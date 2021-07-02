@@ -1,0 +1,13 @@
+{
+  "pages": ["pages/index", "pages/channel", "pages/play"],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "MPPage demo",
+    "navigationBarBackgroundColor": "#fff",
+    "backgroundColor": "#fff",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "debug": true,
+  "sitemapLocation": "sitemap.json"
+}

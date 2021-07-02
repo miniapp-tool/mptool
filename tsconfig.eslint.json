@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["jest", "miniprogram-api-typings"]
+  },
+  "include": ["**/*.ts"]
+}

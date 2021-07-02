@@ -1,0 +1,12 @@
+# Node modules
+node_modules/
+
+# Output
+lib/
+
+# Demo
+demo/**/*.js
+demo/**/*.js.map
+
+# VSCode config
+.vscode/

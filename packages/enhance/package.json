@@ -1,0 +1,39 @@
+{
+  "name": "@mptool/enhance",
+  "version": "0.0.1-alpha.1",
+  "description": "Lifetime enhance for QQ/Wechat miniapp",
+  "keywords": [
+    "miniprogram",
+    "miniapp",
+    "life"
+  ],
+  "homepage": "https://github.com/Mister-Hope/miniapp/tree/main/packages/enhance#readme",
+  "bugs": {
+    "url": "https://github.com/Mister-Hope/miniapp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Mister-Hope/miniapp.git",
+    "directory": "packages/enhance"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "zhangbowang1998@gmail.com",
+    "url": "https://mrhope.site"
+  },
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "devDependencies": {
+    "@mptool/file": "0.0.1-alpha.1",
+    "@mptool/shared": "0.0.1-alpha.1",
+    "miniprogram-api-typings": "^3.3.2",
+    "mitt": "^3.0.0",
+    "rollup": "2.52.3"
+  }
+}

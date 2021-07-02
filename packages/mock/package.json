@@ -1,0 +1,39 @@
+{
+  "name": "@mptool/mock",
+  "version": "0.0.1-alpha.1",
+  "description": "API mock for QQ/Wechat miniapp",
+  "keywords": [
+    "miniprogram",
+    "miniapp",
+    "mock",
+    "wx"
+  ],
+  "homepage": "https://github.com/Mister-Hope/miniapp/tree/main/packages/mock#readme",
+  "bugs": {
+    "url": "https://github.com/Mister-Hope/miniapp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Mister-Hope/miniapp.git",
+    "directory": "packages/mock"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "zhangbowang1998@gmail.com",
+    "url": "https://mrhope.site"
+  },
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "dependencies": {
+    "miniprogram-api-typings": "^3.3.2"
+  },
+  "devDependencies": {
+    "rollup": "2.52.3"
+  }
+}

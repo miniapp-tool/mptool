@@ -1,0 +1,11 @@
+{
+  "name": "miniprogram-ts-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "demo:build": "tsc",
+    "demo:dev": "tsc -w"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^3.3.2"
+  }
+}

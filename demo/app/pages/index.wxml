@@ -1,0 +1,23 @@
+<view>
+  <text>下面是header:</text>
+  <header binding="$" ref="header" />
+  <button catch:tap="onPlay">Go go play page($go)</button>
+  <button
+    catch:tap="$bindGo"
+    data-url="/pages/play?cid=1"
+    data-before="onClickBefore"
+    data-after="onClickAfter"
+  >
+    Go go play page(bindGo)
+  </button>
+  <button catch:tap="onPlayNavigateTo">Go go play page(wx.navigateTo)</button>
+  <navigator url="/pages/play?cid=12">
+    <button>Go go play page(navigator:navigate)</button>
+  </navigator>
+  <navigator url="/pages/play?cid=123" open-type="redirect">
+    <button>Go go play page(navigator:redirect)</button>
+  </navigator>
+  <navigator url="/pages/channel" open-type="switchTab">
+    <button>Go go play page(navigator:switchTab)</button>
+  </navigator>
+</view>
