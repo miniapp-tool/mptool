@@ -4,6 +4,11 @@ node_modules/
 # Output
 lib/
 
+# VuePress Temp
+docs/.vuepress/.cache
+docs/.vuepress/.temp
+docs/.vuepress/dist
+
 # Demo
 demo/**/*.js
 demo/**/*.js.map
