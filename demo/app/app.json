@@ -2,7 +2,7 @@
   "pages": ["pages/index", "pages/channel", "pages/play"],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "MPPage demo",
+    "navigationBarTitleText": "MPTool demo",
     "navigationBarBackgroundColor": "#fff",
     "backgroundColor": "#fff",
     "backgroundTextStyle": "dark",
