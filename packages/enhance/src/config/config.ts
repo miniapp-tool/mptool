@@ -1,6 +1,7 @@
+import { logger } from "@mptool/shared";
 import type { AppConfig } from "./typings";
 
-export interface Config extends Omit<AppConfig, "routes" | "routeResolver"> {
+export interface Config extends Omit<AppConfig, "defaultRoute" | "routeMap"> {
   /**
    * @returns name
    */
@@ -15,55 +16,47 @@ export interface Config extends Omit<AppConfig, "routes" | "routeResolver"> {
 let appConfig: Config | null;
 
 export const $Config = (config: AppConfig): void => {
-  if (!config) throw new Error("AppOptions.config must be set!");
+  const { defaultRoute, routes = [], ...options } = config;
 
-  const { routes, getRoute, ...options } = config;
+  let nameToRouteMap: Record<string, string> = {};
+  let routeToNameMap: Record<string, string> = {};
 
-  const routesConfig =
-    typeof routes === "string"
-      ? [routes]
-      : Array.isArray(routes) &&
-        routes.every((route) => typeof route === "string")
-      ? routes
-      : [];
+  const addRoute = (name: string, route: string): void => {
+    const actualRoute = route.replace(/\$page/g, name);
+    nameToRouteMap[name] = actualRoute;
+    routeToNameMap[actualRoute] = name;
+  };
 
-  const mainRoute = routes[0];
+  if (Array.isArray(routes))
+    routes.forEach(([name, route]) => {
+      if (typeof name === "string") addRoute(name, route);
+      else name.forEach((item) => addRoute(item, route));
+    });
+  else if (typeof routes === "object") {
+    nameToRouteMap = routes;
+    routeToNameMap = Object.fromEntries(
+      Object.keys(routes).map((route) => [routes[route], route])
+    );
+  }
 
-  const routesMath = routesConfig.map(
-    (item) =>
-      new RegExp(
-        `^${item
-          .replace(/^\/?/u, "/?")
-          .replace(/[.]/gu, "\\.")
-          .replace("$page", "([\\w\\-]+)")}`
-      )
+  const defaultRouteReg = new RegExp(
+    `^${defaultRoute
+      .replace(/^\/?/, "/?")
+      .replace(/[.]/g, "\\.")
+      .replace("$page", "([\\w\\-]+)")
+      .replace(/\$page/g, "[\\w\\-]+")}`
   );
-
-  if (!routesConfig.length) console.error("Invalid 'routes' option:", routes);
 
   appConfig = {
     ...options,
-    getRoute:
-      getRoute || ((name: string): string => mainRoute.replace("$page", name)),
 
-    getName: (url: string): string => {
-      let pageName = "";
+    getRoute: (name: string): string =>
+      nameToRouteMap[name] || defaultRoute.replace(/\$page/g, name),
 
-      routesMath.some((reg: RegExp) => {
-        const matchResult = reg.exec(url);
-
-        if (matchResult) {
-          pageName = matchResult[1];
-
-          return true;
-        }
-
-        return false;
-      });
-
-      return pageName;
-    },
+    getName: (url: string): string =>
+      routeToNameMap[url] || defaultRouteReg.exec(url)?.[1] || "Unknown",
   };
 };
 
-export const getConfig = (): Config => appConfig as Config;
+export const getConfig = (): Config =>
+  (appConfig as Config) || logger.error("$Config is not called");

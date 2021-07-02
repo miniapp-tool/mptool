@@ -30,7 +30,7 @@ export const getPath = (
   const url = path.startsWith("/") ? path : getConfig().getRoute(path);
 
   // 合法路径要求从头到尾匹配字母，数字、下划线字符或减号一次或多次
-  if (!/^[\w-]+$/u.test(url) || !url)
+  if (!/^[\w-]+$/u.test(path))
     throw new Error(`Invalid path: ${pageNamewithArg}`);
 
   return {

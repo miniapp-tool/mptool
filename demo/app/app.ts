@@ -5,8 +5,7 @@ import { $App, $Config } from "@mptool/enhance";
 wx.env.DEBUG = true;
 
 $Config({
-  routes: ["test/pages/$page", "/pages/$page"],
-  getRoute: (name: string) => `/pages/${name}`,
+  defaultRoute: "/pages/$page",
 });
 
 $App({

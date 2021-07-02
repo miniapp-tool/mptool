@@ -40,10 +40,10 @@ export const $Component: ComponentConstructor = <
   >
 ): string => {
   // extend page config
-  const { extendComponentBefore } = getConfig();
+  const { extendComponent } = getConfig();
 
-  if (extendComponentBefore)
-    extendComponentBefore(options as UnknownComponentInstance, { event });
+  if (extendComponent)
+    extendComponent(options as UnknownComponentInstance, { event });
 
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
