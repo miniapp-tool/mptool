@@ -40,7 +40,7 @@ export const $Component: ComponentConstructor = <
   >
 ): string => {
   // extend page config
-  const { extendComponentBefore } = getConfig().options;
+  const { extendComponentBefore } = getConfig();
 
   if (extendComponentBefore)
     extendComponentBefore(options as UnknownComponentInstance, { event });

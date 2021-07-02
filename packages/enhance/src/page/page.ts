@@ -21,7 +21,7 @@ export const $Page: PageConstructor = <
   name: string,
   options: PageOptions<Data, Custom>
 ): void => {
-  const { extendPageAfter, extendPageBefore } = getConfig().options;
+  const { extendPageAfter, extendPageBefore } = getConfig();
 
   const callLog = (lifeCycle: string, args?: unknown): void =>
     logger.debug(`Calling Page [${name}] ${lifeCycle} `, args || "");

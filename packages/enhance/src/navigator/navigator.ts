@@ -21,6 +21,26 @@ export type NavigatorType =
   | "switchTab"
   | "reLaunch";
 
+export const getPath = (
+  pageNamewithArg: string
+): { name: string; path: string; query: PageQuery; url: string } => {
+  const [path, queryString] = pageNamewithArg.split("?");
+
+  // 获得正确的路径
+  const url = path.startsWith("/") ? path : getConfig().getRoute(path);
+
+  // 合法路径要求从头到尾匹配字母，数字、下划线字符或减号一次或多次
+  if (!/^[\w-]+$/u.test(url) || !url)
+    throw new Error(`Invalid path: ${pageNamewithArg}`);
+
+  return {
+    name: getConfig().getName(url),
+    path: url,
+    url: `${path}${queryString ? `?${queryString}` : ""}`,
+    query: query.parse(queryString),
+  };
+};
+
 export function getTrigger(
   type: "navigateTo"
 ): (
@@ -44,16 +64,7 @@ export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
   return (pageNamewithArg: string): any => {
     if (!inNagivation) {
-      const [path, queryString] = pageNamewithArg.split("?");
-
-      // 获得正确的路径
-      const url = path.startsWith("/") ? path : getConfig().getRoute(path);
-
-      // 合法路径要求从头到尾匹配字母，数字、下划线字符或减号一次或多次
-      if (!/^[\w-]+$/u.test(path) || !url)
-        throw new Error(`Invalid path: ${pageNamewithArg}`);
-
-      const pageName = getConfig().getName(url);
+      const { name, path, url, query } = getPath(pageNamewithArg);
 
       // 开始等待
       inNagivation = true;
@@ -67,18 +78,12 @@ export function getTrigger(type: NavigatorType) {
         inNagivation = false;
       }, 2000);
 
-      routeEmitter.emit(`${type}:${pageName}`, {
-        url,
-        query: query.parse(queryString),
-      });
+      routeEmitter.emit(`${type}:${name}`, { url: path, query });
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return wx[type]({
-        // Append query string
-        url: `${url}${queryString ? `?${queryString}` : ""}`,
-      });
+      return wx[type]({ url });
     }
   };
 }

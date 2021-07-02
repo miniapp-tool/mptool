@@ -1,8 +1,6 @@
 import type { AppConfig } from "./typings";
 
-export interface Config {
-  options: Omit<AppConfig, "routes" | "routeResolver">;
-
+export interface Config extends Omit<AppConfig, "routes" | "routeResolver"> {
   /**
    * @returns name
    */
@@ -44,7 +42,7 @@ export const initConfig = (config: AppConfig): void => {
   if (!routesConfig.length) console.error("Invalid 'routes' option:", routes);
 
   appConfig = {
-    options,
+    ...options,
     getRoute:
       getRoute || ((name: string): string => mainRoute.replace("$page", name)),
 

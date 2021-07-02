@@ -1,8 +1,7 @@
-import { query } from "@mptool/shared";
 import { getRef } from "./component/store";
 import { getConfig } from "./config";
 import { routeEmitter, userEmitter } from "./event";
-import { getTrigger } from "./navigator";
+import { getPath, getTrigger } from "./navigator";
 
 import type { ComponentOptions, UnknownComponentInstance } from "./component";
 import type { ExtendedPageMethods, PageInstance, PageOptions } from "./page";
@@ -103,17 +102,13 @@ export const getPageName = (url: string): string => {
 /**
  * 预加载
  *
- * @param url 需要预加载的地址
+ * @param pageNamewithArg 需要预加载的地址
  */
-const preload = (url: string): void => {
+const preload = (pageNamewithArg: string): void => {
   /** 页面名称 */
-  const name = getPageName(url);
+  const { name, path, query } = getPath(pageNamewithArg);
 
-  if (name)
-    routeEmitter.emit(`preload:${name}`, {
-      url,
-      query: query.parse(url.split("?")[1]),
-    });
+  if (name) routeEmitter.emit(`preload:${name}`, { url: path, query });
 };
 
 export function bind(
