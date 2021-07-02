@@ -28,6 +28,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "rollup -c",
+    "clean": "rimraf ./lib",
     "dev": "rollup -c -w"
   },
   "dependencies": {
