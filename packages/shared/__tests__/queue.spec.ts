@@ -12,14 +12,14 @@ describe("queue", () => {
       }, timer);
     });
 
-    fn(1, 30);
-    fn(2, 20);
-    fn(3, 10);
+    fn(1, 60);
+    fn(2, 40);
+    fn(3, 20);
 
     setTimeout(() => {
       expect(result).toEqual([1, 2, 3]);
       done();
-    }, 100);
+    }, 200);
   });
 
   it("Parall 3 task", (done) => {
