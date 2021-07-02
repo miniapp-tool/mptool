@@ -14,7 +14,7 @@ export interface Config extends Omit<AppConfig, "routes" | "routeResolver"> {
 
 let appConfig: Config | null;
 
-export const initConfig = (config: AppConfig): void => {
+export const $Config = (config: AppConfig): void => {
   if (!config) throw new Error("AppOptions.config must be set!");
 
   const { routes, getRoute, ...options } = config;

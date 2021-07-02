@@ -1,6 +1,6 @@
 import type { ExtendedPageMethods, PageInstance } from "../page";
 
-export interface Lifetimes {
+export interface ComponentLifetimes {
   /** 组件生命周期声明对象 */
   lifetimes: Partial<{
     /**
@@ -141,7 +141,7 @@ export type ComponentOptions<
   Partial<WechatMiniprogram.Component.Property<Property>> &
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
-  Partial<Lifetimes> &
+  Partial<ComponentLifetimes> &
   ThisType<
     ComponentInstance<Data, Property, Method, CustomInstanceProperty, IsPage>
   >;

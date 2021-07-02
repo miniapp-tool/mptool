@@ -1,5 +1,4 @@
 import { logger, mergeFun } from "@mptool/shared";
-import { initConfig } from "../config";
 import { appEmitter, userEmitter } from "../event";
 
 import type { AppConstructor, AppInstance, AppOptions } from "./typings";
@@ -60,8 +59,6 @@ export const $App: AppConstructor = <Custom = WechatMiniprogram.IAnyObject>(
   appOptions: AppOptions<Custom>
 ): void => {
   let ctx: AppInstance<Custom>;
-
-  initConfig(appOptions.config);
 
   appOptions.onLaunch = appOptions.onLaunch
     ? mergeFun(appLaunchHandler, appOptions.onLaunch)

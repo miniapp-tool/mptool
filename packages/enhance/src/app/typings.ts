@@ -1,10 +1,6 @@
-import type { AppConfig } from "../config";
 import type { UserEmitter } from "../event";
 
 export interface ExtendsAppOptions<Custom> {
-  /** 小程序路径解析配置 */
-  config: AppConfig;
-
   /**
    * 小程序在切入后台后被唤醒
    *
