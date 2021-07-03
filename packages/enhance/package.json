@@ -1,6 +1,6 @@
 {
   "name": "@mptool/enhance",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.1",
   "description": "Lifetime enhance for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
@@ -31,8 +31,8 @@
     "dev": "rollup -c -w"
   },
   "devDependencies": {
-    "@mptool/file": "0.0.1-alpha.0",
-    "@mptool/shared": "0.0.1-alpha.0",
+    "@mptool/file": "0.0.1-alpha.1",
+    "@mptool/shared": "0.0.1-alpha.1",
     "miniprogram-api-typings": "^3.3.2",
     "rollup": "2.52.3"
   },
