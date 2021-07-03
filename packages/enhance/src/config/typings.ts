@@ -1,5 +1,3 @@
-import mitt from "mitt";
-
 import type { UnknownComponentOptions } from "../component";
 import type { PageOptions } from "../page";
 
@@ -64,38 +62,29 @@ export interface AppConfig {
   routes?: Record<string, string> | [string | string[], string][];
 
   /**
-   * 自定义扩展组件，在框架执行扩展之前。例如为每个组件挂在一个实例方法
+   * 自定义扩展组件
    *
-   * @param def pageoption
+   * 时机在框架执行扩展之前，可为每个组件挂载实例方法
+   *
+   * @param options 组件选项
    */
-  extendComponent?(
-    options: UnknownComponentOptions,
-    modules: { event: typeof mitt }
-  ): void;
+  extendComponent?(options: UnknownComponentOptions): void;
 
   /**
    * 自定义扩展页面，在框架执行扩展之前
    *
    * @param name 页面名称
-   * @param def pageoption
-   * @param modules 内置模块
+   * @param options 页面选项
    */
-  extendPageBefore?(
-    name: string,
-    def: PageOptions,
-    modules: { event: typeof mitt }
-  ): void;
+  extendPage?(name: string, options: PageOptions): void;
 
   /**
-   * 自定义扩展页面，在框架执行扩展之后
+   * 自定义诸如页面
    *
-   * @param name 页面名称
-   * @param def pageoption
-   * @param modules 内置模块
+   * 在框架执行扩展之后，这意味着你可以覆盖框架的方法
+   *
+   * @param name 页面选项
+   * @param options pageoption
    */
-  extendPageAfter?(
-    name: string,
-    def: PageOptions,
-    modules: { event: typeof mitt }
-  ): void;
+  injectPage?(name: string, options: PageOptions): void;
 }

@@ -1,10 +1,9 @@
 import { mergeFun } from "@mptool/shared";
-import event from "mitt";
 
+import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
 import { PageInstance } from "../page";
-import { getRef, setRef, removeRef } from "./store";
 
 import type {
   ComponentConstructor,
@@ -42,8 +41,7 @@ export const $Component: ComponentConstructor = <
   // extend page config
   const { extendComponent } = getConfig();
 
-  if (extendComponent)
-    extendComponent(options as UnknownComponentInstance, { event });
+  if (extendComponent) extendComponent(options as UnknownComponentInstance);
 
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};

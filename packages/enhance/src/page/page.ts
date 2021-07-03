@@ -1,5 +1,4 @@
 import { logger, mergeFun } from "@mptool/shared";
-import event from "mitt";
 
 import { appState } from "../app";
 import { mount } from "../bridge";
@@ -17,7 +16,7 @@ export const $Page: PageConstructor = <
   name: string,
   options: PageOptions<Data, Custom>
 ): void => {
-  const { extendPageAfter, extendPageBefore } = getConfig();
+  const { extendPage, injectPage } = getConfig();
 
   const callLog = (lifeCycle: string, args?: unknown): void =>
     logger.debug(`Calling Page [${name}] ${lifeCycle} `, args || "");
@@ -25,7 +24,7 @@ export const $Page: PageConstructor = <
     logger.debug(`Page [${name}] registered ${lifeCycle}`);
 
   // extend page config
-  if (extendPageBefore) extendPageBefore(name, options, { event });
+  if (extendPage) extendPage(name, options);
 
   /*
    * mixin component defs
@@ -119,7 +118,7 @@ export const $Page: PageConstructor = <
   mount(options);
 
   // extend page config
-  if (extendPageAfter) extendPageAfter(name, options, { event });
+  if (injectPage) injectPage(name, options);
 
   // called before register
   if (options.onRegister) {

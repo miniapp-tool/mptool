@@ -1,6 +1,7 @@
 export { $App } from "./app";
 export { $Config } from "./config";
 export { $Component } from "./component";
+export { $Emiiter } from "./event";
 export { $Page } from "./page";
 
 export type {
@@ -22,6 +23,15 @@ export {
   UnknownComponentOptions,
   RefMap,
 } from "./component";
+export type {
+  Emitter,
+  EventHandlerList,
+  EventHandlerMap,
+  EventType,
+  Handler,
+  WildCardEventHandlerList,
+  WildcardHandler,
+} from "./event";
 export type {
   PageConstructor,
   PageOptions,
