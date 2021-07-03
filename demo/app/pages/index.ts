@@ -33,7 +33,7 @@ $Page("index", {
   },
 
   onPlay() {
-    this.$go("play?cid=123");
+    void this.$go("play?cid=123");
   },
 
   onPlayNavigateTo() {

@@ -1,4 +1,5 @@
 import { logger } from "@mptool/shared";
+import { ON_APP_AWAKE, ON_APP_LAUNCH, ON_APP_SHOW } from "../constant";
 import { appEmitter, userEmitter } from "../event";
 import { mergeFunction } from "../utils";
 
@@ -23,7 +24,7 @@ const appLaunchHandler = (
   appState.launch = true;
   appState.lOpt = options;
 
-  appEmitter.emit("app:launch", options);
+  appEmitter.emit(ON_APP_LAUNCH, options);
 };
 
 const appShowHandler = (
@@ -34,12 +35,12 @@ const appShowHandler = (
       appState.show = true;
       appState.sOpt = options;
 
-      appEmitter.emit("app:show", options);
+      appEmitter.emit(ON_APP_SHOW, options);
     }
   } finally {
     // emit onAwake lifeCycle
     if (appState.hide) {
-      appEmitter.emit("app:sleep", new Date().getTime() - appState.hide);
+      appEmitter.emit(ON_APP_AWAKE, new Date().getTime() - appState.hide);
 
       // reset timeStamp
       appState.hide = 0;
@@ -61,31 +62,26 @@ export const $App: AppConstructor = <Custom = WechatMiniprogram.IAnyObject>(
 ): void => {
   let ctx: AppInstance<Custom>;
 
-  appOptions.onLaunch = appOptions.onLaunch
-    ? mergeFunction(appLaunchHandler, appOptions.onLaunch)
-    : appLaunchHandler;
-
-  appOptions.onShow = appOptions.onShow
-    ? mergeFunction(appShowHandler, appOptions.onShow)
-    : appShowHandler;
-
-  appOptions.onHide = appOptions.onHide
-    ? mergeFunction(appHideHandler, appOptions.onHide)
-    : appHideHandler;
-
-  // 保留指针
-  appOptions.onLaunch = mergeFunction(function hold(this: AppInstance<Custom>) {
+  appOptions.onLaunch = mergeFunction(function launchExtraHandler(
+    this: AppInstance<Custom>,
+    options: WechatMiniprogram.App.LaunchShowOption
+  ) {
+    // saving context
     ctx = this;
-  }, appOptions.onLaunch);
+    appLaunchHandler(options);
+  },
+  appOptions.onLaunch);
+  appOptions.onShow = mergeFunction(appShowHandler, appOptions.onShow);
+  appOptions.onHide = mergeFunction(appHideHandler, appOptions.onHide);
 
   // 注册 onAwake 监听
-  if (appOptions.onAwake) {
-    appEmitter.on("app:sleep", (time) => {
-      logger.debug(`[App] awake after ${time}ms`);
+  if (appOptions[ON_APP_AWAKE]) {
+    appEmitter.on(ON_APP_AWAKE, (time) => {
+      logger.debug(`App: awake after ${time}ms`);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      appOptions.onAwake!.call(ctx, time);
+      appOptions[ON_APP_AWAKE]!.call(ctx, time);
     });
-    logger.debug(`[App] registered onAwake`);
+    logger.debug(`App: registered ${ON_APP_AWAKE}`);
   }
 
   appOptions.$emitter = userEmitter;

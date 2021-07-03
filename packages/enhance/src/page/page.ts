@@ -2,6 +2,14 @@ import { logger } from "@mptool/shared";
 
 import { appState } from "../app";
 import { mount } from "../bridge";
+import {
+  ON_APP_AWAKE,
+  ON_APP_LAUNCH,
+  ON_APP_SHOW,
+  ON_PAGE_NAVIGATE,
+  ON_PAGE_PRELOAD,
+  ON_PAGE_READY,
+} from "../constant";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../event";
 import { mergeFunction } from "../utils";
@@ -20,9 +28,9 @@ export const $Page: PageConstructor = <
   const { extendPage, injectPage } = getConfig();
 
   const callLog = (lifeCycle: string, args?: unknown): void =>
-    logger.debug(`Calling Page [${name}] ${lifeCycle} `, args || "");
+    logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args || "");
   const registerLog = (lifeCycle: string): void =>
-    logger.debug(`Page [${name}] registered ${lifeCycle}`);
+    logger.debug(`Page ${name}: registered ${lifeCycle}`);
 
   // extend page config
   if (extendPage) extendPage(name, options);
@@ -37,71 +45,75 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
-  if (options.onAppLaunch) {
+  if (options[ON_APP_LAUNCH]) {
     if (appState.launch) {
       const { lOpt: onLaunchOptions } = appState;
 
-      callLog("onAppLaunch", onLaunchOptions);
-      options.onAppLaunch(
+      callLog(ON_APP_LAUNCH);
+
+      // checked
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      options[ON_APP_LAUNCH]!(
         onLaunchOptions as WechatMiniprogram.App.LaunchShowOption
       );
     } else
-      appEmitter.on("app:launch", (onLaunchOptions) => {
-        callLog("onAppLaunch", onLaunchOptions);
+      appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
+        callLog(ON_APP_LAUNCH);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         options.onAppLaunch!(onLaunchOptions);
       });
 
-    registerLog("onAppLaunch");
+    registerLog(ON_APP_LAUNCH);
   }
 
-  if (options.onAppShow) {
+  if (options[ON_APP_SHOW]) {
     if (appState.launch) {
       const { sOpt: onShowOptions } = appState;
 
-      callLog("onAppLaunch", onShowOptions);
-      options.onAppShow(
+      callLog(ON_APP_SHOW);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      options[ON_APP_SHOW]!(
         onShowOptions as WechatMiniprogram.App.LaunchShowOption
       );
     } else
-      appEmitter.on("app:show", (onShowOptions) => {
-        callLog("onAppLaunch", onShowOptions);
+      appEmitter.on(ON_APP_SHOW, (onShowOptions) => {
+        callLog(ON_APP_SHOW);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.onAppShow!(onShowOptions);
+        options[ON_APP_SHOW]!(onShowOptions);
       });
 
-    registerLog("onAppShow");
+    registerLog(ON_APP_SHOW);
   }
 
-  if (options.onNavigate) {
-    const onNavigateHandler = function (query: PageQuery): void {
-      callLog("onNavigate", query);
+  if (options[ON_PAGE_NAVIGATE]) {
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:${name}`, (query: PageQuery): void => {
+      callLog(ON_PAGE_NAVIGATE, query);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options.onNavigate!(query);
-    };
-
-    routeEmitter.on(`navigate:${name}`, onNavigateHandler);
-    registerLog("onNavigate");
-  }
-
-  if (options.onPreload) {
-    routeEmitter.on(`preload:${name}`, (query: PageQuery): void => {
-      callLog("Preload", query);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options.onPreload!(query);
+      options[ON_PAGE_NAVIGATE]!(query);
     });
-    registerLog("onPreload");
+
+    registerLog(ON_PAGE_NAVIGATE);
+  }
+
+  if (options[ON_PAGE_PRELOAD]) {
+    routeEmitter.on(`${ON_PAGE_PRELOAD}:${name}`, (query: PageQuery): void => {
+      callLog(ON_PAGE_PRELOAD, query);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      options[ON_PAGE_PRELOAD]!(query);
+    });
+
+    registerLog(ON_PAGE_PRELOAD);
   }
 
   options.onLoad = mergeFunction((): void => {
     // After onLoad, onAwake is valid if defined
-    if (options.onAwake) {
-      appEmitter.on("app:sleep", (time: number) => {
-        callLog("onAwake", time);
+    if (options[ON_APP_AWAKE]) {
+      appEmitter.on(ON_APP_AWAKE, (time: number) => {
+        callLog(ON_APP_AWAKE);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.onAwake!(time);
+        options[ON_APP_AWAKE]!(time);
       });
-      registerLog("onNavigate");
+      registerLog(ON_APP_AWAKE);
     }
 
     if (!hasPageLoaded) {
@@ -112,7 +124,7 @@ export const $Page: PageConstructor = <
   }, options.onLoad);
 
   options.onReady = mergeFunction(
-    () => appEmitter.emit("page:ready"),
+    () => appEmitter.emit(ON_PAGE_READY),
     options.onReady
   );
 
@@ -130,5 +142,5 @@ export const $Page: PageConstructor = <
   // register page
   Page(options as WechatMiniprogram.Page.Options<Data, Custom>);
 
-  logger.debug(`Registered Page [${name}]`);
+  logger.debug(`Registered: Page ${name}`);
 };

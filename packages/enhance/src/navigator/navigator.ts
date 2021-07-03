@@ -1,5 +1,6 @@
 import { query } from "@mptool/shared";
 import { getConfig } from "../config";
+import { ON_PAGE_NAVIGATE, ON_PAGE_READY } from "../constant";
 import { appEmitter, routeEmitter } from "../event";
 
 import type { PageQuery } from "../page";
@@ -78,7 +79,7 @@ export function getTrigger(type: NavigatorType) {
         inNagivation = false;
       }, 2000);
 
-      routeEmitter.emit(`${type}:${name}`, query);
+      routeEmitter.emit(`${ON_PAGE_NAVIGATE}:${name}`, query);
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -89,7 +90,7 @@ export function getTrigger(type: NavigatorType) {
 }
 
 /** 监听 page ready 事件 */
-appEmitter.on("page:ready", () => {
+appEmitter.on(ON_PAGE_READY, () => {
   // pageReady 被触发间隔后 100ms，允许下一次跳转
   readyTimer = setTimeout(() => {
     inNagivation = false;

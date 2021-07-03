@@ -1,5 +1,6 @@
 import { getRef } from "./component/store";
 import { getConfig } from "./config";
+import { ON_PAGE_PRELOAD } from "./constant";
 import { routeEmitter, userEmitter } from "./event";
 import { getPathDetail, getTrigger } from "./navigator";
 
@@ -95,7 +96,7 @@ const preload = (pageNamewithArg: string): void => {
   /** 页面名称 */
   const { name, query } = getPathDetail(pageNamewithArg);
 
-  routeEmitter.emit(`preload:${name}`, query);
+  routeEmitter.emit(`${ON_PAGE_PRELOAD}:${name}`, query);
 };
 
 export function bind(

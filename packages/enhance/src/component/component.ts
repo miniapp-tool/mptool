@@ -1,3 +1,4 @@
+import { logger } from "@mptool/shared";
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
@@ -8,7 +9,6 @@ import type {
   ComponentConstructor,
   ComponentInstance,
   ComponentOptions,
-  ExtendedComponentProperty,
   UnknownComponentInstance,
 } from "./typings";
 
@@ -50,7 +50,7 @@ export const $Component: ComponentConstructor = <
     mount(options);
   }, options.lifetimes.created);
 
-  // attach生命周期
+  // attach 生命周期
   options.lifetimes.attached = mergeFunction(function (
     this: ComponentInstance<
       Data,
@@ -62,7 +62,7 @@ export const $Component: ComponentConstructor = <
   ) {
     const id = (componentIndex += 1);
 
-    // 写入id，并保存组件实例
+    // 写入 id，并保存组件实例
     this.$id = id;
     setRef(id, this as UnknownComponentInstance);
     this.$refID = this.properties.ref as string;
@@ -97,25 +97,10 @@ export const $Component: ComponentConstructor = <
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // 添加 ref 属性并创建监听器
+  // add ref
   options.properties = {
     ...options.properties,
-    ref: {
-      type: String,
-      value: "",
-      observer(
-        this: WechatMiniprogram.Component.FullProperty<StringConstructor> &
-          ExtendedComponentProperty,
-        newValue: string
-      ): void {
-        // 支持动态 ref
-        if (this.$refID !== newValue) {
-          if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
-
-          this.$refID = newValue;
-        }
-      },
-    },
+    ref: { type: String, value: "" },
   };
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -134,6 +119,7 @@ export const $Component: ComponentConstructor = <
       method: string,
       ...args: any[]
     ): void {
+      logger.debug(`Component ${this.$id} call ${method}:`, args);
       this.triggerEvent("ing", {
         id: this.$id,
         event: method,
@@ -162,6 +148,29 @@ export const $Component: ComponentConstructor = <
       this.$parent = parent;
     },
     $: bind,
+  };
+
+  options.observers = {
+    ...(options.observers || {}),
+    // add ref observer
+    ref(
+      this: ComponentInstance<
+        Data,
+        Property,
+        Method,
+        CustomInstanceProperty,
+        IsPage
+      >,
+      value: string
+    ): void {
+      // 支持动态 ref
+      if (this.$refID && this.$refID !== value) {
+        if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
+
+        this.$refID = value;
+        logger.debug(`Component ${this.$id} ref: ${value}`);
+      }
+    },
   };
 
   return Component(options);
