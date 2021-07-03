@@ -1,7 +1,7 @@
 export { $App } from "./app";
 export { $Config } from "./config";
 export { $Component } from "./component";
-export { $Emiiter } from "./event";
+export { $Emiiter } from "./emitter";
 export { $Page } from "./page";
 
 export type {
@@ -31,7 +31,7 @@ export type {
   Handler,
   WildCardEventHandlerList,
   WildcardHandler,
-} from "./event";
+} from "./emitter";
 export type {
   PageConstructor,
   PageOptions,

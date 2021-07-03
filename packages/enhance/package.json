@@ -34,7 +34,6 @@
     "@mptool/file": "0.0.1-alpha.0",
     "@mptool/shared": "0.0.1-alpha.0",
     "miniprogram-api-typings": "^3.3.2",
-    "mitt": "^3.0.0",
     "rollup": "2.52.3"
   },
   "publishConfig": {

@@ -1,6 +1,6 @@
 import { logger } from "@mptool/shared";
 import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
-import { appEmitter, userEmitter } from "../event";
+import { appEmitter, userEmitter } from "../emitter";
 import { mergeFunction } from "../utils";
 
 import type { AppConstructor, AppInstance, AppOptions } from "./typings";

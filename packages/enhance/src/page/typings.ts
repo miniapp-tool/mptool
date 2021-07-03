@@ -1,7 +1,7 @@
 import { bind } from "../bridge";
 
 import type { RefMap } from "../component";
-import type { UserEmitter } from "../event";
+import type { UserEmitter } from "../emitter";
 import type { NavigatorMethods } from "../navigator";
 
 export interface PageQuery {

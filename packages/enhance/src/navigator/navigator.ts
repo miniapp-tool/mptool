@@ -1,7 +1,7 @@
 import { query } from "@mptool/shared";
 import { getConfig } from "../config";
 import { ON_PAGE_NAVIGATE, ON_PAGE_READY } from "../constant";
-import { appEmitter, routeEmitter } from "../event";
+import { appEmitter, routeEmitter } from "../emitter";
 
 import type { PageQuery } from "../page";
 

@@ -1,4 +1,4 @@
-import type { UserEmitter } from "../event";
+import type { UserEmitter } from "../emitter";
 
 export interface ExtendsAppOptions<Custom> {
   /**

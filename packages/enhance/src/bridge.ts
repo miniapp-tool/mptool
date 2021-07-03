@@ -1,7 +1,7 @@
 import { getRef } from "./component/store";
 import { getConfig } from "./config";
 import { ON_PAGE_PRELOAD } from "./constant";
-import { routeEmitter, userEmitter } from "./event";
+import { routeEmitter, userEmitter } from "./emitter";
 import { getPathDetail, getTrigger } from "./navigator";
 
 import type { ComponentOptions, UnknownComponentInstance } from "./component";

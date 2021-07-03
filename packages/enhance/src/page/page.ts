@@ -10,7 +10,7 @@ import {
   ON_PAGE_READY,
 } from "../constant";
 import { getConfig } from "../config";
-import { appEmitter, routeEmitter } from "../event";
+import { appEmitter, routeEmitter } from "../emitter";
 import { mergeFunction } from "../utils";
 
 import type { PageConstructor, PageOptions, PageQuery } from "./typings";
