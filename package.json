@@ -20,6 +20,8 @@
     "clean": "lerna run clean --stream",
     "copy": "ts-node scripts/copy-package.ts",
     "dev": "cross-env mode=production lerna run dev --stream",
+    "docs:build": "yarn workspace docs docs:build",
+    "docs:dev": "yarn workspace docs docs:dev",
     "lerna:bootstrap": "lerna bootstrap",
     "lerna:clean": "lerna clean",
     "lerna:release": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} scripts/release",
