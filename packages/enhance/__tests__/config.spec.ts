@@ -3,6 +3,15 @@ import { $Config, getConfig } from "../src/config";
 
 describe("$Config Test", () => {
   it("Should work when only have 'defaultRoute'", () => {
+    $Config({ defaultRoute: "/pages/$name" });
+
+    expect(getConfig().getRoute("main")).toEqual("/pages/main");
+    expect(getConfig().getRoute("user")).toEqual("/pages/user");
+    expect(getConfig().getName("/pages/main")).toEqual("main");
+    expect(getConfig().getName("/pages/user")).toEqual("user");
+  });
+
+  it("Should work with mutiple $name", () => {
     $Config({ defaultRoute: "/pages/$name/$name" });
 
     expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
