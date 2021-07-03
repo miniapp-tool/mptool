@@ -7,14 +7,14 @@
   "compileType": "miniprogram",
   "libVersion": "2.18.0",
   "appid": "wx379c0a8a4769a135",
-  "qqLibVersion": "1.6.3",
-  "qqappid": "",
+  "qqLibVersion": "1.29.0",
+  "qqappid": "1108100302",
   "projectname": "mptool%20demo",
   "setting": {
     "urlCheck": true,
-    "es6": false,
+    "es6": true,
     "enhance": true,
-    "postcss": false,
+    "postcss": true,
     "preloadBackgroundData": false,
     "minified": true,
     "newFeature": true,
@@ -23,7 +23,7 @@
     "autoAudits": false,
     "showShadowRootInWxmlPanel": true,
     "scopeDataCheck": false,
-    "uglifyFileName": false,
+    "uglifyFileName": true,
     "checkInvalidKey": true,
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
@@ -43,10 +43,17 @@
     "packNpmManually": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
-    "showES6CompileOption": false
+    "showES6CompileOption": false,
+    "remoteDebugLogEnable": false,
+    "prefetch": false
   },
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
+  "scripts": {
+    "beforeCompile": "",
+    "beforePreview": "",
+    "beforeUpload": ""
+  },
   "condition": {
     "search": {
       "list": []
