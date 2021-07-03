@@ -22,7 +22,7 @@ export const $Config = (config: AppConfig): void => {
   let routeToNameMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
-    const actualRoute = route.replace(/\$page/g, name);
+    const actualRoute = route.replace(/\$name/g, name);
     nameToRouteMap[name] = actualRoute;
     routeToNameMap[actualRoute] = name;
   };
@@ -43,15 +43,15 @@ export const $Config = (config: AppConfig): void => {
     `^${defaultRoute
       .replace(/^\/?/, "/?")
       .replace(/[.]/g, "\\.")
-      .replace("$page", "([\\w\\-]+)")
-      .replace(/\$page/g, "[\\w\\-]+")}`
+      .replace("$name", "([\\w\\-]+)")
+      .replace(/\$name/g, "[\\w\\-]+")}`
   );
 
   appConfig = {
     ...options,
 
     getRoute: (name: string): string =>
-      nameToRouteMap[name] || defaultRoute.replace(/\$page/g, name),
+      nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
 
     getName: (url: string): string =>
       routeToNameMap[url] || defaultRouteReg.exec(url)?.[1] || "Unknown",

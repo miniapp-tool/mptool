@@ -7,9 +7,9 @@ export interface AppConfig {
   /**
    * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
    *
-   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$page` 表示小程序简称的位置
+   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
    *
-   * 例子: 你可以填入 `/pages/$page/$page` 来表达:
+   * 例子: 你可以填入 `/pages/$name/$name` 来表达:
    *
    * - `main': '/pages/main/main`
    * - `user': '/pages/user/user`
@@ -33,14 +33,14 @@ export interface AppConfig {
    *
    * - `[页面简称数组, 小程序路经模式]`
    *
-   *   小程序路径模式是一个路径字符串，用 `$page` 表示小程序简称的位置
+   *   小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
    *
    * 如:
    *
    * ```js
    * [
-   *   [['main', 'cart', 'user'], '/pages/$page/$page'],
-   *   [['search', 'details', 'order'], '/shop/$page/$page'],
+   *   [['main', 'cart', 'user'], '/pages/$name/$name'],
+   *   [['search', 'details', 'order'], '/shop/$name/$name'],
    *   ['about', '/others/about/about'],
    * ]
    * ```

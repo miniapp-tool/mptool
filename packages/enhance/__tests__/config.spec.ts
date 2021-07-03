@@ -3,7 +3,7 @@ import { $Config, getConfig } from "../src/config";
 
 describe("$Config Test", () => {
   it("Should work when only have 'defaultRoute'", () => {
-    $Config({ defaultRoute: "/pages/$page/$page" });
+    $Config({ defaultRoute: "/pages/$name/$name" });
 
     expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
     expect(getConfig().getRoute("user")).toEqual("/pages/user/user");
@@ -17,7 +17,7 @@ describe("$Config Test", () => {
         user: "/pages/user/user",
         about: "/others/about/about",
       },
-      defaultRoute: "/pages/$page/$page",
+      defaultRoute: "/pages/$name/$name",
     });
 
     expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
@@ -31,12 +31,12 @@ describe("$Config Test", () => {
   it("Should work with array 'routes'", () => {
     $Config({
       routes: [
-        [["main", "cart", "user"], "/pages/$page/$page"],
-        [["search", "details", "order"], "/shop/$page/$page"],
+        [["main", "cart", "user"], "/pages/$name/$name"],
+        [["search", "details", "order"], "/shop/$name/$name"],
         ["about", "/others/about/about"],
-        ["info", "/others/$page/$page"],
+        ["info", "/others/$name/$name"],
       ],
-      defaultRoute: "/pages/$page/$page",
+      defaultRoute: "/pages/$name/$name",
     });
 
     expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
