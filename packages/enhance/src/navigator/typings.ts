@@ -13,7 +13,9 @@ export interface NavigatorMethods {
    * this.$go('play?vid=xxx&cid=xxx');
    * ```
    */
-  $go(pagename: string): void;
+  $go(
+    pagename: string
+  ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 
   /**
    * 跳转到指定页面, **替换页面，不产生历史**
@@ -29,7 +31,7 @@ export interface NavigatorMethods {
    * ```
    */
 
-  $redirect(pagename: string): void;
+  $redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
@@ -44,7 +46,7 @@ export interface NavigatorMethods {
    * this.$switch('main?user=mrhope');
    * ```
    */
-  $switch(pagename: string): void;
+  $switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 关闭所有页面，打开到应用内的某个页面
@@ -59,7 +61,7 @@ export interface NavigatorMethods {
    * this.$launch('main');
    * ```
    */
-  $launch(pagename: string): void;
+  $launch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 返回上一页，`wx.navigateBack` 的封装

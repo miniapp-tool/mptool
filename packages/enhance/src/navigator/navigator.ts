@@ -21,21 +21,21 @@ export type NavigatorType =
   | "switchTab"
   | "reLaunch";
 
-export const getPath = (
-  pageNamewithArg: string
-): { name: string; path: string; query: PageQuery; url: string } => {
-  const [path, queryString] = pageNamewithArg.split("?");
+export interface PathDetails {
+  name: string;
+  query: PageQuery;
+  url: string;
+}
+
+export const getPathDetail = (pageNamewithArg: string): PathDetails => {
+  const config = getConfig();
+  const [pageName, queryString] = pageNamewithArg.split("?");
 
   // 获得正确的路径
-  const url = path.startsWith("/") ? path : getConfig().getRoute(path);
-
-  // 合法路径要求从头到尾匹配字母，数字、下划线字符或减号一次或多次
-  if (!/^[\w-]+$/u.test(path))
-    throw new Error(`Invalid path: ${pageNamewithArg}`);
+  const path = pageName.startsWith("/") ? pageName : config.getRoute(pageName);
 
   return {
-    name: getConfig().getName(url),
-    path: url,
+    name: config.getName(path),
     url: `${path}${queryString ? `?${queryString}` : ""}`,
     query: query.parse(queryString),
   };
@@ -64,7 +64,7 @@ export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
   return (pageNamewithArg: string): any => {
     if (!inNagivation) {
-      const { name, path, url, query } = getPath(pageNamewithArg);
+      const { name, url, query } = getPathDetail(pageNamewithArg);
 
       // 开始等待
       inNagivation = true;
@@ -78,7 +78,7 @@ export function getTrigger(type: NavigatorType) {
         inNagivation = false;
       }, 2000);
 
-      routeEmitter.emit(`${type}:${name}`, { url: path, query });
+      routeEmitter.emit(`${type}:${name}`, query);
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

@@ -1,28 +1,17 @@
 import mitt from "mitt";
 import { Emitter } from "mitt";
+import { PageQuery } from "./page";
 
-import type { PageLifecycleOptions } from "./page";
-
-export type RootEventType = {
+export type AppEventType = {
   "app:launch": WechatMiniprogram.App.LaunchShowOption;
   "app:show": WechatMiniprogram.App.LaunchShowOption;
   "app:sleep": number;
   "page:ready": void;
 };
 
-type PageName = string;
+export type RouteEventType = Record<string, PageQuery>;
 
-type PreloadEvent = `preload:${PageName}`;
-
-type NagivateEvent = `navigate:${PageName}`;
-
-export type RouteEventType = Record<
-  PreloadEvent | NagivateEvent,
-  PageLifecycleOptions
-> &
-  Record<string, PageLifecycleOptions>;
-
-export const appEmitter = mitt<RootEventType>();
+export const appEmitter = mitt<AppEventType>();
 
 export const routeEmitter = mitt<RouteEventType>();
 

@@ -23,7 +23,6 @@ export {
   RefMap,
 } from "./component";
 export type {
-  PageLifecycleOptions,
   PageConstructor,
   PageOptions,
   PageQuery,

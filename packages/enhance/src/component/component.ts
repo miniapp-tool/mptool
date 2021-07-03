@@ -1,7 +1,7 @@
 import { mergeFun } from "@mptool/shared";
 import event from "mitt";
 
-import { bind, mountMethods } from "../bridge";
+import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
 import { PageInstance } from "../page";
 import { getRef, setRef, removeRef } from "./store";
@@ -50,7 +50,7 @@ export const $Component: ComponentConstructor = <
 
   // create 生命周期
   options.lifetimes.created = mergeFun(() => {
-    mountMethods(options);
+    mount(options);
   }, options.lifetimes.created);
 
   // attach生命周期

@@ -8,11 +8,6 @@ export interface PageQuery {
   [props: string]: string;
 }
 
-export interface PageLifecycleOptions {
-  url: string;
-  query: PageQuery;
-}
-
 export interface PageState {
   /** 是否是打开的第一个页面 */
   firstOpen: boolean;
@@ -31,7 +26,7 @@ export interface ExtendedPageLifeCycles {
    *
    * 需要在调用页面中使用 `this.preload(pageName|pagePath)`
    */
-  onPreload(options: PageLifecycleOptions): void;
+  onPreload(options: PageQuery): void;
 
   /**
    * 页面即将被导航时触发
@@ -42,7 +37,7 @@ export interface ExtendedPageLifeCycles {
    * 另外需要特别注意第一次进入一个分包界面
    * 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
    */
-  onNavigate(options: PageLifecycleOptions): void;
+  onNavigate(options: PageQuery): void;
 
   /**
    * 小程序在切入后台后被唤醒
@@ -100,6 +95,20 @@ export interface ExtendedPageMethods extends NavigatorMethods {
    * 获取当前页面实例。
    */
   $currentPage(): PageInstance;
+
+  /**
+   * 获得页面简称
+   *
+   * @param url 页面地址
+   */
+  $getName(url: string): string;
+
+  /**
+   * 获得页面路径
+   *
+   * @param name 页面简称
+   */
+  $getPath(name: string): string;
 }
 
 export type PageInstance<

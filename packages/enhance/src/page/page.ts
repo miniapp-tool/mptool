@@ -2,15 +2,11 @@ import { logger, mergeFun } from "@mptool/shared";
 import event from "mitt";
 
 import { appState } from "../app";
-import { mountMethods } from "../bridge";
+import { mount } from "../bridge";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../event";
 
-import type {
-  PageConstructor,
-  PageLifecycleOptions,
-  PageOptions,
-} from "./typings";
+import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 
 let hasPageLoaded = false;
 
@@ -78,12 +74,10 @@ export const $Page: PageConstructor = <
   }
 
   if (options.onNavigate) {
-    const onNavigateHandler = function (
-      lifeCycleOptions: PageLifecycleOptions
-    ): void {
-      callLog("onNavigate", lifeCycleOptions);
+    const onNavigateHandler = function (query: PageQuery): void {
+      callLog("onNavigate", query);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options.onNavigate!(lifeCycleOptions);
+      options.onNavigate!(query);
     };
 
     routeEmitter.on(`navigate:${name}`, onNavigateHandler);
@@ -91,14 +85,11 @@ export const $Page: PageConstructor = <
   }
 
   if (options.onPreload) {
-    routeEmitter.on(
-      `preload:${name}`,
-      (lifeCycleOptions: PageLifecycleOptions): void => {
-        callLog("Preload", lifeCycleOptions);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.onPreload!(lifeCycleOptions);
-      }
-    );
+    routeEmitter.on(`preload:${name}`, (query: PageQuery): void => {
+      callLog("Preload", query);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      options.onPreload!(query);
+    });
     registerLog("onPreload");
   }
 
@@ -125,7 +116,7 @@ export const $Page: PageConstructor = <
     options.onReady
   );
 
-  mountMethods(options);
+  mount(options);
 
   // extend page config
   if (extendPageAfter) extendPageAfter(name, options, { event });

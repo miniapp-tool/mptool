@@ -1,7 +1,7 @@
 import { getRef } from "./component/store";
 import { getConfig } from "./config";
 import { routeEmitter, userEmitter } from "./event";
-import { getPath, getTrigger } from "./navigator";
+import { getPathDetail, getTrigger } from "./navigator";
 
 import type { ComponentOptions, UnknownComponentInstance } from "./component";
 import type { ExtendedPageMethods, PageInstance, PageOptions } from "./page";
@@ -87,28 +87,15 @@ const getPage = <
   getCurrentPages().slice(0).pop() as WechatMiniprogram.Page.Instance<T, V>;
 
 /**
- * 获得页面名称
- *
- * @param url 页面地址
- *
- * @returns 页面全地址
- */
-export const getPageName = (url: string): string => {
-  const legal = /^[\w-]+(?=\?|$)/u.exec(url);
-
-  return legal ? legal[0] : getConfig().getName(url);
-};
-
-/**
  * 预加载
  *
  * @param pageNamewithArg 需要预加载的地址
  */
 const preload = (pageNamewithArg: string): void => {
   /** 页面名称 */
-  const { name, path, query } = getPath(pageNamewithArg);
+  const { name, query } = getPathDetail(pageNamewithArg);
 
-  if (name) routeEmitter.emit(`preload:${name}`, { url: path, query });
+  routeEmitter.emit(`preload:${name}`, query);
 };
 
 export function bind(
@@ -150,7 +137,7 @@ export function bind(
  *
  * @param ctx 需要挂载页面的指针
  */
-export function mountMethods<Data, Custom>(
+export function mount<Data, Custom>(
   ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods>
 ): void;
 
@@ -159,7 +146,7 @@ export function mountMethods<Data, Custom>(
  *
  * @param ctx 需要挂载组件的指针
  */
-export function mountMethods<
+export function mount<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends WechatMiniprogram.Component.PropertyOption,
   Method extends WechatMiniprogram.Component.MethodOption,
@@ -179,7 +166,7 @@ export function mountMethods<
     Partial<ExtendedPageMethods>
 ): void;
 
-export function mountMethods(
+export function mount(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ctx: Partial<ExtendedPageMethods> & Record<string, any>
 ): void {
@@ -202,6 +189,8 @@ export function mountMethods(
 
   // 页面信息
   ctx.$currentPage = getPage;
+  ctx.$getName = getConfig().getName;
+  ctx.$getPath = getConfig().getRoute;
 
   // 点击跳转代理
   ctx.$bindGo = bindGo;
