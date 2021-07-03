@@ -71,6 +71,15 @@ export interface AppConfig {
   extendComponent?(options: UnknownComponentOptions): void;
 
   /**
+   * 自定义注入组件
+   *
+   * 时机在框架执行扩展之后，这意味着你可以覆盖框架的方法
+   *
+   * @param options 组件选项
+   */
+  injectComponent?(options: UnknownComponentOptions): void;
+
+  /**
    * 自定义扩展页面，在框架执行扩展之前
    *
    * @param name 页面名称
@@ -79,7 +88,7 @@ export interface AppConfig {
   extendPage?(name: string, options: PageOptions): void;
 
   /**
-   * 自定义诸如页面
+   * 自定义注入页面
    *
    * 在框架执行扩展之后，这意味着你可以覆盖框架的方法
    *

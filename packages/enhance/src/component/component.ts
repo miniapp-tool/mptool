@@ -38,7 +38,7 @@ export const $Component: ComponentConstructor = <
   >
 ): string => {
   // extend page config
-  const { extendComponent } = getConfig();
+  const { extendComponent, injectComponent } = getConfig();
 
   if (extendComponent) extendComponent(options as UnknownComponentInstance);
 
@@ -48,6 +48,7 @@ export const $Component: ComponentConstructor = <
   // create 生命周期
   options.lifetimes.created = mergeFunction(() => {
     mount(options);
+    if (injectComponent) injectComponent(options as UnknownComponentInstance);
   }, options.lifetimes.created);
 
   // attach 生命周期
