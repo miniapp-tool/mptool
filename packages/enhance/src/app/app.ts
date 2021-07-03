@@ -1,5 +1,6 @@
-import { logger, mergeFun } from "@mptool/shared";
+import { logger } from "@mptool/shared";
 import { appEmitter, userEmitter } from "../event";
+import { mergeFunction } from "../utils";
 
 import type { AppConstructor, AppInstance, AppOptions } from "./typings";
 
@@ -61,19 +62,19 @@ export const $App: AppConstructor = <Custom = WechatMiniprogram.IAnyObject>(
   let ctx: AppInstance<Custom>;
 
   appOptions.onLaunch = appOptions.onLaunch
-    ? mergeFun(appLaunchHandler, appOptions.onLaunch)
+    ? mergeFunction(appLaunchHandler, appOptions.onLaunch)
     : appLaunchHandler;
 
   appOptions.onShow = appOptions.onShow
-    ? mergeFun(appShowHandler, appOptions.onShow)
+    ? mergeFunction(appShowHandler, appOptions.onShow)
     : appShowHandler;
 
   appOptions.onHide = appOptions.onHide
-    ? mergeFun(appHideHandler, appOptions.onHide)
+    ? mergeFunction(appHideHandler, appOptions.onHide)
     : appHideHandler;
 
   // 保留指针
-  appOptions.onLaunch = mergeFun(function hold(this: AppInstance<Custom>) {
+  appOptions.onLaunch = mergeFunction(function hold(this: AppInstance<Custom>) {
     ctx = this;
   }, appOptions.onLaunch);
 

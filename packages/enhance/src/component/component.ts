@@ -1,9 +1,8 @@
-import { mergeFun } from "@mptool/shared";
-
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
 import { PageInstance } from "../page";
+import { mergeFunction } from "../utils";
 
 import type {
   ComponentConstructor,
@@ -47,12 +46,12 @@ export const $Component: ComponentConstructor = <
   if (!options.lifetimes) options.lifetimes = {};
 
   // create 生命周期
-  options.lifetimes.created = mergeFun(() => {
+  options.lifetimes.created = mergeFunction(() => {
     mount(options);
   }, options.lifetimes.created);
 
   // attach生命周期
-  options.lifetimes.attached = mergeFun(function (
+  options.lifetimes.attached = mergeFunction(function (
     this: ComponentInstance<
       Data,
       Property,
@@ -73,7 +72,7 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.attached);
 
   // detached 生命周期
-  options.lifetimes.detached = mergeFun(function (
+  options.lifetimes.detached = mergeFunction(function (
     this: ComponentInstance<
       Data,
       Property,

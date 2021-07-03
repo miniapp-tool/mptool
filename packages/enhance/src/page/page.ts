@@ -1,9 +1,10 @@
-import { logger, mergeFun } from "@mptool/shared";
+import { logger } from "@mptool/shared";
 
 import { appState } from "../app";
 import { mount } from "../bridge";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../event";
+import { mergeFunction } from "../utils";
 
 import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 
@@ -92,7 +93,7 @@ export const $Page: PageConstructor = <
     registerLog("onPreload");
   }
 
-  options.onLoad = mergeFun((): void => {
+  options.onLoad = mergeFunction((): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
       appEmitter.on("app:sleep", (time: number) => {
@@ -110,7 +111,7 @@ export const $Page: PageConstructor = <
     }
   }, options.onLoad);
 
-  options.onReady = mergeFun(
+  options.onReady = mergeFunction(
     () => appEmitter.emit("page:ready"),
     options.onReady
   );
