@@ -8,7 +8,7 @@
     data-before="onClickBefore"
     data-after="onClickAfter"
   >
-    Go go play page(bindGo)
+    Go go play page($bindGo)
   </button>
   <button catch:tap="onPlayNavigateTo">Go go play page(wx.navigateTo)</button>
   <navigator url="/pages/play?cid=12">
