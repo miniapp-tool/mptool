@@ -1,6 +1,6 @@
 import { query } from "@mptool/shared";
 import { getConfig } from "../config";
-import { ON_PAGE_NAVIGATE, ON_PAGE_READY } from "../constant";
+import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../constant";
 import { appEmitter, routeEmitter } from "../emitter";
 
 import type { PageQuery } from "../page";
@@ -12,9 +12,7 @@ export interface NavigatorTriggerOptions {
   query: PageQuery;
 }
 
-let timer: number;
-let readyTimer: number;
-let inNagivation: boolean;
+let canNavigate = true;
 
 export type NavigatorType =
   | "navigateTo"
@@ -31,8 +29,6 @@ export interface PathDetails {
 export const getPathDetail = (pageNamewithArg: string): PathDetails => {
   const config = getConfig();
   const [pageName, queryString] = pageNamewithArg.split("?");
-
-  // 获得正确的路径
   const path = pageName.startsWith("/") ? pageName : config.getRoute(pageName);
 
   return {
@@ -58,41 +54,45 @@ export function getTrigger(
 ): (pagename: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 
 /**
- * 跳转触发器
+ * Navgation trigger
  */
 // eslint-disable-next-line
 export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
   return (pageNamewithArg: string): any => {
-    if (!inNagivation) {
+    if (canNavigate) {
+      // set navigate lock
+      canNavigate = false;
+
       const { name, url, query } = getPathDetail(pageNamewithArg);
 
-      // 开始等待
-      inNagivation = true;
+      return Promise.race([
+        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${name}`, query),
+        // 等待最小延迟
+        new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), getConfig().maxDelay || 200);
+        }),
+      ]).then(() => {
+        // release navigate lock
+        canNavigate = true;
 
-      // 清楚计时器
-      clearTimeout(timer);
-      clearTimeout(readyTimer);
-
-      /** 2s 内避免重复的跳转 */
-      timer = setTimeout(() => {
-        inNagivation = false;
-      }, 2000);
-
-      routeEmitter.emit(`${ON_PAGE_NAVIGATE}:${name}`, query);
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return wx[type]({ url });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return wx[type]({ url });
+      });
     }
   };
 }
 
-/** 监听 page ready 事件 */
+// release navigate lock with $minInterval ms delay after pageReady triggers
 appEmitter.on(ON_PAGE_READY, () => {
-  // pageReady 被触发间隔后 100ms，允许下一次跳转
-  readyTimer = setTimeout(() => {
-    inNagivation = false;
-  }, 100);
+  setTimeout(() => {
+    canNavigate = true;
+  }, getConfig().minInterval || 100);
+});
+
+// release navigate lock on page unload
+appEmitter.on(ON_PAGE_UNLOAD, () => {
+  canNavigate = true;
 });

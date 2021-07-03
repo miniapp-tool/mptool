@@ -9,6 +9,9 @@ $Config({
 });
 
 $App({
+  globalData: {
+    test: "mptool",
+  },
   onLaunch(opts) {
     console.log("APP launch:", opts);
     this.$emitter.on("message to app", (msg: string) => {
@@ -17,5 +20,6 @@ $App({
   },
   onAwake(time) {
     console.log(`App awake after ${time}ms`);
+    console.log("This", this);
   },
 });

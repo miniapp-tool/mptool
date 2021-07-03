@@ -45,70 +45,72 @@ export const $Component: ComponentConstructor = <
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
 
-  // create 生命周期
   options.lifetimes.created = mergeFunction(() => {
     mount(options);
     if (injectComponent) injectComponent(options as UnknownComponentInstance);
   }, options.lifetimes.created);
 
-  // attach 生命周期
-  options.lifetimes.attached = mergeFunction(function (
-    this: ComponentInstance<
-      Data,
-      Property,
-      Method,
-      CustomInstanceProperty,
-      IsPage
-    >
-  ) {
-    const id = (componentIndex += 1);
+  options.lifetimes.attached = mergeFunction(
+    // set id and save ref
+    function (
+      this: ComponentInstance<
+        Data,
+        Property,
+        Method,
+        CustomInstanceProperty,
+        IsPage
+      >
+    ) {
+      const id = (componentIndex += 1);
 
-    // 写入 id，并保存组件实例
-    this.$id = id;
-    setRef(id, this as UnknownComponentInstance);
-    this.$refID = this.properties.ref as string;
+      this.$id = id;
+      setRef(id, this as UnknownComponentInstance);
+      this.$refID = this.properties.ref as string;
 
-    this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
-  },
-  options.lifetimes.attached);
+      this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
+    },
+    options.lifetimes.attached
+  );
 
-  // detached 生命周期
-  options.lifetimes.detached = mergeFunction(function (
-    this: ComponentInstance<
-      Data,
-      Property,
-      Method,
-      CustomInstanceProperty,
-      IsPage
-    >
-  ) {
-    // 删除保存的组件实例
-    removeRef(this.$id);
+  options.lifetimes.detached = mergeFunction(
+    // remove saved ref
+    function (
+      this: ComponentInstance<
+        Data,
+        Property,
+        Method,
+        CustomInstanceProperty,
+        IsPage
+      >
+    ) {
+      removeRef(this.$id);
 
-    const $refs = this.$parent?.$refs;
-    const refName = this.$refID;
+      const $refs = this.$parent?.$refs;
+      const refName = this.$refID;
 
-    if (refName && $refs) delete $refs[refName];
+      if (refName && $refs) delete $refs[refName];
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    delete this.$parent;
-  },
-  options.lifetimes.detached);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      delete this.$parent;
+    },
+    options.lifetimes.detached
+  );
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // add ref
   options.properties = {
     ...options.properties,
+    // add ref
     ref: { type: String, value: "" },
   };
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // 方法注入
   options.methods = {
     ...options.methods,
+
+    // inject methods
     $call(
       this: ComponentInstance<
         Data,
@@ -130,11 +132,7 @@ export const $Component: ComponentConstructor = <
 
     $getRef: getRef,
 
-    /**
-     * 由父组件调用
-     *
-     * @param parent 父组件
-     */
+    // Setting $root and $parent, called by parent
     _$attached(
       this: ComponentInstance<
         Data,
@@ -153,7 +151,7 @@ export const $Component: ComponentConstructor = <
 
   options.observers = {
     ...(options.observers || {}),
-    // add ref observer
+    // add ref observer to support dynamic ref
     ref(
       this: ComponentInstance<
         Data,
@@ -164,7 +162,6 @@ export const $Component: ComponentConstructor = <
       >,
       value: string
     ): void {
-      // 支持动态 ref
       if (this.$refID && this.$refID !== value) {
         if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
 

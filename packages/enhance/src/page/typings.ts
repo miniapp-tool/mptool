@@ -35,7 +35,7 @@ export interface ExtendedPageLifeCycles {
    *
    * @param options url 参数对象
    */
-  onPreload(options: PageQuery): void;
+  onPreload(options: PageQuery): void | Promise<void>;
 
   /**
    * 页面即将被导航时触发
@@ -46,7 +46,7 @@ export interface ExtendedPageLifeCycles {
    * 另外需要特别注意第一次进入一个分包界面
    * 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
    */
-  onNavigate(options: PageQuery): void;
+  onNavigate(options: PageQuery): void | Promise<void>;
 
   /**
    * 小程序在切入后台后被唤醒

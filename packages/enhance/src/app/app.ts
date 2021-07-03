@@ -3,7 +3,7 @@ import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
 import { appEmitter, userEmitter } from "../emitter";
 import { mergeFunction } from "../utils";
 
-import type { AppConstructor, AppInstance, AppOptions } from "./typings";
+import type { AppConstructor, AppOptions } from "./typings";
 
 export const appState = {
   /** 是否已启动 */
@@ -45,26 +45,16 @@ const appHideHandler = (): void => {
 export const $App: AppConstructor = <Custom = WechatMiniprogram.IAnyObject>(
   appOptions: AppOptions<Custom>
 ): void => {
-  let ctx: AppInstance<Custom>;
-
-  appOptions.onLaunch = mergeFunction(function launchExtraHandler(
-    this: AppInstance<Custom>,
-    options: WechatMiniprogram.App.LaunchShowOption
-  ) {
-    // saving context
-    ctx = this;
-    appLaunchHandler(options);
-  },
-  appOptions.onLaunch);
+  appOptions.onLaunch = mergeFunction(appLaunchHandler, appOptions.onLaunch);
   appOptions.onShow = mergeFunction(appShowHandler, appOptions.onShow);
   appOptions.onHide = mergeFunction(appHideHandler, appOptions.onHide);
 
   // 注册 onAwake 监听
-  if (appOptions[ON_APP_AWAKE]) {
+  if (appOptions.onAwake) {
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      appOptions[ON_APP_AWAKE]!.call(ctx, time);
+      appOptions.onAwake!(time);
     });
     logger.debug(`App: registered ${ON_APP_AWAKE}`);
   }

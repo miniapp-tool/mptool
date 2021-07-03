@@ -35,10 +35,13 @@ export interface Emitter<Events extends Record<EventType, unknown>> {
     type: undefined extends Events[Key] ? Key : never
   ): void;
 
-  emitAsync<Key extends keyof Events>(type: Key, event: Events[Key]): void;
+  emitAsync<Key extends keyof Events>(
+    type: Key,
+    event: Events[Key]
+  ): Promise<void>;
   emitAsync<Key extends keyof Events>(
     type: undefined extends Events[Key] ? Key : never
-  ): void;
+  ): Promise<void>;
 }
 
 /**

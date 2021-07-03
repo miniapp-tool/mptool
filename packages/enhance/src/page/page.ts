@@ -8,6 +8,7 @@ import {
   ON_PAGE_NAVIGATE,
   ON_PAGE_PRELOAD,
   ON_PAGE_READY,
+  ON_PAGE_UNLOAD,
 } from "../constant";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../emitter";
@@ -44,15 +45,13 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
-  if (options[ON_APP_LAUNCH]) {
+  if (options.onAppLaunch) {
     if (appState.launch) {
       const { lOpt: onLaunchOptions } = appState;
 
       callLog(ON_APP_LAUNCH);
 
-      // checked
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options[ON_APP_LAUNCH]!(
+      options.onAppLaunch(
         onLaunchOptions as WechatMiniprogram.App.LaunchShowOption
       );
     } else
@@ -65,33 +64,40 @@ export const $Page: PageConstructor = <
     registerLog(ON_APP_LAUNCH);
   }
 
-  if (options[ON_PAGE_NAVIGATE]) {
-    routeEmitter.on(`${ON_PAGE_NAVIGATE}:${name}`, (query: PageQuery): void => {
-      callLog(ON_PAGE_NAVIGATE, query);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options[ON_PAGE_NAVIGATE]!(query);
-    });
+  if (options.onNavigate) {
+    routeEmitter.on(
+      `${ON_PAGE_NAVIGATE}:${name}`,
+      (query: PageQuery): Promise<void> | void => {
+        callLog(ON_PAGE_NAVIGATE, query);
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return options.onNavigate!(query);
+      }
+    );
 
     registerLog(ON_PAGE_NAVIGATE);
   }
 
-  if (options[ON_PAGE_PRELOAD]) {
-    routeEmitter.on(`${ON_PAGE_PRELOAD}:${name}`, (query: PageQuery): void => {
-      callLog(ON_PAGE_PRELOAD, query);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options[ON_PAGE_PRELOAD]!(query);
-    });
+  if (options.onPreload) {
+    routeEmitter.on(
+      `${ON_PAGE_PRELOAD}:${name}`,
+      (query: PageQuery): void | Promise<void> => {
+        callLog(ON_PAGE_PRELOAD, query);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return options.onPreload!(query);
+      }
+    );
 
     registerLog(ON_PAGE_PRELOAD);
   }
 
   options.onLoad = mergeFunction((): void => {
     // After onLoad, onAwake is valid if defined
-    if (options[ON_APP_AWAKE]) {
+    if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog(ON_APP_AWAKE);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options[ON_APP_AWAKE]!(time);
+        options.onAwake!(time);
       });
       registerLog(ON_APP_AWAKE);
     }
@@ -106,6 +112,11 @@ export const $Page: PageConstructor = <
   options.onReady = mergeFunction(
     () => appEmitter.emit(ON_PAGE_READY),
     options.onReady
+  );
+
+  options.onUnload = mergeFunction(
+    () => appEmitter.emit(ON_PAGE_UNLOAD),
+    options.onUnload
   );
 
   mount(options);

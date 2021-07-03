@@ -10,6 +10,15 @@
   >
     Go go play page($bindGo)
   </button>
+  <button catch:tap="onChannel">Go go channel page($redirect)</button>
+  <button
+    catch:tap="$bindRedirect"
+    data-url="/pages/channel?cid=1"
+    data-before="onClickBefore"
+    data-after="onClickAfter"
+  >
+    Go go play channel($bindRedirect)
+  </button>
   <button catch:tap="onPlayNavigateTo">Go go play page(wx.navigateTo)</button>
   <navigator url="/pages/play?cid=12">
     <button>Go go play page(navigator:navigate)</button>

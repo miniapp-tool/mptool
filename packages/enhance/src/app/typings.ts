@@ -1,12 +1,12 @@
 import type { UserEmitter } from "../emitter";
 
-export interface ExtendsAppOptions<Custom> {
+export interface ExtendsAppOptions {
   /**
    * 小程序在切入后台后被唤醒
    *
    * @param time 休眠时间 (单位ms)
    */
-  onAwake?(this: AppInstance<Custom>, time: number): void;
+  onAwake?(time: number): void;
 }
 
 export interface ExtendedAppMethods {
@@ -18,7 +18,7 @@ export interface ExtendedAppMethods {
   $emitter: UserEmitter;
 }
 
-export type AppOptions<Custom> = ExtendsAppOptions<Custom> &
+export type AppOptions<Custom> = ExtendsAppOptions &
   Partial<WechatMiniprogram.App.Option> &
   Custom &
   Partial<ExtendedAppMethods> &

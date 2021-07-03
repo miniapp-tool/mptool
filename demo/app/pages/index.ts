@@ -36,6 +36,10 @@ $Page("index", {
     void this.$go("play?cid=123");
   },
 
+  onChannel() {
+    void this.$redirect("channel?cid=123");
+  },
+
   onPlayNavigateTo() {
     void wx.navigateTo({ url: "/pages/play?cid=abcd" });
   },
