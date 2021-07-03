@@ -61,7 +61,7 @@ export interface NavigatorMethods {
    * this.$launch('main');
    * ```
    */
-  $launch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 返回上一页，`wx.navigateBack` 的封装

@@ -182,7 +182,7 @@ export function mount(
   ctx.$go = navigate;
   ctx.$redirect = redirect;
   ctx.$switch = switchTab;
-  ctx.$launch = reLaunch;
+  ctx.$reLaunch = reLaunch;
   ctx.$back = back;
 
   // 页面预加载
