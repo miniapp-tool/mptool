@@ -8,25 +8,8 @@ export default defineUserConfig<DefaultThemeOptions>({
   description: "极其轻量的小程序框架",
 
   head: [
-    // [
-    //   "link",
-    //   {
-    //     rel: "icon",
-    //     type: "image/png",
-    //     sizes: "16x16",
-    //     href: `/assets/icon/favicon-16x16.png`,
-    //   },
-    // ],
-    // [
-    //   "link",
-    //   {
-    //     rel: "icon",
-    //     type: "image/png",
-    //     sizes: "32x32",
-    //     href: `/assets/icon/favicon-32x32.png`,
-    //   },
-    // ],
-    ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
+    ["link", { rel: "icon", href: `/logo.svg` }],
+    // ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
     ["meta", { name: "application-name", content: "MP Tool" }],
     ["meta", { name: "apple-mobile-web-app-title", content: "MP Tool" }],
     [
