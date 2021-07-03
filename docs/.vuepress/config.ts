@@ -32,12 +32,6 @@ export default defineUserConfig<DefaultThemeOptions>({
     },
   },
 
-  markdown: {
-    code: {
-      lineNumbers: false,
-    },
-  },
-
   themeConfig: {
     logo: "/logo.svg",
     repo: "miniapp-tool/mptool",
