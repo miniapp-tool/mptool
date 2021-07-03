@@ -22,6 +22,11 @@ export interface ExtendedPageLifeCycles {
   onRegister(): void;
 
   /**
+   * 在 App.onLaunch 触发时调用
+   */
+  onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void;
+
+  /**
    * 页面预加载时触发
    *
    * 需要在调用页面中使用 `this.preload(pageName|pagePath)`
@@ -45,26 +50,18 @@ export interface ExtendedPageLifeCycles {
    * @param time 休眠时间(单位ms)
    */
   onAwake(time: number): void;
-
-  /**
-   * 在 App.onLaunch 触发时调用
-   */
-  onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void;
-
-  /**
-   * App.onShow 第一次触发时调用。
-   *
-   * Warning: 只会触发一次，需要多次调用的请使用原生的 App.onShow
-   */
-  onAppShow(options: WechatMiniprogram.App.LaunchShowOption): void;
 }
 
 export interface ExtendedPageProperties {
   /** 当前页面名称 */
   $name: string;
-  /** 一些由 lifecycle 生成的页面状态 */
+  /** 一些由框架生成的页面状态 */
   $state: PageState;
-  /** 消息派发器 */
+  /**
+   * 事件派发器
+   *
+   * 是一个 [mitt](https://github.com/developit/mitt) 实例
+   */
   $emitter: UserEmitter;
   /**
    * 指定了 `ref` 的子组件实例映射

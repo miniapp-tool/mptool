@@ -1,6 +1,5 @@
 // App
 export const ON_APP_LAUNCH = "onAppLaunch";
-export const ON_APP_SHOW = "onAppShow";
 export const ON_APP_AWAKE = "onAwake";
 
 // Page

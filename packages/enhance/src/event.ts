@@ -1,11 +1,6 @@
 import mitt from "mitt";
 import { Emitter } from "mitt";
-import {
-  ON_APP_LAUNCH,
-  ON_APP_SHOW,
-  ON_APP_AWAKE,
-  ON_PAGE_READY,
-} from "./constant";
+import { ON_APP_LAUNCH, ON_APP_AWAKE, ON_PAGE_READY } from "./constant";
 import { PageQuery } from "./page";
 
 export type {
@@ -20,7 +15,6 @@ export type {
 
 export type AppEventType = {
   [ON_APP_LAUNCH]: WechatMiniprogram.App.LaunchShowOption;
-  [ON_APP_SHOW]: WechatMiniprogram.App.LaunchShowOption;
   [ON_APP_AWAKE]: number;
   [ON_PAGE_READY]: void;
 };

@@ -5,7 +5,6 @@ import { mount } from "../bridge";
 import {
   ON_APP_AWAKE,
   ON_APP_LAUNCH,
-  ON_APP_SHOW,
   ON_PAGE_NAVIGATE,
   ON_PAGE_PRELOAD,
   ON_PAGE_READY,
@@ -64,25 +63,6 @@ export const $Page: PageConstructor = <
       });
 
     registerLog(ON_APP_LAUNCH);
-  }
-
-  if (options[ON_APP_SHOW]) {
-    if (appState.launch) {
-      const { sOpt: onShowOptions } = appState;
-
-      callLog(ON_APP_SHOW);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options[ON_APP_SHOW]!(
-        onShowOptions as WechatMiniprogram.App.LaunchShowOption
-      );
-    } else
-      appEmitter.on(ON_APP_SHOW, (onShowOptions) => {
-        callLog(ON_APP_SHOW);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options[ON_APP_SHOW]!(onShowOptions);
-      });
-
-    registerLog(ON_APP_SHOW);
   }
 
   if (options[ON_PAGE_NAVIGATE]) {

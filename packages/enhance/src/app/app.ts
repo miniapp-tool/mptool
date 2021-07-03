@@ -1,5 +1,5 @@
 import { logger } from "@mptool/shared";
-import { ON_APP_AWAKE, ON_APP_LAUNCH, ON_APP_SHOW } from "../constant";
+import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
 import { appEmitter, userEmitter } from "../event";
 import { mergeFunction } from "../utils";
 
@@ -10,10 +10,6 @@ export const appState = {
   launch: false,
   /** 启动参数 */
   lOpt: {},
-  /** 是否正在显示 */
-  show: false,
-  /** 显示参数 */
-  sOpt: {},
   /** 切入后台时的时间戳 */
   hide: 0,
 };
@@ -27,24 +23,13 @@ const appLaunchHandler = (
   appEmitter.emit(ON_APP_LAUNCH, options);
 };
 
-const appShowHandler = (
-  options: WechatMiniprogram.App.LaunchShowOption
-): void => {
-  try {
-    if (!appState.show) {
-      appState.show = true;
-      appState.sOpt = options;
+const appShowHandler = (): void => {
+  // emit onAwake lifeCycle
+  if (appState.hide) {
+    appEmitter.emit(ON_APP_AWAKE, new Date().getTime() - appState.hide);
 
-      appEmitter.emit(ON_APP_SHOW, options);
-    }
-  } finally {
-    // emit onAwake lifeCycle
-    if (appState.hide) {
-      appEmitter.emit(ON_APP_AWAKE, new Date().getTime() - appState.hide);
-
-      // reset timeStamp
-      appState.hide = 0;
-    }
+    // reset timeStamp
+    appState.hide = 0;
   }
 };
 

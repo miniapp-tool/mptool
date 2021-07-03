@@ -4,13 +4,17 @@ export interface ExtendsAppOptions<Custom> {
   /**
    * 小程序在切入后台后被唤醒
    *
-   * @param time 休眠时间(单位ms)
+   * @param time 休眠时间 (单位ms)
    */
   onAwake?(this: AppInstance<Custom>, time: number): void;
 }
 
 export interface ExtendedAppMethods {
-  /** 事件派发器 */
+  /**
+   * 事件派发器
+   *
+   * 是一个 [mitt](https://github.com/developit/mitt) 实例
+   */
   $emitter: UserEmitter;
 }
 
