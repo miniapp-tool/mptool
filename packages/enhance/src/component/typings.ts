@@ -67,7 +67,7 @@ export interface ExtendedComponentProperty {
   $parent: PageInstance | UnknownComponentInstance;
 
   /**
-   * 指定了 ref 的子组件实例Map，在父组件获取子组件引用
+   * 指定了 `ref` 的子组件实例映射
    *
    * 示例:
    *
@@ -76,9 +76,11 @@ export interface ExtendedComponentProperty {
    * ```
    *
    * ```js
-   * Page.P({
-   *   onLoad: function () {
-   *     this.$refs.customComp // 根据ref属性获取子组件的实例引用
+   * $Component({
+   *   lifetimes:{
+   *     attached() {
+   *       this.$refs.customComp // 根据ref属性获取子组件的实例引用
+   *     }
    *   }
    * });
    * ```

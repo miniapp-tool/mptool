@@ -2,7 +2,7 @@
 
 ::: tip
 
-小程序增强框架，大小仅 6.56kB。
+小程序增强框架，大小仅 6.56kB，同时支持 TS。
 
 目前支持跨组件、页面通信，页面组件间引用和生命周期扩展
 
@@ -128,6 +128,12 @@ $App({
 
 请注意无法解析的路径会回退到 `defaultRoute`。
 
+### 跳转配置
+
+由于框架的 `onNavigate` 生命周期会造成跳转延时，你可以通过 `maxDelay` 控制框架延迟跳转的最大时长，单位为 ms，默认为 `200`。
+
+同时为了防止快速跳转触发额外生命周期导致的一些潜在问题 (诸如影响首屏渲染)，默认情况下，你只能在当前页面 `onReady` 生命周期触发之后再经过 100ms，才能通过框架进行下一次跳转。使用 `onReady` + `延时` 是为了保证首屏渲染完成，避免同步的 onNavigate 周期阻塞小程序渲染。如果你需要一个更大或者更小的延迟值，请通过 `minInterval` 设置。
+
 ### 构造器扩展
 
 你可以通过以下扩展方法为每个组件和页面注入实例方法或属性。
@@ -151,6 +157,94 @@ $App({
 - `onAwake(time: number)`: 在小程序从后台唤醒时调用
 
   参数 `time` 为本次切入后台的时间，单位 ms
+
+## 组件和页面通用的跳转方法
+
+::: warning
+
+由于相对 url 的写法和夜间简称可能出现相同格式，框架不支持相对路径跳转，请一律使用页面简称或绝对路径
+
+:::
+
+- `$go(pagename: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`: 导航到指定页面
+
+  本函数是 `wx.navigateTo` 的封装，`pagename` 可以带上 `queryString`
+
+  示例：
+
+  ```js
+  this.$go("play?vid=xxx&cid=xxx");
+  ```
+
+- `$redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 重定向到指定页面, 即**替换页面，不产生历史**
+
+  本函数是 `wx.redirectTo` 的封装，`pagename` 可以带上 `queryString`
+
+  示例：
+
+  ```js
+  this.$redirect("about?year=2021");
+  ```
+
+- `$switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
+
+  本函数是 `wx.switchTab` 的封装，路径参数只用于触发 `onNavigate` (`wx.switchTab` 不支持参数)
+
+  示例：
+
+  ```js
+  this.$switch("main?user=mrhope");
+  ```
+
+- `$reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 关闭所有页面，之后打开到应用内的某个页面
+
+  本函数是 `wx.reLaunch` 的封装，`pagename` 可以带上 `queryString`
+
+  示例：
+
+  ```js
+  this.$launch("main?user=mrhope");
+  ```
+
+- `$back(delta = 1)`: 返回上一页
+
+  本函数是 `wx.navigateBack` 的简单封装，delta 为返回的层数，默认为`1`
+
+- `$preload(pagename: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+
+  本函数是 `wx.navigateBack` 的简单封装，delta 为返回的层数，默认为`1`
+
+- 代理方法:
+
+  `$bindGo`, `$bindRedirect`, `$bindSwitch` 和`$bindRelaunch` 是四个用在 WXML 的代理方法。
+
+  你需要使用 data-set 来绑定跳转配置
+
+  - `data-url` 跳转到的页面名
+  - `data-before` 跳转前执行
+  - `data-after` 跳转后执行
+
+  例子:
+
+  ```html
+  <button
+    bindtap="$bindRedirect"
+    data-url="/pages/play"
+    data-after="onClickAfter"
+  >
+    click redirect
+  </button>
+  ```
+
+  ```html
+  <button
+    bindtap="$bindReLaunch"
+    data-url="/pages/play"
+    data-before="onClickBefore"
+  >
+    click reLaunch
+  </button>
+  ```
 
 ## $Page
 
@@ -216,8 +310,8 @@ $Page("main", {
   ```
 
   ```js
-  Page.P({
-    onLoad: function () {
+  $Page({
+    onLoad() {
       this.$refs.customComp1; // custom-component1 子组件的实例引用
       this.$refs.customComp2; // custom-component2 子组件的实例引用
     },
@@ -226,9 +320,15 @@ $Page("main", {
 
 ### 方法扩展
 
+- `$currentPage(): PageInstance`: 获取当前页面实例
+
+- `$getName(url: string): string`: 获取传入页面地址的页面简称
+
+- `$getPath(name: string): string`: 获取传入页面简称的页面路径
+
 - `$`: 父子组件沟通器
 
-  用于以 `binding="$"` 形式建立父子组件/页面与组件沟通
+  用于通过 `binding="$"` 形式建立父子组件/页面与组件沟通
 
   ::: tip
 
@@ -246,6 +346,10 @@ $Page("main", {
 
   :::
 
+- `onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption)`: 在 App.onLaunch 触发时调用
+
+  参数 `options` 为 App 启动时的 `onLaunch` 参数
+
 - `onAwake(time: number)`: 在小程序从后台唤醒时调用
 
   参数 `time` 为本次休眠时间，单位 ms
@@ -255,6 +359,12 @@ $Page("main", {
   参数 `options` 为 url 参数对象
 
   可在其他页面中使用 `this.$preload(pageNameWithArgs|pageUrl)` 触发特定页面的预加载周期。
+
+  ::: warning 小程序分包
+
+  由于小程序每个分包下页面会在首次请求跳转到某个分包页面时注册，所以此时进入的首个页面无法触发 `onPreload` 周期。
+
+  :::
 
   你可以在用户特定行为后根据用户行为漏斗特点预加载对应界面准备数据。
 
@@ -395,15 +505,15 @@ $Page("main", {
 
   使用包装方法进行跳转时吗，会先执行对应页面的 `onNavigate` 再进行跳转。
 
-  你可以将低耗时 (建议 < 150ms) 的操作放入 `onNavigate` 周期。
+  ::: warning
 
-  ::: tip
+  由于同步或异步的 `onNavigate` 均受到支持，为了避免执行时间较长的方法阻塞跳转、迷惑用户，在达到 `maxDelay` 时长后框架会强制进行跳转，而不再等待 `onNavigate` 完成。
 
-  请注意 `onNavigate` 周期会阻塞页面的跳转直至其完成。
-
-  所以为了放置给用于如果你需要执行异步操作
+  另外由于小程序每个分包下页面会在首次请求跳转到某个分包页面时注册，所以此时进入的首个页面无法触发 `onNavigate` 周期。
 
   :::
+
+  建议将低耗时 (< 150ms) 的操作放入 `onNavigate` 周期，并在 `onLoad` 时判断 `onNavigate` 是否成功触发。
 
   例子:
 
@@ -421,7 +531,7 @@ $Page("main", {
     // 用户在商品页面加入了购物车，极有可能下单
     addCart(itemID: string) {
       // ...
-      this.$preload(`order?id=${itemID}`); // 通知订单页预加载此商品
+      this.$go(`order?id=${itemID}`); // 跳转到订单页
     },
   });
   ```
@@ -439,23 +549,21 @@ $Page("main", {
       loading: true,
     },
 
-    onPreload({ id }: { id: string }) {
-      // 此处 getData 可以为你自己的耗时逻辑
-      getData(id).then((data) => {
-        this.$state.id = id;
-        this.$state.data = data;
-      });
+    onNavigate({ id }: { id: string }) {
+      this.$state.orderData = prepareOrderData(id);
+      this.$state.id = id;
     },
 
     onLoad({ id }: { id: string }) {
-      // 数据已经预加载
+      // 数据已经处理完毕
       if (this.$state.id === id) {
         // 直接设置，跳过加载
-        this.setData({ loading: false, data });
+        this.setData({ loading: false, orderData });
       } else {
-        // 自行获取
-        getData(id).then((data) => {
-          this.setData({ loading: false, data });
+        // 处理后赋值
+        this.setData({
+          loading: false,
+          orderData: prepareOrderData(id),
         });
       }
     },
@@ -478,7 +586,7 @@ $Page("main", {
     // 用户在商品页面加入了购物车，极有可能下单
     addCart(itemID) {
       // ...
-      this.$preload(`order?id=${itemID}`); // 通知订单页预加载此商品
+      this.$go(`order?id=${itemID}`); // 跳转到订单页
     },
   });
   ```
@@ -496,23 +604,21 @@ $Page("main", {
       loading: true,
     },
 
-    onPreload({ id }) {
-      // 此处 getData 可以为你自己的耗时逻辑
-      getData(id).then((data) => {
-        this.$state.id = id;
-        this.$state.data = data;
-      });
+    onNavigate({ id }) {
+      this.$state.orderData = prepareOrderData(id);
+      this.$state.id = id;
     },
 
     onLoad({ id }) {
-      // 数据已经预加载
+      // 数据已经处理完毕
       if (this.$state.id === id) {
         // 直接设置，跳过加载
-        this.setData({ loading: false, data });
+        this.setData({ loading: false, orderData });
       } else {
-        // 自行获取
-        getData(id).then((data) => {
-          this.setData({ loading: false, data });
+        // 处理后赋值
+        this.setData({
+          loading: false,
+          orderData: prepareOrderData(id),
         });
       }
     },
@@ -524,5 +630,60 @@ $Page("main", {
   :::
 
   ::::
+
+## $Component
+
+框架提供的组件注册器。
+
+> TODO:　文档尚未制作完成
+
+### 属性扩展
+
+- `$id`: 数字，当前组件的唯一标识
+
+- `$refID`: 字符串，当前组件引用的 ref id，
+
+- `$root`: 当前组件所属的页面组件实例
+
+  ::: warning
+
+  只在 `attached`, `ready` 生命周期后生效
+
+  :::
+
+- `$parent`: 当前组件所属的父组件或父页面实例
+
+  ::: warning
+
+  只在 `attached`, `ready` 生命周期后生效
+
+  :::
+
+- `$refs`: 指定了 ref 的子组件实例 Map，在父组件获取子组件引用
+
+  示例:
+
+  ```html
+  <custom-component binding="$" ref="customRef1" />
+  ```
+
+  ```js
+  $Component({
+    lifetimes: {
+      attached() {
+        this.$refs.customComp; // 根据ref属性获取子组件的实例引用
+      },
+    },
+  });
+  ```
+
+### 实例方法
+
+- `$call(method: string, ...args: unknown[]): void`: 通过消息的方式调用父组件方法，即使父组件方法不存在也不会报错
+
+  - 参数 `method` 为需要调用的方法名称
+  - 参数 `args` 为需要传递的参数
+
+## $Emitter
 
 > TODO:　文档尚未制作完成

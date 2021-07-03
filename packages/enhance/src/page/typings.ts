@@ -22,11 +22,18 @@ export interface ExtendedPageLifeCycles {
   onRegister(): void;
 
   /**
-   * 在 App.onLaunch 触发时调用
+   * 在 `App.onLaunch` 触发时调用
    *
    * @param App.onLaunch 参数
    */
   onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void;
+
+  /**
+   * 小程序在切入后台后被唤醒
+   *
+   * @param time 休眠时间 (单位 ms)
+   */
+  onAwake(time: number): void;
 
   /**
    * 页面预加载时触发
@@ -47,13 +54,6 @@ export interface ExtendedPageLifeCycles {
    * 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
    */
   onNavigate(options: PageQuery): void | Promise<void>;
-
-  /**
-   * 小程序在切入后台后被唤醒
-   *
-   * @param time 休眠时间(单位ms)
-   */
-  onAwake(time: number): void;
 }
 
 export interface ExtendedPageProperties {
@@ -67,6 +67,7 @@ export interface ExtendedPageProperties {
    * 是一个 [mitt](https://github.com/developit/mitt) 实例
    */
   $emitter: UserEmitter;
+
   /**
    * 指定了 `ref` 的子组件实例映射
    *
@@ -77,8 +78,8 @@ export interface ExtendedPageProperties {
    * ```
    *
    * ```js
-   * Page.P({
-   *   onLoad: function () {
+   * $Page({
+   *   onLoad() {
    *     this.$refs.customComp // 根据ref属性获取子组件的实例引用
    *   }
    * });
