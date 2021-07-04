@@ -75,7 +75,7 @@ export interface NavigatorMethods {
    * this.$back(2);
    * ```
    */
-  $back(delta?: number): void;
+  $back(delta?: number): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 提前预加载指定页面 (会触发对应页面的 `onPreload` 生命周期)
@@ -89,7 +89,7 @@ export interface NavigatorMethods {
    * this.$preload('/page/main?userName=xxx&action=xxx');
    * ```
    */
-  $preload(pagename: string): void;
+  $preload(pagename: string): void | Promise<void>;
 
   /**
    * 点击代理方法，绑定 `$go` 逻辑
@@ -100,6 +100,7 @@ export interface NavigatorMethods {
    * - `data-after`  跳转后执行
    *
    * 示例：
+   *
    * ```html
    * <button
    *   bindtap="$bindGo"
@@ -119,6 +120,7 @@ export interface NavigatorMethods {
    * - `data-after`  跳转后执行
    *
    * 示例：
+   *
    * ```html
    * <button
    *   bindtap="$bindRedirect"
@@ -138,6 +140,7 @@ export interface NavigatorMethods {
    * - `data-after`  跳转后执行
    *
    * 示例：
+   *
    * ```html
    * <button
    *   bindtap="$bindSwitch"

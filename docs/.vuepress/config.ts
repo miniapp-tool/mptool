@@ -46,15 +46,19 @@ export default defineUserConfig<DefaultThemeOptions>({
           },
           {
             text: "框架",
-            link: "/guide/enhance.html",
+            children: [
+              "/guide/get-started.html",
+              "/guide/enhance.html",
+              "/guide/file.html",
+            ],
           },
           {
-            text: "缓存增强",
-            link: "/guide/file.html",
+            text: "API",
+            children: ["/api/enhance/index.html", "/api/file.html"],
           },
         ],
         sidebar: {
-          "/guide/": [
+          "/": [
             {
               text: "介绍",
               children: [
@@ -63,8 +67,23 @@ export default defineUserConfig<DefaultThemeOptions>({
                 "/guide/file.md",
               ],
             },
+            {
+              text: "API",
+              children: [
+                {
+                  text: "Enhance",
+                  children: [
+                    "/api/enhance/config.md",
+                    "/api/enhance/app.md",
+                    "/api/enhance/page.md",
+                    "/api/enhance/component.md",
+                    "/api/enhance/emitter.md",
+                  ],
+                },
+                "/api/file.md",
+              ],
+            },
           ],
-          "/": ["/readme.md", "/guide/get-started.md"],
         },
         selectLanguageName: "简体中文",
         selectLanguageText: "选择语言",

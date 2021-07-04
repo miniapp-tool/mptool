@@ -26,14 +26,16 @@ export interface ExtendedPageLifeCycles {
    *
    * @param App.onLaunch 参数
    */
-  onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void;
+  onAppLaunch(
+    options: WechatMiniprogram.App.LaunchShowOption
+  ): void | Promise<void>;
 
   /**
    * 小程序在切入后台后被唤醒
    *
    * @param time 休眠时间 (单位 ms)
    */
-  onAwake(time: number): void;
+  onAwake(time: number): void | Promise<void>;
 
   /**
    * 页面预加载时触发

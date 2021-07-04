@@ -2,7 +2,7 @@
 
 ::: tip
 
-小程序增强框架，大小仅 6.56kB，同时支持 TS。
+小程序增强框架，大小仅 6.78kB，同时提供完整的 TS 支持。
 
 目前支持跨组件、页面通信，页面组件间引用和生命周期扩展
 
@@ -148,103 +148,91 @@ $App({
 
 框架提供的应用注册器
 
-### 属性扩展
-
-- `$emitter`: 事件派发器，是一个 [mitt](https://github.com/developit/mitt) 实例
-
 ### 生命周期扩展
+
+我们提供了额外的 `onAwake` 生命周期。
 
 - `onAwake(time: number)`: 在小程序从后台唤醒时调用
 
   参数 `time` 为本次切入后台的时间，单位 ms
 
+### 属性扩展
+
+- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
+
 ## 组件和页面通用的跳转方法
+
+我们提供了新的 `onNavigate` 生命周期，想要触发它，你必须使用下列 API 进行跳转。
 
 ::: warning
 
-由于相对 url 的写法和夜间简称可能出现相同格式，框架不支持相对路径跳转，请一律使用页面简称或绝对路径
+由于相对 url 的写法会和页面简称出现混淆，框架不支持相对路径跳转，请一律使用页面简称或绝对路径
 
 :::
 
-- `$go(pagename: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`: 导航到指定页面
+我们在逻辑层包装了四个方法:
 
-  本函数是 `wx.navigateTo` 的封装，`pagename` 可以带上 `queryString`
+- `$go(pagename: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`: 导航到指定页面，是 `wx.navigateTo` 的封装
 
-  示例：
+- `$redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 重定向到指定页面, 即**替换页面，不产生历史**，是 `wx.redirectTo` 的封装
 
-  ```js
-  this.$go("play?vid=xxx&cid=xxx");
-  ```
+- `$switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面，是 `wx.switchTab` 的封装
 
-- `$redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 重定向到指定页面, 即**替换页面，不产生历史**
+- `$reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 关闭所有页面，之后打开到应用内的某个页面，是 `wx.reLaunch` 的封装
 
-  本函数是 `wx.redirectTo` 的封装，`pagename` 可以带上 `queryString`
+在上述四个方法中，`pagename` 为页面简称，同时可以带上 `queryString`。
 
-  示例：
+你也可以传入一个带有可选参数使用绝对路径的 `url`。
 
-  ```js
-  this.$redirect("about?year=2021");
-  ```
+::: tip 示例
 
-- `$switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
+```js
+this.$go("play?vid=xxx&cid=xxx");
 
-  本函数是 `wx.switchTab` 的封装，路径参数只用于触发 `onNavigate` (`wx.switchTab` 不支持参数)
+this.$redirect("about?year=2021");
 
-  示例：
+this.$switch("main?user=mrhope");
 
-  ```js
-  this.$switch("main?user=mrhope");
-  ```
+this.$launch("main?user=mrhope");
+```
 
-- `$reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 关闭所有页面，之后打开到应用内的某个页面
+:::
 
-  本函数是 `wx.reLaunch` 的封装，`pagename` 可以带上 `queryString`
+::: warning
 
-  示例：
+请注意由于 `wx.switchTab` 不支持参数，参数将只用于触发 `onNavigate`
 
-  ```js
-  this.$launch("main?user=mrhope");
-  ```
+:::
 
-- `$back(delta = 1)`: 返回上一页
+此外，我们还在视图层一侧提供了四个代理方法 `$bindGo`, `$bindRedirect`, `$bindSwitch` 和`$bindRelaunch`
 
-  本函数是 `wx.navigateBack` 的简单封装，delta 为返回的层数，默认为`1`
+你需要使用 data-set 来绑定跳转配置:
 
-- `$preload(pagename: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+- `data-url` 跳转到的页面简称或绝对路径
+- `data-before` 跳转前执行
+- `data-after` 跳转后执行
 
-  本函数是 `wx.navigateBack` 的简单封装，delta 为返回的层数，默认为`1`
+::: tip 例子
 
-- 代理方法:
+```html
+<button
+  bindtap="$bindRedirect"
+  data-url="/pages/play"
+  data-after="onClickAfter"
+>
+  click redirect
+</button>
+```
 
-  `$bindGo`, `$bindRedirect`, `$bindSwitch` 和`$bindRelaunch` 是四个用在 WXML 的代理方法。
+```html
+<button bindtap="$bindReLaunch" data-url="play" data-before="onClickBefore">
+  click reLaunch
+</button>
+```
 
-  你需要使用 data-set 来绑定跳转配置
+:::
 
-  - `data-url` 跳转到的页面名
-  - `data-before` 跳转前执行
-  - `data-after` 跳转后执行
-
-  例子:
-
-  ```html
-  <button
-    bindtap="$bindRedirect"
-    data-url="/pages/play"
-    data-after="onClickAfter"
-  >
-    click redirect
-  </button>
-  ```
-
-  ```html
-  <button
-    bindtap="$bindReLaunch"
-    data-url="/pages/play"
-    data-before="onClickBefore"
-  >
-    click reLaunch
-  </button>
-  ```
+我们还提供了 `$back(delta = 1)` ，是 `wx.navigateBack` 的简单封装，`delta` 为返回的层数，默认为`1`
 
 ## $Page
 
@@ -284,65 +272,13 @@ $Page("main", {
 
 ::::
 
-### 属性扩展
-
-- `$name`: 当前页面名称
-
-- `$state`: 框架生成的页面状态
-
-  ::: tip
-
-  你可以考虑将部分自定义扩展的数据注入到此处
-
-  :::
-
-  - `$state.firstOpen`: 是否是第一个打开的页面
-
-- `$emitter`: 事件派发器，是一个 [mitt](https://github.com/developit/mitt) 实例
-
-- `$refs`: 指定了 `ref` 的子组件实例映射
-
-  示例:
-
-  ```html
-  <custom-component1 binding="$" ref="customComp1" />
-  <custom-component2 binding="$" ref="customComp2" />
-  ```
-
-  ```js
-  $Page({
-    onLoad() {
-      this.$refs.customComp1; // custom-component1 子组件的实例引用
-      this.$refs.customComp2; // custom-component2 子组件的实例引用
-    },
-  });
-  ```
-
-### 方法扩展
-
-- `$currentPage(): PageInstance`: 获取当前页面实例
-
-- `$getName(url: string): string`: 获取传入页面地址的页面简称
-
-- `$getPath(name: string): string`: 获取传入页面简称的页面路径
-
-- `$`: 父子组件沟通器
-
-  用于通过 `binding="$"` 形式建立父子组件/页面与组件沟通
-
-  ::: tip
-
-  我们这里做了一个优雅的 hack，实际上 `binding` 可以理解为 `bind:ing`，即框架向所有组件注入了 `ing` 事件并在内部调用它。
-
-  :::
-
 ### 生命周期扩展
 
 - `onRegister()`: 在页面即将注册时调用
 
   ::: warning
 
-  此时页面的 this 还不可用
+  此时 this 上尚未挂载小程序原生方法
 
   :::
 
@@ -359,12 +295,6 @@ $Page("main", {
   参数 `options` 为 url 参数对象
 
   可在其他页面中使用 `this.$preload(pageNameWithArgs|pageUrl)` 触发特定页面的预加载周期。
-
-  ::: warning 小程序分包
-
-  由于小程序每个分包下页面会在首次请求跳转到某个分包页面时注册，所以此时进入的首个页面无法触发 `onPreload` 周期。
-
-  :::
 
   你可以在用户特定行为后根据用户行为漏斗特点预加载对应界面准备数据。
 
@@ -488,18 +418,15 @@ $Page("main", {
 
   ::::
 
+  ::: warning 小程序分包
+
+  由于小程序每个分包下页面会在首次请求跳转到某个分包页面时注册，所以此时进入的首个页面无法触发 `onPreload` 周期。
+
+  :::
+
 - `onNavigate(options: PageQuery)`: 页面即将被跳转时触发
 
-  为触发 `onNavigate` 生命周期，跳转必须使用框架包装的方法:
-
-  - `$go`
-  - `$redirect`
-  - `$switch`
-  - `$reLaunch`
-  - `$bindGo`
-  - `$bindRedirect`
-  - `$bindSwitch`
-  - `$bindReLaunch`
+  为触发 `onNavigate` 生命周期，跳转必须使用[框架包装的方法](#组件和页面通用的跳转方法)
 
   参数 `options` 为 url 参数对象
 
@@ -631,19 +558,73 @@ $Page("main", {
 
   ::::
 
+### 属性扩展
+
+- `$name`: 当前页面名称
+
+- `$state`: 框架生成的页面状态
+
+  ::: tip
+
+  你可以考虑将部分自定义扩展的数据注入到此处
+
+  :::
+
+  - `$state.firstOpen`: 是否是第一个打开的页面
+
+- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
+
+- `$refs`: 指定了 `ref` 的子组件实例映射
+
+  示例:
+
+  ```html
+  <custom-component1 binding="$" ref="customComp1" />
+  <custom-component2 binding="$" ref="customComp2" />
+  ```
+
+  ```js
+  $Page({
+    onLoad() {
+      this.$refs.customComp1; // custom-component1 子组件的实例引用
+      this.$refs.customComp2; // custom-component2 子组件的实例引用
+    },
+  });
+  ```
+
+### 方法扩展
+
+- `$preload(pagename: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+
+  `pagename` 为页面简称，可以带上 `queryString`，也可填入带有可选参数的小程序绝对路径
+
+- `$currentPage(): PageInstance`: 获取当前页面实例
+
+- `$getName(url: string): string`: 获取传入页面地址的页面简称
+
+- `$getPath(name: string): string`: 获取传入页面简称的页面路径
+
+- `$`: 父子组件沟通器
+
+  用于通过 `binding="$"` 形式建立父子组件/页面与组件沟通
+
+  ::: tip
+
+  我们这里做了一个优雅的 hack，实际上 `binding` 可以理解为 `bind:ing`，即框架向所有组件注入了 `ing` 事件并在内部调用它。
+
+  :::
+
 ## $Component
 
 框架提供的组件注册器。
-
-> TODO:　文档尚未制作完成
 
 ### 属性扩展
 
 - `$id`: 数字，当前组件的唯一标识
 
-- `$refID`: 字符串，当前组件引用的 ref id，
+- `$refID`: 字符串，当前组件上用于索引的 ref ID 值
 
-- `$root`: 当前组件所属的页面组件实例
+- `$root`: 当前组件所属的页面实例
 
   ::: warning
 
@@ -684,6 +665,64 @@ $Page("main", {
   - 参数 `method` 为需要调用的方法名称
   - 参数 `args` 为需要传递的参数
 
+- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
+
+- `$`: 父子组件沟通器
+
+  用于通过 `binding="$"` 形式建立父子组件/页面与组件沟通
+
+  ::: tip
+
+  我们这里做了一个优雅的 hack，实际上 `binding` 可以理解为 `bind:ing`，即框架向所有组件注入了 `ing` 事件并在内部调用它。
+
+  :::
+
 ## $Emitter
 
-> TODO:　文档尚未制作完成
+`$Emitter` 是一个很常规的发布订阅器。
+
+我们在 [mitt](https://github.com/developit/mitt) 之上提供了新的 `emitAsync` 方法加入了对 async 函数的支持，可以异步的触发所有的监听器之后触发自身的回调。
+
+### 使用案例
+
+```ts
+import { $Emitter } from "@mptool/enhance";
+
+const emitter = $Emitter();
+
+// listen to an event
+emitter.on("foo", (e) => console.log("foo", e));
+
+// listen to an event
+emitter.on(
+  "bar",
+  (e) =>
+    new Promise((resolve) =>
+      setTimeout(() => {
+        console.log("bar", e);
+        resolve();
+      }, 200)
+    )
+);
+
+// listen to all events
+emitter.on("*", (type, e) => console.log(type, e));
+
+// fire an event
+emitter.emit("foo", { a: "b" });
+
+// fire an event asynchronously
+emitter.emitAsync("bar", { data: "content" }).then(() => {
+  // now all handlers are complete
+});
+
+// clearing all events
+emitter.all.clear();
+
+// working with handler references:
+function onFoo() {}
+emitter.on("foo", onFoo); // listen
+emitter.off("foo", onFoo); // unlisten
+```
+
+具体详情请见 [API 文档](../api/enhance/emitter.md)

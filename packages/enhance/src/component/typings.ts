@@ -49,7 +49,7 @@ export interface ExtendedComponentProperty {
   $id: number;
 
   /**
-   * 当前组件引用的 ref id
+   * 当前组件上用于索引的 ref ID 值
    */
   $refID: string;
   /**

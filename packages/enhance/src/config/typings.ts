@@ -71,7 +71,7 @@ export interface AppConfig {
   maxDelay?: number;
 
   /**
-   * 允许下次跳转据页面首屏渲染后的最小间隔时间，单位 ms
+   * 允许进行跳转据页面首屏渲染后的最小间隔时间，单位 ms
    *
    * @default 100
    */
