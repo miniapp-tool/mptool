@@ -42,7 +42,8 @@ const appHideHandler = (): void => {
  *
  * @param appOptions Appoption
  */
-export const $App: AppConstructor = <Custom = WechatMiniprogram.IAnyObject>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const $App: AppConstructor = <Custom extends Record<string, any>>(
   appOptions: AppOptions<Custom>
 ): void => {
   appOptions.onLaunch = mergeFunction(appLaunchHandler, appOptions.onLaunch);

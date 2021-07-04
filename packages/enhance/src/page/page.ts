@@ -18,10 +18,7 @@ import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 
 let hasPageLoaded = false;
 
-export const $Page: PageConstructor = <
-  Data = WechatMiniprogram.IAnyObject,
-  Custom = WechatMiniprogram.IAnyObject
->(
+export const $Page: PageConstructor = <Data, Custom>(
   name: string,
   options: PageOptions<Data, Custom>
 ): void => {

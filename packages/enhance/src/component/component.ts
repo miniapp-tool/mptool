@@ -2,14 +2,14 @@ import { logger } from "@mptool/shared";
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
-import { PageInstance } from "../page";
+import { TrivialPageInstance } from "../page";
 import { mergeFunction } from "../utils";
 
 import type {
   ComponentConstructor,
   ComponentInstance,
   ComponentOptions,
-  UnknownComponentInstance,
+  TrivalComponentInstance,
 } from "./typings";
 
 let componentIndex = 0;
@@ -23,10 +23,8 @@ export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends WechatMiniprogram.Component.PropertyOption,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    string,
-    never
-  >,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CustomInstanceProperty extends Record<string, any> = {},
   IsPage extends boolean = false
 >(
   options: ComponentOptions<
@@ -40,14 +38,14 @@ export const $Component: ComponentConstructor = <
   // extend page config
   const { extendComponent, injectComponent } = getConfig();
 
-  if (extendComponent) extendComponent(options as UnknownComponentInstance);
+  if (extendComponent) extendComponent(options as TrivalComponentInstance);
 
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
 
   options.lifetimes.created = mergeFunction(() => {
     mount(options);
-    if (injectComponent) injectComponent(options as UnknownComponentInstance);
+    if (injectComponent) injectComponent(options as TrivalComponentInstance);
   }, options.lifetimes.created);
 
   options.lifetimes.attached = mergeFunction(
@@ -64,7 +62,7 @@ export const $Component: ComponentConstructor = <
       const id = (componentIndex += 1);
 
       this.$id = id;
-      setRef(id, this as UnknownComponentInstance);
+      setRef(id, this);
       this.$refID = this.properties.ref as string;
 
       this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
@@ -141,9 +139,9 @@ export const $Component: ComponentConstructor = <
         CustomInstanceProperty,
         IsPage
       >,
-      parent: UnknownComponentInstance | PageInstance
+      parent: TrivalComponentInstance | TrivialPageInstance
     ): void {
-      this.$root = (parent as UnknownComponentInstance).$root || parent;
+      this.$root = (parent as TrivalComponentInstance).$root || parent;
       this.$parent = parent;
     },
     $: bind,

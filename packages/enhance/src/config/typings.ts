@@ -1,5 +1,5 @@
-import type { UnknownComponentOptions } from "../component";
-import type { PageOptions } from "../page";
+import type { TrivalComponentOptions } from "../component";
+import type { TrivalPageOptions } from "../page";
 
 export interface AppConfig {
   /**
@@ -84,7 +84,7 @@ export interface AppConfig {
    *
    * @param options 组件选项
    */
-  extendComponent?(options: UnknownComponentOptions): void;
+  extendComponent?(options: TrivalComponentOptions): void;
 
   /**
    * 自定义注入组件
@@ -93,7 +93,7 @@ export interface AppConfig {
    *
    * @param options 组件选项
    */
-  injectComponent?(options: UnknownComponentOptions): void;
+  injectComponent?(options: TrivalComponentOptions): void;
 
   /**
    * 自定义扩展页面，在框架执行扩展之前
@@ -101,7 +101,7 @@ export interface AppConfig {
    * @param name 页面名称
    * @param options 页面选项
    */
-  extendPage?(name: string, options: PageOptions): void;
+  extendPage?(name: string, options: TrivalPageOptions): void;
 
   /**
    * 自定义注入页面
@@ -111,5 +111,5 @@ export interface AppConfig {
    * @param name 页面选项
    * @param options pageoption
    */
-  injectPage?(name: string, options: PageOptions): void;
+  injectPage?(name: string, options: TrivalPageOptions): void;
 }

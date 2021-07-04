@@ -1,4 +1,4 @@
-import type { ExtendedPageMethods, PageInstance } from "../page";
+import type { ExtendedPageMethods, TrivialPageInstance } from "../page";
 
 export interface ComponentLifetimes {
   /** 组件生命周期声明对象 */
@@ -57,14 +57,14 @@ export interface ExtendedComponentProperty {
    *
    * @description 只在 `attached`, `ready` 生命周期后生效
    */
-  $root: PageInstance;
+  $root: TrivialPageInstance;
 
   /**
    * 当前组件所属的父组件实例引用
    *
    * @description 只在 `attached`, `ready` 生命周期后生效
    */
-  $parent: PageInstance | UnknownComponentInstance;
+  $parent: TrivialPageInstance | TrivalComponentInstance;
 
   /**
    * 指定了 `ref` 的子组件实例映射
@@ -101,28 +101,29 @@ export interface ExtendedComponentMethods {
   /**
    * @private
    */
-  _$attached(parent: UnknownComponentInstance | PageInstance): void;
+  _$attached(parent: TrivalComponentInstance | TrivialPageInstance): void;
 }
 
 export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends WechatMiniprogram.Component.PropertyOption,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    string,
-    never
-  >,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CustomInstanceProperty extends Record<string, any> = {},
   IsPage extends boolean = false
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
   Method &
-  (IsPage extends true
-    ? WechatMiniprogram.Page.ILifetime
-    : Record<string, never>) &
+  (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {}) &
   CustomInstanceProperty &
   ExtendedComponentProperty &
-  ExtendedPageMethods & {
+  ExtendedPageMethods<
+    Data & WechatMiniprogram.Component.PropertyOptionToData<Property>,
+    CustomInstanceProperty &
+      Method &
+      (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
+  > & {
     /** 组件数据，**包括内部数据和属性值** */
     data: Data & WechatMiniprogram.Component.PropertyOptionToData<Property>;
     /** 组件数据，**包括内部数据和属性值**（与 `data` 一致） */
@@ -134,10 +135,8 @@ export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends WechatMiniprogram.Component.PropertyOption,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    string,
-    never
-  >,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CustomInstanceProperty extends Record<string, any> = {},
   IsPage extends boolean = false
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<WechatMiniprogram.Component.Property<Property>> &
@@ -153,10 +152,8 @@ export interface ComponentConstructor {
     Data extends WechatMiniprogram.Component.DataOption,
     Property extends WechatMiniprogram.Component.PropertyOption,
     Method extends WechatMiniprogram.Component.MethodOption,
-    CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-      string,
-      never
-    >,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CustomInstanceProperty extends Record<string, any> = {},
     IsPage extends boolean = false
   >(
     options: ComponentOptions<
@@ -169,16 +166,16 @@ export interface ComponentConstructor {
   ): string;
 }
 
-export type UnknownComponentInstance = ComponentInstance<
+export type TrivalComponentInstance = ComponentInstance<
   Record<string, unknown>,
   Record<string, WechatMiniprogram.Component.AllProperty>,
   Record<string, (...args: unknown[]) => unknown | undefined>
 >;
 
-export type UnknownComponentOptions = ComponentInstance<
+export type TrivalComponentOptions = ComponentInstance<
   Record<string, unknown>,
   Record<string, WechatMiniprogram.Component.AllProperty>,
   Record<string, (...args: unknown[]) => unknown | undefined>
 >;
 
-export type RefMap = Record<string, UnknownComponentInstance>;
+export type RefMap = Record<string, TrivalComponentInstance>;

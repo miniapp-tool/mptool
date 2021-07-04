@@ -4,8 +4,13 @@ import { ON_PAGE_PRELOAD } from "./constant";
 import { routeEmitter, userEmitter } from "./emitter";
 import { getPathDetail, getTrigger } from "./navigator";
 
-import type { ComponentOptions, UnknownComponentInstance } from "./component";
-import type { ExtendedPageMethods, PageInstance, PageOptions } from "./page";
+import type { ComponentOptions, TrivalComponentInstance } from "./component";
+import type {
+  ExtendedPageMethods,
+  PageOptions,
+  PageInstance,
+  TrivialPageInstance,
+} from "./page";
 
 export type NavigatorType =
   | "navigateTo"
@@ -35,10 +40,7 @@ function clickHandlerFactory(
   const route = routeMethods[type];
 
   return function touchHandler(
-    this: PageInstance<
-      WechatMiniprogram.IAnyObject,
-      WechatMiniprogram.IAnyObject
-    >,
+    this: TrivialPageInstance,
     event: WechatMiniprogram.Touch
   ): Promise<void> | void {
     if (event) {
@@ -81,11 +83,11 @@ const back = (delta = 1): void => {
  */
 const getPage = <
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T = Record<string, any>,
+  Data = Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  V = Record<string, any>
->(): WechatMiniprogram.Page.Instance<T, V> =>
-  getCurrentPages().slice(0).pop() as WechatMiniprogram.Page.Instance<T, V>;
+  Custom = Record<string, any>
+>(): PageInstance<Data, Custom> =>
+  getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
 /**
  * 预加载
@@ -100,7 +102,7 @@ const preload = (pageNamewithArg: string): void => {
 };
 
 export function bind(
-  this: UnknownComponentInstance,
+  this: TrivalComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
     id: number;
     event: string;
@@ -112,7 +114,7 @@ export function bind(
   switch (event) {
     // run private attach
     case "_$attached": {
-      const ref = getRef(id) as UnknownComponentInstance | undefined;
+      const ref = getRef(id) as TrivalComponentInstance | undefined;
 
       if (!ref) break;
 
@@ -139,7 +141,7 @@ export function bind(
  * @param ctx 需要挂载页面的指针
  */
 export function mount<Data, Custom>(
-  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods>
+  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>
 ): void;
 
 /**
@@ -151,10 +153,8 @@ export function mount<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends WechatMiniprogram.Component.PropertyOption,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    string,
-    never
-  >,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CustomInstanceProperty extends Record<string, any> = {},
   IsPage extends boolean = false
 >(
   ctx: ComponentOptions<
@@ -164,12 +164,23 @@ export function mount<
     CustomInstanceProperty,
     IsPage
   > &
-    Partial<ExtendedPageMethods>
+    Partial<
+      ExtendedPageMethods<
+        Data & WechatMiniprogram.Component.PropertyOptionToData<Property>,
+        CustomInstanceProperty &
+          Method &
+          (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
+      >
+    >
 ): void;
 
 export function mount(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ctx: Partial<ExtendedPageMethods> & Record<string, any>
+  ctx: Partial<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ExtendedPageMethods<Record<string, any>, Record<string, any>>
+  > &
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Record<string, any>
 ): void {
   ctx.$ = bind;
 

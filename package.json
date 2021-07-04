@@ -31,7 +31,7 @@
     "packages:update": "ncu -u --deep --timeout 600000 && yarn install && yarn upgrade",
     "postinstall": "husky install",
     "release": "ts-node scripts/release.ts",
-    "test": "jest -i"
+    "test": "jest -i && lerna run tsd --stream"
   },
   "lint-staged": {
     "*.{md,yml,json}": [
@@ -85,6 +85,7 @@
     "sort-package-json": "1.50.0",
     "ts-jest": "27.0.3",
     "ts-node": "10.0.0",
+    "tsd": "0.17.0",
     "typescript": "4.3.5"
   }
 }

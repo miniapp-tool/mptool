@@ -88,7 +88,7 @@ export interface ExtendedPageProperties {
   $refs: RefMap;
 }
 
-export interface ExtendedPageMethods extends NavigatorMethods {
+export interface ExtendedPageMethods<Data, Custom> extends NavigatorMethods {
   /**
    * 绑定组件函数
    */
@@ -96,7 +96,7 @@ export interface ExtendedPageMethods extends NavigatorMethods {
   /**
    * 获取当前页面实例。
    */
-  $currentPage(): PageInstance;
+  $currentPage(): PageInstance<Data, Custom>;
 
   /**
    * 获得页面简称
@@ -114,21 +114,25 @@ export interface ExtendedPageMethods extends NavigatorMethods {
 }
 
 export type PageInstance<
-  Data = WechatMiniprogram.IAnyObject,
-  Custom = WechatMiniprogram.IAnyObject
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Data extends Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Custom extends Record<string, any>
 > = WechatMiniprogram.OptionalInterface<
   WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles
 > &
   WechatMiniprogram.Page.InstanceProperties &
   WechatMiniprogram.Page.InstanceMethods<Data> &
-  ExtendedPageMethods &
+  ExtendedPageMethods<Data, Custom> &
   ExtendedPageProperties &
   WechatMiniprogram.Page.Data<Data> &
   Custom;
 
 export type PageOptions<
-  Data = WechatMiniprogram.IAnyObject,
-  Custom = WechatMiniprogram.IAnyObject
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Data extends Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Custom extends Record<string, any>
 > = (Custom &
   Partial<WechatMiniprogram.Page.Data<Data>> &
   Partial<WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles> &
@@ -137,10 +141,28 @@ export type PageOptions<
   }) &
   ThisType<PageInstance<Data, Custom>>;
 
-export type PageConstructor = <
-  Data = WechatMiniprogram.IAnyObject,
-  Custom = WechatMiniprogram.IAnyObject
->(
-  name: string,
-  options: PageOptions<Data, Custom>
-) => void;
+export interface PageConstructor {
+  <
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Data extends Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Custom extends Record<string, any>
+  >(
+    name: string,
+    options: PageOptions<Data, Custom>
+  ): void;
+}
+
+export type TrivialPageInstance = PageInstance<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>
+>;
+
+export type TrivalPageOptions = PageOptions<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any>
+>;

@@ -19,8 +19,8 @@ export {
   ComponentLifetimes,
   ExtendedComponentProperty,
   ExtendedComponentMethods,
-  UnknownComponentInstance,
-  UnknownComponentOptions,
+  TrivalComponentInstance,
+  TrivalComponentOptions,
   RefMap,
 } from "./component";
 export type {

@@ -1,11 +1,11 @@
-import type { UnknownComponentInstance } from "./typings";
+import type { TrivalComponentInstance } from "./typings";
 
-const componentRefs: Record<number, UnknownComponentInstance> = {};
+const componentRefs: Record<number, TrivalComponentInstance> = {};
 
-export const getRef = (id: number): UnknownComponentInstance =>
+export const getRef = (id: number): TrivalComponentInstance =>
   componentRefs[id];
 
-export const setRef = (id: number, value: UnknownComponentInstance): void => {
+export const setRef = (id: number, value: TrivalComponentInstance): void => {
   componentRefs[id] = value;
 };
 
