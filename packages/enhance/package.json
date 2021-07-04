@@ -35,7 +35,7 @@
     "@mptool/file": "0.0.1-alpha.1",
     "@mptool/shared": "0.0.1-alpha.1",
     "miniprogram-api-typings": "^3.3.2",
-    "rollup": "2.52.3"
+    "rollup": "2.52.7"
   },
   "publishConfig": {
     "access": "public"
