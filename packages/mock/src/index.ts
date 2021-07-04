@@ -321,16 +321,6 @@ logger.warn('key3', 'value3')
   getFileSystemManager: (): any => ({}),
 };
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      wx: typeof miniappMock;
-    }
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-global.wx = miniappMock;
+(global as typeof globalThis & { wx: typeof miniappMock }).wx = miniappMock;
 
 export const wx = miniappMock;
