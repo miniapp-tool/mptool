@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@mptool/mock": "0.0.1-alpha.1",
-    "rollup": "2.52.3"
+    "rollup": "2.52.7"
   },
   "publishConfig": {
     "access": "public"
