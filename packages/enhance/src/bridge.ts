@@ -72,9 +72,8 @@ const bindRelaunch = clickHandlerFactory("reLaunch");
  *
  * @param [delta=1] 后退层数
  */
-const back = (delta = 1): void => {
-  void wx.navigateBack({ delta });
-};
+const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> =>
+  wx.navigateBack({ delta });
 
 /**
  * 获得页面实例

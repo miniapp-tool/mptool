@@ -48,14 +48,14 @@ export const $Page: PageConstructor = <Data, Custom>(
 
       callLog(ON_APP_LAUNCH);
 
-      options.onAppLaunch(
+      void options.onAppLaunch(
         onLaunchOptions as WechatMiniprogram.App.LaunchShowOption
       );
     } else
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
         callLog(ON_APP_LAUNCH);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.onAppLaunch!(onLaunchOptions);
+        void options.onAppLaunch!(onLaunchOptions);
       });
 
     registerLog(ON_APP_LAUNCH);
@@ -94,7 +94,7 @@ export const $Page: PageConstructor = <Data, Custom>(
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog(ON_APP_AWAKE);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.onAwake!(time);
+        void options.onAwake!(time);
       });
       registerLog(ON_APP_AWAKE);
     }

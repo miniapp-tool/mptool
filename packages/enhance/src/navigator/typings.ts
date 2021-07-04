@@ -108,7 +108,7 @@ export interface NavigatorMethods {
    * >click go</button>
    * ```
    */
-  $bindGo(event: WechatMiniprogram.Touch): void;
+  $bindGo(event: WechatMiniprogram.Touch): void | Promise<void>;
 
   /**
    * 点击代理方法，绑定 `$redirect` 逻辑
@@ -127,7 +127,7 @@ export interface NavigatorMethods {
    * >click redirect</button>
    * ```
    */
-  $bindRedirect(event: WechatMiniprogram.Touch): void;
+  $bindRedirect(event: WechatMiniprogram.Touch): void | Promise<void>;
 
   /**
    * 点击代理方法，绑定 `$switch` 逻辑
@@ -146,7 +146,7 @@ export interface NavigatorMethods {
    * >click switch</button>
    * ```
    */
-  $bindSwitch(event: WechatMiniprogram.Touch): void;
+  $bindSwitch(event: WechatMiniprogram.Touch): void | Promise<void>;
 
   /**
    * 点击代理方法，绑定 `$reLaunch` 逻辑。
@@ -166,5 +166,5 @@ export interface NavigatorMethods {
    * >click relaunch</button>
    * ```
    */
-  $bindRelaunch(event: WechatMiniprogram.Touch): void;
+  $bindRelaunch(event: WechatMiniprogram.Touch): void | Promise<void>;
 }
