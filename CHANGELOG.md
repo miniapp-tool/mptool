@@ -1,4 +1,10 @@
-# [](http://mister-hope/miniapp/compare/v0.0.1-alpha.2...v) (2021-07-04)
+# [](http://mister-hope/miniapp/compare/v0.0.1-alpha.3...v) (2021-07-05)
+
+## [0.0.1-alpha.3](http://mister-hope/miniapp/compare/v0.0.1-alpha.2...v0.0.1-alpha.3) (2021-07-05)
+
+### Features
+
+- **enhance:** rebuild props ([323ff5c](http://mister-hope/miniapp/commits/323ff5c637398f4049641e63fa02075efa9987e3))
 
 ## [0.0.1-alpha.2](http://mister-hope/miniapp/compare/v0.0.1-alpha.1...v0.0.1-alpha.2) (2021-07-04)
 
