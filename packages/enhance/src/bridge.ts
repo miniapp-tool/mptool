@@ -4,7 +4,12 @@ import { ON_PAGE_PRELOAD } from "./constant";
 import { routeEmitter, userEmitter } from "./emitter";
 import { getPathDetail, getTrigger } from "./navigator";
 
-import type { ComponentOptions, TrivalComponentInstance } from "./component";
+import type {
+  ComponentOptions,
+  InferPropTypes,
+  PropsOptions,
+  TrivalComponentInstance,
+} from "./component";
 import type {
   ExtendedPageMethods,
   PageOptions,
@@ -150,7 +155,7 @@ export function mount<Data, Custom>(
  */
 export function mount<
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends WechatMiniprogram.Component.PropertyOption,
+  Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomInstanceProperty extends Record<string, any> = {},
@@ -165,7 +170,7 @@ export function mount<
   > &
     Partial<
       ExtendedPageMethods<
-        Data & WechatMiniprogram.Component.PropertyOptionToData<Property>,
+        Data & InferPropTypes<Property>,
         CustomInstanceProperty &
           Method &
           (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})

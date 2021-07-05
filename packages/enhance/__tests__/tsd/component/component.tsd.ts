@@ -9,38 +9,28 @@ $Component({
   properties: {
     myProperty: {
       type: String,
-      value: "",
+      default: "",
     },
     freeType: {
       type: null,
-      value: "d",
+      default: "d",
     },
     myProperty2: String,
     min: {
       type: Number,
-      value: 0,
+      default: 0,
     },
     test: {
       type: String,
-      value: "",
-      observer(n: string, o: string) {
-        n.concat(o);
-      },
+      default: "",
     },
     max: {
       type: Number,
-      value: 0,
-      observer(newVal, oldVal) {
-        expectType<number>(newVal);
-        expectType<number>(oldVal);
-        expectType<void>(this.onMyButtonTap());
-        expectType<number>(this.data.max);
-      },
+      default: 0,
     },
     lastLeaf: {
-      type: Number,
-      optionalTypes: [String, Object],
-      value: 0,
+      type: [String, Object, Number],
+      default: 0,
     },
   },
 
@@ -71,6 +61,7 @@ $Component({
   pageLifetimes: {
     show() {
       // is current component but not the page
+      expectType<string>(this.data.myProperty);
       expectType<string>(this.is);
     },
   },
@@ -169,7 +160,7 @@ $Component({
   properties: {
     a: {
       type: Number,
-      observer: "onAChange",
+      // observer: "onAChange",
       value: 1,
     },
   },

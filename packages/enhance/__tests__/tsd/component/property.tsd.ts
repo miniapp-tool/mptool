@@ -1,24 +1,24 @@
 import { expectType } from "tsd";
-import { $Component } from "../../../src";
+import { $Component, PropType } from "../../../src";
 
 interface Config {
   a: number;
 }
 
-interface ConfigConstructor extends ObjectConstructor {
-  new (value?: any): Config;
-  readonly prototype: Config;
-}
-
 $Component({
   properties: {
     config: {
-      type: Object as ConfigConstructor,
+      type: Object as PropType<Config>,
+    },
+    config2: {
+      type: Object as PropType<Config>,
+      default: { a: 1 },
     },
   },
   methods: {
     doc() {
-      expectType<Record<string, any>>(this.data.config);
+      expectType<Config | undefined>(this.data.config);
+      expectType<Config>(this.data.config2);
     },
   },
   options: {
@@ -31,28 +31,26 @@ $Component({
     n: Number,
     n2: {
       type: Number,
-      value: 1,
+      default: 1,
     },
     s: String,
     a: Array,
     a2: {
       type: Array,
-      value: [1, 2],
+      default: [1, 2],
     },
     b: Boolean,
     o: Object,
   },
   methods: {
     f() {
-      expectType<number>(this.data.n);
+      expectType<number | undefined>(this.data.n);
       expectType<number>(this.data.n2);
-      expectType<string>(this.data.s);
-      expectType<any[]>(this.data.a);
+      expectType<string | undefined>(this.data.s);
+      expectType<any[] | undefined>(this.data.a);
       expectType<any[]>(this.data.a2);
-      expectType<boolean>(this.data.b);
-      expectType<Record<string, any>>(this.data.o);
-      expectType<any>(this.data.a[0]);
-      expectType<any>(this.data.o.prop);
+      expectType<boolean | undefined>(this.data.b);
+      expectType<Record<string, any> | undefined>(this.data.o);
     },
   },
 });
@@ -62,19 +60,19 @@ $Component({
     n: Number,
     n2: {
       type: Number,
-      value: 1,
+      default: 1,
     },
     s: String,
     a: Array,
     a2: {
       type: Array,
-      value: [1, 2],
+      default: [1, 2],
     },
     b: Boolean,
     o: Object,
     o2: {
       type: Object,
-      value: {} as Record<string, any>,
+      default: {} as Record<string, any>,
     },
   },
   methods: {
@@ -84,17 +82,15 @@ $Component({
     },
     f() {
       expectType<string>(this.g());
-      expectType<number>(this.data.n);
+      expectType<number | undefined>(this.data.n);
       expectType<number>(this.data.n2);
-      expectType<string>(this.data.s);
-      expectType<any[]>(this.data.a);
+      expectType<string | undefined>(this.data.s);
+      expectType<any[] | undefined>(this.data.a);
       expectType<any[]>(this.data.a2);
-      expectType<boolean>(this.data.b);
-      expectType<Record<string, any>>(this.data.o);
+      expectType<boolean | undefined>(this.data.b);
+      expectType<Record<string, any> | undefined>(this.data.o);
       expectType<Record<string, any>>(this.data.o2);
       expectType<any>(this.data.o2.city);
-      expectType<any>(this.data.a[0]);
-      expectType<any>(this.data.o.prop);
     },
   },
 });
@@ -103,11 +99,11 @@ $Component({
   properties: {
     n: {
       type: Number,
-      value: 1,
+      default: 1,
     },
     a: {
       type: Array,
-      value: [1, 2],
+      default: [1, 2],
     },
   },
   methods: {
@@ -125,8 +121,8 @@ $Component({
   },
   methods: {
     f() {
-      expectType<number>(this.data.n);
-      expectType<any[]>(this.data.a);
+      expectType<number | undefined>(this.data.n);
+      expectType<any[] | undefined>(this.data.a);
     },
   },
 });

@@ -1,4 +1,90 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ExtendedPageMethods, TrivialPageInstance } from "../page";
+
+export type Props = Record<string, unknown>;
+
+export type PropsOptions<Property = Props> = {
+  [K in keyof Property]: PropItem<Property[K]> | null;
+};
+
+export type PropItem<Type, Default = Type> =
+  | PropOption<Type, Default>
+  | PropConstructor<Type>;
+
+export interface PropOption<Type = any, Default = Type> {
+  /** 属性类型 */
+  type?: PropType<Type> | null;
+  /**
+   * 是否必填
+   *
+   * @description 仅用作类型推导，无检查
+   */
+  required?: boolean;
+  /** 属性初始值 */
+  default?: Default | null | undefined | object;
+}
+
+type PropMethod<Type, TypeConstructor = any> = Type extends (
+  ...args: any
+) => any
+  ? // if is function with args
+    { new (): TypeConstructor; (): Type; readonly prototype: TypeConstructor } // Create Function like constructor
+  : never;
+
+type PropConstructor<Type = any> =
+  | { new (...args: any[]): Type & {} }
+  | { (): Type }
+  | PropMethod<Type>;
+
+export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
+
+export type InferFromType<Type> = [Type] extends [null]
+  ? any // null would fail to infer
+  : [Type] extends [ArrayConstructor]
+  ? any[]
+  : [Type] extends [ObjectConstructor]
+  ? Record<string, any>
+  : [Type] extends [BooleanConstructor]
+  ? boolean
+  : [Type] extends [PropConstructor<infer V>]
+  ? unknown extends V
+    ? // fail to infer
+      any
+    : V
+  : Type;
+
+type RequiredKeys<T> = {
+  [K in keyof T]: T[K] extends { required: true } | { default: any }
+    ? T[K] extends { default: undefined | (() => undefined) }
+      ? never
+      : K
+    : never;
+}[keyof T];
+
+type OptionalKeys<Type> = Exclude<keyof Type, RequiredKeys<Type>>;
+
+export type InferPropType<Type> = [Type] extends [null]
+  ? any // null would fail to infer
+  : [Type] extends [{ type: null }]
+  ? any // As TS issue https://github.com/Microsoft/TypeScript/issues/14829 // somehow `ObjectConstructor` when inferred from { (): T } becomes `any` // `BooleanConstructor` when inferred from PropConstructor(with PropMethod) becomes `Boolean`
+  : [Type] extends [ArrayConstructor | { type: ArrayConstructor }]
+  ? any[]
+  : [Type] extends [ObjectConstructor | { type: ObjectConstructor }]
+  ? Record<string, any>
+  : [Type] extends [BooleanConstructor | { type: BooleanConstructor }]
+  ? boolean
+  : [Type] extends [PropItem<infer Value, infer Default>]
+  ? unknown extends Value
+    ? Default
+    : Value
+  : Type;
+
+export type InferPropTypes<O> = O extends object
+  ? { [K in keyof O]?: unknown } & // This is needed to keep the relation between the option prop and the props, allowing to use ctrl+click to navigate to the prop options. see: #3656
+      { [K in RequiredKeys<O>]: InferPropType<O[K]> } &
+      { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
+  : { [K in string]: any };
 
 export interface ComponentLifetimes {
   /** 组件生命周期声明对象 */
@@ -106,7 +192,7 @@ export interface ExtendedComponentMethods {
 
 export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends WechatMiniprogram.Component.PropertyOption,
+  Property extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomInstanceProperty extends Record<string, any> = {},
@@ -119,27 +205,29 @@ export type ComponentInstance<
   CustomInstanceProperty &
   ExtendedComponentProperty &
   ExtendedPageMethods<
-    Data & WechatMiniprogram.Component.PropertyOptionToData<Property>,
+    Data & InferPropTypes<Property>,
     CustomInstanceProperty &
       Method &
       (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
   > & {
     /** 组件数据，**包括内部数据和属性值** */
-    data: Data & WechatMiniprogram.Component.PropertyOptionToData<Property>;
+    data: Data & InferPropTypes<Property>;
     /** 组件数据，**包括内部数据和属性值**（与 `data` 一致） */
-    properties: Data &
-      WechatMiniprogram.Component.PropertyOptionToData<Property>;
+    properties: Data & InferPropTypes<Property>;
   };
 
 export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends WechatMiniprogram.Component.PropertyOption,
+  Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomInstanceProperty extends Record<string, any> = {},
   IsPage extends boolean = false
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
-  Partial<WechatMiniprogram.Component.Property<Property>> &
+  Partial<{
+    /** 组件属性 */
+    properties: Property;
+  }> &
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
   Partial<ComponentLifetimes> &
@@ -150,7 +238,7 @@ export type ComponentOptions<
 export interface ComponentConstructor {
   <
     Data extends WechatMiniprogram.Component.DataOption,
-    Property extends WechatMiniprogram.Component.PropertyOption,
+    Property extends PropsOptions,
     Method extends WechatMiniprogram.Component.MethodOption,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     CustomInstanceProperty extends Record<string, any> = {},
@@ -167,15 +255,15 @@ export interface ComponentConstructor {
 }
 
 export type TrivalComponentInstance = ComponentInstance<
-  Record<string, unknown>,
-  Record<string, WechatMiniprogram.Component.AllProperty>,
-  Record<string, (...args: unknown[]) => unknown | undefined>
+  Record<string, any>,
+  Record<string, null>,
+  Record<string, (...args: unknown[]) => any>
 >;
 
 export type TrivalComponentOptions = ComponentInstance<
-  Record<string, unknown>,
-  Record<string, WechatMiniprogram.Component.AllProperty>,
-  Record<string, (...args: unknown[]) => unknown | undefined>
+  Record<string, any>,
+  Record<string, null>,
+  Record<string, (...args: any[]) => any>
 >;
 
 export type RefMap = Record<string, TrivalComponentInstance>;

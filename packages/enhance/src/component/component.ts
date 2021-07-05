@@ -9,10 +9,62 @@ import type {
   ComponentConstructor,
   ComponentInstance,
   ComponentOptions,
+  PropsOptions,
   TrivalComponentInstance,
 } from "./typings";
+import { TrivalComponentOptions } from ".";
 
 let componentIndex = 0;
+
+export const handleProperties = (
+  props: PropsOptions = {}
+): WechatMiniprogram.Component.PropertyOption => {
+  const properties: WechatMiniprogram.Component.PropertyOption = {};
+
+  Object.keys(props).forEach((propertyName) => {
+    const vueSyntaxValue = props[propertyName];
+
+    // Constructor or null
+    if (vueSyntaxValue === null || typeof vueSyntaxValue === "function")
+      properties[propertyName] =
+        vueSyntaxValue as WechatMiniprogram.Component.ShortProperty;
+    else {
+      const { type } = vueSyntaxValue;
+
+      // null type
+      if (type === null)
+        properties[propertyName] = {
+          type: null,
+          value: vueSyntaxValue.default,
+        };
+      // array type, should push rest into `optionalTypes`
+      else if (Array.isArray(type))
+        // array type syntax
+        properties[propertyName] = {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          type: type[0],
+          value: vueSyntaxValue.default,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          optionalTypes: type.slice(1),
+        };
+      else
+        properties[propertyName] = {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          type,
+          value: vueSyntaxValue.default,
+        };
+    }
+  });
+
+  return {
+    ...properties,
+    // add ref
+    ref: { type: String, value: "" },
+  };
+};
 
 /**
  * 组件注册器
@@ -21,7 +73,7 @@ let componentIndex = 0;
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends WechatMiniprogram.Component.PropertyOption,
+  Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomInstanceProperty extends Record<string, any> = {},
@@ -38,14 +90,16 @@ export const $Component: ComponentConstructor = <
   // extend page config
   const { extendComponent, injectComponent } = getConfig();
 
-  if (extendComponent) extendComponent(options as TrivalComponentInstance);
+  if (extendComponent)
+    extendComponent(options as unknown as TrivalComponentOptions);
 
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
 
   options.lifetimes.created = mergeFunction(() => {
     mount(options);
-    if (injectComponent) injectComponent(options as TrivalComponentInstance);
+    if (injectComponent)
+      injectComponent(options as unknown as TrivalComponentOptions);
   }, options.lifetimes.created);
 
   options.lifetimes.attached = mergeFunction(
@@ -94,14 +148,6 @@ export const $Component: ComponentConstructor = <
     },
     options.lifetimes.detached
   );
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  options.properties = {
-    ...options.properties,
-    // add ref
-    ref: { type: String, value: "" },
-  };
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -169,5 +215,16 @@ export const $Component: ComponentConstructor = <
     },
   };
 
-  return Component(options);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  options.properties = handleProperties(options.properties);
+
+  // we cast properties into syntax that miniprogram can handle
+  return Component(
+    options as unknown as WechatMiniprogram.Component.Options<
+      Data,
+      WechatMiniprogram.Component.PropertyOption,
+      Method
+    >
+  );
 };

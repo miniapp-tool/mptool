@@ -22,6 +22,7 @@ export {
   TrivalComponentInstance,
   TrivalComponentOptions,
   RefMap,
+  PropType,
 } from "./component";
 export type {
   Emitter,
