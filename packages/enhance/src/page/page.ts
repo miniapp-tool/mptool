@@ -46,57 +46,57 @@ export const $Page: PageConstructor = <Data, Custom>(
     if (appState.launch) {
       const { lOpt: onLaunchOptions } = appState;
 
-      callLog(ON_APP_LAUNCH);
+      callLog("onAppLaunch");
 
       void options.onAppLaunch(
         onLaunchOptions as WechatMiniprogram.App.LaunchShowOption
       );
     } else
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
-        callLog(ON_APP_LAUNCH);
+        callLog("onAppLaunch");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         void options.onAppLaunch!(onLaunchOptions);
       });
 
-    registerLog(ON_APP_LAUNCH);
+    registerLog("onAppLaunch");
   }
 
   if (options.onNavigate) {
     routeEmitter.on(
       `${ON_PAGE_NAVIGATE}:${name}`,
       (query: PageQuery): Promise<void> | void => {
-        callLog(ON_PAGE_NAVIGATE, query);
+        callLog("onNavigate", query);
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onNavigate!(query);
       }
     );
 
-    registerLog(ON_PAGE_NAVIGATE);
+    registerLog("onNavigate");
   }
 
   if (options.onPreload) {
     routeEmitter.on(
       `${ON_PAGE_PRELOAD}:${name}`,
       (query: PageQuery): void | Promise<void> => {
-        callLog(ON_PAGE_PRELOAD, query);
+        callLog("onPreload", query);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onPreload!(query);
       }
     );
 
-    registerLog(ON_PAGE_PRELOAD);
+    registerLog("onPreload");
   }
 
   options.onLoad = mergeFunction((): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
-        callLog(ON_APP_AWAKE);
+        callLog("onAwake");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         void options.onAwake!(time);
       });
-      registerLog(ON_APP_AWAKE);
+      registerLog("onAwake");
     }
 
     if (!hasPageLoaded) {

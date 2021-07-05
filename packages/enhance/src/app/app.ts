@@ -57,7 +57,7 @@ export const $App: AppConstructor = <Custom extends Record<string, any>>(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       appOptions.onAwake!(time);
     });
-    logger.debug(`App: registered ${ON_APP_AWAKE}`);
+    logger.debug("App: registered onAwake");
   }
 
   appOptions.$emitter = userEmitter;
