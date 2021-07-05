@@ -6,12 +6,10 @@ $Component({
     created() {
       console.log("[Component/Nav] created");
       console.log("[Component/Nav] properties:", this.properties);
-      console.log("[Component/Nav] is:", this.properties);
+      console.log("[Component/Nav] is:", this.is);
     },
     attached() {
       console.log("[Component/Nav] attached");
-      console.log("[Component/Nav] properties:", this.properties);
-      console.log("[Component/Nav] is:", this.properties);
       console.log("[Component/Nav] $root:", this.$root);
       console.log("[Component/Nav] $parent:", this.$parent);
     },

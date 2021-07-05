@@ -6,12 +6,10 @@ $Component({
     created(): void {
       console.log("[Component/Header] created");
       console.log("[Component/Header] properties:", this.properties);
-      console.log("[Component/Header] is:", this.properties);
+      console.log("[Component/Header] is:", this.is);
     },
     attached(): void {
       console.log("[Component/Header] attached");
-      console.log("[Component/Header] properties:", this.properties);
-      console.log("[Component/Header] is:", this.properties);
       console.log("[Component/Header] $root:", this.$root);
       console.log("[Component/Header] $parent:", this.$parent);
     },
