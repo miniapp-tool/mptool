@@ -9,8 +9,7 @@ $Page("channel", {
     console.log("[pages/channel] appLaunch:", opts);
   },
   onPreload(res) {
-    console.log("[pages/channel] preload:", res);
-    console.log("This", this);
+    console.log("[pages/channel] preload:", res, this);
 
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -20,8 +19,7 @@ $Page("channel", {
     });
   },
   onNavigate(res) {
-    console.log("[pages/channel] navigating:", res);
-    console.log("This", this);
+    console.log("[pages/channel] navigating:", res, this);
 
     return new Promise((resolve) => {
       setTimeout(() => {

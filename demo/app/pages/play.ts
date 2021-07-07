@@ -6,20 +6,16 @@ $Page("play", {
     test: "play",
   },
   onPageLaunch() {
-    console.log("[pages/play] page launch");
-    console.log("This", this);
+    console.log("[pages/play] page launch", this);
   },
   onAppLaunch(opts) {
-    console.log("[pages/play] appLaunch:", opts);
-    console.log("This", this);
+    console.log("[pages/play] appLaunch:", opts, this);
   },
   onPreload(res) {
-    console.log("[pages/play] preload:", res);
-    console.log("This", this);
+    console.log("[pages/play] preload:", res, this);
   },
   onNavigate(res) {
-    console.log("[pages/play] navigating:", res);
-    console.log("This", this);
+    console.log("[pages/play] navigating:", res, this);
   },
   onLoad(res) {
     console.log("[pages/play] onLoad:", res);

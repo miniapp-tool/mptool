@@ -19,7 +19,6 @@ $App({
     });
   },
   onAwake(time) {
-    console.log(`App awake after ${time}ms`);
-    console.log("This", this);
+    console.log(`App awake after ${time}ms`, this);
   },
 });
