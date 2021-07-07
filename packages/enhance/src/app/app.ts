@@ -1,7 +1,7 @@
 import { logger } from "@mptool/shared";
 import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
 import { appEmitter, userEmitter } from "../emitter";
-import { mergeFunction } from "../utils";
+import { wrapFunction } from "../utils";
 
 import type { AppConstructor, AppOptions } from "./typings";
 
@@ -46,9 +46,9 @@ const appHideHandler = (): void => {
 export const $App: AppConstructor = <Custom extends Record<string, any>>(
   appOptions: AppOptions<Custom>
 ): void => {
-  appOptions.onLaunch = mergeFunction(appLaunchHandler, appOptions.onLaunch);
-  appOptions.onShow = mergeFunction(appShowHandler, appOptions.onShow);
-  appOptions.onHide = mergeFunction(appHideHandler, appOptions.onHide);
+  appOptions.onLaunch = wrapFunction(appOptions.onLaunch, appLaunchHandler);
+  appOptions.onShow = wrapFunction(appOptions.onShow, appShowHandler);
+  appOptions.onHide = wrapFunction(appOptions.onHide, appHideHandler);
 
   // 注册 onAwake 监听
   if (appOptions.onAwake) {

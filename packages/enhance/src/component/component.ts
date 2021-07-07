@@ -3,7 +3,7 @@ import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
 import { TrivialPageInstance } from "../page";
-import { mergeFunction } from "../utils";
+import { wrapFunction } from "../utils";
 
 import type {
   ComponentConstructor,
@@ -96,13 +96,14 @@ export const $Component: ComponentConstructor = <
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
 
-  options.lifetimes.created = mergeFunction(() => {
+  options.lifetimes.created = wrapFunction(options.lifetimes.created, () => {
     mount(options);
     if (injectComponent)
       injectComponent(options as unknown as TrivalComponentOptions);
-  }, options.lifetimes.created);
+  });
 
-  options.lifetimes.attached = mergeFunction(
+  options.lifetimes.attached = wrapFunction(
+    options.lifetimes.attached,
     // set id and save ref
     function (
       this: ComponentInstance<
@@ -120,11 +121,11 @@ export const $Component: ComponentConstructor = <
       this.$refID = this.properties.ref as string;
 
       this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
-    },
-    options.lifetimes.attached
+    }
   );
 
-  options.lifetimes.detached = mergeFunction(
+  options.lifetimes.detached = wrapFunction(
+    options.lifetimes.detached,
     // remove saved ref
     function (
       this: ComponentInstance<
@@ -145,8 +146,7 @@ export const $Component: ComponentConstructor = <
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       delete this.$parent;
-    },
-    options.lifetimes.detached
+    }
   );
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

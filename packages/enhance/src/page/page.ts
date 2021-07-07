@@ -12,7 +12,7 @@ import {
 } from "../constant";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../emitter";
-import { mergeFunction } from "../utils";
+import { wrapFunction } from "../utils";
 
 import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 
@@ -32,10 +32,7 @@ export const $Page: PageConstructor = <Data, Custom>(
   // extend page config
   if (extendPage) extendPage(name, options);
 
-  /*
-   * mixin component defs
-   * C.use(option, option.comps, `Page[${name}]`, emitter)
-   */
+  options.$name = name;
 
   options.$state = {
     /** 是否是首个启动页面 */
@@ -88,7 +85,7 @@ export const $Page: PageConstructor = <Data, Custom>(
     registerLog("onPreload");
   }
 
-  options.onLoad = mergeFunction((): void => {
+  options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
@@ -104,16 +101,14 @@ export const $Page: PageConstructor = <Data, Custom>(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       options.$state!.firstOpen = true;
     }
-  }, options.onLoad);
+  });
 
-  options.onReady = mergeFunction(
-    () => appEmitter.emit(ON_PAGE_READY),
-    options.onReady
+  options.onReady = wrapFunction(options.onReady, () =>
+    appEmitter.emit(ON_PAGE_READY)
   );
 
-  options.onUnload = mergeFunction(
-    () => appEmitter.emit(ON_PAGE_UNLOAD),
-    options.onUnload
+  options.onUnload = wrapFunction(options.onUnload, () =>
+    appEmitter.emit(ON_PAGE_UNLOAD)
   );
 
   mount(options);
