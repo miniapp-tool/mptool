@@ -7,6 +7,7 @@
     "demo:dev": "tsc -w"
   },
   "devDependencies": {
-    "miniprogram-api-typings": "^3.3.2"
+    "miniprogram-api-typings": "3.3.2",
+    "typescript": "4.3.5"
   }
 }

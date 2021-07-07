@@ -46,6 +46,7 @@ $Page("index", {
 
   onAwake(time) {
     console.log("[pages/index] Awake after:", time);
+    console.log("This:", this);
   },
 
   onClickBefore() {
