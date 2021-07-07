@@ -1,3 +1,11 @@
+# [](http://mister-hope/miniapp/compare/v0.0.1-alpha.5...v) (2021-07-07)
+
+## [0.0.1-alpha.5](http://mister-hope/miniapp/compare/v0.0.1-alpha.4...v0.0.1-alpha.5) (2021-07-07)
+
+### Bug Fixes
+
+- **enhance:** fix wrapper function ([8106b12](http://mister-hope/miniapp/commits/8106b127708f07697bdbed9adc63c0551511cd32))
+
 ## [0.0.1-alpha.4](http://mister-hope/miniapp/compare/v0.0.1-alpha.3...v0.0.1-alpha.4) (2021-07-07)
 
 ### Bug Fixes
