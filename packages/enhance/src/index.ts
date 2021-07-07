@@ -36,6 +36,7 @@ export type {
 export type {
   PageConstructor,
   PageOptions,
+  PageInstance,
   PageQuery,
   PageState,
 } from "./page";
