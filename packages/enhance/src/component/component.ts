@@ -96,11 +96,22 @@ export const $Component: ComponentConstructor = <
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
 
-  options.lifetimes.created = wrapFunction(options.lifetimes.created, () => {
-    mount(options);
-    if (injectComponent)
-      injectComponent(options as unknown as TrivalComponentOptions);
-  });
+  options.lifetimes.created = wrapFunction(
+    options.lifetimes.created,
+    function init(
+      this: ComponentInstance<
+        Data,
+        Property,
+        Method,
+        CustomInstanceProperty,
+        IsPage
+      >
+    ) {
+      mount(this);
+      if (injectComponent)
+        injectComponent(options as unknown as TrivalComponentOptions);
+    }
+  );
 
   options.lifetimes.attached = wrapFunction(
     options.lifetimes.attached,
