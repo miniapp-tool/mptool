@@ -1,4 +1,8 @@
-# [](http://mister-hope/miniapp/compare/v0.0.1-alpha.3...v) (2021-07-05)
+## [0.0.1-alpha.4](http://mister-hope/miniapp/compare/v0.0.1-alpha.3...v0.0.1-alpha.4) (2021-07-07)
+
+### Bug Fixes
+
+- **enhance:** export missing instance ([a9fed55](http://mister-hope/miniapp/commits/a9fed55b634cf2ab81df8eea804e5b87f9efc5d7))
 
 ## [0.0.1-alpha.3](http://mister-hope/miniapp/compare/v0.0.1-alpha.2...v0.0.1-alpha.3) (2021-07-05)
 
