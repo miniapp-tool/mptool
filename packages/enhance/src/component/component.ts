@@ -2,6 +2,7 @@ import { logger } from "@mptool/shared";
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
+import { userEmitter } from "../emitter";
 import { TrivialPageInstance } from "../page";
 import { wrapFunction } from "../utils";
 
@@ -201,6 +202,7 @@ export const $Component: ComponentConstructor = <
       this.$root = (parent as TrivalComponentInstance).$root || parent;
       this.$parent = parent;
     },
+    $emitter: userEmitter,
     $: bind,
   };
 
