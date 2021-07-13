@@ -1,4 +1,4 @@
-import emitter from "./emitter";
+import { $Emitter } from "./emitter";
 import {
   ON_APP_LAUNCH,
   ON_APP_AWAKE,
@@ -18,13 +18,11 @@ export type AppEventType = {
 
 export type RouteEventType = Record<string, PageQuery>;
 
-export const $Emiiter = emitter;
+export const appEmitter = $Emitter<AppEventType>();
 
-export const appEmitter = emitter<AppEventType>();
-
-export const routeEmitter = emitter<RouteEventType>();
+export const routeEmitter = $Emitter<RouteEventType>();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type UserEmitter = Emitter<Record<string, any>>;
 
-export const userEmitter: UserEmitter = emitter();
+export const userEmitter: UserEmitter = $Emitter();
