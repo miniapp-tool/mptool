@@ -59,7 +59,7 @@ export const rm = (
   path: string,
   type: "dir" | "file" = isDir(path) ? "dir" : "file"
 ): void => {
-  const deleteLog = (): void => logger.error(`Deleted ${path}`);
+  const deleteLog = (): void => logger.debug(`Deleted ${path}`);
   const errorLog = (err: unknown): void =>
     logger.error(`Error deleting ${path}:`, err);
 
