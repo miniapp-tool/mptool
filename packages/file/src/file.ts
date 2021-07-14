@@ -19,29 +19,51 @@ const fileManager = wx.getFileSystemManager();
 /** 用户文件夹路径 */
 const userPath = wx.env.USER_DATA_PATH;
 
+export const dirname = (path: string): string =>
+  path.split("/").slice(0, -1).join("/");
+
+/** 判断文件或文件夹是否存在 */
+export const exists = (path: string): boolean => {
+  try {
+    fileManager.statSync(`${userPath}/${path}`, false);
+
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+/** 是否是文件 */
+export const isFile = (path: string): boolean =>
+  exists(path) &&
+  (
+    fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats
+  ).isFile();
+
+/** 是否是文件夹 */
+export const isDir = (path: string): boolean =>
+  exists(path) &&
+  (
+    fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats
+  ).isDirectory();
+
 /**
  * 删除文件或文件夹
  *
- * @description 传入 `isDir` 可以提升删除性能
+ * @description 传入 `type` 可以略微提升删除性能
  *
  * @param path 要删除的文件或文件夹路径
- * @param isDir 要删除的是否是文件夹
+ * @param type 要删除的类型
  */
-export const rm = (path: string, isDir?: boolean | undefined): void => {
+export const rm = (
+  path: string,
+  type: "dir" | "file" = isDir(path) ? "dir" : "file"
+): void => {
   const deleteLog = (): void => logger.error(`Deleted ${path}`);
   const errorLog = (err: unknown): void =>
     logger.error(`Error deleting ${path}:`, err);
 
-  if (isDir === undefined)
-    try {
-      isDir = (
-        fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats
-      ).isFile();
-    } catch (err) {
-      return errorLog(err);
-    }
-
-  if (isDir)
+  if (type === "dir")
     try {
       fileManager.rmdirSync(`${userPath}/${path}`, true);
       deleteLog();
@@ -55,17 +77,6 @@ export const rm = (path: string, isDir?: boolean | undefined): void => {
     } catch (err) {
       errorLog(err);
     }
-};
-
-/** 判断文件或文件夹是否存在 */
-export const exists = (path: string): boolean => {
-  try {
-    fileManager.statSync(`${userPath}/${path}`, false);
-
-    return true;
-  } catch (err) {
-    return false;
-  }
 };
 
 /** 列出目录下内容 */
