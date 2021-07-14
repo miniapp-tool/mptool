@@ -257,25 +257,20 @@ export const writeFile = <T = unknown>(
 /**
  * 写入 JSON 文件
  *
- * @param path 写入文件的路径，若文件夹不存在会自动创建
- * @param fileName 写入文件的文件名，不含 `.json`
+ * @param path 写入文件的路径，不含 `.json`，若父文件夹不存在会自动创建
+ * @param fileName 写入文件的文件名
  * @param data 写入文件的数据，可接受任意可序列化的数据
  * @param encoding 文件编码选项，默认 `utf-8`
  */
 export const writeJSON = <T = unknown>(
   path: string,
-  fileName: string,
   data: T,
   encoding: FileEncoding = "utf-8"
 ): void => {
   const jsonString = JSON.stringify(data);
 
-  mkdir(path);
-  fileManager.writeFileSync(
-    `${userPath}/${path}/${fileName}.json`,
-    jsonString,
-    encoding
-  );
+  mkdir(dirname(path));
+  fileManager.writeFileSync(`${userPath}/${path}.json`, jsonString, encoding);
 };
 
 /**
