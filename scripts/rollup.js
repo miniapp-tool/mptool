@@ -48,7 +48,7 @@ export const rollupTypescript = (
   {
     input: `./src/${filePath}.ts`,
     output: [{ file: `./lib/${filePath}.d.ts`, format: "esm" }],
-    plugins: [dts()],
+    plugins: [dts({ respectExternal: true })],
     external: dtsExternal,
   },
 ];
