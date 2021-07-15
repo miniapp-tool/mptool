@@ -7,10 +7,10 @@ const realtime = Boolean(wx.getRealtimeLogManager);
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
-  if ((wx.env as Record<string, unknown>).DEBUG as boolean)
-    console.info(...args);
-  if (realtime) log.info("debug", ...args);
-  else (log as WechatMiniprogram.LogManager).debug(...args);
+  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
+    if (realtime) log.info("debug", ...args);
+    else (log as WechatMiniprogram.LogManager).debug(...args);
+  }
 };
 
 /** 写入信息日志 */
