@@ -66,7 +66,7 @@ export interface ExtendedPageProperties {
   /**
    * 事件派发器
    *
-   * 是一个 [mitt](https://github.com/developit/mitt) 实例
+   * 是一个全局共享的 [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
    */
   $emitter: UserEmitter;
 

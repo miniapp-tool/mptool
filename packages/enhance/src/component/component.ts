@@ -12,8 +12,8 @@ import type {
   ComponentOptions,
   PropsOptions,
   TrivalComponentInstance,
+  TrivalComponentOptions,
 } from "./typings";
-import { TrivalComponentOptions } from ".";
 
 let componentIndex = 0;
 

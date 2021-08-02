@@ -141,7 +141,7 @@ $App({
 - `extendComponent(componentOptions)` 用于扩展组件
 - `extendPage(pageOptions)` 用于扩展页面
 
-- `injectPage(componentOptions)` 用于为组件注入，在框架扩展之后执行，这意味着你可以覆盖框架注入的方法。
+- `injectComponent(componentOptions)` 用于为组件注入，在框架扩展之后执行，这意味着你可以覆盖框架注入的方法。
 - `injectPage(pageOptions)` 用于为页面注入，在框架扩展之后执行，这意味着你可以覆盖框架注入的方法。
 
 ## $App
