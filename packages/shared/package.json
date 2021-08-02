@@ -32,11 +32,11 @@
     "dev": "rollup -c -w"
   },
   "dependencies": {
-    "miniprogram-api-typings": "^3.3.2"
+    "miniprogram-api-typings": "^3.4.1"
   },
   "devDependencies": {
     "@mptool/mock": "0.0.1-alpha.13",
-    "rollup": "2.52.7"
+    "rollup": "2.55.1"
   },
   "publishConfig": {
     "access": "public"
