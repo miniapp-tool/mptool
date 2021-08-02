@@ -235,20 +235,18 @@ export const saveOnlineFile = ({
 /**
  * 写入文件
  *
- * @param path 写入文件的路径，若文件夹不存在会自动创建
- * @param fileName 写入文件的文件名
+ * @param path 写入文件的路径，若父文件夹不存在会自动创建
  * @param data 写入文件的数据，可接受任意可序列化的数据或 Buffer
  * @param encoding 文件编码选项，默认 `utf-8` (数据) 或 `binary` (Buffer)
  */
 export const writeFile = <T = unknown>(
   path: string,
-  fileName: string,
   data: T,
   encoding: FileEncoding = data instanceof ArrayBuffer ? "binary" : "utf-8"
 ): void => {
-  mkdir(path);
+  mkdir(dirname(path));
   fileManager.writeFileSync(
-    `${userPath}/${path}/${fileName}`,
+    `${userPath}/${path}`,
     data instanceof ArrayBuffer ? data : JSON.stringify(data),
     encoding
   );
@@ -258,7 +256,6 @@ export const writeFile = <T = unknown>(
  * 写入 JSON 文件
  *
  * @param path 写入文件的路径，不含 `.json`，若父文件夹不存在会自动创建
- * @param fileName 写入文件的文件名
  * @param data 写入文件的数据，可接受任意可序列化的数据
  * @param encoding 文件编码选项，默认 `utf-8`
  */

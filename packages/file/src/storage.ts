@@ -2,7 +2,7 @@ import { logger } from "@mptool/shared";
 
 export interface StorageData<T> {
   data: T;
-  expired: number | "keep" | "once";
+  expired: number;
 }
 
 /** 本次小程序启动的会话 ID */
@@ -30,8 +30,8 @@ export const put = <T = unknown>(key: string, value: T): void => {
  *
  * @returns 值
  */
-export const take = <T = unknown>(key: string): T => {
-  const value = storage[key] as T;
+export const take = <T = unknown>(key: string): T | undefined => {
+  const value = storage[key] as T | undefined;
 
   // release key
   storage[key] = undefined;
@@ -49,18 +49,21 @@ export const take = <T = unknown>(key: string): T => {
  *
  * @returns 返回值
  */
-const getData = <T = unknown>(key: string, value: StorageData<T> | null): T =>
+const getData = <T = unknown>(
+  key: string,
+  value: StorageData<T> | null
+): T | undefined =>
   value
     ? value.expired
       ? value.expired === sessionId || new Date().getTime() < value.expired
         ? // not expired
           value.data
         : // expired
-          (wx.removeStorageSync(`_cache_${key}`), undefined as unknown as T)
+          (wx.removeStorageSync(`_cache_${key}`), undefined)
       : // permanent
         value.data
     : // not exist
-      (undefined as unknown as T);
+      undefined;
 
 const prepareData = <T = unknown>(
   key: string,
@@ -81,15 +84,14 @@ const prepareData = <T = unknown>(
     if (!olddata) return undefined;
 
     // 使用上次过期时间
-    expire = olddata.expired || 0;
-
-    // 仅本次会话有效
-  } else if (expire === "once") expire = sessionId;
-  // 使用 sessionId 计算正确的过期时间戳
-  else expire = expire + new Date().getTime();
-
-  // 写入正确的过期时间
-  data.expired = expire as number;
+    data.expired = olddata.expired || 0;
+  } else
+    data.expired =
+      expire === "once"
+        ? // 仅本次会话有效
+          sessionId
+        : // 计算过期时间
+          expire + new Date().getTime();
 
   return data;
 };
@@ -144,7 +146,7 @@ export const setAync = <T = unknown>(
  *
  * @returns 设置值
  */
-export const get = <T = unknown>(key: string): T =>
+export const get = <T = unknown>(key: string): T | undefined =>
   getData(key, wx.getStorageSync<StorageData<T>>(`_cache_${key}`));
 
 /**
@@ -187,3 +189,51 @@ export const removeAsync = (
   wx.removeStorage({
     key: `_cache_${key}`,
   });
+
+/**
+ * 清除失效数据
+ *
+ * @param key key
+ */
+export const check = (): void => {
+  wx.getStorageInfoSync().keys.forEach((key) => {
+    if (key.startsWith("_cache_")) {
+      const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
+
+      if (
+        !value ||
+        (value.expired !== sessionId && new Date().getTime() >= value.expired)
+      )
+        wx.removeStorageSync(key);
+    }
+  });
+};
+
+/**
+ * 异步清除失效数据
+ *
+ * @param key key
+ */
+export const checkAsync = (): Promise<void[]> =>
+  wx.getStorageInfo().then(({ keys }) =>
+    Promise.all<void>(
+      keys
+        .filter((key) => key.startsWith("_cache_"))
+        .map((key) =>
+          wx
+            .getStorage<StorageData<unknown> | undefined>({ key })
+            .then(({ data }) => {
+              if (
+                !data ||
+                (data.expired !== sessionId &&
+                  new Date().getTime() >= data.expired)
+              )
+                return wx.removeStorage({ key }).then(() => {
+                  // return void
+                });
+
+              return;
+            })
+        )
+    )
+  );
