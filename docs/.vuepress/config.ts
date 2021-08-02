@@ -54,7 +54,7 @@ export default defineUserConfig<DefaultThemeOptions>({
           },
           {
             text: "API",
-            children: ["/api/enhance/index.html", "/api/file.html"],
+            children: ["/api/enhance/index.html", "/api/file/index.html"],
           },
         ],
         sidebar: {
@@ -80,7 +80,10 @@ export default defineUserConfig<DefaultThemeOptions>({
                     "/api/enhance/emitter.md",
                   ],
                 },
-                "/api/file.md",
+                {
+                  text: "File",
+                  children: ["/api/file/file.md", "/api/file/storage.md"],
+                },
               ],
             },
           ],
