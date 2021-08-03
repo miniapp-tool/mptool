@@ -34,7 +34,7 @@
   "devDependencies": {
     "@mptool/file": "0.0.1-alpha.14",
     "@mptool/shared": "0.0.1-alpha.14",
-    "miniprogram-api-typings": "^3.4.1",
+    "miniprogram-api-typings": "^3.4.2",
     "rollup": "2.55.1"
   },
   "publishConfig": {
