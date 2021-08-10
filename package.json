@@ -62,7 +62,7 @@
     "@types/node": "16.4.10",
     "@types/semver": "7.3.8",
     "@typescript-eslint/eslint-plugin": "4.28.5",
-    "@typescript-eslint/parser": "4.28.5",
+    "@typescript-eslint/parser": "4.29.1",
     "chalk": "4.1.2",
     "conventional-changelog-cli": "2.1.1",
     "cross-env": "7.0.3",
