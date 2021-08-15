@@ -6,4 +6,5 @@
 - [$App](app.md)
 - [$Page](page.md)
 - [$Component](component.md)
-- [$Emitter](emitter.md)
+- [Emitter](emitter.md)
+- other utils (TODO)

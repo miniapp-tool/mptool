@@ -1,4 +1,4 @@
-export * as utils from "@mptool/shared";
+export * from "@mptool/shared";
 export { $App } from "./app";
 export { $Config } from "./config";
 export { $Component } from "./component";

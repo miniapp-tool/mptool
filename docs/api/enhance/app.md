@@ -20,7 +20,7 @@
 
 ### $emitter
 
-事件派发器，是一个 [$Emitter](./emitter.md) 实例
+事件派发器，是一个 [Emitter](./emitter.md) 实例
 
 - `$emitter.on(type:string, handler: (event?:any) => void | Promise<void>): void`: 监听 `type` 事件
 

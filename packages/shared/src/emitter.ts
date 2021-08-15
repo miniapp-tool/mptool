@@ -18,7 +18,7 @@ export type EventHandlerMap<Events extends Record<EventType, unknown>> = Map<
   EventHandlerList<Events[keyof Events]> | WildCardEventHandlerList<Events>
 >;
 
-export interface Emitter<Events extends Record<EventType, unknown>> {
+export interface EmitterInstance<Events extends Record<EventType, unknown>> {
   all: EventHandlerMap<Events>;
 
   on<Key extends keyof Events>(type: Key, handler: Handler<Events[Key]>): void;
@@ -45,13 +45,14 @@ export interface Emitter<Events extends Record<EventType, unknown>> {
 }
 
 /**
- * Mitt: Tiny (~300b) functional event emitter / pubsub.
+ * Tiny (~300b) functional event emitter / pubsub.
  * @name emitter
  * @returns Emitter
  */
-export function emitter<Events extends Record<EventType, unknown>>(
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export function Emitter<Events extends Record<EventType, unknown>>(
   all?: EventHandlerMap<Events>
-): Emitter<Events> {
+): EmitterInstance<Events> {
   type GenericEventHandler =
     | Handler<Events[keyof Events]>
     | WildcardHandler<Events>;

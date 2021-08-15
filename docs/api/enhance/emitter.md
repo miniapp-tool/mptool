@@ -1,27 +1,27 @@
-# $Emitter
+# Emitter
 
 - 类型:
 
   ```ts
-  function $Emitter<Events extends Record<EventType, unknown>>(
+  function Emitter<Events extends Record<EventType, unknown>>(
     all?: EventHandlerMap<Events>
-  ): Emitter<Events>;
+  ): EmitterInstance<Events>;
   ```
 
 框架中使用的事件派发器。
 
 ## 创建实例
 
-你需要通过调用 `$Emitter()` 返回一个 Emitter 实例。
+你需要通过调用 `Emitter()` 返回一个 Emitter 实例。
 
 ::: tip
 
-$Emitter 支持在调用时通过泛型传入一个 `Events` 对象来在 TypeScript 下进行类型推导。
+`Emitter` 支持在调用时通过泛型传入一个 `Events` 对象来在 TypeScript 下进行类型推导。
 
 例子
 
 ```ts
-import { $Emitter } from "@mptool/enhance";
+import { Emitter } from "@mptool/enhance";
 
 type Events = {
   foo: string;
@@ -29,7 +29,7 @@ type Events = {
   baz: void;
 };
 
-const emitter = $Emitter<Events>(); // inferred as Emitter<Events>
+const emitter = Emitter<Events>(); // inferred as EmitterInstance<Events>
 
 emitter.on("foo", (e) => {}); // 'e' has inferred type 'string'
 

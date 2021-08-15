@@ -2,7 +2,7 @@
 
 ::: tip
 
-小程序增强框架，大小仅 6.78kB，同时提供完整的 TS 支持。
+小程序增强框架，大小仅 7.56kB，同时提供完整的 TS 支持。
 
 目前支持跨组件、页面通信，页面组件间引用和生命周期扩展
 
@@ -158,7 +158,7 @@ $App({
 
 ### 属性扩展
 
-- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
+- `$emitter`: 事件派发器，是一个 [Emitter](#emitter) 实例
 
 ## 组件和页面通用的跳转方法
 
@@ -665,7 +665,7 @@ $Page("main", {
   - 参数 `method` 为需要调用的方法名称
   - 参数 `args` 为需要传递的参数
 
-- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
+- `$emitter`: 事件派发器，是一个 [emitter](#emitter) 实例
 
 - `$`: 父子组件沟通器
 
@@ -677,18 +677,18 @@ $Page("main", {
 
   :::
 
-## $Emitter
+## Emitter
 
-`$Emitter` 是一个很常规的发布订阅器。
+`Emitter` 是一个很常规的发布订阅器。
 
 我们在 [mitt](https://github.com/developit/mitt) 之上提供了新的 `emitAsync` 方法加入了对 async 函数的支持，可以异步的触发所有的监听器之后触发自身的回调。
 
 ### 使用案例
 
 ```ts
-import { $Emitter } from "@mptool/enhance";
+import { Emitter } from "@mptool/enhance";
 
-const emitter = $Emitter();
+const emitter = Emitter();
 
 // listen to an event
 emitter.on("foo", (e) => console.log("foo", e));
