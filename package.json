@@ -30,7 +30,7 @@
     "packages:check-update": "ncu --deep --timeout 600000",
     "packages:update": "ncu -u --deep --timeout 600000 && yarn install && yarn upgrade",
     "postinstall": "husky install",
-    "release": "ts-node scripts/release.ts",
+    "release": "ts-node scripts/release",
     "test": "jest -i && lerna run tsd --stream"
   },
   "lint-staged": {
