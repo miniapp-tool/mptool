@@ -1,14 +1,14 @@
 {
   "name": "mptool-demo",
-  "version": "0.0.1-alpha.14",
+  "version": "0.0.1-alpha.15",
   "private": true,
   "scripts": {
     "demo:build": "tsc",
     "demo:dev": "tsc -w"
   },
   "dependencies": {
-    "@mptool/enhance": "0.0.1-alpha.14",
-    "@mptool/file": "0.0.1-alpha.14"
+    "@mptool/enhance": "0.0.1-alpha.15",
+    "@mptool/file": "0.0.1-alpha.15"
   },
   "devDependencies": {
     "miniprogram-api-typings": "3.4.2",
