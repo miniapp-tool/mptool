@@ -49,7 +49,7 @@ export interface Emitter<Events extends Record<EventType, unknown>> {
  * @name emitter
  * @returns Emitter
  */
-export function $Emitter<Events extends Record<EventType, unknown>>(
+export function emitter<Events extends Record<EventType, unknown>>(
   all?: EventHandlerMap<Events>
 ): Emitter<Events> {
   type GenericEventHandler =

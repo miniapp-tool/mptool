@@ -1,4 +1,4 @@
-import { logger } from "@mptool/shared";
+import { logger, wrapFunction } from "@mptool/shared";
 
 import { appState } from "../app";
 import { mount } from "../bridge";
@@ -12,7 +12,6 @@ import {
 } from "../constant";
 import { getConfig } from "../config";
 import { appEmitter, routeEmitter } from "../emitter";
-import { wrapFunction } from "../utils";
 
 import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 

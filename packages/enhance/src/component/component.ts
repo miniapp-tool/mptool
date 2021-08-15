@@ -1,10 +1,9 @@
-import { logger } from "@mptool/shared";
+import { logger, wrapFunction } from "@mptool/shared";
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
 import { userEmitter } from "../emitter";
 import { TrivialPageInstance } from "../page";
-import { wrapFunction } from "../utils";
 
 import type {
   ComponentConstructor,

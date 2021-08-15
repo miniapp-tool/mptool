@@ -1,10 +1,19 @@
+export * as utils from "@mptool/shared";
 export { $App } from "./app";
 export { $Config } from "./config";
 export { $Component } from "./component";
-export { $Emitter, userEmitter as emitter } from "./emitter";
+export { userEmitter as emitter } from "./emitter";
 export { $Page } from "./page";
-export { logger } from "@mptool/shared";
 
+export type {
+  Emitter,
+  EventHandlerList,
+  EventHandlerMap,
+  EventType,
+  Handler,
+  WildCardEventHandlerList,
+  WildcardHandler,
+} from "@mptool/shared";
 export type {
   AppConstructor,
   AppInstance,
@@ -25,15 +34,6 @@ export {
   RefMap,
   PropType,
 } from "./component";
-export type {
-  Emitter,
-  EventHandlerList,
-  EventHandlerMap,
-  EventType,
-  Handler,
-  WildCardEventHandlerList,
-  WildcardHandler,
-} from "./emitter";
 export type {
   PageConstructor,
   PageOptions,

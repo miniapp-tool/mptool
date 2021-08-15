@@ -1,7 +1,6 @@
-import { logger } from "@mptool/shared";
+import { logger, wrapFunction } from "@mptool/shared";
 import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
 import { appEmitter, userEmitter } from "../emitter";
-import { wrapFunction } from "../utils";
 
 import type { AppConstructor, AppOptions } from "./typings";
 
