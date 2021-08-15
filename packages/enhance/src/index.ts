@@ -40,4 +40,6 @@ export type {
   PageInstance,
   PageQuery,
   PageState,
+  TrivalPageOptions,
+  TrivialPageInstance,
 } from "./page";
