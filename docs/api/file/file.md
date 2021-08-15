@@ -207,28 +207,20 @@
 - 类型:
 
   ```ts
-  function saveOnlineFile(options: SaveOnlineFileOption): void;
+  function saveOnlineFile(
+    onlinePath: string,
+    targetPath: string
+  ): Promise<void>;
   ```
 
 - 参数:
 
-  ```ts
-  /** 保存在线文件选项接口 */
-  export interface SaveOnlineFileOption {
-    /** 在线文件路径 */
-    onlinePath: string;
-    /** 本地保存路径 */
-    savePath: string;
-    /** 本地保存文件名 */
-    saveName: string;
-    /** 成功回调函数 */
-    success?: (path: string) => void;
-    /** 失败回调函数 */
-    fail?: (errMsg: WechatMiniprogram.GeneralCallbackResult) => void;
-    /** 状态码错误回调函数 */
-    error?: (statusCode: number) => void;
-  }
-  ```
+  - `onlinePath`: 在线文件路径
+  - `targetPath`: 目标文件路径
+
+- 返回值:
+
+  当保存失败时，`err` 为文字格式的失败消息或数字格式的非 `200` 状态码
 
 将在线文件保存到本地指定位置 (会自动创建本地保存文件夹与文件)。
 
@@ -237,17 +229,16 @@
 - 类型:
 
   ```ts
-  function unzip(
-    path: string,
-    unzipPath: string,
-    successFunc?: () => void
-  ): void;
+  function unzip(zipFilePath: string, targetPath: string): Promise<void>;
   ```
 
 - 参数:
 
-  - `path`: 待解压的压缩文件路径
-  - `unzipPath`: 解压到的目录 (你无需关注它是否已经存在)
-  - `successFunc`: 解压成功的回调函数
+  - `zipFilePath`: 待解压的压缩文件路径
+  - `targetPath`: 解压到的目录 (你无需关注它是否已经存在)
+
+- 返回值:
+
+  当解压失败时，`err` 为文字格式的失败消息
 
 将缓存文件保存到本地文件存储。

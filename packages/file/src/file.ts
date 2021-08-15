@@ -181,54 +181,38 @@ export const saveFile = (tempFilePath: string, path: string): void => {
   }
 };
 
-/** 保存在线文件选项接口 */
-export interface SaveOnlineFileOption {
-  /** 在线文件路径 */
-  onlinePath: string;
-  /** 本地保存路径 */
-  savePath: string;
-  /** 本地保存文件名 */
-  saveName: string;
-  /** 成功回调函数 */
-  success?: (path: string) => void;
-  /** 失败回调函数 */
-  fail?: (errMsg: WechatMiniprogram.GeneralCallbackResult) => void;
-  /** 状态码错误回调函数 */
-  error?: (statusCode: number) => void;
-}
-
 /**
  * 保存在线文件
  *
- * @param options 配置
+ * @param onlinePath 在线文件路径
+ * @param localPath 本地保存路径
  */
-export const saveOnlineFile = ({
-  onlinePath,
-  savePath,
-  saveName,
-  success,
-  fail,
-  error: errorFunc,
-}: SaveOnlineFileOption): void => {
-  mkdir(savePath);
-  wx.downloadFile({
-    url: onlinePath,
-    filePath: `${userPath}/${savePath}/${saveName}`,
-    success: (res) => {
-      if (res.statusCode === 200) {
-        logger.info(`${onlinePath} saved`);
-        if (success) success(res.tempFilePath);
-      } else {
-        logger.error(
-          `Download ${onlinePath} failed with statusCode ${res.statusCode}`
-        );
-        if (errorFunc) errorFunc(res.statusCode);
-      }
-    },
-    fail: (failMsg) => {
-      logger.error(`Download ${onlinePath} failed:`, failMsg);
-      if (fail) fail(failMsg);
-    },
+export const saveOnlineFile = (
+  onlinePath: string,
+  localPath: string
+): Promise<string> => {
+  mkdir(dirname(localPath));
+
+  return new Promise((resolve, reject) => {
+    wx.downloadFile({
+      url: onlinePath,
+      filePath: `${userPath}/${localPath}`,
+      success: (res) => {
+        if (res.statusCode === 200) {
+          logger.info(`${onlinePath} saved`);
+          resolve(res.tempFilePath);
+        } else {
+          logger.error(
+            `Download ${onlinePath} failed with statusCode ${res.statusCode}`
+          );
+          reject(res.statusCode);
+        }
+      },
+      fail: (failMsg) => {
+        logger.error(`Download ${onlinePath} failed:`, failMsg);
+        reject(failMsg);
+      },
+    });
   });
 };
 
@@ -273,23 +257,21 @@ export const writeJSON = <T = unknown>(
 /**
  * 解压文件
  *
- * @param path 压缩文件路径
- * @param unzipPath 解压路径
+ * @param zipFilePath 压缩文件路径
+ * @param targetPath 解压路径
  * @param successFunc 回调函数
  */
-export const unzip = (
-  path: string,
-  unzipPath: string,
-  successFunc?: () => void
-): void => {
-  fileManager.unzip({
-    zipFilePath: `${userPath}/${path}`,
-    targetPath: `${userPath}/${unzipPath}`,
-    success: () => {
-      if (successFunc) successFunc();
-    },
-    fail: (failMsg) => {
-      logger.error(`Unzip ${path} failed:`, failMsg);
-    },
+export const unzip = (zipFilePath: string, targetPath: string): Promise<void> =>
+  new Promise((resolve, reject) => {
+    fileManager.unzip({
+      zipFilePath: `${userPath}/${zipFilePath}`,
+      targetPath: `${userPath}/${targetPath}`,
+      success: () => {
+        resolve();
+      },
+      fail: (failMsg) => {
+        logger.error(`Unzip ${zipFilePath} failed:`, failMsg);
+        reject();
+      },
+    });
   });
-};

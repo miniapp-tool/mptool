@@ -82,27 +82,12 @@
   - `tempFilePath`: 缓存文件路径
   - `path`: 保存文件路径
 
-- `saveOnlineFile(options: SaveOnlineFileOption)`
+- `saveOnlineFile(onlinePath, localPath): Promise<void>`
 
   将在线文件保存到本地指定位置
 
-  ```ts
-  /** 保存在线文件选项接口 */
-  export interface SaveOnlineFileOption {
-    /** 在线文件路径 */
-    onlinePath: string;
-    /** 本地保存路径 */
-    savePath: string;
-    /** 本地保存文件名 */
-    saveName: string;
-    /** 成功回调函数 */
-    success?: (path: string) => void;
-    /** 失败回调函数 */
-    fail?: (errMsg: WechatMiniprogram.GeneralCallbackResult) => void;
-    /** 状态码错误回调函数 */
-    error?: (statusCode: number) => void;
-  }
-  ```
+  - `onlinePath`: 在线文件路径
+  - `localPath`: 本地文件路径
 
   ::: tip
 
@@ -110,13 +95,12 @@
 
   :::
 
-- `unzip(path, unzipPath, successFunc)`
+- `unzip(zipFilePath, targetPath): Promise<void>`
 
   解压文件
 
-  - `path`: 待解压的压缩文件路径
-  - `unzipPath`: 解压到的目录
-  - `successFunc`: 解压成功的回调函数，可选
+  - `zipFilePath`: 待解压的压缩文件路径
+  - `targetPath`: 解压到的目录
 
   ::: tip
 
