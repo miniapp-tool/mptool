@@ -1,6 +1,6 @@
 {
   "name": "@mptool/file",
-  "version": "0.0.1-alpha.16",
+  "version": "0.0.1-alpha.17",
   "description": "File enhance plugin for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
@@ -31,8 +31,8 @@
     "dev": "rollup -c -w"
   },
   "devDependencies": {
-    "@mptool/mock": "0.0.1-alpha.16",
-    "@mptool/shared": "0.0.1-alpha.16",
+    "@mptool/mock": "0.0.1-alpha.17",
+    "@mptool/shared": "0.0.1-alpha.17",
     "rollup": "2.56.2"
   },
   "peerDependencies": {
