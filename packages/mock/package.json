@@ -32,10 +32,10 @@
     "dev": "rollup -c -w"
   },
   "dependencies": {
-    "miniprogram-api-typings": "^3.4.1"
+    "miniprogram-api-typings": "^3.4.2"
   },
   "devDependencies": {
-    "rollup": "2.55.1"
+    "rollup": "2.56.2"
   },
   "publishConfig": {
     "access": "public"

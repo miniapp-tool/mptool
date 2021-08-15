@@ -7,11 +7,11 @@
     "demo:dev": "tsc -w"
   },
   "dependencies": {
-    "@mptool/enhance": "0.0.1-alpha.12",
-    "@mptool/file": "0.0.1-alpha.12"
+    "@mptool/enhance": "0.0.1-alpha.14",
+    "@mptool/file": "0.0.1-alpha.14"
   },
   "devDependencies": {
-    "miniprogram-api-typings": "3.4.1",
+    "miniprogram-api-typings": "3.4.2",
     "typescript": "4.3.5"
   }
 }
