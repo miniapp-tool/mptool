@@ -35,7 +35,7 @@
     "miniprogram-api-typings": "^3.4.2"
   },
   "devDependencies": {
-    "rollup": "2.56.2"
+    "rollup": "2.56.3"
   },
   "publishConfig": {
     "access": "public"
