@@ -76,7 +76,7 @@
     "lerna": "4.0.0",
     "lint-staged": "11.1.2",
     "npm-check-updates": "11.8.3",
-    "ora": "5.4.1",
+    "ora": "6.0.0",
     "prettier": "2.3.2",
     "rollup": "2.56.2",
     "rollup-plugin-dts": "3.0.2",
