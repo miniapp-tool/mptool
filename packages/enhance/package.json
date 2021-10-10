@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@mptool/shared": "0.0.1-alpha.17",
-    "miniprogram-api-typings": "^3.4.2",
+    "miniprogram-api-typings": "^3.4.3",
     "rollup": "2.58.0"
   },
   "publishConfig": {
