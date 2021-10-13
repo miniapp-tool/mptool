@@ -2295,10 +2295,10 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.2.tgz#423c77877d0569db20e1fc80885ac4118314010e"
   integrity sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==
 
-"@tsd/typescript@~4.3.2":
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-4.3.5.tgz#0e0669bbd82a399a06c825c22dc63d56debe70a2"
-  integrity sha512-Xwxv8bIwyI3ggPz9bwoWEoiaz79MJs+VGf27S1N2tapfDVo60Lz741j5diL9RwszZSXt6IkTAuw7Lai7jSXRJg==
+"@tsd/typescript@~4.4.3":
+  version "4.4.3"
+  resolved "https://registry.yarnpkg.com/@tsd/typescript/-/typescript-4.4.3.tgz#43c1b5d2136d9bbd4069401d3ff7b2e907a6e14c"
+  integrity sha512-1DaMp8tnrWp0e2W6371bAbPIDMX3epOXelI3surWwV2OBw3hs0zWzZmBz2R2K1habIH2MUd+sjDqnfQGd2fCqA==
 
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.14":
   version "7.1.16"
@@ -5304,7 +5304,7 @@ eslint-config-prettier@8.3.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
   integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
 
-eslint-formatter-pretty@^4.0.0:
+eslint-formatter-pretty@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/eslint-formatter-pretty/-/eslint-formatter-pretty-4.1.0.tgz#7a6877c14ffe2672066c853587d89603e97c7708"
   integrity sha512-IsUTtGxF1hrH6lMWiSl1WbGaiP01eT6kzywdY1U+zLc0MP+nwEnUiS9UI8IaOTUhTeQJLlCEWIbXINBH4YJbBQ==
@@ -10951,13 +10951,13 @@ ts-node@^9:
     source-map-support "^0.5.17"
     yn "3.1.1"
 
-tsd@0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.17.0.tgz#e5aa66d6598d0b66628784ecb4c0c27795b47317"
-  integrity sha512-+HUwya2NgoP/g9t2gRCC3I8VtGu65NgG9Lv75vNzMaxjMFo+0VXF9c4sj3remSzJYeBHLNKzWMbFOinPqrL20Q==
+tsd@0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.18.0.tgz#d653f87e05ea0d07348601660e41b84c9cc81b5b"
+  integrity sha512-UIkxm2CLmSjXlQs4zqxgVV9UmzK8VgJ63eBpgkH/ZsMkiUdzxxHvdCCg8F314HDxzfQl2muJEy/TEcXHIFIPXg==
   dependencies:
-    "@tsd/typescript" "~4.3.2"
-    eslint-formatter-pretty "^4.0.0"
+    "@tsd/typescript" "~4.4.3"
+    eslint-formatter-pretty "^4.1.0"
     globby "^11.0.1"
     meow "^9.0.0"
     path-exists "^4.0.0"
