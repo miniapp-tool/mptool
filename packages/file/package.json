@@ -33,10 +33,10 @@
   "devDependencies": {
     "@mptool/mock": "0.0.1-alpha.17",
     "@mptool/shared": "0.0.1-alpha.17",
-    "rollup": "2.58.0"
+    "rollup": "2.60.0"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.4.3"
+    "miniprogram-api-typings": "^3.4.4"
   },
   "publishConfig": {
     "access": "public"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /** 实时日志管理器 */
 const log = wx.getRealtimeLogManager
   ? wx.getRealtimeLogManager()
