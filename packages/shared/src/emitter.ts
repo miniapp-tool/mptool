@@ -60,20 +60,22 @@ export function Emitter<Events extends Record<EventType, unknown>>(
 
   return {
     /**
-     * A Map of event names to registered handler functions.
+     * 事件名到处理函数的映射
+     * @memberOf emitter
      */
     all,
 
     /**
-     * Register an event handler for the given type.
-     * @param {string|symbol} type Type of event to listen for, or `'*'` for all events
-     * @param {Function} handler Function to call in response to given event
+     * 为特定事件类型注册处理函数
+     *
+     * @param type 监听的事件类型，使用 `'*'` 监听所有事件
+     * @param handler 待添加的响应函数
      * @memberOf emitter
      */
-    on<Key extends keyof Events>(
+    on: <Key extends keyof Events>(
       type: Key,
       handler: GenericEventHandler
-    ): void {
+    ): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const handlers: Array<GenericEventHandler> | undefined = all!.get(type);
 
@@ -83,16 +85,18 @@ export function Emitter<Events extends Record<EventType, unknown>>(
     },
 
     /**
-     * Remove an event handler for the given type.
-     * If `handler` is omitted, all handlers of the given type are removed.
-     * @param {string|symbol} type Type of event to unregister `handler` from, or `'*'`
-     * @param {Function} [handler] Handler function to remove
+     * 从特定事件类型移除指定监听器
+     *
+     * 如果省略 `handler`，给定类型的所有事件均被忽略
+     *
+     * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
+     * @param {Function} [handler] 待移除的响应函数
      * @memberOf emitter
      */
-    off<Key extends keyof Events>(
+    off: <Key extends keyof Events>(
       type: Key,
       handler?: GenericEventHandler
-    ): void {
+    ): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const handlers: Array<GenericEventHandler> | undefined = all!.get(type);
 
@@ -104,16 +108,17 @@ export function Emitter<Events extends Record<EventType, unknown>>(
     },
 
     /**
-     * Invoke all handlers for the given type.
-     * If present, `'*'` handlers are invoked after type-matched handlers.
+     * 调用所有给定事件类型的响应函数
      *
-     * Note: Manually firing '*' handlers is not supported.
+     * 如果存在，`'*'` 响应函数会在符合事件类型的响应函数之后调用
      *
-     * @param {string|symbol} type The event type to invoke
-     * @param {Any} [event] Any value (object is recommended and powerful), passed to each handler
+     * 注意，手动调用 `'*'` 事件不被支持
+     *
+     * @param type 待触发的事件类型
+     * @param event 传递给所有响应函数的事件
      * @memberOf emitter
      */
-    emit<Key extends keyof Events>(type: Key, event?: Events[Key]): void {
+    emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       let handlers = all!.get(type);
       if (handlers) {
@@ -136,32 +141,36 @@ export function Emitter<Events extends Record<EventType, unknown>>(
     },
 
     /**
-     * Invoke all handlers for the given type asynchronously
-     * If present, `'*'` handlers are invoked after type-matched handlers.
+     * 异步调用所有给定事件类型的响应函数
      *
-     * Note: Manually firing '*' handlers is not supported.
+     * 所有响应函数将被并行调用。
      *
-     * @param {string|symbol} type The event type to invoke
-     * @param {Any} [event] Any value (object is recommended and powerful), passed to each handler
+     * 如果存在，`'*'` 响应函数会在符合事件类型的响应函数之后并行调用
+     *
+     * 注意，手动调用 `'*'` 事件不被支持
+     *
+     * @param type 待触发的事件类型
+     * @param event 传递给所有响应函数的事件
      * @memberOf emitter
      */
-    emitAsync<Key extends keyof Events>(
+    emitAsync: <Key extends keyof Events>(
       type: Key,
       event?: Events[Key]
-    ): Promise<void> {
-      return Promise.all(
-        ((this.all.get(type) || []) as EventHandlerList<Events[keyof Events]>)
+    ): Promise<void> =>
+      Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ((all!.get(type) || []) as EventHandlerList<Events[keyof Events]>)
           .slice()
           .map((handler) => handler(event as Events[Key]))
       )
         .then(() =>
           Promise.all(
-            ((this.all.get("*") || []) as WildCardEventHandlerList<Events>)
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ((all!.get("*") || []) as WildCardEventHandlerList<Events>)
               .slice()
               .map((handler) => handler(type, event as Events[Key]))
           )
         )
-        .then(() => void 0);
-    },
+        .then(() => void 0),
   };
 }
