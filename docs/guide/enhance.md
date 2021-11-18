@@ -158,7 +158,11 @@ $App({
 
 ### 属性扩展
 
-- `$emitter`: 事件派发器，是一个 [Emitter](#emitter) 实例
+- `$all`: [Emitter](#emitter) 实例属性
+
+### 方法扩展
+
+- `$on`, `$off`, `$emit`, `$emitAsync`: [Emitter](#emitter) 实例方法
 
 ## 组件和页面通用的跳转方法
 
@@ -572,8 +576,6 @@ $Page("main", {
 
   - `$state.firstOpen`: 是否是第一个打开的页面
 
-- `$emitter`: 事件派发器，是一个 [$Emitter](#emitter) 实例
-
 - `$refs`: 指定了 `ref` 的子组件实例映射
 
   示例:
@@ -592,6 +594,8 @@ $Page("main", {
   });
   ```
 
+- `$all`: [Emitter](#emitter) 实例属性
+
 ### 方法扩展
 
 - `$preload(pagename: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
@@ -603,6 +607,8 @@ $Page("main", {
 - `$getName(url: string): string`: 获取传入页面地址的页面简称
 
 - `$getPath(name: string): string`: 获取传入页面简称的页面路径
+
+- `$on`, `$off`, `$emit`, `$emitAsync`: [Emitter](#emitter) 实例方法
 
 - `$`: 父子组件沟通器
 
@@ -658,6 +664,8 @@ $Page("main", {
   });
   ```
 
+- `$all`: [Emitter](#emitter) 实例属性
+
 ### 实例方法
 
 - `$call(method: string, ...args: unknown[]): void`: 通过消息的方式调用父组件方法，即使父组件方法不存在也不会报错
@@ -665,7 +673,7 @@ $Page("main", {
   - 参数 `method` 为需要调用的方法名称
   - 参数 `args` 为需要传递的参数
 
-- `$emitter`: 事件派发器，是一个 [emitter](#emitter) 实例
+- `$on`, `$off`, `$emit`, `$emitAsync`: [Emitter](#emitter) 实例方法
 
 - `$`: 父子组件沟通器
 

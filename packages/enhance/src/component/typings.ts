@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { UserEmitter } from "../emitter";
+import type { InstanceEmitterMethods } from "../emitter";
 import type { ExtendedPageMethods, TrivialPageInstance } from "../page";
 
 export type Props = Record<string, unknown>;
@@ -176,17 +176,10 @@ export interface ExtendedComponentProperty {
    * ```
    */
   $refs: RefMap;
-
-  /**
-   * 事件派发器
-   *
-   * 是一个全局共享的 [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
-   */
-  $emitter: UserEmitter;
 }
 
 /** 组件实例 */
-export interface ExtendedComponentMethods {
+export interface ExtendedComponentMethods extends InstanceEmitterMethods {
   /**
    * 通过消息的方式调用父组件方法，方法不存在也不会报错
    *

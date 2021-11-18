@@ -139,17 +139,17 @@
 
 - `$state.firstOpen`: 是否是第一个打开的页面
 
-### $emitter
+### 事件派发
 
-事件派发器，是一个 [Emitter](./emitter.md) 实例
+事件派发相关，均为 [$Emitter](./emitter.md) 实例属性或方法
 
-- `$emitter.on(type:string, handler: (event?:any) => void | Promise<void>): void`: 监听 `type` 事件
+- `$on(type:string, handler: (event?:any) => void | Promise<void>): void`: 监听 `type` 事件
 
-- `$emitter.emit(type:string, event?:any): void`: 同步触发 `type` 事件
+- `$emit(type:string, event?:any): void`: 同步触发 `type` 事件
 
-- `$emitter.emitAsync(type:string, event?:any): Promise<void>`: 异步触发 `type` 事件并接受回调
+- `$emitAsync(type:string, event?:any): Promise<void>`: 异步触发 `type` 事件并接受回调
 
-- `$emitter.off(type:string, handler: (event?:any) => void | Promise<void>): Promise<void>`: 取消监听 `type` 的 `handler` 事件或全部事件 (当未传入 `handler`)
+- `$off(type:string, handler: (event?:any) => void | Promise<void>): Promise<void>`: 取消监听 `type` 的 `handler` 事件或全部事件 (当未传入 `handler`)
 
 ### $refs
 

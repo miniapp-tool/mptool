@@ -1,4 +1,4 @@
-import type { UserEmitter } from "../emitter";
+import type { InstanceEmitterMethods } from "../emitter";
 
 export interface ExtendsAppOptions {
   /**
@@ -9,14 +9,7 @@ export interface ExtendsAppOptions {
   onAwake?(time: number): void;
 }
 
-export interface ExtendedAppMethods {
-  /**
-   * 事件派发器
-   *
-   * 是一个全局共享的 [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
-   */
-  $emitter: UserEmitter;
-}
+export type ExtendedAppMethods = InstanceEmitterMethods;
 
 export type AppOptions<Custom> = ExtendsAppOptions &
   Partial<WechatMiniprogram.App.Option> &

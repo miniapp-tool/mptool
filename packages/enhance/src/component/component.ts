@@ -2,7 +2,6 @@ import { logger, wrapFunction } from "@mptool/shared";
 import { getRef, setRef, removeRef } from "./store";
 import { bind, mount } from "../bridge";
 import { getConfig } from "../config";
-import { userEmitter } from "../emitter";
 import { TrivialPageInstance } from "../page";
 
 import type {
@@ -166,6 +165,7 @@ export const $Component: ComponentConstructor = <
     ...options.methods,
 
     // inject methods
+
     $call(
       this: ComponentInstance<
         Data,
@@ -201,7 +201,7 @@ export const $Component: ComponentConstructor = <
       this.$root = (parent as TrivalComponentInstance).$root || parent;
       this.$parent = parent;
     },
-    $emitter: userEmitter,
+
     $: bind,
   };
 

@@ -1,7 +1,7 @@
 import { bind } from "../bridge";
 
 import type { RefMap } from "../component";
-import type { UserEmitter } from "../emitter";
+import type { InstanceEmitterMethods } from "../emitter";
 import type { NavigatorMethods } from "../navigator";
 
 export interface PageQuery {
@@ -63,12 +63,6 @@ export interface ExtendedPageProperties {
   $name: string;
   /** 一些由框架生成的页面状态 */
   $state: PageState;
-  /**
-   * 事件派发器
-   *
-   * 是一个全局共享的 [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
-   */
-  $emitter: UserEmitter;
 
   /**
    * 指定了 `ref` 的子组件实例映射
@@ -90,7 +84,9 @@ export interface ExtendedPageProperties {
   $refs: RefMap;
 }
 
-export interface ExtendedPageMethods<Data, Custom> extends NavigatorMethods {
+export interface ExtendedPageMethods<Data, Custom>
+  extends InstanceEmitterMethods,
+    NavigatorMethods {
   /**
    * 绑定组件函数
    */

@@ -59,7 +59,14 @@ export const $App: AppConstructor = <Custom extends Record<string, any>>(
     logger.debug("App: registered onAwake");
   }
 
-  appOptions.$emitter = userEmitter;
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  appOptions.$on = userEmitter.on;
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  appOptions.$off = userEmitter.off;
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  appOptions.$emit = userEmitter.emit;
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  appOptions.$emitAsync = userEmitter.emitAsync;
 
   /**
    * Use app config
