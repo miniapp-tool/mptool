@@ -121,6 +121,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
     emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       let handlers = all!.get(type);
+
       if (handlers) {
         (handlers as EventHandlerList<Events[keyof Events]>)
           .slice()
@@ -131,6 +132,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       handlers = all!.get("*");
+
       if (handlers) {
         (handlers as WildCardEventHandlerList<Events>)
           .slice()
