@@ -1,7 +1,7 @@
 import { rmSync } from "fs";
 import { copy } from "./copy";
 
-const parentFolderPath = "./demo/app/node_modules/@mptool";
+const parentFolderPath = "./demo/node_modules/@mptool";
 
 try {
   rmSync(parentFolderPath, { recursive: true });

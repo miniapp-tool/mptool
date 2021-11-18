@@ -28,7 +28,7 @@ $Page("index", {
 
   onReady() {
     setTimeout(() => {
-      this.$emitter.emit("message to app", "I am index!");
+      this.$emit("message to app", "I am index!");
     }, 100);
   },
 

@@ -14,7 +14,7 @@ $App({
   },
   onLaunch(opts) {
     console.log("APP launch:", opts);
-    this.$emitter.on("message to app", (msg: string) => {
+    this.$on("message to app", (msg: string) => {
       console.log(`Receive message:${msg}`);
     });
   },
