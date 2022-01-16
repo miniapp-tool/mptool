@@ -2,8 +2,8 @@ import { $Page } from "@mptool/enhance";
 
 $Page("channel", {
   data: {},
-  onPageLaunch() {
-    console.log("[pages/channel] page launch");
+  onRegister() {
+    console.log("[pages/channel] page register");
   },
   onAppLaunch(opts) {
     console.log("[pages/channel] appLaunch:", opts);

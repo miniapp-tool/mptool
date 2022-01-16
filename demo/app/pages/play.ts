@@ -5,8 +5,8 @@ $Page("play", {
   data: {
     test: "play",
   },
-  onPageLaunch() {
-    console.log("[pages/play] page launch", this);
+  onRegister() {
+    console.log("[pages/play] page register", this);
   },
   onAppLaunch(opts) {
     console.log("[pages/play] appLaunch:", opts, this);
