@@ -1,4 +1,7 @@
-# MP Tool
+---
+title: MP Tool
+icon: creative
+---
 
 轻量的小程序增强框架。
 

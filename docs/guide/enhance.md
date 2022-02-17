@@ -1,4 +1,7 @@
-# @mptool/enhance
+---
+title: "@mptool/enhance"
+icon: tool
+---
 
 ::: tip
 

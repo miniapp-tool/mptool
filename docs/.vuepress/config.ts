@@ -2,11 +2,13 @@ import { defineHopeConfig } from "vuepress-theme-hope";
 
 export default defineHopeConfig({
   head: [
-    ["link", { rel: "icon", href: `/logo.svg` }],
-    ["meta", { name: "application-name", content: "MP Tool" }],
-    ["meta", { name: "apple-mobile-web-app-title", content: "MP Tool" }],
-    ["meta", { name: "msapplication-TileColor", content: "#07C160" }],
-    ["meta", { name: "theme-color", content: "#07C160" }],
+    [
+      "link",
+      {
+        rel: "stylesheet",
+        href: "//at.alicdn.com/t/font_2410206_njbtaif35kf.css",
+      },
+    ],
   ],
 
   locales: {
@@ -17,30 +19,37 @@ export default defineHopeConfig({
     },
   },
 
+  theme: "hope",
+
   themeConfig: {
     hostname: "https://miniapp-tool.github.io",
+
     author: {
       name: "Mr.Hope",
       url: "https://mrhope.site",
     },
+
+    iconPrefix: "iconfont icon-",
+
     logo: "/logo.svg",
+
     repo: "miniapp-tool/mptool",
+
     docsDir: "docs",
-    docsBranch: "main",
+
     locales: {
       "/": {
         navbar: [
-          {
-            text: "指南",
-            link: "/guide/get-started",
-          },
+          "/guide/",
           {
             text: "框架",
+            icon: "frame",
             prefix: "/guide/",
             children: ["enhance", "file"],
           },
           {
             text: "API",
+            icon: "api",
             prefix: "/api/",
             children: ["enhance/", "file/"],
           },
@@ -49,23 +58,52 @@ export default defineHopeConfig({
           "/": [
             {
               text: "介绍",
+              icon: "creative",
               prefix: "/guide/",
-              children: ["get-started", "enhance", "file"],
+              children: ["", "enhance", "file"],
             },
             {
               text: "API",
               children: [
                 {
                   text: "Enhance",
+                  icon: "tool",
                   prefix: "/api/enhance/",
                   children: ["config", "app", "page", "component", "emitter"],
                 },
                 {
                   text: "File",
+                  icon: "folder",
                   prefix: "/api/file/",
                   children: ["file", "storage"],
                 },
               ],
+            },
+          ],
+        },
+
+        footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
+
+        displayFooter: true,
+      },
+    },
+
+    plugins: {
+      mdEnhance: {
+        codegroup: true,
+        tasklist: true,
+      },
+
+      pwa: {
+        favicon: "/logo.png",
+        cachePic: true,
+        themeColor: "#07C160",
+        manifest: {
+          icons: [
+            {
+              src: "/logo.png",
+              sizes: "200x200",
+              type: "image/png",
             },
           ],
         },

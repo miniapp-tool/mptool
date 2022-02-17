@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "docs:build": "vuepress build .",
+    "docs:clean-dev": "vuepress dev .  --clean-cache",
     "docs:dev": "vuepress dev ."
   },
   "devDependencies": {

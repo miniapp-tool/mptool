@@ -1,4 +1,7 @@
-# @mptool/file
+---
+title: "@mptool/file"
+icon: folder
+---
 
 ## 文件 API
 
