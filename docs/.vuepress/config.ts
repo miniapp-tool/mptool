@@ -1,25 +1,10 @@
-import { defineUserConfig } from "@vuepress/cli";
-import taskLists = require("markdown-it-task-lists");
+import { defineHopeConfig } from "vuepress-theme-hope";
 
-import type { DefaultThemeOptions } from "@vuepress/theme-default";
-
-export default defineUserConfig<DefaultThemeOptions>({
-  title: "MP Tool",
-  description: "极其轻量的小程序框架",
-
+export default defineHopeConfig({
   head: [
     ["link", { rel: "icon", href: `/logo.svg` }],
-    // ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
     ["meta", { name: "application-name", content: "MP Tool" }],
     ["meta", { name: "apple-mobile-web-app-title", content: "MP Tool" }],
-    [
-      "meta",
-      { name: "apple-mobile-web-app-status-bar-style", content: "white" },
-    ],
-    // [
-    //   "link",
-    //   { rel: "apple-touch-icon", href: `/assets/icon/apple-touch-icon.png` },
-    // ],
     ["meta", { name: "msapplication-TileColor", content: "#07C160" }],
     ["meta", { name: "theme-color", content: "#07C160" }],
   ],
@@ -33,6 +18,11 @@ export default defineUserConfig<DefaultThemeOptions>({
   },
 
   themeConfig: {
+    hostname: "https://miniapp-tool.github.io",
+    author: {
+      name: "Mr.Hope",
+      url: "https://mrhope.site",
+    },
     logo: "/logo.svg",
     repo: "miniapp-tool/mptool",
     docsDir: "docs",
@@ -42,81 +32,48 @@ export default defineUserConfig<DefaultThemeOptions>({
         navbar: [
           {
             text: "指南",
-            link: "/guide/get-started.html",
+            link: "/guide/get-started",
           },
           {
             text: "框架",
-            children: [
-              "/guide/get-started.html",
-              "/guide/enhance.html",
-              "/guide/file.html",
-            ],
+            prefix: "/guide/",
+            children: ["enhance", "file"],
           },
           {
             text: "API",
-            children: ["/api/enhance/index.html", "/api/file/index.html"],
+            prefix: "/api/",
+            children: ["enhance/", "file/"],
           },
         ],
         sidebar: {
           "/": [
             {
               text: "介绍",
-              children: [
-                "/guide/get-started.md",
-                "/guide/enhance.md",
-                "/guide/file.md",
-              ],
+              prefix: "/guide/",
+              children: ["get-started", "enhance", "file"],
             },
             {
               text: "API",
               children: [
                 {
                   text: "Enhance",
-                  children: [
-                    "/api/enhance/config.md",
-                    "/api/enhance/app.md",
-                    "/api/enhance/page.md",
-                    "/api/enhance/component.md",
-                    "/api/enhance/emitter.md",
-                  ],
+                  prefix: "/api/enhance/",
+                  children: ["config", "app", "page", "component", "emitter"],
                 },
                 {
                   text: "File",
-                  children: ["/api/file/file.md", "/api/file/storage.md"],
+                  prefix: "/api/file/",
+                  children: ["file", "storage"],
                 },
               ],
             },
           ],
         },
-        selectLanguageName: "简体中文",
-        selectLanguageText: "选择语言",
-        selectLanguageAriaLabel: "选择语言",
-        contributorsText: "贡献者",
-        editLinkText: "在 GitHub 上编辑此页",
-        lastUpdatedText: "上次更新于",
-        tip: "提示",
-        warning: "注意",
-        danger: "警告",
-        notFound: ["未找到页面"],
-        backToHome: "返回主页",
-        openInNewWindow: "在新窗口打开",
       },
     },
   },
 
   plugins: [
-    ["@vuepress/pwa"],
-    [
-      "@vuepress/pwa-popup",
-      {
-        locales: {
-          "/": {
-            message: "发现新内容可用",
-            buttonText: "刷新",
-          },
-        },
-      },
-    ],
     [
       "@vuepress/plugin-search",
       {
@@ -127,11 +84,5 @@ export default defineUserConfig<DefaultThemeOptions>({
         },
       },
     ],
-    {
-      name: "mptool",
-      extendsMarkdown: (md) => {
-        md.use(taskLists, { label: true, labelAfter: true });
-      },
-    },
   ],
 });
