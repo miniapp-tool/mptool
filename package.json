@@ -75,7 +75,7 @@
     "jest": "27.5.1",
     "lerna": "4.0.0",
     "lint-staged": "12.3.7",
-    "npm-check-updates": "12.5.7",
+    "npm-check-updates": "12.5.8",
     "ora": "5.4.1",
     "prettier": "2.6.2",
     "rollup": "2.70.1",
