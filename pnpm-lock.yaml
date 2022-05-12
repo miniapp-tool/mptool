@@ -114,41 +114,49 @@ importers:
       '@mptool/mock': workspace:*
       '@mptool/shared': workspace:*
       miniprogram-api-typings: ^3.4.6
+      rimraf: ^3.0.2
       rollup: 2.72.1
     devDependencies:
       '@mptool/mock': link:../mock
       '@mptool/shared': link:../shared
       miniprogram-api-typings: 3.4.6
+      rimraf: 3.0.2
       rollup: 2.72.1
 
   packages/file:
     specifiers:
       '@mptool/mock': workspace:*
       '@mptool/shared': workspace:*
+      rimraf: ^3.0.2
       rollup: 2.72.1
     devDependencies:
       '@mptool/mock': link:../mock
       '@mptool/shared': link:../shared
+      rimraf: 3.0.2
       rollup: 2.72.1
 
   packages/mock:
     specifiers:
       miniprogram-api-typings: ^3.4.6
+      rimraf: ^3.0.2
       rollup: 2.72.1
     dependencies:
       miniprogram-api-typings: 3.4.6
     devDependencies:
+      rimraf: 3.0.2
       rollup: 2.72.1
 
   packages/shared:
     specifiers:
       '@mptool/mock': workspace:*
       miniprogram-api-typings: ^3.4.6
+      rimraf: ^3.0.2
       rollup: 2.72.1
     dependencies:
       miniprogram-api-typings: 3.4.6
     devDependencies:
       '@mptool/mock': link:../mock
+      rimraf: 3.0.2
       rollup: 2.72.1
 
 packages:

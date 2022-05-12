@@ -33,6 +33,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
+    "rimraf": "^3.0.2",
     "rollup": "2.72.1"
   },
   "peerDependencies": {
