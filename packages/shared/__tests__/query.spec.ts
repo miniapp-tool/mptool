@@ -1,4 +1,5 @@
 import "@mptool/mock";
+import { describe, expect, it } from "vitest";
 import { query } from "../src";
 
 const { parse, stringify, join } = query;

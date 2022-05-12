@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Emitter, EmitterInstance, EventHandlerMap } from "../src/emitter";
 
 describe("mitt", () => {
@@ -8,8 +9,8 @@ describe("mitt", () => {
   it("should accept an optional event handler map", () => {
     expect(() => Emitter(new Map())).not.toThrow();
     const map = new Map();
-    const a = jest.fn();
-    const b = jest.fn();
+    const a = vi.fn();
+    const b = vi.fn();
     map.set("foo", [a, b]);
     const events = Emitter<{ foo: undefined }>(map);
     events.emit("foo");
@@ -26,7 +27,9 @@ describe("mitt#", () => {
     FOO: unknown;
     bar: unknown;
     Bar: unknown;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:bat!": unknown;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:baT!": unknown;
     Foo: unknown;
     [eventType]: unknown;
@@ -52,22 +55,22 @@ describe("mitt#", () => {
     });
 
     it("should register handler for new type", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("foo", foo);
 
       expect(events.get("foo")).toEqual([foo]);
     });
 
     it("should register handlers for any type strings", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("constructor", foo);
 
       expect(events.get("constructor")).toEqual([foo]);
     });
 
     it("should append handler for existing type", () => {
-      const foo = jest.fn();
-      const bar = jest.fn();
+      const foo = vi.fn();
+      const bar = vi.fn();
       inst.on("foo", foo);
       inst.on("foo", bar);
 
@@ -75,7 +78,7 @@ describe("mitt#", () => {
     });
 
     it("should NOT normalize case", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("FOO", foo);
       inst.on("Bar", foo);
       inst.on("baz:baT!", foo);
@@ -88,7 +91,7 @@ describe("mitt#", () => {
     });
 
     it("can take symbols for event types", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on(eventType, foo);
       expect(events.get(eventType)).toEqual([foo]);
     });
@@ -96,7 +99,7 @@ describe("mitt#", () => {
     // Adding the same listener multiple times should register it multiple times.
     // See https://nodejs.org/api/events.html#events_emitter_on_eventname_listener
     it("should add duplicate listeners", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("foo", foo);
       inst.on("foo", foo);
       expect(events.get("foo")).toEqual([foo, foo]);
@@ -110,7 +113,7 @@ describe("mitt#", () => {
     });
 
     it("should remove handler for type", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("foo", foo);
       inst.off("foo", foo);
 
@@ -118,7 +121,7 @@ describe("mitt#", () => {
     });
 
     it("should NOT normalize case", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("FOO", foo);
       inst.on("Bar", foo);
       inst.on("baz:bat!", foo);
@@ -135,7 +138,7 @@ describe("mitt#", () => {
     });
 
     it("should remove only the first matching listener", () => {
-      const foo = jest.fn();
+      const foo = vi.fn();
       inst.on("foo", foo);
       inst.on("foo", foo);
       inst.off("foo", foo);
@@ -145,9 +148,9 @@ describe("mitt#", () => {
     });
 
     it('off("type") should remove all handlers of the given type', () => {
-      inst.on("foo", jest.fn());
-      inst.on("foo", jest.fn());
-      inst.on("bar", jest.fn());
+      inst.on("foo", vi.fn());
+      inst.on("foo", vi.fn());
+      inst.on("bar", vi.fn());
       inst.off("foo");
       expect(events.get("foo")).toEqual([]);
       expect(events.get("bar")).toHaveLength(1);
@@ -174,8 +177,8 @@ describe("mitt#", () => {
     });
 
     it("should NOT ignore case", () => {
-      const onFoo = jest.fn(),
-        onFOO = jest.fn();
+      const onFoo = vi.fn(),
+        onFOO = vi.fn();
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
 
@@ -189,7 +192,7 @@ describe("mitt#", () => {
     });
 
     it("should invoke * handlers", () => {
-      const star = jest.fn(),
+      const star = vi.fn(),
         ea = { a: "a" },
         eb = { b: "b" };
 

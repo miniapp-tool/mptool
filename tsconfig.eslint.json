@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["jest", "miniprogram-api-typings"]
+    "types": ["inquirer", "miniprogram-api-typings"]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "./package.json"]
 }

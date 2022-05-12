@@ -104,8 +104,11 @@ $Page("example", {
     this.setData(
       {
         text: "Set some data for updating view.",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "array[0].text": "changed data",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "object.text": "changed data",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         "newField.text": "new data",
       },
       function () {}

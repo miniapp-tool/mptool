@@ -1,4 +1,5 @@
 import "@mptool/mock";
+import { describe, expect, it } from "vitest";
 import { $Config, getConfig } from "../src/config";
 
 describe("$Config Test", () => {

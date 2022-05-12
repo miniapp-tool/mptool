@@ -7,19 +7,19 @@
     "miniapp",
     "file"
   ],
-  "homepage": "https://github.com/Mister-Hope/miniapp/tree/main/packages/file#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/file#readme",
   "bugs": {
-    "url": "https://github.com/Mister-Hope/miniapp/issues"
+    "url": "https://github.com/miniapp-tool/mptool/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Mister-Hope/miniapp.git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
     "directory": "packages/file"
   },
   "license": "MIT",
   "author": {
     "name": "Mr.Hope",
-    "email": "zhangbowang1998@gmail.com",
+    "email": "mister-hope@outlook.com",
     "url": "https://mrhope.site"
   },
   "main": "lib/index.js",
@@ -31,9 +31,9 @@
     "dev": "rollup -c -w"
   },
   "devDependencies": {
-    "@mptool/mock": "0.0.1-alpha.18",
-    "@mptool/shared": "0.0.1-alpha.18",
-    "rollup": "2.70.1"
+    "@mptool/mock": "workspace:*",
+    "@mptool/shared": "workspace:*",
+    "rollup": "2.72.1"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^3.4.4"

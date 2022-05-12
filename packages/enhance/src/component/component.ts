@@ -198,7 +198,7 @@ export const $Component: ComponentConstructor = <
       >,
       parent: TrivalComponentInstance | TrivialPageInstance
     ): void {
-      this.$root = (parent as TrivalComponentInstance).$root || parent;
+      this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
 

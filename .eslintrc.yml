@@ -18,6 +18,8 @@ ignorePatterns:
   - demo/**/*.js
   - lib/
   - node_modules/
+  # workaround
+  - scripts/release/release.ts
 
 overrides:
   - files:
@@ -35,7 +37,6 @@ overrides:
     parserOptions:
       parser: "@typescript-eslint/parser"
       project:
-        - "./tsconfig.json"
         - "./tsconfig.eslint.json"
 
     rules:
@@ -97,9 +98,6 @@ overrides:
   - files:
       - "**/__tests__/**/*.spec.{j,t}s"
 
-    env:
-      jest: true
-
     rules:
       "@typescript-eslint/no-empty-function":
         - off
@@ -132,7 +130,6 @@ overrides:
         - off
 
   - files:
-      - "jest.config.js"
       - "rollup.config.js"
       - "scripts/**/*.js"
 
@@ -141,4 +138,4 @@ overrides:
 
     parserOptions:
       sourceType: module
-      ecmaVersion: 11
+      ecmaVersion: 2020

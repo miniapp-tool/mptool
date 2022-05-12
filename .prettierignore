@@ -11,3 +11,6 @@ docs/.vuepress/dist
 
 # Demo
 demo/**/*.js
+
+# Lock file
+pnpm-lock.yaml

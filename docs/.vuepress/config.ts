@@ -1,6 +1,8 @@
-import { defineHopeConfig } from "vuepress-theme-hope";
+import { searchPlugin } from "@vuepress/plugin-search";
+import { defineUserConfig } from "vuepress";
+import { hopeTheme } from "vuepress-theme-hope";
 
-export default defineHopeConfig({
+export default defineUserConfig({
   head: [
     [
       "link",
@@ -19,9 +21,7 @@ export default defineHopeConfig({
     },
   },
 
-  theme: "hope",
-
-  themeConfig: {
+  theme: hopeTheme({
     hostname: "https://miniapp-tool.github.io",
 
     author: {
@@ -109,18 +109,15 @@ export default defineHopeConfig({
         },
       },
     },
-  },
+  }),
 
   plugins: [
-    [
-      "@vuepress/plugin-search",
-      {
-        locales: {
-          "/": {
-            placeholder: "搜索文档",
-          },
+    searchPlugin({
+      locales: {
+        "/": {
+          placeholder: "搜索文档",
         },
       },
-    ],
+    }),
   ],
 });
