@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.0.1-alpha.18",
+  "version": "0.0.1-beta.1",
   "private": true,
   "scripts": {
     "docs:build": "vuepress build .",

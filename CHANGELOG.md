@@ -1,4 +1,13 @@
-# [](http://mister-hope/miniapp/compare/v0.0.1-alpha.5...v) (2021-07-07)
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.0.1-beta.1](https://miniapp-tool///compare/v0.0.1-alpha.18...v0.0.1-beta.1) (2022-05-12)
+
+### Bug Fixes
+
+- **demo:** update demo ([17e3dac](https://miniapp-tool///commit/17e3dac8c406869913943100c3deaead094dbc83))
+- update demo ([a1bda7d](https://miniapp-tool///commit/a1bda7d4385b5873d962dd6c9d1d6c4eb46ac63b))
 
 ## [0.0.1-alpha.5](http://mister-hope/miniapp/compare/v0.0.1-alpha.4...v0.0.1-alpha.5) (2021-07-07)
 
