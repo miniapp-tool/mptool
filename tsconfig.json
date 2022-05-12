@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "types": ["node", "miniprogram-api-typings"]
   },
   "include": ["packages/**/src/*.ts"]
