@@ -57,7 +57,7 @@
     "@typescript-eslint/eslint-plugin": "5.23.0",
     "@typescript-eslint/parser": "5.23.0",
     "bumpp": "7.1.1",
-    "c8": "7.11.2",
+    "c8": "7.11.3",
     "chalk": "5.0.1",
     "conventional-changelog-cli": "2.2.2",
     "cross-env": "7.0.3",
