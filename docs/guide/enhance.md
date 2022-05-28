@@ -21,9 +21,9 @@ icon: tool
 
 用于配置小程序框架，请在 `app.js` 中于 `$App` 之前调用。
 
-:::: code-group
+::: code-tabs#language
 
-::: code-group-item TypeScript
+@tab TypeScript
 
 ```ts
 // app.ts
@@ -38,9 +38,7 @@ $App({
 });
 ```
 
-:::
-
-::: code-group-item JavaScript
+@tab JavaScript
 
 ```js
 // app.js
@@ -56,8 +54,6 @@ $App({
 ```
 
 :::
-
-::::
 
 ### 路由配置
 
@@ -249,9 +245,9 @@ this.$launch("main?user=mrhope");
 
 如:
 
-:::: code-group
+::: code-tabs#language
 
-::: code-group-item TypeScript
+@tab code-group-item TypeScript
 
 ```ts
 // pages/index/index.ts
@@ -262,9 +258,7 @@ $Page("main", {
 });
 ```
 
-:::
-
-::: code-group-item JavaScript
+@tab JavaScript
 
 ```js
 // pages/index/index.js
@@ -276,8 +270,6 @@ $Page("main", {
 ```
 
 :::
-
-::::
 
 ### 生命周期扩展
 
@@ -307,9 +299,9 @@ $Page("main", {
 
   例子:
 
-  :::: code-group
+  ::: code-tabs
 
-  ::: code-group-item 商品详情页 (TS)
+  @tab 商品详情页 (TS)
 
   ```ts
   // pages/detail/detail.ts
@@ -326,9 +318,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 订单页 (TS)
+  @tab 订单页 (TS)
 
   ```ts
   // pages/order/order.ts
@@ -364,9 +354,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 商品详情页 (JS)
+  @tab 商品详情页 (JS)
 
   ```ts
   // pages/detail/detail.js
@@ -383,9 +371,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 订单页 (JS)
+  @tab 订单页 (JS)
 
   ```ts
   // pages/order/order.js
@@ -423,8 +409,6 @@ $Page("main", {
 
   :::
 
-  ::::
-
   ::: warning 小程序分包
 
   由于小程序每个分包下页面会在首次请求跳转到某个分包页面时注册，所以此时进入的首个页面无法触发 `onPreload` 周期。
@@ -451,9 +435,9 @@ $Page("main", {
 
   例子:
 
-  :::: code-group
+  ::: code-tabs
 
-  ::: code-group-item 商品详情页 (TS)
+  @tab 商品详情页 (TS)
 
   ```ts
   // pages/detail/detail.ts
@@ -470,9 +454,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 订单页 (TS)
+  @tab 订单页 (TS)
 
   ```ts
   // pages/order/order.ts
@@ -506,9 +488,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 商品详情页 (JS)
+  @tab 商品详情页 (JS)
 
   ```ts
   // pages/detail/detail.js
@@ -525,9 +505,7 @@ $Page("main", {
   });
   ```
 
-  :::
-
-  ::: code-group-item 订单页 (JS)
+  @tab 订单页 (JS)
 
   ```ts
   // pages/order/order.js
@@ -562,8 +540,6 @@ $Page("main", {
   ```
 
   :::
-
-  ::::
 
 ### 属性扩展
 

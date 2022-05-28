@@ -35,8 +35,8 @@
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "^3.4.6",
-    "rimraf": "^3.0.2",
-    "rollup": "2.72.1"
+    "rimraf": "3.0.2",
+    "rollup": "2.74.1"
   },
   "publishConfig": {
     "access": "public"
