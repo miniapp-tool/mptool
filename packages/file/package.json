@@ -34,7 +34,7 @@
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
     "rimraf": "3.0.2",
-    "rollup": "2.75.3"
+    "rollup": "2.75.5"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^3.4.4"
