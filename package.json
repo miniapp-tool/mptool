@@ -70,7 +70,7 @@
     "inquirer": "8.2.4",
     "lint-staged": "13.0.0",
     "miniprogram-api-typings": "3.4.6",
-    "npm-check-updates": "13.0.4",
+    "npm-check-updates": "13.1.5",
     "ora": "6.1.0",
     "prettier": "2.6.2",
     "rollup": "2.75.5",
