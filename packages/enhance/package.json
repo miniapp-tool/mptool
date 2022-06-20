@@ -36,7 +36,7 @@
     "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "3.4.6",
     "rimraf": "3.0.2",
-    "rollup": "2.75.5"
+    "rollup": "2.75.7"
   },
   "publishConfig": {
     "access": "public"
