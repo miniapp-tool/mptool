@@ -3,16 +3,6 @@ import { defineUserConfig } from "vuepress";
 import { hopeTheme } from "vuepress-theme-hope";
 
 export default defineUserConfig({
-  head: [
-    [
-      "link",
-      {
-        rel: "stylesheet",
-        href: "//at.alicdn.com/t/font_2410206_njbtaif35kf.css",
-      },
-    ],
-  ],
-
   locales: {
     "/": {
       lang: "zh-CN",
@@ -29,7 +19,7 @@ export default defineUserConfig({
       url: "https://mrhope.site",
     },
 
-    iconPrefix: "iconfont icon-",
+    iconAssets: "//at.alicdn.com/t/font_2410206_njbtaif35kf.css",
 
     logo: "/logo.svg",
 
@@ -90,7 +80,7 @@ export default defineUserConfig({
 
     plugins: {
       mdEnhance: {
-        codegroup: true,
+        codetabs: true,
         tasklist: true,
       },
 
