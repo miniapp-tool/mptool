@@ -6,7 +6,7 @@ importers:
     specifiers:
       '@commitlint/cli': 17.0.2
       '@commitlint/config-conventional': 17.0.2
-      '@rollup/plugin-commonjs': 22.0.0
+      '@rollup/plugin-commonjs': 22.0.1
       '@rollup/plugin-json': 4.1.0
       '@rollup/plugin-node-resolve': 13.3.0
       '@rollup/plugin-typescript': 8.3.2
@@ -45,7 +45,7 @@ importers:
     devDependencies:
       '@commitlint/cli': 17.0.2
       '@commitlint/config-conventional': 17.0.2
-      '@rollup/plugin-commonjs': 22.0.0_rollup@2.75.7
+      '@rollup/plugin-commonjs': 22.0.1_rollup@2.75.7
       '@rollup/plugin-json': 4.1.0_rollup@2.75.7
       '@rollup/plugin-node-resolve': 13.3.0_rollup@2.75.7
       '@rollup/plugin-typescript': 8.3.2_crakuyujesv2ywnnfdgjbmjvam
@@ -1691,8 +1691,8 @@ packages:
       rollup: 2.75.3
     dev: true
 
-  /@rollup/plugin-commonjs/22.0.0_rollup@2.75.7:
-    resolution: {integrity: sha512-Ktvf2j+bAO+30awhbYoCaXpBcyPmJbaEUYClQns/+6SNCYFURbvBiNbWgHITEsIgDDWCDUclWRKEuf8cwZCFoQ==}
+  /@rollup/plugin-commonjs/22.0.1_rollup@2.75.7:
+    resolution: {integrity: sha512-dGfEZvdjDHObBiP5IvwTKMVeq/tBZGMBHZFMdIV1ClMM/YoWS34xrHFGfag9SN2ZtMgNZRFruqvxZQEa70O6nQ==}
     engines: {node: '>= 12.0.0'}
     peerDependencies:
       rollup: ^2.68.0
@@ -8918,7 +8918,7 @@ packages:
       esbuild: 0.14.41
       postcss: 8.4.14
       resolve: 1.22.0
-      rollup: 2.75.5
+      rollup: 2.75.7
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
