@@ -9,7 +9,7 @@ importers:
       '@rollup/plugin-commonjs': 22.0.0
       '@rollup/plugin-json': 4.1.0
       '@rollup/plugin-node-resolve': 13.3.0
-      '@rollup/plugin-typescript': 8.3.2
+      '@rollup/plugin-typescript': 8.3.3
       '@types/inquirer': 8.2.1
       '@types/node': 17.0.36
       '@typescript-eslint/eslint-plugin': 5.29.0
@@ -48,7 +48,7 @@ importers:
       '@rollup/plugin-commonjs': 22.0.0_rollup@2.75.7
       '@rollup/plugin-json': 4.1.0_rollup@2.75.7
       '@rollup/plugin-node-resolve': 13.3.0_rollup@2.75.7
-      '@rollup/plugin-typescript': 8.3.2_crakuyujesv2ywnnfdgjbmjvam
+      '@rollup/plugin-typescript': 8.3.3_crakuyujesv2ywnnfdgjbmjvam
       '@types/inquirer': 8.2.1
       '@types/node': 17.0.36
       '@typescript-eslint/eslint-plugin': 5.29.0_pr2zjsgc4cbu6cmehgx54pud5a
@@ -1756,13 +1756,16 @@ packages:
       rollup: 2.75.3
     dev: true
 
-  /@rollup/plugin-typescript/8.3.2_crakuyujesv2ywnnfdgjbmjvam:
-    resolution: {integrity: sha512-MtgyR5LNHZr3GyN0tM7gNO9D0CS+Y+vflS4v/PHmrX17JCkHUYKvQ5jN5o3cz1YKllM3duXUqu3yOHwMPUxhDg==}
+  /@rollup/plugin-typescript/8.3.3_crakuyujesv2ywnnfdgjbmjvam:
+    resolution: {integrity: sha512-55L9SyiYu3r/JtqdjhwcwaECXP7JeJ9h1Sg1VWRJKIutla2MdZQodTgcCNybXLMCnqpNLEhS2vGENww98L1npg==}
     engines: {node: '>=8.0.0'}
     peerDependencies:
       rollup: ^2.14.0
       tslib: '*'
       typescript: '>=3.7.0'
+    peerDependenciesMeta:
+      tslib:
+        optional: true
     dependencies:
       '@rollup/pluginutils': 3.1.0_rollup@2.75.7
       resolve: 1.22.0
@@ -8918,7 +8921,7 @@ packages:
       esbuild: 0.14.41
       postcss: 8.4.14
       resolve: 1.22.0
-      rollup: 2.75.5
+      rollup: 2.75.7
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
