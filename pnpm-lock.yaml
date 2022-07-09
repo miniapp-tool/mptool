@@ -40,7 +40,7 @@ importers:
       tsd: 0.21.0
       tslib: 2.4.0
       typescript: 4.7.4
-      vite: 2.9.12
+      vite: 2.9.14
       vitest: 0.18.0
     devDependencies:
       '@commitlint/cli': 17.0.3
@@ -79,7 +79,7 @@ importers:
       tsd: 0.21.0
       tslib: 2.4.0
       typescript: 4.7.4
-      vite: 2.9.12
+      vite: 2.9.14
       vitest: 0.18.0_c8@7.11.3
 
   demo:
@@ -8714,6 +8714,30 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /vite/2.9.14:
+    resolution: {integrity: sha512-P/UCjSpSMcE54r4mPak55hWAZPlyfS369svib/gpmz8/01L822lMPOJ/RYW6tLCe1RPvMvOsJ17erf55bKp4Hw==}
+    engines: {node: '>=12.2.0'}
+    hasBin: true
+    peerDependencies:
+      less: '*'
+      sass: '*'
+      stylus: '*'
+    peerDependenciesMeta:
+      less:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+    dependencies:
+      esbuild: 0.14.47
+      postcss: 8.4.14
+      resolve: 1.22.1
+      rollup: 2.75.7
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /vitest/0.18.0_c8@7.11.3:
     resolution: {integrity: sha512-ryAtlh5Gvg3+aLNuOQ8YOHxgQCCu46jx40X5MBL0K0/ejB9i5zsr8fV8LTGXbXex80UMHlzceI9F+ouGaiR+mQ==}
     engines: {node: '>=v14.16.0'}
@@ -8745,7 +8769,7 @@ packages:
       local-pkg: 0.4.1
       tinypool: 0.2.1
       tinyspy: 0.3.3
-      vite: 2.9.12
+      vite: 2.9.14
     transitivePeerDependencies:
       - less
       - sass
