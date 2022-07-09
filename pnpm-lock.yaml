@@ -22,7 +22,7 @@ importers:
       cz-conventional-changelog: 3.3.0
       eslint: 8.19.0
       eslint-config-prettier: 8.5.0
-      eslint-plugin-prettier: 4.0.0
+      eslint-plugin-prettier: 4.2.1
       execa: 6.1.0
       husky: 8.0.1
       inquirer: 9.0.0
@@ -61,7 +61,7 @@ importers:
       cz-conventional-changelog: 3.3.0
       eslint: 8.19.0
       eslint-config-prettier: 8.5.0_eslint@8.19.0
-      eslint-plugin-prettier: 4.0.0_7uxdfn2xinezdgvmbammh6ev5i
+      eslint-plugin-prettier: 4.2.1_7uxdfn2xinezdgvmbammh6ev5i
       execa: 6.1.0
       husky: 8.0.1
       inquirer: 9.0.0
@@ -4696,9 +4696,9 @@ packages:
       supports-hyperlinks: 2.2.0
     dev: true
 
-  /eslint-plugin-prettier/4.0.0_7uxdfn2xinezdgvmbammh6ev5i:
-    resolution: {integrity: sha512-98MqmCJ7vJodoQK359bqQWaxOE0CS8paAz/GgjaZLyex4TTk3g9HugoO89EqWCrFiOqn9EVvcoo7gZzONCWVwQ==}
-    engines: {node: '>=6.0.0'}
+  /eslint-plugin-prettier/4.2.1_7uxdfn2xinezdgvmbammh6ev5i:
+    resolution: {integrity: sha512-f/0rXLXUt0oFYs8ra4w49wYZBG5GKZpAYsJSm6rnYL5uVDjd+zowwMwVZHnAjf4edNrKpCDYfXDgmRE/Ak7QyQ==}
+    engines: {node: '>=12.0.0'}
     peerDependencies:
       eslint: '>=7.28.0'
       eslint-config-prettier: '*'
