@@ -28,7 +28,7 @@ importers:
       inquirer: 9.0.0
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
-      npm-check-updates: 15.2.6
+      npm-check-updates: 15.3.4
       ora: 6.1.2
       prettier: 2.7.1
       rollup: 2.76.0
@@ -67,7 +67,7 @@ importers:
       inquirer: 9.0.0
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
-      npm-check-updates: 15.2.6
+      npm-check-updates: 15.3.4
       ora: 6.1.2
       prettier: 2.7.1
       rollup: 2.76.0
@@ -3388,7 +3388,7 @@ packages:
     dev: true
 
   /colors/1.0.3:
-    resolution: {integrity: sha1-BDP0TYCWgP3rYO0mDxsMJi6CpAs=}
+    resolution: {integrity: sha512-pFGrxThWcWQ2MsAz6RtgeWe4NK2kUE1WfsrvvlctdII745EW9I0yflqhe7++M5LEc7bV2c/9/5zc8sFcpL0Drw==}
     engines: {node: '>=0.1.90'}
     dev: true
 
@@ -6949,12 +6949,12 @@ packages:
       npm-normalize-package-bin: 1.0.1
     dev: true
 
-  /npm-check-updates/15.2.6:
-    resolution: {integrity: sha512-lXihP+6EjHW74ENE6YYW2feUmdsfK4evus2ZTCyTd0QSnmHdx0bcHpiHsjgqjPtIqgHPJXLCrV6gd3JGYZg3xg==}
+  /npm-check-updates/15.3.4:
+    resolution: {integrity: sha512-YZDcw0DFn5ggl7b9znZ7N0i+Q1HVIxW+eZlV7XvR+RIs367H+ytKCB4slAU33Bg9IljY7uv3dsFjV2npOt3GyA==}
     engines: {node: '>=14.14'}
     hasBin: true
     dependencies:
-      chalk: 4.1.2
+      chalk: 5.0.1
       cli-table: 0.3.11
       commander: 9.3.0
       fast-memoize: 2.5.2
