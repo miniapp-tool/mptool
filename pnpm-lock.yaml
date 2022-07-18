@@ -40,7 +40,7 @@ importers:
       tsd: 0.22.0
       tslib: 2.4.0
       typescript: 4.7.4
-      vite: 2.9.14
+      vite: 3.0.2
       vitest: 0.18.0
     devDependencies:
       '@commitlint/cli': 17.0.3
@@ -79,7 +79,7 @@ importers:
       tsd: 0.22.0
       tslib: 2.4.0
       typescript: 4.7.4
-      vite: 2.9.14
+      vite: 3.0.2
       vitest: 0.18.0_c8@7.11.3
 
   demo:
@@ -8833,6 +8833,33 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /vite/3.0.2:
+    resolution: {integrity: sha512-TAqydxW/w0U5AoL5AsD9DApTvGb2iNbGs3sN4u2VdT1GFkQVUfgUldt+t08TZgi23uIauh1TUOQJALduo9GXqw==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    hasBin: true
+    peerDependencies:
+      less: '*'
+      sass: '*'
+      stylus: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      less:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      esbuild: 0.14.49
+      postcss: 8.4.14
+      resolve: 1.22.1
+      rollup: 2.76.0
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /vitest/0.18.0_c8@7.11.3:
     resolution: {integrity: sha512-ryAtlh5Gvg3+aLNuOQ8YOHxgQCCu46jx40X5MBL0K0/ejB9i5zsr8fV8LTGXbXex80UMHlzceI9F+ouGaiR+mQ==}
     engines: {node: '>=v14.16.0'}
@@ -8864,12 +8891,13 @@ packages:
       local-pkg: 0.4.2
       tinypool: 0.2.2
       tinyspy: 0.3.3
-      vite: 2.9.14
+      vite: 3.0.2
     transitivePeerDependencies:
       - less
       - sass
       - stylus
       - supports-color
+      - terser
     dev: true
 
   /vue-demi/0.13.1_vue@3.2.37:
