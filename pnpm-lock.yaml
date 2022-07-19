@@ -25,7 +25,7 @@ importers:
       eslint-plugin-prettier: 4.2.1
       execa: 6.1.0
       husky: 8.0.1
-      inquirer: 9.0.0
+      inquirer: 9.0.2
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
       npm-check-updates: 15.2.6
@@ -64,7 +64,7 @@ importers:
       eslint-plugin-prettier: 4.2.1_7uxdfn2xinezdgvmbammh6ev5i
       execa: 6.1.0
       husky: 8.0.1
-      inquirer: 9.0.0
+      inquirer: 9.0.2
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
       npm-check-updates: 15.2.6
@@ -5806,8 +5806,8 @@ packages:
       through: 2.3.8
     dev: true
 
-  /inquirer/9.0.0:
-    resolution: {integrity: sha512-eYTDdTYr/YPwRenOzLZTvaJUDXDW8GQgxvzBppuXLj/kauTRLfV8bCPVbGh2staP7edrqL+rGwjaOa+JVxBWsg==}
+  /inquirer/9.0.2:
+    resolution: {integrity: sha512-AqmDHmz3bIe573OiM4svTZzajBzff1xpuzYAimW8gjzW5ncuPllWB8t/GKl+NSuKRJaKyIF2bU2RCx8H1dwqyQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
       ansi-escapes: 5.0.0
