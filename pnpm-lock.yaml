@@ -10,7 +10,7 @@ importers:
       '@rollup/plugin-json': 4.1.0
       '@rollup/plugin-node-resolve': 13.3.0
       '@rollup/plugin-typescript': 8.3.3
-      '@types/inquirer': 8.2.1
+      '@types/inquirer': 9.0.0
       '@types/node': 18.0.6
       '@typescript-eslint/eslint-plugin': 5.30.7
       '@typescript-eslint/parser': 5.30.7
@@ -25,7 +25,7 @@ importers:
       eslint-plugin-prettier: 4.2.1
       execa: 6.1.0
       husky: 8.0.1
-      inquirer: 9.0.2
+      inquirer: 9.1.0
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
       npm-check-updates: 16.0.0
@@ -49,7 +49,7 @@ importers:
       '@rollup/plugin-json': 4.1.0_rollup@2.77.0
       '@rollup/plugin-node-resolve': 13.3.0_rollup@2.77.0
       '@rollup/plugin-typescript': 8.3.3_sbpikdwgo7pbmeew3vug7t5zyu
-      '@types/inquirer': 8.2.1
+      '@types/inquirer': 9.0.0
       '@types/node': 18.0.6
       '@typescript-eslint/eslint-plugin': 5.30.7_6wltbjakwuqm7awqswigmiuhd4
       '@typescript-eslint/parser': 5.30.7_he2ccbldppg44uulnyq4rwocfa
@@ -64,7 +64,7 @@ importers:
       eslint-plugin-prettier: 4.2.1_g4fztgbwjyq2fvmcscny2sj6fy
       execa: 6.1.0
       husky: 8.0.1
-      inquirer: 9.0.2
+      inquirer: 9.1.0
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.5.0
       npm-check-updates: 16.0.0
@@ -1984,8 +1984,8 @@ packages:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
     dev: true
 
-  /@types/inquirer/8.2.1:
-    resolution: {integrity: sha512-wKW3SKIUMmltbykg4I5JzCVzUhkuD9trD6efAmYgN2MrSntY0SMRQzEnD3mkyJ/rv9NLbTC7g3hKKE86YwEDLw==}
+  /@types/inquirer/9.0.0:
+    resolution: {integrity: sha512-4sncHTq3AWbLWZOs83DQlrKxhdehs2AW79Dp1amoGGc6B+oJal7fQJa/EO1Taa5CQLSywEMAgw2SFB1fZIX3PQ==}
     dependencies:
       '@types/through': 0.0.30
       rxjs: 7.5.6
@@ -5691,8 +5691,8 @@ packages:
       wrap-ansi: 7.0.0
     dev: true
 
-  /inquirer/9.0.2:
-    resolution: {integrity: sha512-AqmDHmz3bIe573OiM4svTZzajBzff1xpuzYAimW8gjzW5ncuPllWB8t/GKl+NSuKRJaKyIF2bU2RCx8H1dwqyQ==}
+  /inquirer/9.1.0:
+    resolution: {integrity: sha512-eukdjrBljg9t55ZnvJjvGi1OyYEzVBFsO/8o5d2MV3mc28u3x4X2kS4eJ/+9U10KiREfPkEBSeCrU/S2G/uRtw==}
     engines: {node: '>=12.0.0'}
     dependencies:
       ansi-escapes: 5.0.0
