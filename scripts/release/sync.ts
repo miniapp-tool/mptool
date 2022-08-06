@@ -7,7 +7,9 @@ const packages = readdirSync(packagesDir);
 
 export const sync = (): Promise<void[]> => {
   const promises = packages.map((packageName) => {
-    return import(`../../packages/${packageName}/package.json`).then(
+    return import(`../../packages/${packageName}/package.json`, {
+      assert: { type: "json" },
+    }).then(
       (content: Record<string, unknown>) =>
         new Promise<void>((resolve) => {
           get(`https://npmmirror.com/sync/${content.name as string}`).on(
