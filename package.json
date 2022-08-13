@@ -85,5 +85,5 @@
     "vite": "2.9.15",
     "vitest": "0.21.0"
   },
-  "packageManager": "pnpm@7.8.0"
+  "packageManager": "pnpm@7.9.0"
 }
