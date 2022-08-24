@@ -9,7 +9,7 @@ importers:
       '@rollup/plugin-commonjs': 22.0.2
       '@rollup/plugin-json': 4.1.0
       '@rollup/plugin-node-resolve': 13.3.0
-      '@rollup/plugin-typescript': 8.3.4
+      '@rollup/plugin-typescript': 8.4.0
       '@types/inquirer': 9.0.0
       '@types/node': 18.6.4
       '@typescript-eslint/eslint-plugin': 5.33.0
@@ -48,7 +48,7 @@ importers:
       '@rollup/plugin-commonjs': 22.0.2_rollup@2.77.3
       '@rollup/plugin-json': 4.1.0_rollup@2.77.3
       '@rollup/plugin-node-resolve': 13.3.0_rollup@2.77.3
-      '@rollup/plugin-typescript': 8.3.4_z6zeof5eklcd4ck5cj6ien7gzy
+      '@rollup/plugin-typescript': 8.4.0_z6zeof5eklcd4ck5cj6ien7gzy
       '@types/inquirer': 9.0.0
       '@types/node': 18.6.4
       '@typescript-eslint/eslint-plugin': 5.33.0_njno5y7ry2l2lcmiu4tywxkwnq
@@ -1854,8 +1854,8 @@ packages:
       rollup: 2.77.2
     dev: true
 
-  /@rollup/plugin-typescript/8.3.4_z6zeof5eklcd4ck5cj6ien7gzy:
-    resolution: {integrity: sha512-wt7JnYE9antX6BOXtsxGoeVSu4dZfw0dU3xykfOQ4hC3EddxRbVG/K0xiY1Wup7QOHJcjLYXWAn0Kx9Z1SBHHg==}
+  /@rollup/plugin-typescript/8.4.0_z6zeof5eklcd4ck5cj6ien7gzy:
+    resolution: {integrity: sha512-QssfoOP6V4/6skX12EfOW5UzJAv/c334F4OJWmQpe2kg3agEa0JwVCckwmfuvEgDixyX+XyxjFenH7M2rDKUyQ==}
     engines: {node: '>=8.0.0'}
     peerDependencies:
       rollup: ^2.14.0
@@ -3651,8 +3651,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      is-text-path: 1.0.1
       JSONStream: 1.3.5
+      is-text-path: 1.0.1
       lodash: 4.17.21
       meow: 8.1.2
       split2: 3.2.2
