@@ -17,7 +17,10 @@ import type { PageConstructor, PageOptions, PageQuery } from "./typings";
 
 let hasPageLoaded = false;
 
-export const $Page: PageConstructor = <Data, Custom>(
+export const $Page: PageConstructor = <
+  Data extends Record<string, any>,
+  Custom extends Record<string, any>
+>(
   name: string,
   options: PageOptions<Data, Custom>
 ): void => {

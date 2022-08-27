@@ -87,9 +87,9 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> =>
  */
 const getPage = <
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data = Record<string, any>,
+  Data extends Record<string, any> = Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Custom = Record<string, any>
+  Custom extends Record<string, any> = Record<string, any>
 >(): PageInstance<Data, Custom> =>
   getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
@@ -144,7 +144,10 @@ export function bind(
  *
  * @param ctx 需要挂载页面的指针
  */
-export function mount<Data, Custom>(
+export function mount<
+  Data extends Record<string, any>,
+  Custom extends Record<string, any>
+>(
   ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>
 ): void;
 

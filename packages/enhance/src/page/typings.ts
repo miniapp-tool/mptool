@@ -84,8 +84,10 @@ export interface ExtendedPageProperties {
   $refs: RefMap;
 }
 
-export interface ExtendedPageMethods<Data, Custom>
-  extends InstanceEmitterMethods,
+export interface ExtendedPageMethods<
+  Data extends Record<string, any>,
+  Custom extends Record<string, any>
+> extends InstanceEmitterMethods,
     NavigatorMethods {
   /**
    * 绑定组件函数
