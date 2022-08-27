@@ -1,6 +1,6 @@
 {
   "name": "@mptool/mock",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "API mock for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",

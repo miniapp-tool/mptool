@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+### [0.1.1](https://miniapp-tool///compare/v0.1.0...v0.1.1) (2022-08-27)
+
+
+### Features
+
+* update types ([8a6901e](https://miniapp-tool///commit/8a6901e0d1c989d55b5810070820de569634440d))
+
 ## [0.1.0](https://miniapp-tool///compare/v0.0.1-beta.1...v0.1.0) (2022-08-27)
 
 ## [0.0.1-beta.1](https://miniapp-tool///compare/v0.0.1-alpha.18...v0.0.1-beta.1) (2022-05-12)
