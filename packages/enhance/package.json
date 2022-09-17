@@ -34,7 +34,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "3.5.0",
+    "miniprogram-api-typings": "3.6.0",
     "rimraf": "3.0.2",
     "rollup": "2.78.1"
   },

@@ -69,7 +69,7 @@
     "husky": "8.0.1",
     "inquirer": "9.1.0",
     "lint-staged": "13.0.3",
-    "miniprogram-api-typings": "3.5.0",
+    "miniprogram-api-typings": "3.6.0",
     "npm-check-updates": "16.0.6",
     "ora": "6.1.2",
     "prettier": "2.7.1",
