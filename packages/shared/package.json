@@ -37,7 +37,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "rimraf": "3.0.2",
-    "rollup": "2.78.1"
+    "rollup": "2.79.1"
   },
   "publishConfig": {
     "access": "public"
