@@ -110,4 +110,6 @@ export default defineUserConfig({
       },
     }),
   ],
+
+  shouldPrefetch: false,
 });
