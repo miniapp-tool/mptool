@@ -27,6 +27,9 @@ jobs:
       - name: Build docs
         run: pnpm docs:build
 
+      - name: Add .nojekyll
+        run: echo > docs/.vuepress/dist/.nojekyll
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
