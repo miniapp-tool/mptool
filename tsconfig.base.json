@@ -15,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "inlineSourceMap": false,
-    "inlineSources": false,
+    "inlineSources": true,
     "lib": ["ESNext"],
     "listEmittedFiles": false,
     "module": "ESNext",

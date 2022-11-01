@@ -1,8 +1,0 @@
-# Source Files
-src/
-
-# Rollup config
-rollup.config.js
-
-# TypeScript config
-tsconfig.*
