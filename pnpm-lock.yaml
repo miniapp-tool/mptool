@@ -32,7 +32,7 @@ importers:
       ora: 6.1.2
       prettier: 2.7.1
       rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3
+      rollup-plugin-dts: 5.0.0
       rollup-plugin-terser: 7.0.2
       sort-package-json: 2.0.0
       standard-version: 9.5.0
@@ -71,7 +71,7 @@ importers:
       ora: 6.1.2
       prettier: 2.7.1
       rollup: 2.79.1
-      rollup-plugin-dts: 4.2.3_gypgyaqhine6mwjfvh7icfhviq
+      rollup-plugin-dts: 5.0.0_gypgyaqhine6mwjfvh7icfhviq
       rollup-plugin-terser: 7.0.2_rollup@2.79.1
       sort-package-json: 2.0.0
       standard-version: 9.5.0
@@ -8729,11 +8729,11 @@ packages:
     resolution: {integrity: sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==}
     dev: true
 
-  /rollup-plugin-dts/4.2.3_gypgyaqhine6mwjfvh7icfhviq:
-    resolution: {integrity: sha512-jlcpItqM2efqfIiKzDB/IKOS9E9fDvbkJSGw5GtK/PqPGS9eC3R3JKyw2VvpTktZA+TNgJRMu1NTv244aTUzzQ==}
-    engines: {node: '>=v12.22.12'}
+  /rollup-plugin-dts/5.0.0_gypgyaqhine6mwjfvh7icfhviq:
+    resolution: {integrity: sha512-OO8ayCvuJCKaQSShyVTARxGurVVk4ulzbuvz+0zFd1f93vlnWFU5pBMT7HFeS6uj7MvvZLx4kUAarGATSU1+Ng==}
+    engines: {node: '>=v14'}
     peerDependencies:
-      rollup: ^2.55
+      rollup: ^3.0.0
       typescript: ^4.1
     dependencies:
       magic-string: 0.26.7
