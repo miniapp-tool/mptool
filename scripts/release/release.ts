@@ -1,7 +1,7 @@
-import chalk from "chalk";
 import { execaCommand } from "execa";
-import ora from "ora";
 import inquirer from "inquirer";
+import ora from "ora";
+import picocolors from "picocolors";
 import pkg from "../../package.json" assert { type: "json" };
 import { sync } from "./sync.js";
 
@@ -11,7 +11,7 @@ const { prompt } = inquirer;
 const tags = ["next", "test", "alpha", "beta", "latest"];
 
 export const release = async (): Promise<void> => {
-  ora(`Current version: ${chalk.green(currentVersion)}`).info();
+  ora(`Current version: ${picocolors.green(currentVersion)}`).info();
 
   const { npmTag } = await prompt<{ npmTag: string }>([
     {

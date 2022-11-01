@@ -24,6 +24,7 @@ export const rollupTypescript = (
         format: "cjs",
         sourcemap: true,
         exports: "named",
+        inlineDynamicImports,
         plugins: [
           ...(isProduction ? [terser({ format: { comments: false } })] : []),
         ],
@@ -33,6 +34,7 @@ export const rollupTypescript = (
         format: "esm",
         sourcemap: true,
         exports: "named",
+        inlineDynamicImports,
         plugins: [
           ...(isProduction ? [terser({ format: { comments: false } })] : []),
         ],
@@ -42,7 +44,6 @@ export const rollupTypescript = (
       typescript(tsconfig),
       ...(resolve ? [nodeResolve(), commonjs()] : []),
     ],
-    inlineDynamicImports,
     external,
   },
   {
