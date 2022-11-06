@@ -34,7 +34,7 @@ importers:
       rollup: 3.2.5
       rollup-plugin-dts: 5.0.0
       rollup-plugin-terser: 7.0.2
-      sort-package-json: 2.0.0
+      sort-package-json: 2.1.0
       standard-version: 9.5.0
       ts-node: 10.9.1
       tsd: 0.24.1
@@ -73,7 +73,7 @@ importers:
       rollup: 3.2.5
       rollup-plugin-dts: 5.0.0_oa2candk7eitu7usnsurwiyuuu
       rollup-plugin-terser: 7.0.2_rollup@3.2.5
-      sort-package-json: 2.0.0
+      sort-package-json: 2.1.0
       standard-version: 9.5.0
       ts-node: 10.9.1_cbe7ovvae6zqfnmtgctpgpys54
       tsd: 0.24.1
@@ -8270,8 +8270,8 @@ packages:
     resolution: {integrity: sha512-855pvK+VkU7PaKYPc+Jjnmt4EzejQHyhhF33q31qG8x7maDzkeFhAAThdCYay11CISO+qAMwjOBP+fPZe0IPyg==}
     dev: true
 
-  /sort-package-json/2.0.0:
-    resolution: {integrity: sha512-71AZsHsf33oC8Pa0/4/6eo1IufgLfibqxTXTA3bfeicx8gba7kDc5Cofy2YHWrH/cV8nfXSQeMNpGliR07oEHA==}
+  /sort-package-json/2.1.0:
+    resolution: {integrity: sha512-M5ctkdnn7znAkoVQJ0Y+PHDUieyXMhydPyW7r2J9ZM0Iwc3BTyEf5cmoSRfHNo07FEvzWwnphcP7GlrAX164UQ==}
     hasBin: true
     dependencies:
       detect-indent: 7.0.1
