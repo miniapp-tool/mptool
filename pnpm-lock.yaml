@@ -10,7 +10,7 @@ importers:
       '@rollup/plugin-json': 5.0.1
       '@rollup/plugin-node-resolve': 15.0.1
       '@rollup/plugin-typescript': 9.0.2
-      '@types/inquirer': 9.0.2
+      '@types/inquirer': 9.0.3
       '@types/node': 18.11.9
       '@typescript-eslint/eslint-plugin': 5.42.0
       '@typescript-eslint/parser': 5.42.0
@@ -49,7 +49,7 @@ importers:
       '@rollup/plugin-json': 5.0.1_rollup@3.2.5
       '@rollup/plugin-node-resolve': 15.0.1_rollup@3.2.5
       '@rollup/plugin-typescript': 9.0.2_skqhbvp355vci76ty3pdffvjrq
-      '@types/inquirer': 9.0.2
+      '@types/inquirer': 9.0.3
       '@types/node': 18.11.9
       '@typescript-eslint/eslint-plugin': 5.42.0_6xw5wg2354iw4zujk2f3vyfrzu
       '@typescript-eslint/parser': 5.42.0_wyqvi574yv7oiwfeinomdzmc3m
@@ -2041,8 +2041,8 @@ packages:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
     dev: true
 
-  /@types/inquirer/9.0.2:
-    resolution: {integrity: sha512-MQc3adiIh/rDxLkjnvL03rSvuHg+/dKif4dn/MRsnE+oU1bAdyuDbW0w+ewR1M/M/u/Z0YAbw7NZYCpgQ5SW8A==}
+  /@types/inquirer/9.0.3:
+    resolution: {integrity: sha512-CzNkWqQftcmk2jaCWdBTf9Sm7xSw4rkI1zpU/Udw3HX5//adEZUIm9STtoRP1qgWj0CWQtJ9UTvqmO2NNjhMJw==}
     dependencies:
       '@types/through': 0.0.30
       rxjs: 7.5.7
@@ -2126,7 +2126,7 @@ packages:
   /@types/sax/1.2.4:
     resolution: {integrity: sha512-pSAff4IAxJjfAXUG6tFkO7dsSbTmf8CtUpfhhZ5VhkRpC4628tJhh3+V6H1E+/Gs9piSzYKT5yzHO5M4GG9jkw==}
     dependencies:
-      '@types/node': 17.0.45
+      '@types/node': 18.11.9
     dev: true
 
   /@types/semver/7.3.13:
