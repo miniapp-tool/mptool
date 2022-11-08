@@ -27,7 +27,7 @@ importers:
       inquirer: 9.1.4
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.6.0
-      npm-check-updates: 16.3.16
+      npm-check-updates: 16.3.18
       ora: 6.1.2
       picocolors: 1.0.0
       prettier: 2.7.1
@@ -66,7 +66,7 @@ importers:
       inquirer: 9.1.4
       lint-staged: 13.0.3
       miniprogram-api-typings: 3.6.0
-      npm-check-updates: 16.3.16
+      npm-check-updates: 16.3.18
       ora: 6.1.2
       picocolors: 1.0.0
       prettier: 2.7.1
@@ -1758,6 +1758,7 @@ packages:
   /@npmcli/move-file/2.0.1:
     resolution: {integrity: sha512-mJd2Z5TjYWq/ttPLLGqArdtnC74J6bOzg4rMDnN+p1xTacZ2yPRCk2y0oSWQtygLR9YVQXgOcONrwtnk3JupxQ==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This functionality has been moved to @npmcli/fs
     dependencies:
       mkdirp: 1.0.4
       rimraf: 3.0.2
@@ -1766,6 +1767,7 @@ packages:
   /@npmcli/move-file/3.0.0:
     resolution: {integrity: sha512-mOUBUIXsqAQBfn87vGIjBAve6JmD9PkP9Vdq2SayDqQh2Ol60hnXaBSvT4V6IQiho1otw6SipnVV1fulvOiyKQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    deprecated: This functionality has been moved to @npmcli/fs
     dependencies:
       mkdirp: 1.0.4
       rimraf: 3.0.2
@@ -7083,8 +7085,8 @@ packages:
       npm-normalize-package-bin: 1.0.1
     dev: true
 
-  /npm-check-updates/16.3.16:
-    resolution: {integrity: sha512-OJRfwc2+p0ZnDvZQ4FOou9ev4kI6c0Lmu+uEJjijCNUSXnf5AEpyB6+kX31HsmkDzQ10ApA4CvM1TE+rXP+R8g==}
+  /npm-check-updates/16.3.18:
+    resolution: {integrity: sha512-J4qOkWti3D3mDNbo1D7oBEWtSct+HxwU1rRXJyMEPOrkyEXssc1KS7pgvtsXFO8QMtSg7dLyxyi8stLC7ym4+g==}
     engines: {node: '>=14.14'}
     hasBin: true
     dependencies:
