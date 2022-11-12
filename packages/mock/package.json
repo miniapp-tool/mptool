@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "rimraf": "3.0.2",
-    "rollup": "3.2.5"
+    "rollup": "3.3.0"
   },
   "publishConfig": {
     "access": "public"
