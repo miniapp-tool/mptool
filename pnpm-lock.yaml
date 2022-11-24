@@ -30,7 +30,7 @@ importers:
       npm-check-updates: 16.3.18
       ora: 6.1.2
       picocolors: 1.0.0
-      prettier: 2.7.1
+      prettier: 2.8.0
       rollup: 3.3.0
       rollup-plugin-dts: 5.0.0
       rollup-plugin-terser: 7.0.2
@@ -60,7 +60,7 @@ importers:
       cz-conventional-changelog: 3.3.0
       eslint: 8.27.0
       eslint-config-prettier: 8.5.0_eslint@8.27.0
-      eslint-plugin-prettier: 4.2.1_v7o5sx5x3wbs57ifz6wc4f76we
+      eslint-plugin-prettier: 4.2.1_2nbgrxrkm4eifnvca45lk46lbi
       execa: 6.1.0
       husky: 8.0.2
       inquirer: 9.1.4
@@ -69,7 +69,7 @@ importers:
       npm-check-updates: 16.3.18
       ora: 6.1.2
       picocolors: 1.0.0
-      prettier: 2.7.1
+      prettier: 2.8.0
       rollup: 3.3.0
       rollup-plugin-dts: 5.0.0_aoc4guvlpr5bfeyf2nus4ubkpu
       rollup-plugin-terser: 7.0.2_rollup@3.3.0
@@ -5035,7 +5035,7 @@ packages:
       supports-hyperlinks: 2.3.0
     dev: true
 
-  /eslint-plugin-prettier/4.2.1_v7o5sx5x3wbs57ifz6wc4f76we:
+  /eslint-plugin-prettier/4.2.1_2nbgrxrkm4eifnvca45lk46lbi:
     resolution: {integrity: sha512-f/0rXLXUt0oFYs8ra4w49wYZBG5GKZpAYsJSm6rnYL5uVDjd+zowwMwVZHnAjf4edNrKpCDYfXDgmRE/Ak7QyQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -5048,7 +5048,7 @@ packages:
     dependencies:
       eslint: 8.27.0
       eslint-config-prettier: 8.5.0_eslint@8.27.0
-      prettier: 2.7.1
+      prettier: 2.8.0
       prettier-linter-helpers: 1.0.0
     dev: true
 
@@ -7730,8 +7730,8 @@ packages:
       fast-diff: 1.2.0
     dev: true
 
-  /prettier/2.7.1:
-    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+  /prettier/2.8.0:
+    resolution: {integrity: sha512-9Lmg8hTFZKG0Asr/kW9Bp8tJjRVluO8EJQVfY2T7FMw9T5jy4I/Uvx0Rca/XWf50QQ1/SS48+6IJWnrb+2yemA==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
