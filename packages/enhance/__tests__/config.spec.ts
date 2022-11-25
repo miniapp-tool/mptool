@@ -1,6 +1,6 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
-import { $Config, getConfig } from "../src/config";
+import { $Config, getConfig } from "../src/config/index.js";
 
 describe("$Config Test", () => {
   it("Should work when only have 'defaultRoute'", () => {
