@@ -1,8 +1,8 @@
 import { logger, wrapFunction } from "@mptool/shared";
-import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant";
-import { appEmitter, userEmitter } from "../emitter";
+import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
+import { appEmitter, userEmitter } from "../emitter/index.js";
 
-import type { AppConstructor, AppOptions } from "./typings";
+import type { AppConstructor, AppOptions } from "./typings.js";
 
 export const appState = {
   /** 是否已启动 */

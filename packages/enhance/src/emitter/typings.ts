@@ -1,4 +1,4 @@
-import type { UserEmitter } from "./emitter";
+import type { UserEmitter } from "./emitter.js";
 
 export interface InstanceEmitterMethods {
   /**

@@ -1,5 +1,5 @@
 import { logger } from "@mptool/shared";
-import type { AppConfig } from "./typings";
+import type { AppConfig } from "./typings.js";
 
 export interface Config extends Omit<AppConfig, "defaultRoute" | "routeMap"> {
   /**

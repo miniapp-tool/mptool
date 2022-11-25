@@ -1,8 +1,8 @@
-import { bind } from "../bridge";
+import { bind } from "../bridge.js";
 
-import type { RefMap } from "../component";
-import type { InstanceEmitterMethods } from "../emitter";
-import type { NavigatorMethods } from "../navigator";
+import type { RefMap } from "../component/index.js";
+import type { InstanceEmitterMethods } from "../emitter/index.js";
+import type { NavigatorMethods } from "../navigator/index.js";
 
 export interface PageQuery {
   [props: string]: string;

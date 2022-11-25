@@ -1,9 +1,9 @@
 export * from "@mptool/shared";
-export { $App } from "./app";
-export { $Config } from "./config";
-export { $Component } from "./component";
-export { userEmitter as emitter } from "./emitter";
-export { $Page } from "./page";
+export { $App } from "./app/index.js";
+export { $Config } from "./config/index.js";
+export { $Component } from "./component/index.js";
+export { userEmitter as emitter } from "./emitter/index.js";
+export { $Page } from "./page/index.js";
 
 export type {
   Emitter,
@@ -20,9 +20,9 @@ export type {
   AppOptions,
   ExtendsAppOptions,
   ExtendedAppMethods,
-} from "./app";
-export type { AppConfig } from "./config";
-export {
+} from "./app/index.js";
+export type { AppConfig } from "./config/index.js";
+export type {
   ComponentConstructor,
   ComponentInstance,
   ComponentOptions,
@@ -33,7 +33,7 @@ export {
   TrivalComponentOptions,
   RefMap,
   PropType,
-} from "./component";
+} from "./component/index.js";
 export type {
   PageConstructor,
   PageOptions,
@@ -42,4 +42,4 @@ export type {
   PageState,
   TrivalPageOptions,
   TrivialPageInstance,
-} from "./page";
+} from "./page/index.js";

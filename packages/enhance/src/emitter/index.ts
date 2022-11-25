@@ -1,2 +1,2 @@
-export * from "./emitter";
-export * from "./typings";
+export * from "./emitter.js";
+export * from "./typings.js";

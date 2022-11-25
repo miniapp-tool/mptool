@@ -1,5 +1,5 @@
-import type { TrivalComponentOptions } from "../component";
-import type { TrivalPageOptions } from "../page";
+import type { TrivalComponentOptions } from "../component/index.js";
+import type { TrivalPageOptions } from "../page/index.js";
 
 export interface AppConfig {
   /**

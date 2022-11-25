@@ -1,3 +1,3 @@
-export * from "./component";
-export * from "./store";
-export * from "./typings";
+export * from "./component.js";
+export * from "./store.js";
+export * from "./typings.js";

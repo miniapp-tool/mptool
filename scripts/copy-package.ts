@@ -1,5 +1,5 @@
-import { rmSync } from "fs";
-import { copy } from "./copy";
+import { rmSync } from "node:fs";
+import { copy } from "./copy.js";
 
 const parentFolderPath = "./demo/node_modules/@mptool";
 

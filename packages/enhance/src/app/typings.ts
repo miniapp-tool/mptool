@@ -1,4 +1,4 @@
-import type { InstanceEmitterMethods } from "../emitter";
+import type { InstanceEmitterMethods } from "../emitter/index.js";
 
 export interface ExtendsAppOptions {
   /**

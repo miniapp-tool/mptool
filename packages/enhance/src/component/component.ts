@@ -1,8 +1,8 @@
 import { logger, wrapFunction } from "@mptool/shared";
-import { getRef, setRef, removeRef } from "./store";
-import { bind, mount } from "../bridge";
-import { getConfig } from "../config";
-import { TrivialPageInstance } from "../page";
+import { getRef, setRef, removeRef } from "./store.js";
+import { bind, mount } from "../bridge.js";
+import { getConfig } from "../config/index.js";
+import { TrivialPageInstance } from "../page/index.js";
 
 import type {
   ComponentConstructor,
@@ -11,7 +11,7 @@ import type {
   PropsOptions,
   TrivalComponentInstance,
   TrivalComponentOptions,
-} from "./typings";
+} from "./typings.js";
 
 let componentIndex = 0;
 

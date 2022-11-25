@@ -4,10 +4,10 @@ import {
   ON_APP_AWAKE,
   ON_PAGE_READY,
   ON_PAGE_UNLOAD,
-} from "../constant";
+} from "../constant.js";
 
 import type { EmitterInstance } from "@mptool/shared";
-import type { PageQuery } from "../page";
+import type { PageQuery } from "../page/index.js";
 
 export type AppEventType = {
   [ON_APP_LAUNCH]: WechatMiniprogram.App.LaunchShowOption;

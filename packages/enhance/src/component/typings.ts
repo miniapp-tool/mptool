@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { InstanceEmitterMethods } from "../emitter";
-import type { ExtendedPageMethods, TrivialPageInstance } from "../page";
+import type { InstanceEmitterMethods } from "../emitter/index.js";
+import type {
+  ExtendedPageMethods,
+  TrivialPageInstance,
+} from "../page/index.js";
 
 export type Props = Record<string, unknown>;
 

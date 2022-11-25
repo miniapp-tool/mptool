@@ -4,5 +4,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["node", "miniprogram-api-typings"]
   },
-  "include": ["packages/**/src/*.ts"]
+  "include": ["**/*.ts"]
 }

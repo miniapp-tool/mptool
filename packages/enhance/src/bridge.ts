@@ -1,8 +1,8 @@
 import { getRef } from "./component/store";
-import { getConfig } from "./config";
-import { ON_PAGE_PRELOAD } from "./constant";
-import { routeEmitter, userEmitter } from "./emitter";
-import { getPathDetail, getTrigger } from "./navigator";
+import { getConfig } from "./config/index.js";
+import { ON_PAGE_PRELOAD } from "./constant.js";
+import { routeEmitter, userEmitter } from "./emitter/index.js";
+import { getPathDetail, getTrigger } from "./navigator/index.js";
 
 import type {
   ComponentOptions,

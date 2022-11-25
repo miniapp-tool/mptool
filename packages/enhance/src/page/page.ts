@@ -1,7 +1,7 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import { appState } from "../app";
-import { mount } from "../bridge";
+import { appState } from "../app/index.js";
+import { mount } from "../bridge.js";
 import {
   ON_APP_AWAKE,
   ON_APP_LAUNCH,
@@ -9,11 +9,11 @@ import {
   ON_PAGE_PRELOAD,
   ON_PAGE_READY,
   ON_PAGE_UNLOAD,
-} from "../constant";
-import { getConfig } from "../config";
-import { appEmitter, routeEmitter } from "../emitter";
+} from "../constant.js";
+import { getConfig } from "../config/index.js";
+import { appEmitter, routeEmitter } from "../emitter/index.js";
 
-import type { PageConstructor, PageOptions, PageQuery } from "./typings";
+import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
 
 let hasPageLoaded = false;
 

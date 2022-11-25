@@ -1,6 +1,6 @@
-import { readdirSync } from "fs";
-import { get } from "https";
-import { resolve } from "path";
+import { readdirSync } from "node:fs";
+import { get } from "node:https";
+import { resolve } from "node:path";
 
 const packagesDir = resolve(process.cwd(), "packages");
 const packages = readdirSync(packagesDir);

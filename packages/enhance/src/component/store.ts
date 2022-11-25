@@ -1,4 +1,4 @@
-import type { TrivalComponentInstance } from "./typings";
+import type { TrivalComponentInstance } from "./typings.js";
 
 const componentRefs: Record<number, TrivalComponentInstance> = {};
 

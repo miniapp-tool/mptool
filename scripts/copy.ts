@@ -1,5 +1,5 @@
-import { copyFileSync, mkdirSync, readdirSync, statSync } from "fs";
-import { dirname } from "path";
+import { copyFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { dirname } from "node:path";
 
 export const ensureDirExistSync = (dirPath: string): void => {
   try {

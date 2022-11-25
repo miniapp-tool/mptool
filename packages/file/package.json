@@ -29,7 +29,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "clean": "rimraf ./lib",
     "dev": "rollup -c -w"
   },

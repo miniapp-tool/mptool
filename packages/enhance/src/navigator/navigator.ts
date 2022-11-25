@@ -1,9 +1,13 @@
 import { query } from "@mptool/shared";
-import { getConfig } from "../config";
-import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../constant";
-import { appEmitter, routeEmitter } from "../emitter";
+import { getConfig } from "../config/index.js";
+import {
+  ON_PAGE_NAVIGATE,
+  ON_PAGE_READY,
+  ON_PAGE_UNLOAD,
+} from "../constant.js";
+import { appEmitter, routeEmitter } from "../emitter/index.js";
 
-import type { PageQuery } from "../page";
+import type { PageQuery } from "../page/index.js";
 
 export interface NavigatorTriggerOptions {
   fullPath: string;
