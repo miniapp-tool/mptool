@@ -38,9 +38,7 @@
     "miniprogram-api-typings": "^3.6.0"
   },
   "devDependencies": {
-    "@mptool/mock": "workspace:*",
-    "rimraf": "3.0.2",
-    "rollup": "3.4.0"
+    "@mptool/mock": "workspace:*"
   },
   "publishConfig": {
     "access": "public"
