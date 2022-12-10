@@ -57,7 +57,10 @@ export const rollupTypescript = (
   },
   {
     input: `./src/${filePath}.ts`,
-    output: [{ file: `./lib/${filePath}.d.ts`, format: "esm" as ModuleFormat }],
+    output: [
+      { file: `./lib/${filePath}.d.cts`, format: "esm" as ModuleFormat },
+      { file: `./lib/${filePath}.d.mts`, format: "esm" as ModuleFormat },
+    ],
     plugins: [
       dts({
         compilerOptions: {

@@ -23,9 +23,9 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mrhope.site"
   },
-  "main": "lib/index.js",
+  "main": "lib/index.cjs",
   "module": "lib/index.mjs",
-  "types": "lib/index.d.ts",
+  "types": "lib/index.d.cts",
   "files": [
     "lib"
   ],
@@ -36,10 +36,6 @@
   },
   "dependencies": {
     "miniprogram-api-typings": "^3.6.0"
-  },
-  "devDependencies": {
-    "rimraf": "3.0.2",
-    "rollup": "3.4.0"
   },
   "publishConfig": {
     "access": "public"

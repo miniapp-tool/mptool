@@ -22,9 +22,9 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mrhope.site"
   },
-  "main": "lib/index.js",
+  "main": "lib/index.cjs",
   "module": "lib/index.mjs",
-  "types": "lib/index.d.ts",
+  "types": "lib/index.d.cts",
   "files": [
     "lib"
   ],
@@ -35,9 +35,7 @@
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "@mptool/shared": "workspace:*",
-    "rimraf": "3.0.2",
-    "rollup": "3.4.0"
+    "@mptool/shared": "workspace:*"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^3.4.4"
