@@ -8,7 +8,7 @@ import { sync } from "./sync.js";
 const { version: currentVersion } = pkg;
 const { prompt } = inquirer;
 
-const tags = ["next", "test", "alpha", "beta", "latest"];
+const tags = ["latest", "alpha", "beta", "next", "test"];
 
 export const release = async (): Promise<void> => {
   ora(`Current version: ${picocolors.green(currentVersion)}`).info();

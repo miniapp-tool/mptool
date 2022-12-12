@@ -25,7 +25,7 @@
     "lint:prettier": "prettier --check --write .",
     "release": "pnpm release:bump && pnpm clean && pnpm build && pnpm release:publish",
     "release:bump": "bumpp package.json demo/package.json docs/package.json packages/*/package.json --execute=\"pnpm standard-version --skip.bump --skip.commit --skip.tag && git add CHANGELOG.md\" --commit \"chore(release): publish v%s\" --all --tag --push",
-    "release:publish": "cross-env NODE_OPTIONS=\"--experimental-json-modules\" ts-node-esm  -O {\\\"module\\\":\\\"ESNext\\\"} scripts/release",
+    "release:publish": "cross-env NODE_OPTIONS=\"--experimental-json-modules\" tsx scripts/release/index.ts",
     "test": "vitest run && pnpm -r --stream run tsd"
   },
   "lint-staged": {
@@ -44,6 +44,9 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "tsx": "^3.12.1"
   },
   "devDependencies": {
     "@commitlint/cli": "17.3.0",
