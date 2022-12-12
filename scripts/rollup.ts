@@ -30,7 +30,7 @@ export const rollupTypescript = (
     input: `./src/${filePath}.ts`,
     output: [
       {
-        file: `./lib/${filePath}.cjs`,
+        file: `./lib/${filePath}.js`,
         format: "cjs",
         sourcemap: true,
         exports: "named",
@@ -58,7 +58,7 @@ export const rollupTypescript = (
   {
     input: `./src/${filePath}.ts`,
     output: [
-      { file: `./lib/${filePath}.d.cts`, format: "esm" as ModuleFormat },
+      { file: `./lib/${filePath}.d.ts`, format: "esm" as ModuleFormat },
       { file: `./lib/${filePath}.d.mts`, format: "esm" as ModuleFormat },
     ],
     plugins: [

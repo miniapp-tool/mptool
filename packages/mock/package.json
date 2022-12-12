@@ -23,9 +23,9 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mrhope.site"
   },
-  "main": "lib/index.cjs",
-  "module": "lib/index.mjs",
-  "types": "lib/index.d.cts",
+  "main": "./lib/index,js",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
   "files": [
     "lib"
   ],
