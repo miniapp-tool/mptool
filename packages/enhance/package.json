@@ -34,9 +34,11 @@
     "dev": "rollup -c -w",
     "tsd": "tsd"
   },
+  "dependencies": {
+    "@mptool/shared": "workspace:*"
+  },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "3.6.0"
   },
   "publishConfig": {
