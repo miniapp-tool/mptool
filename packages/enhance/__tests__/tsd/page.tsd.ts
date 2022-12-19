@@ -84,7 +84,7 @@ $Page("example", {
   onUnload() {},
   onPullDownRefresh() {},
   onShareAppMessage(res) {
-    expectType<string>(res.from);
+    expectType<"button" | "menu">(res.from);
     if (res.from === "button") {
       expectType<string | undefined>(res.webViewUrl);
     }

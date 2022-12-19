@@ -38,7 +38,7 @@
     "@mptool/shared": "workspace:*"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.4.4"
+    "miniprogram-api-typings": "^3.8.1"
   },
   "publishConfig": {
     "access": "public"
