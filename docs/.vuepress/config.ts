@@ -1,4 +1,4 @@
-import { searchPlugin } from "@vuepress/plugin-search";
+import { searchProPlugin } from "vuepress-plugin-search-pro";
 import { defineUserConfig } from "vuepress";
 import { hopeTheme } from "vuepress-theme-hope";
 
@@ -101,15 +101,7 @@ export default defineUserConfig({
     },
   }),
 
-  plugins: [
-    searchPlugin({
-      locales: {
-        "/": {
-          placeholder: "搜索文档",
-        },
-      },
-    }),
-  ],
+  plugins: [searchProPlugin({ indexContent: true })],
 
   shouldPrefetch: false,
 });
