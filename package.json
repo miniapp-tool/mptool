@@ -72,7 +72,7 @@
     "inquirer": "9.1.4",
     "lint-staged": "13.1.0",
     "miniprogram-api-typings": "3.8.1",
-    "npm-check-updates": "16.6.0",
+    "npm-check-updates": "16.6.2",
     "ora": "6.1.2",
     "picocolors": "1.0.0",
     "prettier": "2.8.1",
