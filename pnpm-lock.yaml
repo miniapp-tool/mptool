@@ -26,7 +26,7 @@ importers:
       execa: 6.1.0
       husky: 8.0.3
       inquirer: 9.1.4
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
       nano-staged: 0.8.0
       ora: 6.1.2
       picocolors: 1.0.0
@@ -65,7 +65,7 @@ importers:
       execa: 6.1.0
       husky: 8.0.3
       inquirer: 9.1.4
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
       nano-staged: 0.8.0
       ora: 6.1.2
       picocolors: 1.0.0
@@ -86,13 +86,13 @@ importers:
     specifiers:
       '@mptool/enhance': workspace:*
       '@mptool/file': workspace:*
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
       typescript: 4.9.4
     dependencies:
       '@mptool/enhance': link:../packages/enhance
       '@mptool/file': link:../packages/file
     devDependencies:
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
       typescript: 4.9.4
 
   docs:
@@ -113,12 +113,12 @@ importers:
     specifiers:
       '@mptool/mock': workspace:*
       '@mptool/shared': workspace:*
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
     dependencies:
       '@mptool/shared': link:../shared
     devDependencies:
       '@mptool/mock': link:../mock
-      miniprogram-api-typings: 3.8.1
+      miniprogram-api-typings: 3.9.0
 
   packages/file:
     specifiers:
@@ -6435,6 +6435,11 @@ packages:
 
   /miniprogram-api-typings/3.8.1:
     resolution: {integrity: sha512-AjuBYxghx3LZeTtWQ48TfDMxoACGRUA+NdPrgl+mPPNgi5g0YXn3sDELNHRw0LcjTxfqhVufwLL65AjwT+W+FQ==}
+    dev: false
+
+  /miniprogram-api-typings/3.9.0:
+    resolution: {integrity: sha512-QCXHHW9H4XYazb8J9EMiFyaOWHXhBG4oehkQqi+76FJpKKIlpgL0ZkXxzJ2L+6T/c5OxKm7iegovKIQGVkZDLQ==}
+    dev: true
 
   /mitt/3.0.0:
     resolution: {integrity: sha512-7dX2/10ITVyqh4aOSVI9gdape+t9l2/8QxHrFmUXu4EEUpdlxl6RudZUPZoc+zuY2hk1j7XxVroIVIan/pD/SQ==}
