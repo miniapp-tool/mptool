@@ -81,7 +81,7 @@
     "miniprogram-api-typings": "3.8.1",
     "ora": "6.1.2",
     "picocolors": "1.0.0",
-    "prettier": "2.8.2",
+    "prettier": "2.8.3",
     "rimraf": "3.0.2",
     "rollup": "3.9.1",
     "rollup-plugin-dts": "5.1.1",
