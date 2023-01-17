@@ -65,7 +65,7 @@
     "@typescript-eslint/parser": "5.48.1",
     "bumpp": "8.2.1",
     "c8": "7.12.0",
-    "commit-and-tag-version": "10.1.0",
+    "commit-and-tag-version": "11.0.0",
     "conventional-changelog-cli": "2.2.2",
     "cross-env": "7.0.3",
     "cz-conventional-changelog": "3.3.0",
