@@ -14,6 +14,8 @@ export default defineUserConfig({
   theme: hopeTheme({
     hostname: "https://miniapp-tool.github.io",
 
+    favicon: "/logo.png",
+
     author: {
       name: "Mr.Hope",
       url: "https://mrhope.site",
@@ -85,7 +87,6 @@ export default defineUserConfig({
       },
 
       pwa: {
-        favicon: "/logo.png",
         cachePic: true,
         themeColor: "#07C160",
         manifest: {
