@@ -98,8 +98,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(esbuild@0.17.4)(rollup@3.12.0)
       sort-package-json:
-        specifier: 2.2.0
-        version: 2.2.0
+        specifier: 2.4.1
+        version: 2.4.1
       tsd:
         specifier: 0.25.0
         version: 0.25.0
@@ -7847,8 +7847,8 @@ packages:
     resolution: {integrity: sha512-855pvK+VkU7PaKYPc+Jjnmt4EzejQHyhhF33q31qG8x7maDzkeFhAAThdCYay11CISO+qAMwjOBP+fPZe0IPyg==}
     dev: true
 
-  /sort-package-json@2.2.0:
-    resolution: {integrity: sha512-ux712xsrPqkW+0b51GdmC8QTvImM3wsdip9mNVSQTY9ZV3/1eTAK6jIcQ8Vz9kfN1WHL4wv/pLn89mrqeyQu6A==}
+  /sort-package-json@2.4.1:
+    resolution: {integrity: sha512-Nd3rgLBJcZ4iw7tpuOhwBupG6SvUDU0Fy1cZGAMorA2JmDUb+29Dg5phJK9gapa2Ak9d15w/RuMl/viwX+nKwQ==}
     hasBin: true
     dependencies:
       detect-indent: 7.0.1
