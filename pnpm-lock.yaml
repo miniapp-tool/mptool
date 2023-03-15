@@ -62,8 +62,8 @@ importers:
         specifier: 4.2.1
         version: 4.2.1(eslint-config-prettier@8.7.0)(eslint@8.35.0)(prettier@2.8.4)
       execa:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.1.1
+        version: 7.1.1
       husky:
         specifier: 8.0.3
         version: 8.0.3
@@ -3037,7 +3037,7 @@ packages:
     dependencies:
       '@vuepress/core': 2.0.0-beta.61
       '@vuepress/utils': 2.0.0-beta.61
-      execa: 7.0.0
+      execa: 7.1.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5096,8 +5096,8 @@ packages:
       strip-final-newline: 2.0.0
     dev: true
 
-  /execa@7.0.0:
-    resolution: {integrity: sha512-tQbH0pH/8LHTnwTrsKWideqi6rFB/QNUawEwrn+WHyz7PX1Tuz2u7wfTvbaNBdP5JD5LVWxNo8/A8CHNZ3bV6g==}
+  /execa@7.1.1:
+    resolution: {integrity: sha512-wH0eMf/UXckdUYnO21+HDztteVv05rq2GXksxT4fCGeHkBhw1DROXh40wcjMcRqDOWE7iPJ4n3M7e2+YFP+76Q==}
     engines: {node: ^14.18.0 || ^16.14.0 || >=18.0.0}
     dependencies:
       cross-spawn: 7.0.3
@@ -9223,7 +9223,7 @@ packages:
       '@vueuse/core': 9.13.0(vue@3.2.47)
       cheerio: 1.0.0-rc.12
       dayjs: 1.11.7
-      execa: 7.0.0
+      execa: 7.1.1
       fflate: 0.7.4
       gray-matter: 4.0.3
       semver: 7.3.8
