@@ -87,7 +87,7 @@
     "rollup-plugin-dts": "5.2.0",
     "rollup-plugin-esbuild": "5.0.0",
     "sort-package-json": "2.4.1",
-    "tsd": "0.26.1",
+    "tsd": "0.28.1",
     "tsx": "3.12.5",
     "tslib": "2.5.0",
     "typescript": "4.9.5",
