@@ -29,5 +29,5 @@ features:
     icon: state
     details: 完全打通组件、页面与 APP 之间的通信。你可以几乎在任意位置间进行通信或触发事件
 
-footer: MIT 协议 | Copyright © 2021-present Mr.Hope
+footer: 使用 <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> 主题
 ---
