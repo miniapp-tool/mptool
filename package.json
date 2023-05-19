@@ -89,7 +89,7 @@
     "sort-package-json": "2.4.1",
     "tsd": "0.28.1",
     "tsx": "3.12.7",
-    "tslib": "2.5.0",
+    "tslib": "2.5.2",
     "typescript": "5.0.4",
     "vite": "4.3.6",
     "vitest": "0.31.0"
