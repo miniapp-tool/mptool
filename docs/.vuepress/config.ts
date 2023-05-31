@@ -1,15 +1,12 @@
-import { searchProPlugin } from "vuepress-plugin-search-pro";
+import { cut } from "nodejs-jieba";
 import { defineUserConfig } from "vuepress";
+import { searchProPlugin } from "vuepress-plugin-search-pro";
 import { hopeTheme } from "vuepress-theme-hope";
 
 export default defineUserConfig({
-  locales: {
-    "/": {
-      lang: "zh-CN",
-      title: "MP Tool",
-      description: "极其轻量的小程序框架",
-    },
-  },
+  lang: "zh-CN",
+  title: "MP Tool",
+  description: "极其轻量的小程序框架",
 
   theme: hopeTheme({
     hostname: "https://miniapp-tool.github.io",
@@ -29,80 +26,71 @@ export default defineUserConfig({
 
     docsDir: "docs",
 
-    locales: {
-      "/": {
-        navbar: [
-          "/guide/",
-          {
-            text: "框架",
-            icon: "frame",
-            prefix: "/guide/",
-            children: ["enhance", "file"],
-          },
-          {
-            text: "API",
-            icon: "api",
-            prefix: "/api/",
-            children: ["enhance/", "file/"],
-          },
-        ],
-        sidebar: {
-          "/": [
+    navbar: [
+      "/guide/",
+      {
+        text: "框架",
+        icon: "frame",
+        prefix: "/guide/",
+        children: ["enhance", "file"],
+      },
+      {
+        text: "API",
+        icon: "api",
+        prefix: "/api/",
+        children: ["enhance/", "file/"],
+      },
+    ],
+
+    sidebar: {
+      "/": [
+        {
+          text: "介绍",
+          icon: "creative",
+          prefix: "/guide/",
+          children: ["", "enhance", "file"],
+        },
+        {
+          text: "API",
+          children: [
             {
-              text: "介绍",
-              icon: "creative",
-              prefix: "/guide/",
-              children: ["", "enhance", "file"],
+              text: "Enhance",
+              icon: "tool",
+              prefix: "/api/enhance/",
+              children: ["config", "app", "page", "component", "emitter"],
             },
             {
-              text: "API",
-              children: [
-                {
-                  text: "Enhance",
-                  icon: "tool",
-                  prefix: "/api/enhance/",
-                  children: ["config", "app", "page", "component", "emitter"],
-                },
-                {
-                  text: "File",
-                  icon: "folder",
-                  prefix: "/api/file/",
-                  children: ["file", "storage"],
-                },
-              ],
+              text: "File",
+              icon: "folder",
+              prefix: "/api/file/",
+              children: ["file", "storage"],
             },
           ],
         },
-
-        footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
-
-        displayFooter: true,
-      },
+      ],
     },
+
+    footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
+
+    displayFooter: true,
 
     plugins: {
       mdEnhance: {
         codetabs: true,
         tasklist: true,
       },
-
-      pwa: {
-        cachePic: true,
-        themeColor: "#07C160",
-        manifest: {
-          icons: [
-            {
-              src: "/logo.png",
-              sizes: "200x200",
-              type: "image/png",
-            },
-          ],
-        },
-      },
     },
   }),
 
-  plugins: [searchProPlugin({ indexContent: true })],
+  plugins: [
+    searchProPlugin({
+      indexContent: true,
+      indexOptions: {
+        tokenize: (text, fieldName) =>
+          fieldName === "id" ? [text] : cut(text, true),
+      },
+    }),
+  ],
 
   shouldPrefetch: false,
 });
