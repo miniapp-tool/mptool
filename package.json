@@ -76,7 +76,7 @@
     "eslint-plugin-prettier": "4.2.1",
     "execa": "7.1.1",
     "husky": "8.0.3",
-    "inquirer": "9.2.6",
+    "inquirer": "9.2.7",
     "nano-staged": "0.8.0",
     "miniprogram-api-typings": "3.9.1",
     "ora": "6.3.1",
