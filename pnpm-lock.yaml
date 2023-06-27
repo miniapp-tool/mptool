@@ -108,8 +108,8 @@ importers:
         specifier: 0.28.1
         version: 0.28.1
       tslib:
-        specifier: 2.5.2
-        version: 2.5.2
+        specifier: 2.6.0
+        version: 2.6.0
       tsx:
         specifier: 3.12.7
         version: 3.12.7
@@ -5429,7 +5429,7 @@ packages:
     dependencies:
       '@types/raphael': 2.3.3
       raphael: 2.3.0
-      tslib: 2.5.2
+      tslib: 2.6.0
     dev: true
 
   /for-each@0.3.3:
@@ -8386,7 +8386,7 @@ packages:
   /rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
     dependencies:
-      tslib: 2.5.2
+      tslib: 2.6.0
     dev: true
 
   /sade@1.8.1:
@@ -9053,8 +9053,8 @@ packages:
     resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
     dev: true
 
-  /tslib@2.5.2:
-    resolution: {integrity: sha512-5svOrSA2w3iGFDs1HibEVBGbDrAY82bFQ3HZ3ixB+88nsbsWQoKqDRb5UBYAUPEzbBn6dAp5gRNXglySbx1MlA==}
+  /tslib@2.6.0:
+    resolution: {integrity: sha512-7At1WUettjcSRHXCyYtTselblcHl9PJFFVKiCAy/bY97+BPZXSQ2wbq0P9s8tK2G7dFQfNnlJnPAiArVBVBsfA==}
     dev: true
 
   /tsutils@3.21.0(typescript@5.0.4):
