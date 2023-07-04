@@ -48,7 +48,9 @@ export const rollupTypescript = (
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       ...(resolve ? [nodeResolve(), commonjs() as Plugin] : []),
-      esbuild({ charset: "utf8", minify: isProduction, target: "node14" }),
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      esbuild({ charset: "utf8", minify: isProduction, target: "node16" }),
     ],
     external,
     treeshake: {
