@@ -8,11 +8,11 @@
     "docs:dev": "vuepress dev ."
   },
   "devDependencies": {
-    "@vuepress/client": "2.0.0-beta.62",
+    "@vuepress/client": "2.0.0-beta.64",
     "nodejs-jieba": "0.0.2",
     "vue": "3.3.4",
-    "vuepress": "2.0.0-beta.62",
-    "vuepress-plugin-search-pro": "2.0.0-beta.217",
-    "vuepress-theme-hope": "2.0.0-beta.217"
+    "vuepress": "2.0.0-beta.64",
+    "vuepress-plugin-search-pro": "2.0.0-beta.230",
+    "vuepress-theme-hope": "2.0.0-beta.230"
   }
 }
