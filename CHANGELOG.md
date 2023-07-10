@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.0](https://miniapp-tool///compare/v0.1.6...v0.2.0) (2023-07-10)
+
+
+### Features
+
+* support redirect to home with $back ([8db1275](https://miniapp-tool///commit/8db12757dc64e7f531ff41e426cbc8172e9f6e7b))
+
+
+### Bug Fixes
+
+* fix typos in api name ([34a4cef](https://miniapp-tool///commit/34a4cef6c300655bd7e7f8e6174ac3a6f29c0f1a))
+
 ## [0.1.6](https://miniapp-tool///compare/v0.1.5...v0.1.6) (2023-07-04)
 
 ### [0.1.5](https://miniapp-tool///compare/v0.1.4...v0.1.5) (2022-12-12)
