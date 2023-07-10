@@ -1,6 +1,6 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
-import { get, getAsync, set, setAync } from "../src/index.js";
+import { get, getAsync, set, setAsync } from "../src/index.js";
 
 describe("set", () => {
   it("set sync simple", () => {
@@ -15,7 +15,7 @@ describe("set", () => {
 
   it("set async", () =>
     new Promise<void>((resolve) => {
-      void setAync("data-async", { title: 123 }).then(() => {
+      void setAsync("data-async", { title: 123 }).then(() => {
         expect(get("data-async")).toEqual({ title: 123 });
         resolve();
       });
@@ -23,7 +23,7 @@ describe("set", () => {
 
   it("set expire", () =>
     new Promise<void>((resolve) => {
-      void setAync("data-expire", { title: 123 }, 100).then(() => {
+      void setAsync("data-expire", { title: 123 }, 100).then(() => {
         setTimeout(() => {
           void getAsync("data-expire").then((data) => {
             expect(data).toEqual(undefined);
@@ -35,7 +35,7 @@ describe("set", () => {
 
   it("set expire x2", () =>
     new Promise<void>((resolve) => {
-      void setAync("data-expire-x2", { title: 123 }, 100).then(() => {
+      void setAsync("data-expire-x2", { title: 123 }, 100).then(() => {
         set("data-expire-x2", { title: 456 }, 200);
         setTimeout(() => {
           expect(get("data-expire-x2")).toEqual({ title: 456 });
@@ -46,7 +46,7 @@ describe("set", () => {
 
   it("set expire then update value", () =>
     new Promise<void>((resolve) => {
-      void setAync("data-expire-update", { title: 123 }, 100).then(() => {
+      void setAsync("data-expire-update", { title: 123 }, 100).then(() => {
         set("data-expire-update", { title: 456 }, "keep");
         setTimeout(() => {
           expect(get("data-expire-update")).toEqual(undefined);

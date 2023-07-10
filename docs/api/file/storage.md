@@ -79,12 +79,12 @@
 
 存储数据。
 
-### setAync
+### setAsync
 
 - 类型:
 
   ```ts
-  function setAync<T = unknown>(
+  function setAsync<T = unknown>(
     key: string,
     value: T,
     expire: number | "keep" | "once"

@@ -164,7 +164,7 @@ icon: folder
 
   :::
 
-- `setAync(key, value, expire)`
+- `setAsync(key, value, expire)`
 
   `set` 的异步版本，在设置大量数据时可考虑使用，返回一个 Promise。
 

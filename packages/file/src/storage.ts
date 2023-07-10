@@ -78,13 +78,13 @@ const prepareData = <T = unknown>(
 
   // 保持上一次的缓存时间
   if (expire === "keep") {
-    const olddata = wx.getStorageSync<StorageData<T>>(`_cache_${key}`);
+    const oldData = wx.getStorageSync<StorageData<T>>(`_cache_${key}`);
 
     // 上次没有缓存，本次也不更新
-    if (!olddata) return undefined;
+    if (!oldData) return undefined;
 
     // 使用上次过期时间
-    data.expired = olddata.expired || 0;
+    data.expired = oldData.expired || 0;
   } else
     data.expired =
       expire === "once"
@@ -125,7 +125,7 @@ export const set = <T = unknown>(
  * - `'once'`:默认仅本次启动有效
  * @param [asyncCB] 异步回调方法，不填为同步
  */
-export const setAync = <T = unknown>(
+export const setAsync = <T = unknown>(
   key: string,
   value: T,
   expire: number | "keep" | "once" = "once"
