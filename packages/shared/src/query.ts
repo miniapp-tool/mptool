@@ -2,17 +2,17 @@
  * 字符串参数解析
  *
  * @param queryString 需要解析的字符串
- * @param [spliter='&'] 分隔符
+ * @param [splitter='&'] 分隔符
  *
  * @returns 参数对象
  */
 export const parse = (
   queryString = "",
-  spliter = "&"
+  splitter = "&"
 ): Record<string, string> => {
   /** 参数对象 */
   const queries: Record<string, string> = {};
-  const splits = queryString ? queryString.split(spliter) : undefined;
+  const splits = queryString ? queryString.split(splitter) : undefined;
 
   if (splits && splits.length > 0)
     splits.forEach((item) => {
@@ -28,14 +28,14 @@ export const parse = (
  * query 对象转换字符串
  *
  * @param params query 对象
- * @param [spliter='&] 分隔符
+ * @param [splitter='&] 分隔符
  * @param [unencoded=false] 是否已经解码
  *
  * @returns 解析的字符串
  */
 export const stringify = (
   params: Record<string, string> = {},
-  spliter = "&",
+  splitter = "&",
   unencoded = false
 ): string =>
   Object.keys(params)
@@ -44,7 +44,7 @@ export const stringify = (
 
       return `${key}=${unencoded ? value : encodeURIComponent(value)}`;
     })
-    .join(spliter);
+    .join(splitter);
 
 /**
  * URL 添加 query

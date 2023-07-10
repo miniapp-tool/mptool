@@ -109,12 +109,12 @@
 
 当数据已经过期或不存在时，返回 `undefined`。
 
-### getAync
+### getAsync
 
 - 类型:
 
   ```ts
-  function getAync<T = unknown>(key: string): Promise<T | undefined>;
+  function getAsync<T = unknown>(key: string): Promise<T | undefined>;
   ```
 
 - 参数:

@@ -708,8 +708,8 @@ emitter.all.clear();
 
 // working with handler references:
 function onFoo() {}
-emitter.on("foo", onFoo); // listen
-emitter.off("foo", onFoo); // unlisten
+emitter.on("foo", onFoo); // start listening
+emitter.off("foo", onFoo); // stop listening
 ```
 
 具体详情请见 [API 文档](../api/enhance/emitter.md)

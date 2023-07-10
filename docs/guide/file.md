@@ -176,7 +176,7 @@ icon: folder
 
   - `key`: 设置的键名
 
-- `getAync(key)`
+- `getAsync(key)`
 
   `get` 的异步版本，在读取大量数据避免阻塞线程时可考虑使用，返回一个 Promise。
 

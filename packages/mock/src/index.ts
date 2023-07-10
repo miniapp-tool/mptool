@@ -85,7 +85,7 @@ interface RemoveStorageOption {
 
 const storage: Record<string, any> = {};
 
-const miniappMock = {
+const wxMock = {
   version: "test",
   env: {
     USER_DATA_PATH: "wxfile://",
@@ -321,6 +321,6 @@ logger.warn('key3', 'value3')
   getFileSystemManager: (): any => ({}),
 };
 
-(global as typeof globalThis & { wx: typeof miniappMock }).wx = miniappMock;
+(global as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
 
-export const wx = miniappMock;
+export const wx = wxMock;

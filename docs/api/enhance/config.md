@@ -93,7 +93,7 @@
 
 ## extendComponent
 
-- 类型: `(options: TrivalComponentOptions): void`
+- 类型: `(options: TrivialComponentOptions): void`
 
 - 参数:
 
@@ -107,7 +107,7 @@
 
 ## injectComponent
 
-- 类型: `(options: TrivalComponentOptions): void`
+- 类型: `(options: TrivialComponentOptions): void`
 
 - 参数:
 
@@ -121,7 +121,7 @@
 
 ## extendPage
 
-- 类型: `(name: string, options: TrivalPageOptions): void`
+- 类型: `(name: string, options: TrivialPageOptions): void`
 
 - 参数:
 
@@ -134,7 +134,7 @@
 
 ## injectPage
 
-- 类型: `(name: string, options: TrivalPageOptions): void`
+- 类型: `(name: string, options: TrivialPageOptions): void`
 
 - 参数:
 
