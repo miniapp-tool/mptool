@@ -29,16 +29,57 @@
     "release:publish": "cross-env NODE_OPTIONS=\"--experimental-json-modules\" tsx scripts/release/index.ts",
     "test": "vitest run && pnpm -r --stream run tsd"
   },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "17.6.6",
+    "@commitlint/config-conventional": "17.6.6",
+    "@rollup/plugin-commonjs": "25.0.2",
+    "@rollup/plugin-json": "6.0.0",
+    "@rollup/plugin-node-resolve": "15.1.0",
+    "@types/inquirer": "9.0.3",
+    "@types/node": "20.4.1",
+    "@typescript-eslint/eslint-plugin": "5.61.0",
+    "@typescript-eslint/parser": "5.61.0",
+    "bumpp": "9.1.1",
+    "c8": "8.0.0",
+    "commit-and-tag-version": "11.2.2",
+    "conventional-changelog-cli": "3.0.0",
+    "cross-env": "7.0.3",
+    "cz-conventional-changelog": "3.3.0",
+    "esbuild": "0.18.11",
+    "eslint": "8.44.0",
+    "eslint-config-prettier": "8.8.0",
+    "eslint-plugin-prettier": "5.0.0-alpha.2",
+    "execa": "7.1.1",
+    "husky": "8.0.3",
+    "inquirer": "9.2.7",
+    "miniprogram-api-typings": "3.10.0",
+    "nano-staged": "0.8.0",
+    "ora": "6.3.1",
+    "picocolors": "1.0.0",
+    "prettier": "3.0.0",
+    "rimraf": "5.0.1",
+    "rollup": "3.26.2",
+    "rollup-plugin-dts": "5.3.0",
+    "rollup-plugin-esbuild": "5.0.0",
+    "sort-package-json": "2.5.1",
+    "tsd": "0.28.1",
+    "tslib": "2.6.0",
+    "tsx": "3.12.7",
+    "typescript": "5.1.6",
+    "vite": "4.4.2",
+    "vitest": "0.33.0"
+  },
+  "packageManager": "pnpm@8.6.7",
   "commit-and-tag-version": {
     "skip": {
       "bump": true,
       "commit": true,
       "tag": true
-    }
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
     }
   },
   "nano-staged": {
@@ -52,46 +93,5 @@
     "package.json": [
       "sort-package-json"
     ]
-  },
-  "packageManager": "pnpm@8.6.6",
-  "devDependencies": {
-    "@commitlint/cli": "17.6.6",
-    "@commitlint/config-conventional": "17.6.6",
-    "@rollup/plugin-commonjs": "25.0.2",
-    "@rollup/plugin-json": "6.0.0",
-    "@rollup/plugin-node-resolve": "15.1.0",
-    "@types/inquirer": "9.0.3",
-    "@types/node": "20.3.3",
-    "@typescript-eslint/eslint-plugin": "5.61.0",
-    "@typescript-eslint/parser": "5.61.0",
-    "bumpp": "9.1.1",
-    "c8": "8.0.0",
-    "commit-and-tag-version": "11.2.2",
-    "conventional-changelog-cli": "3.0.0",
-    "cross-env": "7.0.3",
-    "cz-conventional-changelog": "3.3.0",
-    "esbuild": "0.18.11",
-    "eslint": "8.44.0",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-prettier": "4.2.1",
-    "execa": "7.1.1",
-    "husky": "8.0.3",
-    "inquirer": "9.2.7",
-    "nano-staged": "0.8.0",
-    "miniprogram-api-typings": "3.10.0",
-    "ora": "6.3.1",
-    "picocolors": "1.0.0",
-    "prettier": "2.8.8",
-    "rimraf": "5.0.1",
-    "rollup": "3.26.0",
-    "rollup-plugin-dts": "5.3.0",
-    "rollup-plugin-esbuild": "5.0.0",
-    "sort-package-json": "2.5.0",
-    "tsd": "0.28.1",
-    "tsx": "3.12.7",
-    "tslib": "2.6.0",
-    "typescript": "5.1.6",
-    "vite": "4.3.9",
-    "vitest": "0.32.4"
   }
 }
