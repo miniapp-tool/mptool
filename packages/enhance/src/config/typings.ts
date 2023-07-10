@@ -62,6 +62,11 @@ export interface AppConfig {
   routes?: Record<string, string> | [string | string[], string][];
 
   /**
+   * 主页页面名称或路径
+   */
+  home?: string;
+
+  /**
    * 跳转延迟执行的最长时间，单位 ms
    *
    * @description 异步 onNavigate 方法用时过久会直接调转

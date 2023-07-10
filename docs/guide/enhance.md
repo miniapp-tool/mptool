@@ -127,6 +127,8 @@ $App({
 
 请注意无法解析的路径会回退到 `defaultRoute`。
 
+另外，你可以设置 `home` 选项，以应对无页面可后退时，重定向到的主页面。
+
 ### 跳转配置
 
 由于框架的 `onNavigate` 生命周期会造成跳转延时，你可以通过 `maxDelay` 控制框架延迟跳转的最大时长，单位为 ms，默认为 `200`。
@@ -688,8 +690,8 @@ emitter.on(
       setTimeout(() => {
         console.log("bar", e);
         resolve();
-      }, 200)
-    )
+      }, 200),
+    ),
 );
 
 // listen to all events

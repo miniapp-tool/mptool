@@ -40,13 +40,13 @@ const routeMethods = { navigate, redirect, switchTab, reLaunch };
 type RouteType = "navigate" | "redirect" | "switchTab" | "reLaunch";
 
 function clickHandlerFactory(
-  type: RouteType
+  type: RouteType,
 ): (event: WechatMiniprogram.Touch) => Promise<void> | void {
   const route = routeMethods[type];
 
   return function touchHandler(
     this: TrivialPageInstance,
-    event: WechatMiniprogram.Touch
+    event: WechatMiniprogram.Touch,
   ): Promise<void> | void {
     if (event) {
       const { before, after, url } = event.currentTarget.dataset as {
@@ -77,8 +77,13 @@ const bindRelaunch = clickHandlerFactory("reLaunch");
  *
  * @param [delta=1] 后退层数
  */
-const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> =>
-  wx.navigateBack({ delta });
+const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
+  const { home } = getConfig();
+
+  return getCurrentPages().length <= delta && home
+    ? reLaunch(home)
+    : wx.navigateBack({ delta });
+};
 
 /**
  * 获得页面实例
@@ -87,7 +92,7 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> =>
  */
 const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
-  Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject
+  Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
 >(): PageInstance<Data, Custom> =>
   getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
@@ -109,7 +114,7 @@ export function bind(
     id: number;
     event: string;
     args: unknown[];
-  }>
+  }>,
 ): void {
   const { args, event, id } = touchEvent.detail;
 
@@ -144,9 +149,9 @@ export function bind(
  */
 export function mount<
   Data extends WechatMiniprogram.IAnyObject,
-  Custom extends WechatMiniprogram.IAnyObject
+  Custom extends WechatMiniprogram.IAnyObject,
 >(
-  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>
+  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>,
 ): void;
 
 /**
@@ -159,7 +164,7 @@ export function mount<
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-  IsPage extends boolean = false
+  IsPage extends boolean = false,
 >(
   ctx: ComponentOptions<
     Data,
@@ -175,7 +180,7 @@ export function mount<
           Method &
           (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
       >
-    >
+    >,
 ): void;
 
 export function mount(
@@ -185,7 +190,7 @@ export function mount(
       WechatMiniprogram.IAnyObject
     >
   > &
-    WechatMiniprogram.IAnyObject
+    WechatMiniprogram.IAnyObject,
 ): void {
   ctx.$ = bind;
 

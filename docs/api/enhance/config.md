@@ -77,6 +77,13 @@
 
 :::
 
+## home
+
+- 类型: `string`
+- 必填: 否
+
+主页页面名称
+
 ## maxDelay
 
 - 类型: `number`
