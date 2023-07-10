@@ -1,5 +1,5 @@
-import type { TrivalComponentOptions } from "../component/index.js";
-import type { TrivalPageOptions } from "../page/index.js";
+import type { TrivialComponentOptions } from "../component/index.js";
+import type { TrivialPageOptions } from "../page/index.js";
 
 export interface AppConfig {
   /**
@@ -84,7 +84,7 @@ export interface AppConfig {
    *
    * @param options 组件选项
    */
-  extendComponent?(options: TrivalComponentOptions): void;
+  extendComponent?(options: TrivialComponentOptions): void;
 
   /**
    * 自定义注入组件
@@ -93,7 +93,7 @@ export interface AppConfig {
    *
    * @param options 组件选项
    */
-  injectComponent?(options: TrivalComponentOptions): void;
+  injectComponent?(options: TrivialComponentOptions): void;
 
   /**
    * 自定义扩展页面，在框架执行扩展之前
@@ -101,15 +101,15 @@ export interface AppConfig {
    * @param name 页面名称
    * @param options 页面选项
    */
-  extendPage?(name: string, options: TrivalPageOptions): void;
+  extendPage?(name: string, options: TrivialPageOptions): void;
 
   /**
    * 自定义注入页面
    *
    * 在框架执行扩展之后，这意味着你可以覆盖框架的方法
    *
-   * @param name 页面选项
-   * @param options pageoption
+   * @param name 页面名称
+   * @param options 页面选项
    */
-  injectPage?(name: string, options: TrivalPageOptions): void;
+  injectPage?(name: string, options: TrivialPageOptions): void;
 }

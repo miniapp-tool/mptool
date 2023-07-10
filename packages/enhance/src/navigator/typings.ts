@@ -3,9 +3,9 @@ export interface NavigatorMethods {
   /**
    * 导航到指定页面
    *
-   * 本函数是 `wx.navigateTo` 的封装，`pagename` 可以带上 `queryString`
+   * 本函数是 `wx.navigateTo` 的封装，`pageName` 可以带上 `queryString`
    *
-   * @param pagename 页面名称或页面的路径
+   * @param pageName 页面名称或页面的路径
    *
    * 示例：
    *
@@ -14,15 +14,15 @@ export interface NavigatorMethods {
    * ```
    */
   $go(
-    pagename: string
+    pageName: string
   ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 
   /**
    * 跳转到指定页面, **替换页面，不产生历史**
    *
-   * 本函数是 `wx.redirectTo` 的封装，`pagename` 可以带上 `queryString`
+   * 本函数是 `wx.redirectTo` 的封装，`pageName` 可以带上 `queryString`
    *
-   * @param pagename 页面名称或页面的路径
+   * @param pageName 页面名称或页面的路径
    *
    * 示例：
    *
@@ -31,14 +31,14 @@ export interface NavigatorMethods {
    * ```
    */
 
-  $redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $redirect(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
    *
    * 本函数是 `wx.switchTab` 的封装，路径参数只用于触发 `onNavigate`
    *
-   * @param pagename 页面名称或页面的路径
+   * @param pageName 页面名称或页面的路径
    *
    * 示例：
    *
@@ -46,14 +46,14 @@ export interface NavigatorMethods {
    * this.$switch('main?user=mrhope');
    * ```
    */
-  $switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $switch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 关闭所有页面，之后打开到应用内的某个页面
    *
-   * 本函数是 `wx.reLaunch` 的封装，`pagename` 可以带上 `queryString`
+   * 本函数是 `wx.reLaunch` 的封装，`pageName` 可以带上 `queryString`
    *
-   * @param pagename 页面名称或页面的路径
+   * @param pageName 页面名称或页面的路径
    *
    * 示例：
    *
@@ -61,7 +61,7 @@ export interface NavigatorMethods {
    * this.$launch('main');
    * ```
    */
-  $reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $reLaunch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
    * 返回上一页，`wx.navigateBack` 的封装
@@ -80,7 +80,7 @@ export interface NavigatorMethods {
   /**
    * 提前预加载指定页面 (会触发对应页面的 `onPreload` 生命周期)
    *
-   * @param pagename 页面名称或页面的路径，可以带上 `queryString`
+   * @param pageName 页面名称或页面的路径，可以带上 `queryString`
    *
    * 示例：
    *
@@ -89,7 +89,7 @@ export interface NavigatorMethods {
    * this.$preload('/page/main?userName=xxx&action=xxx');
    * ```
    */
-  $preload(pagename: string): void | Promise<void>;
+  $preload(pageName: string): void | Promise<void>;
 
   /**
    * 点击代理方法，绑定 `$go` 逻辑
@@ -103,7 +103,7 @@ export interface NavigatorMethods {
    *
    * ```html
    * <button
-   *   bindtap="$bindGo"
+   *   catch:tap="$bindGo"
    *   data-url="/pages/play"
    *   data-before="onClickBefore"
    * >click go</button>
@@ -123,7 +123,7 @@ export interface NavigatorMethods {
    *
    * ```html
    * <button
-   *   bindtap="$bindRedirect"
+   *   catch:tap="$bindRedirect"
    *   data-url="/pages/play"
    *   data-before="onClickBefore"
    * >click redirect</button>
@@ -143,7 +143,7 @@ export interface NavigatorMethods {
    *
    * ```html
    * <button
-   *   bindtap="$bindSwitch"
+   *   catch:tap="$bindSwitch"
    *   data-url="/pages/play"
    *   data-before="onClickBefore"
    * >click switch</button>
@@ -163,7 +163,7 @@ export interface NavigatorMethods {
    *
    * ```html
    * <button
-   *   bindtap="$bindReLaunch"
+   *   catch:tap="$bindReLaunch"
    *   data-url="/pages/play"
    *   data-before="onClickBefore"
    * >click relaunch</button>

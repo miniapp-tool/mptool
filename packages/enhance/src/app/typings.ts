@@ -22,6 +22,7 @@ export type AppInstance<Custom> = AppOptions<Custom> &
   ExtendedAppMethods;
 
 export interface AppConstructor {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <Custom extends Record<string, any>>(appOptions: AppOptions<Custom>): void;
+  <Custom extends WechatMiniprogram.IAnyObject>(
+    appOptions: AppOptions<Custom>
+  ): void;
 }

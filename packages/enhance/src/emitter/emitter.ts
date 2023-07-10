@@ -22,7 +22,6 @@ export const appEmitter = Emitter<AppEventType>();
 
 export const routeEmitter = Emitter<RouteEventType>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UserEmitter = EmitterInstance<Record<string, any>>;
+export type UserEmitter = EmitterInstance<WechatMiniprogram.IAnyObject>;
 
 export const userEmitter: UserEmitter = Emitter();

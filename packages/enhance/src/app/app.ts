@@ -39,10 +39,11 @@ const appHideHandler = (): void => {
 /**
  * Application wrapper
  *
- * @param appOptions Appoption
+ * @param appOptions App Option
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const $App: AppConstructor = <Custom extends Record<string, any>>(
+export const $App: AppConstructor = <
+  Custom extends WechatMiniprogram.IAnyObject
+>(
   appOptions: AppOptions<Custom>
 ): void => {
   appOptions.onLaunch = wrapFunction(appOptions.onLaunch, appLaunchHandler);

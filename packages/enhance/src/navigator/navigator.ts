@@ -30,9 +30,9 @@ export interface PathDetails {
   url: string;
 }
 
-export const getPathDetail = (pageNamewithArg: string): PathDetails => {
+export const getPathDetail = (pageNameWithArg: string): PathDetails => {
   const config = getConfig();
-  const [pageName, queryString] = pageNamewithArg.split("?");
+  const [pageName, queryString] = pageNameWithArg.split("?");
   const path = pageName.startsWith("/") ? pageName : config.getRoute(pageName);
 
   return {
@@ -45,30 +45,30 @@ export const getPathDetail = (pageNamewithArg: string): PathDetails => {
 export function getTrigger(
   type: "navigateTo"
 ): (
-  pagename: string
+  pageName: string
 ) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 export function getTrigger(
   type: "redirectTo"
-): (pagename: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 export function getTrigger(
   type: "switchTab"
-): (pagename: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 export function getTrigger(
   type: "reLaunch"
-): (pagename: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 
 /**
- * Navgation trigger
+ * Navigation trigger
  */
 // eslint-disable-next-line
 export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
-  return (pageNamewithArg: string): any => {
+  return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
       canNavigate = false;
 
-      const { name, url, query } = getPathDetail(pageNamewithArg);
+      const { name, url, query } = getPathDetail(pageNameWithArg);
 
       return Promise.race([
         routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${name}`, query),

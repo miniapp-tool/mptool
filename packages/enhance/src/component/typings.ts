@@ -48,7 +48,7 @@ export type InferFromType<Type> = [Type] extends [null]
   : [Type] extends [ArrayConstructor]
   ? any[]
   : [Type] extends [ObjectConstructor]
-  ? Record<string, any>
+  ? WechatMiniprogram.IAnyObject
   : [Type] extends [BooleanConstructor]
   ? boolean
   : [Type] extends [PropConstructor<infer V>]
@@ -75,7 +75,7 @@ export type InferPropType<Type> = [Type] extends [null]
   : [Type] extends [ArrayConstructor | { type: ArrayConstructor }]
   ? any[]
   : [Type] extends [ObjectConstructor | { type: ObjectConstructor }]
-  ? Record<string, any>
+  ? WechatMiniprogram.IAnyObject
   : [Type] extends [BooleanConstructor | { type: BooleanConstructor }]
   ? boolean
   : [Type] extends [PropItem<infer Value, infer Default>]
@@ -157,7 +157,7 @@ export interface ExtendedComponentProperty {
    *
    * @description 只在 `attached`, `ready` 生命周期后生效
    */
-  $parent: TrivialPageInstance | TrivalComponentInstance;
+  $parent: TrivialPageInstance | TrivialComponentInstance;
 
   /**
    * 指定了 `ref` 的子组件实例映射
@@ -194,7 +194,7 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
   /**
    * @private
    */
-  _$attached(parent: TrivalComponentInstance | TrivialPageInstance): void;
+  _$attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
 }
 
 export type ComponentInstance<
@@ -202,7 +202,7 @@ export type ComponentInstance<
   Property extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CustomInstanceProperty extends Record<string, any> = {},
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
@@ -227,8 +227,7 @@ export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CustomInstanceProperty extends Record<string, any> = {},
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<{
@@ -247,8 +246,7 @@ export interface ComponentConstructor {
     Data extends WechatMiniprogram.Component.DataOption,
     Property extends PropsOptions,
     Method extends WechatMiniprogram.Component.MethodOption,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    CustomInstanceProperty extends Record<string, any> = {},
+    CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
     IsPage extends boolean = false
   >(
     options: ComponentOptions<
@@ -261,16 +259,16 @@ export interface ComponentConstructor {
   ): string;
 }
 
-export type TrivalComponentInstance = ComponentInstance<
-  Record<string, any>,
+export type TrivialComponentInstance = ComponentInstance<
+  WechatMiniprogram.IAnyObject,
   Record<string, null>,
   Record<string, (...args: unknown[]) => any>
 >;
 
-export type TrivalComponentOptions = ComponentInstance<
-  Record<string, any>,
+export type TrivialComponentOptions = ComponentInstance<
+  WechatMiniprogram.IAnyObject,
   Record<string, null>,
   Record<string, (...args: any[]) => any>
 >;
 
-export type RefMap = Record<string, TrivalComponentInstance>;
+export type RefMap = Record<string, TrivialComponentInstance>;

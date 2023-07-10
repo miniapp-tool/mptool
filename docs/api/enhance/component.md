@@ -106,12 +106,12 @@ $Component({
 - 类型:
 
   ```ts
-  function $preload(pagename: string): void | Promise<void>;
+  function $preload(pageName: string): void | Promise<void>;
   ```
 
 - 参数:
 
-  - `pagename`: 页面简称，可以带上 `queryString`
+  - `pageName`: 页面简称，可以带上 `queryString`
 
 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
 
@@ -121,13 +121,13 @@ $Component({
 
   ```ts
   function $go(
-    pagename: string
+    pageName: string
   ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
   ```
 
 - 参数:
 
-  - `pagename`: 页面简称，可以带上 `queryString`
+  - `pageName`: 页面简称，可以带上 `queryString`
 
 导航到指定页面
 
@@ -147,13 +147,13 @@ this.$go("play?vid=xxx&cid=xxx");
 
   ```ts
   function $redirect(
-    pagename: string
+    pageName: string
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
 
-  - `pagename`: 页面简称，可以带上 `queryString`
+  - `pageName`: 页面简称，可以带上 `queryString`
 
 重定向到指定页面, 即**替换页面，不产生历史**。
 
@@ -173,13 +173,13 @@ this.$redirect("about?year=2021");
 
   ```ts
   function $switch(
-    pagename: string
+    pageName: string
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
 
-  - `pagename`: 页面简称，可以带上 `queryString`
+  - `pageName`: 页面简称，可以带上 `queryString`
 
 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
 
@@ -205,13 +205,13 @@ this.$switch("main?user=mrhope");
 
   ```ts
   function $reLaunch(
-    pagename: string
+    pageName: string
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
 
-  - `pagename`: 页面简称，可以带上 `queryString`
+  - `pageName`: 页面简称，可以带上 `queryString`
 
 关闭所有页面，之后打开到应用内的某个页面
 
@@ -250,7 +250,7 @@ this.$launch("main?user=mrhope");
 ::: tip
 
 ```html
-<button bindtap="$bindGo" data-url="play" data-before="onClickBefore">
+<button catch:tap="$bindGo" data-url="play" data-before="onClickBefore">
   click go
 </button>
 ```
@@ -269,7 +269,7 @@ this.$launch("main?user=mrhope");
 
 ```html
 <button
-  bindtap="$bindRedirect"
+  catch:tap="$bindRedirect"
   data-url="/pages/play"
   data-after="onClickAfter"
 >

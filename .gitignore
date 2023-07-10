@@ -13,5 +13,3 @@ docs/.vuepress/dist
 demo/**/*.js
 demo/**/*.js.map
 
-# VSCode config
-.vscode/

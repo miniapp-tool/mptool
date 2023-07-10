@@ -29,8 +29,8 @@ export type {
   ComponentLifetimes,
   ExtendedComponentProperty,
   ExtendedComponentMethods,
-  TrivalComponentInstance,
-  TrivalComponentOptions,
+  TrivialComponentInstance,
+  TrivialComponentOptions,
   RefMap,
   PropType,
 } from "./component/index.js";
@@ -40,6 +40,6 @@ export type {
   PageInstance,
   PageQuery,
   PageState,
-  TrivalPageOptions,
+  TrivialPageOptions,
   TrivialPageInstance,
 } from "./page/index.js";

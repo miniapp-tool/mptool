@@ -8,14 +8,14 @@ import type {
   ComponentOptions,
   InferPropTypes,
   PropsOptions,
-  TrivalComponentInstance,
-} from "./component";
+  TrivialComponentInstance,
+} from "./component/index.js";
 import type {
   ExtendedPageMethods,
   PageOptions,
   PageInstance,
   TrivialPageInstance,
-} from "./page";
+} from "./page/index.js";
 
 export type NavigatorType =
   | "navigateTo"
@@ -86,27 +86,25 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> =>
  * @returns 页面实例对象
  */
 const getPage = <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data extends Record<string, any> = Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Custom extends Record<string, any> = Record<string, any>
+  Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject
 >(): PageInstance<Data, Custom> =>
   getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
 /**
  * 预加载
  *
- * @param pageNamewithArg 需要预加载的地址
+ * @param pageNameWithArg 需要预加载的地址
  */
-const preload = (pageNamewithArg: string): void => {
+const preload = (pageNameWithArg: string): void => {
   /** 页面名称 */
-  const { name, query } = getPathDetail(pageNamewithArg);
+  const { name, query } = getPathDetail(pageNameWithArg);
 
   routeEmitter.emit(`${ON_PAGE_PRELOAD}:${name}`, query);
 };
 
 export function bind(
-  this: TrivalComponentInstance,
+  this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
     id: number;
     event: string;
@@ -118,7 +116,7 @@ export function bind(
   switch (event) {
     // run private attach
     case "_$attached": {
-      const ref = getRef(id) as TrivalComponentInstance | undefined;
+      const ref = getRef(id) as TrivialComponentInstance | undefined;
 
       if (!ref) break;
 
@@ -145,8 +143,8 @@ export function bind(
  * @param ctx 需要挂载页面的指针
  */
 export function mount<
-  Data extends Record<string, any>,
-  Custom extends Record<string, any>
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject
 >(
   ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>
 ): void;
@@ -160,8 +158,7 @@ export function mount<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CustomInstanceProperty extends Record<string, any> = {},
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false
 >(
   ctx: ComponentOptions<
@@ -183,11 +180,12 @@ export function mount<
 
 export function mount(
   ctx: Partial<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ExtendedPageMethods<Record<string, any>, Record<string, any>>
+    ExtendedPageMethods<
+      WechatMiniprogram.IAnyObject,
+      WechatMiniprogram.IAnyObject
+    >
   > &
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
+    WechatMiniprogram.IAnyObject
 ): void {
   ctx.$ = bind;
 

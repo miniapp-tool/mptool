@@ -85,8 +85,8 @@ export interface ExtendedPageProperties {
 }
 
 export interface ExtendedPageMethods<
-  Data extends Record<string, any>,
-  Custom extends Record<string, any>
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject
 > extends InstanceEmitterMethods,
     NavigatorMethods {
   /**
@@ -114,10 +114,8 @@ export interface ExtendedPageMethods<
 }
 
 export type PageInstance<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data extends Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Custom extends Record<string, any>
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject
 > = WechatMiniprogram.OptionalInterface<
   WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles
 > &
@@ -129,10 +127,8 @@ export type PageInstance<
   Custom;
 
 export type PageOptions<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data extends Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Custom extends Record<string, any>
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject
 > = (Custom &
   Partial<WechatMiniprogram.Page.Data<Data>> &
   Partial<WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles> &
@@ -143,10 +139,8 @@ export type PageOptions<
 
 export interface PageConstructor {
   <
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Data extends Record<string, any>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Custom extends Record<string, any>
+    Data extends WechatMiniprogram.IAnyObject,
+    Custom extends WechatMiniprogram.IAnyObject
   >(
     name: string,
     options: PageOptions<Data, Custom>
@@ -154,15 +148,11 @@ export interface PageConstructor {
 }
 
 export type TrivialPageInstance = PageInstance<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Record<string, any>
+  WechatMiniprogram.IAnyObject,
+  WechatMiniprogram.IAnyObject
 >;
 
-export type TrivalPageOptions = PageOptions<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Record<string, any>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Record<string, any>
+export type TrivialPageOptions = PageOptions<
+  WechatMiniprogram.IAnyObject,
+  WechatMiniprogram.IAnyObject
 >;

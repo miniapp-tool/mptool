@@ -175,15 +175,15 @@ $App({
 
 我们在逻辑层包装了四个方法:
 
-- `$go(pagename: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`: 导航到指定页面，是 `wx.navigateTo` 的封装
+- `$go(pageName: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`: 导航到指定页面，是 `wx.navigateTo` 的封装
 
-- `$redirect(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 重定向到指定页面, 即**替换页面，不产生历史**，是 `wx.redirectTo` 的封装
+- `$redirect(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 重定向到指定页面, 即**替换页面，不产生历史**，是 `wx.redirectTo` 的封装
 
-- `$switch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面，是 `wx.switchTab` 的封装
+- `$switch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面，是 `wx.switchTab` 的封装
 
-- `$reLaunch(pagename: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 关闭所有页面，之后打开到应用内的某个页面，是 `wx.reLaunch` 的封装
+- `$reLaunch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>`: 关闭所有页面，之后打开到应用内的某个页面，是 `wx.reLaunch` 的封装
 
-在上述四个方法中，`pagename` 为页面简称，同时可以带上 `queryString`。
+在上述四个方法中，`pageName` 为页面简称，同时可以带上 `queryString`。
 
 你也可以传入一个带有可选参数使用绝对路径的 `url`。
 
@@ -219,7 +219,7 @@ this.$launch("main?user=mrhope");
 
 ```html
 <button
-  bindtap="$bindRedirect"
+  catch:tap="$bindRedirect"
   data-url="/pages/play"
   data-after="onClickAfter"
 >
@@ -228,7 +228,7 @@ this.$launch("main?user=mrhope");
 ```
 
 ```html
-<button bindtap="$bindReLaunch" data-url="play" data-before="onClickBefore">
+<button catch:tap="$bindReLaunch" data-url="play" data-before="onClickBefore">
   click reLaunch
 </button>
 ```
@@ -577,9 +577,9 @@ $Page("main", {
 
 ### 方法扩展
 
-- `$preload(pagename: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+- `$preload(pageName: string)`: 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
 
-  `pagename` 为页面简称，可以带上 `queryString`，也可填入带有可选参数的小程序绝对路径
+  `pageName` 为页面简称，可以带上 `queryString`，也可填入带有可选参数的小程序绝对路径
 
 - `$currentPage(): PageInstance`: 获取当前页面实例
 

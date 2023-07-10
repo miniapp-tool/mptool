@@ -9,8 +9,8 @@ import type {
   ComponentInstance,
   ComponentOptions,
   PropsOptions,
-  TrivalComponentInstance,
-  TrivalComponentOptions,
+  TrivialComponentInstance,
+  TrivialComponentOptions,
 } from "./typings.js";
 
 let componentIndex = 0;
@@ -74,8 +74,7 @@ export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CustomInstanceProperty extends Record<string, any> = {},
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false
 >(
   options: ComponentOptions<
@@ -90,7 +89,7 @@ export const $Component: ComponentConstructor = <
   const { extendComponent, injectComponent } = getConfig();
 
   if (extendComponent)
-    extendComponent(options as unknown as TrivalComponentOptions);
+    extendComponent(options as unknown as TrivialComponentOptions);
 
   // ensure lifetimes
   if (!options.lifetimes) options.lifetimes = {};
@@ -108,7 +107,7 @@ export const $Component: ComponentConstructor = <
     ) {
       mount(this);
       if (injectComponent)
-        injectComponent(options as unknown as TrivalComponentOptions);
+        injectComponent(options as unknown as TrivialComponentOptions);
     }
   );
 
@@ -196,7 +195,7 @@ export const $Component: ComponentConstructor = <
         CustomInstanceProperty,
         IsPage
       >,
-      parent: TrivalComponentInstance | TrivialPageInstance
+      parent: TrivialComponentInstance | TrivialPageInstance
     ): void {
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
