@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://miniapp-tool///compare/v0.2.0...v0.2.1) (2023-07-11)
+
 ## [0.2.0](https://miniapp-tool///compare/v0.1.6...v0.2.0) (2023-07-10)
 
 
