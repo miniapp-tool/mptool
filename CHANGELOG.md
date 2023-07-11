@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://miniapp-tool///compare/v0.2.1...v0.2.2) (2023-07-11)
+
+
+### Features
+
+* support back in wxml ([aaa0d57](https://miniapp-tool///commit/aaa0d57cd304aef5601d6d4500b3ea6ec1f5cf7f))
+
 ## [0.2.1](https://miniapp-tool///compare/v0.2.0...v0.2.1) (2023-07-11)
 
 ## [0.2.0](https://miniapp-tool///compare/v0.1.6...v0.2.0) (2023-07-10)
