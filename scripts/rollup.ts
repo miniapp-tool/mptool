@@ -24,7 +24,7 @@ export const rollupTypescript = (
     dtsExternal = [],
     resolve = false,
     inlineDynamicImports = true,
-  }: RollupTypescriptOptions = {}
+  }: RollupTypescriptOptions = {},
 ): RollupOptions[] => [
   {
     input: `./src/${filePath}.ts`,
@@ -50,7 +50,7 @@ export const rollupTypescript = (
       ...(resolve ? [nodeResolve(), commonjs() as Plugin] : []),
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      esbuild({ charset: "utf8", minify: isProduction, target: "node16" }),
+      esbuild({ charset: "utf8", minify: isProduction, target: "es2015" }),
     ],
     external,
     treeshake: {
