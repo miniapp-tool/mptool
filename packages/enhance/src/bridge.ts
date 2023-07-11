@@ -34,19 +34,16 @@ const redirect = getTrigger("redirectTo");
 const switchTab = getTrigger("switchTab");
 const reLaunch = getTrigger("reLaunch");
 
-/** 导航方法 */
-const routeMethods = { navigate, redirect, switchTab, reLaunch };
-
-type RouteType = "navigate" | "redirect" | "switchTab" | "reLaunch";
-
 function clickHandlerFactory(
-  type: RouteType,
+  action: (pageName: string) => Promise<unknown>,
 ): (event: WechatMiniprogram.Touch) => Promise<void> | void {
-  const route = routeMethods[type];
-
   return function touchHandler(
     this: TrivialPageInstance,
-    event: WechatMiniprogram.Touch,
+    event?: WechatMiniprogram.TouchEvent<
+      WechatMiniprogram.IAnyObject,
+      WechatMiniprogram.IAnyObject,
+      { before?: string; after?: string; url?: string }
+    >,
   ): Promise<void> | void {
     if (event) {
       const { before, after, url } = event.currentTarget.dataset as {
@@ -59,7 +56,7 @@ function clickHandlerFactory(
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
       if (url)
-        return route(url).then(() => {
+        return action(url).then(() => {
           if (this && after && typeof this[after] === "function")
             (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
         });
@@ -67,10 +64,10 @@ function clickHandlerFactory(
   };
 }
 
-const bindGo = clickHandlerFactory("navigate");
-const bindRedirect = clickHandlerFactory("redirect");
-const bindSwitch = clickHandlerFactory("switchTab");
-const bindRelaunch = clickHandlerFactory("reLaunch");
+const bindGo = clickHandlerFactory(navigate);
+const bindRedirect = clickHandlerFactory(redirect);
+const bindSwitch = clickHandlerFactory(switchTab);
+const bindRelaunch = clickHandlerFactory(reLaunch);
 
 /**
  * 返回，默认返回上一页
@@ -83,6 +80,27 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   return getCurrentPages().length <= delta && home
     ? reLaunch(home)
     : wx.navigateBack({ delta });
+};
+
+const bindBack = function touchHandler(
+  this: TrivialPageInstance,
+  event?: WechatMiniprogram.TouchEvent<
+    WechatMiniprogram.IAnyObject,
+    WechatMiniprogram.IAnyObject,
+    { before?: string; after?: string; delta?: number }
+  >,
+): Promise<void> | void {
+  if (event) {
+    const { before, after, delta = 1 } = event.currentTarget.dataset;
+
+    if (this && before && typeof this[before] === "function")
+      (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
+
+    return back(Number(delta)).then(() => {
+      if (this && after && typeof this[after] === "function")
+        (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
+    });
+  }
 };
 
 /**
@@ -226,4 +244,5 @@ export function mount(
   ctx.$bindRedirect = bindRedirect;
   ctx.$bindSwitch = bindSwitch;
   ctx.$bindRelaunch = bindRelaunch;
+  ctx.$bindBack = bindBack;
 }

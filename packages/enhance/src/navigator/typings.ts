@@ -14,7 +14,7 @@ export interface NavigatorMethods {
    * ```
    */
   $go(
-    pageName: string
+    pageName: string,
   ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 
   /**
@@ -170,4 +170,23 @@ export interface NavigatorMethods {
    * ```
    */
   $bindRelaunch(event: WechatMiniprogram.Touch): void | Promise<void>;
+
+  /**
+   * 点击代理方法，绑定 `$back` 逻辑
+   * 你可以在元素上声明 `data-delta` 作为回退层数
+   *
+   * - `data-before` 跳转前执行
+   * - `data-after`  跳转后执行
+   *
+   * 示例:
+   *
+   * ```html
+   * <button
+   *   catch:tap="$bindBack"
+   *   data-delta="1"
+   *   data-before="onClickBefore"
+   * >click relaunch</button>
+   * ```
+   */
+  $bindBack(): Promise<void> | void;
 }

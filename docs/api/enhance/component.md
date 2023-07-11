@@ -121,7 +121,7 @@ $Component({
 
   ```ts
   function $go(
-    pageName: string
+    pageName: string,
   ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
   ```
 
@@ -147,7 +147,7 @@ this.$go("play?vid=xxx&cid=xxx");
 
   ```ts
   function $redirect(
-    pageName: string
+    pageName: string,
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
@@ -173,7 +173,7 @@ this.$redirect("about?year=2021");
 
   ```ts
   function $switch(
-    pageName: string
+    pageName: string,
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
@@ -205,7 +205,7 @@ this.$switch("main?user=mrhope");
 
   ```ts
   function $reLaunch(
-    pageName: string
+    pageName: string,
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
@@ -241,7 +241,7 @@ this.$launch("main?user=mrhope");
 
 ### $bindGo
 
-`$go` 的视图层代理方法，你需要在视图层使用 data-set 来绑定跳转配置:
+`$go` 的视图层代理方法，你需要在视图层使用 dataset 来绑定跳转配置:
 
 - `data-url` 跳转到的页面简称或绝对路径，可带参数
 - `data-before` 跳转前执行
@@ -259,7 +259,7 @@ this.$launch("main?user=mrhope");
 
 ### $bindRedirect
 
-`$redirect` 的视图层代理方法，你需要在视图层使用 data-set 来绑定跳转配置:
+`$redirect` 的视图层代理方法，你需要在视图层使用 dataset 来绑定跳转配置:
 
 - `data-url` 跳转到的页面简称或绝对路径，可带参数
 - `data-before` 跳转前执行
@@ -281,7 +281,7 @@ this.$launch("main?user=mrhope");
 
 ### $bindSwitch
 
-`$switch` 的视图层代理方法，你需要在视图层使用 data-set 来绑定跳转配置:
+`$switch` 的视图层代理方法，你需要在视图层使用 dataset 来绑定跳转配置:
 
 - `data-url` 跳转到的页面简称或绝对路径，可带参数
 
@@ -296,8 +296,16 @@ this.$launch("main?user=mrhope");
 
 ### $bindRelaunch
 
-`$reLaunch` 的视图层代理方法，你需要在视图层使用 data-set 来绑定跳转配置:
+`$reLaunch` 的视图层代理方法，你需要在视图层使用 dataset 来绑定跳转配置:
 
 - `data-url` 跳转到的页面简称或绝对路径，可带参数
+- `data-before` 跳转前执行
+- `data-after` 跳转后执行
+
+### $bindBack
+
+`$back` 的视图层代理方法，你需要在视图层使用 dataset 来绑定跳转配置:
+
+- `data-delta` 回退层数
 - `data-before` 跳转前执行
 - `data-after` 跳转后执行
