@@ -4,24 +4,21 @@ All notable changes to this project will be documented in this file. See [Conven
 
 ## [0.2.2](https://miniapp-tool///compare/v0.2.1...v0.2.2) (2023-07-11)
 
-
 ### Features
 
-* support back in wxml ([aaa0d57](https://miniapp-tool///commit/aaa0d57cd304aef5601d6d4500b3ea6ec1f5cf7f))
+- support back in wxml ([aaa0d57](https://miniapp-tool///commit/aaa0d57cd304aef5601d6d4500b3ea6ec1f5cf7f))
 
 ## [0.2.1](https://miniapp-tool///compare/v0.2.0...v0.2.1) (2023-07-11)
 
 ## [0.2.0](https://miniapp-tool///compare/v0.1.6...v0.2.0) (2023-07-10)
 
-
 ### Features
 
-* support redirect to home with $back ([8db1275](https://miniapp-tool///commit/8db12757dc64e7f531ff41e426cbc8172e9f6e7b))
-
+- support redirect to home with $back ([8db1275](https://miniapp-tool///commit/8db12757dc64e7f531ff41e426cbc8172e9f6e7b))
 
 ### Bug Fixes
 
-* fix typos in api name ([34a4cef](https://miniapp-tool///commit/34a4cef6c300655bd7e7f8e6174ac3a6f29c0f1a))
+- fix typos in api name ([34a4cef](https://miniapp-tool///commit/34a4cef6c300655bd7e7f8e6174ac3a6f29c0f1a))
 
 ## [0.1.6](https://miniapp-tool///compare/v0.1.5...v0.1.6) (2023-07-04)
 
