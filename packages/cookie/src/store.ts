@@ -30,7 +30,10 @@ export interface SetCookieOptions {
 export class CookieStore {
   private store: CookieStoreType = new Map();
 
-  constructor(public key = "__cookie_store__") {
+  constructor(
+    /** 存储键值 */
+    private key = "__cookie_store__",
+  ) {
     this.init();
   }
 

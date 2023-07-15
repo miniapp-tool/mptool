@@ -1,10 +1,28 @@
 # CookieStore
 
 ```ts
+type CookieStoreOptions =
+  | string
+  | {
+      domain?: string;
+      path?: string;
+    };
+
+interface SetCookieOptions {
+  name: string;
+  value: string;
+  domain: string;
+  path?: string;
+  expires?: Date;
+  maxAge?: number;
+  httpOnly?: boolean;
+}
+
 class CookieStore {
-  key: string;
-  private store;
-  constructor(key?: string);
+  constructor(
+    /** 存储键值 */
+    key?: string,
+  );
   /**
    * 获取 Cookie 对象
    *
@@ -12,7 +30,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return cookie 对象
    */
-  get(name: string, options: CookeStoreOptions): Cookie | null;
+  get(name: string, options: CookieStoreOptions): Cookie | null;
   /**
    * 获取 Cookie 值
    *
@@ -20,7 +38,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return Cookie 值
    */
-  getValue(name: string, options: CookeStoreOptions): string | undefined;
+  getValue(name: string, options: CookieStoreOptions): string | undefined;
   /**
    * 是否有特定的 Cookie
    *
@@ -28,7 +46,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return 是否存在
    */
-  has(name: string, options: CookeStoreOptions): boolean;
+  has(name: string, options: CookieStoreOptions): boolean;
   /**
    * 设置 cookie
    */
@@ -43,20 +61,26 @@ class CookieStore {
   /**
    * 获取所有域名和 cookies 结构
    */
-  values(): Record<string, Record<string, string>>;
+  list(): Record<string, Record<string, string>>;
   /**
    * 获取 cookies 对象数组
    *
    * @param options Cookie 选项
    * @return Cookie 对象数组
    */
-  getCookies(options?: CookeStoreOptions): Cookie[];
+  getCookies(options?: CookieStoreOptions): Cookie[];
+  /**
+   * 获取所有 cookies 对象
+   *
+   * @return Cookie 对象数组
+   */
+  getAllCookies(): Cookie[];
   /**
    * 获取 cookies key/value 对象
    *
    * @return 键值 Map
    */
-  getCookiesMap(options: CookeStoreOptions): Record<string, string>;
+  getCookiesMap(options: CookieStoreOptions): Record<string, string>;
   /**
    * 应用 Cookies
    *
@@ -85,6 +109,6 @@ class CookieStore {
    * @param options Cookie 选项
    * @return request cookie header
    */
-  getHeader(options: CookeStoreOptions): string;
+  getHeader(options: CookieStoreOptions): string;
 }
 ```

@@ -72,5 +72,6 @@ class Cookie {
    */
   isPathMatched(path: string): boolean;
   toString(): string;
+  toJSON(): CookieType;
 }
 ```

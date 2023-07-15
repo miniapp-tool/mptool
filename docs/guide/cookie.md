@@ -29,8 +29,9 @@ const cookieStore = new CookieStore(key);
 - `getValue(name, options)`: 获取 Cookie 值
 - `has(name, options)`: 是否有 Cookie
 - `set(options)`: 设置 Cookie
-- `values()`: 获取全部 Cookie
+- `list()`: 按 domain 结构获取全部 Cookie
 - `getCookies(options)`: 获取满足条件的 Cookie
+- `getAllCookies()`: 获取全部 Cookies
 - `getCookiesMap(options)`: 获取满足条件的 Cookie 键值 Map
 - `apply(cookies)`: 向存储中应用 Cookie
 - `clear(domain?)`: 清除 `domain` 下的全部 cookie
