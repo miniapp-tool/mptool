@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://miniapp-tool///compare/v0.2.2...v0.3.0) (2023-07-15)
+
+
+### Features
+
+* add cookie and all package ([39745cb](https://miniapp-tool///commit/39745cbd36b838b9c0a1c5d841357dba6d7542da))
+
 ## [0.2.2](https://miniapp-tool///compare/v0.2.1...v0.2.2) (2023-07-11)
 
 ### Features

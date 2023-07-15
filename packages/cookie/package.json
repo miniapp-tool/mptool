@@ -1,6 +1,6 @@
 {
   "name": "@mptool/cookie",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Cookie handler for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
