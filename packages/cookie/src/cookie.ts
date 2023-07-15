@@ -22,7 +22,9 @@ export class Cookie {
       ? cookie.maxAge! > 0
         ? new Date().getTime() + cookie.maxAge! * 1000
         : "outdate"
-      : cookie.expires?.getTime() ?? "session";
+      : cookie.expires
+      ? new Date(cookie.expires).getTime()
+      : "session";
   }
 
   /**
@@ -60,5 +62,18 @@ export class Cookie {
 
   toString(): string {
     return `${this.name}=${this.value}`;
+  }
+
+  toJSON(): CookieType {
+    return {
+      name: this.name,
+      value: this.value,
+      domain: this.domain,
+      path: this.path,
+      httpOnly: this.httpOnly,
+      ...(typeof this.expires === "number"
+        ? { expires: new Date(this.expires) }
+        : {}),
+    };
   }
 }
