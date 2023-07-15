@@ -29,11 +29,12 @@ export const getDomain = (domainOrURL: string): string =>
   domainOrURL
     .replace(/^https?:\/\//, "")
     .split("/")
-    .shift()!;
+    .shift()!
+    .replace(/:\d+$/, "");
 
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
-  const path = url.split(domain).pop() || "/";
+  const path = url.split(domain)[1].replace(/^:\d+/, "") || "/";
 
   return {
     domain,

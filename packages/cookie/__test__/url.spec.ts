@@ -16,4 +16,8 @@ it("Should parse domain and path for url", () => {
     domain: "example.com",
     path: "/a/b.html",
   });
+  expect(parseUrl("https://example.com:443/a/b.html")).toStrictEqual({
+    domain: "example.com",
+    path: "/a/b.html",
+  });
 });
