@@ -245,8 +245,6 @@ export class CookieStore {
         )
       : setCookieHeader;
 
-    console.log(getDomain(domainOrURL));
-
     return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
