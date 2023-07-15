@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://miniapp-tool///compare/v0.3.0...v0.3.1) (2023-07-15)
+
+
+### Features
+
+* add getAllCookies method ([a456bca](https://miniapp-tool///commit/a456bca21f8e3b840077c4b045d673138cb56d52))
+
+
+### Bug Fixes
+
+* fix bugs ([3022891](https://miniapp-tool///commit/30228913beeaf61f189f68c516380079a262a35e))
+* fix cookie ([a58ad12](https://miniapp-tool///commit/a58ad12c98c755a325867cae28a980ae063b5d0b))
+
 ## [0.3.0](https://miniapp-tool///compare/v0.2.2...v0.3.0) (2023-07-15)
 
 
