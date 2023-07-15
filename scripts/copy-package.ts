@@ -15,5 +15,5 @@ copy("./packages/file/package.json", `${parentFolderPath}/file/package.json`);
 copy("./packages/enhance/lib", `${parentFolderPath}/enhance/lib`);
 copy(
   "./packages/enhance/package.json",
-  `${parentFolderPath}/enhance/package.json`
+  `${parentFolderPath}/enhance/package.json`,
 );

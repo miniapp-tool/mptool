@@ -4,7 +4,7 @@
 
   ```ts
   function Emitter<Events extends Record<EventType, unknown>>(
-    all?: EventHandlerMap<Events>
+    all?: EventHandlerMap<Events>,
   ): EmitterInstance<Events>;
   ```
 
@@ -55,7 +55,7 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```ts
   function on<Key extends keyof Events>(
     type: Key,
-    handler: GenericEventHandler
+    handler: GenericEventHandler,
   ): void;
   ```
 
@@ -73,7 +73,7 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```ts
   function off<Key extends keyof Events>(
     type: Key,
-    handler?: GenericEventHandler
+    handler?: GenericEventHandler,
   ): void;
   ```
 
@@ -120,7 +120,7 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```ts
   function emitAsync<Key extends keyof Events>(
     type: Key,
-    event?: Events[Key]
+    event?: Events[Key],
   ): Promise<void>;
   ```
 

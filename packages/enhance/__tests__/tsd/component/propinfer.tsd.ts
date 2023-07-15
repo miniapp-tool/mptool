@@ -96,13 +96,13 @@ expectType<number>(convertOptionsWithDefault(numberOptionsWithDefault));
 expectType<string>(convertOptionsWithDefault(stringOptionsWithDefault));
 expectType<boolean>(convertOptionsWithDefault(booleanOptionsWithDefault));
 expectType<Record<string, any>>(
-  convertOptionsWithDefault(objectOptionsWithDefault)
+  convertOptionsWithDefault(objectOptionsWithDefault),
 );
 expectType<any[]>(convertOptionsWithDefault(arrayOptionsWithDefault));
 expectType<any>(convertOptionsWithDefault(nullOptionsWithDefault));
 
 const convertProps = <Props extends PropsOptions>(
-  _props: Props
+  _props: Props,
 ): InferPropTypes<Props> => null as unknown as InferPropTypes<Props>;
 
 interface Config {
@@ -114,7 +114,7 @@ expectType<Config | undefined>(
     config: {
       type: Object as PropType<Config>,
     },
-  }).config
+  }).config,
 );
 
 expectType<Config | undefined>(
@@ -123,7 +123,7 @@ expectType<Config | undefined>(
     config: {
       type: Object as PropType<Config>,
     },
-  }).config
+  }).config,
 );
 
 expectType<string | undefined>(
@@ -132,7 +132,7 @@ expectType<string | undefined>(
     config: {
       type: Object as PropType<Config>,
     },
-  }).myString
+  }).myString,
 );
 
 expectType<Config>(
@@ -142,7 +142,7 @@ expectType<Config>(
       type: Object as PropType<Config>,
       default: { a: 1 },
     },
-  }).config
+  }).config,
 );
 
 type Config2 = Config | string[];
@@ -154,5 +154,5 @@ expectType<Config2>(
       type: [Object, Array] as PropType<Config2>,
       default: { a: 1 },
     },
-  }).config
+  }).config,
 );

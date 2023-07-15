@@ -51,7 +51,7 @@ export const take = <T = unknown>(key: string): T | undefined => {
  */
 const getData = <T = unknown>(
   key: string,
-  value: StorageData<T> | null
+  value: StorageData<T> | null,
 ): T | undefined =>
   value
     ? value.expired
@@ -68,7 +68,7 @@ const getData = <T = unknown>(
 const prepareData = <T = unknown>(
   key: string,
   value: T,
-  expire: number | "keep" | "once"
+  expire: number | "keep" | "once",
 ): StorageData<T> | undefined => {
   /** 默认保存数据格式 */
   const data: StorageData<T> = {
@@ -109,7 +109,7 @@ const prepareData = <T = unknown>(
 export const set = <T = unknown>(
   key: string,
   value: T,
-  expire: number | "keep" | "once" = "once"
+  expire: number | "keep" | "once" = "once",
 ): void => {
   wx.setStorageSync(`_cache_${key}`, prepareData(key, value, expire));
 };
@@ -128,7 +128,7 @@ export const set = <T = unknown>(
 export const setAsync = <T = unknown>(
   key: string,
   value: T,
-  expire: number | "keep" | "once" = "once"
+  expire: number | "keep" | "once" = "once",
 ): Promise<WechatMiniprogram.GeneralCallbackResult | void> =>
   wx
     .setStorage({
@@ -184,7 +184,7 @@ export const remove = (key: string): void => {
  * @param option 回调函数
  */
 export const removeAsync = (
-  key: string
+  key: string,
 ): Promise<WechatMiniprogram.GeneralCallbackResult> =>
   wx.removeStorage({
     key: `_cache_${key}`,
@@ -233,7 +233,7 @@ export const checkAsync = (): Promise<void[]> =>
                 });
 
               return;
-            })
-        )
-    )
+            }),
+        ),
+    ),
   );

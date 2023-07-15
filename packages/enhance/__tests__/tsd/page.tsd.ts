@@ -111,7 +111,7 @@ $Page("example", {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         "newField.text": "new data",
       },
-      function () {}
+      function () {},
     );
     expectType<string>(this.route);
     expectType<string>(this.data.text);

@@ -68,6 +68,7 @@ export const rollupTypescript = (
         compilerOptions: {
           preserveSymlinks: false,
         },
+        respectExternal: true,
       }),
     ],
     external: dtsExternal,

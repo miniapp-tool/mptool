@@ -18,16 +18,16 @@
  */
 export function wrapFunction<T>(
   original: ((this: T, ...args: any[]) => void) | undefined,
-  pre: (this: T, ...args: any[]) => void
+  pre: (this: T, ...args: any[]) => void,
 ): (this: T, ...args: any[]) => void;
 export function wrapFunction<T>(
   original: ((this: T, ...args: any[]) => Promise<void>) | undefined,
-  pre: (this: T, ...args: any[]) => void
+  pre: (this: T, ...args: any[]) => void,
 ): (this: T, ...args: any[]) => Promise<void>;
 
 export function wrapFunction<T, R extends void | Promise<void>>(
   original: ((this: T, ...args: any[]) => R) | undefined,
-  pre: (this: T, ...args: any[]) => void
+  pre: (this: T, ...args: any[]) => void,
 ) {
   return function wrapper(this: T, ...args: any[]): Promise<void> | void {
     pre.apply(this, args);
@@ -65,7 +65,7 @@ export function wrapFunction<T, R extends void | Promise<void>>(
  */
 export const lock = <T, A extends unknown[], R>(
   fn: (this: T, release: () => void, ...args: A) => R,
-  ctx?: T
+  ctx?: T,
 ): ((this: T, ...args: A) => R | undefined) => {
   let pending: boolean;
 
@@ -103,7 +103,7 @@ export const lock = <T, A extends unknown[], R>(
  */
 export const once = <T, A extends unknown[], R>(
   func: (...args: A) => R,
-  ctx?: T
+  ctx?: T,
 ): ((this: T, ...args: A) => R | undefined) => {
   let called: boolean;
 
@@ -131,7 +131,7 @@ export interface Task<ArgType extends unknown[] = unknown[], This = unknown> {
 export class Queue {
   constructor(
     /** 允许同时并行的任务数 */
-    public capacity = 1
+    public capacity = 1,
   ) {}
 
   /** 回调队列 */
@@ -203,7 +203,7 @@ export class Queue {
  */
 export const funcQueue = <A extends unknown[], T = unknown>(
   fn: (next: () => void, ...args: A) => void,
-  capacity = 1
+  capacity = 1,
 ): ((this: T, ...args: A) => void) => {
   const queue = new Queue(capacity);
 

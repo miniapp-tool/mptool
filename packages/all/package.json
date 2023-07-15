@@ -1,20 +1,19 @@
 {
-  "name": "@mptool/file",
+  "name": "@mptool/all",
   "version": "0.2.2",
-  "description": "File enhance plugin for QQ/Wechat miniapp",
+  "description": "Full back for mptool",
   "keywords": [
     "miniprogram",
-    "miniapp",
-    "file"
+    "miniapp"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/file#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/file"
+    "directory": "packages/all"
   },
   "license": "MIT",
   "author": {
@@ -31,19 +30,22 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "clean": "rimraf ./lib",
-    "dev": "rollup -c -w"
-  },
-  "dependencies": {
-    "miniprogram-api-typings": "^3.10.0"
-  },
-  "devDependencies": {
-    "@mptool/mock": "workspace:*",
-    "@mptool/shared": "workspace:*"
+    "dev": "rollup -c -w",
+    "tsd": "tsd"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^3.10.0"
   },
+  "devDependencies": {
+    "@mptool/cookie": "workspace:*",
+    "@mptool/enhance": "workspace:*",
+    "@mptool/file": "workspace:*",
+    "miniprogram-api-typings": "3.10.0"
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "tsd": {
+    "directory": "__tests__/tsd"
   }
 }

@@ -19,10 +19,10 @@ let hasPageLoaded = false;
 
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
-  Custom extends WechatMiniprogram.IAnyObject
+  Custom extends WechatMiniprogram.IAnyObject,
 >(
   name: string,
-  options: PageOptions<Data, Custom>
+  options: PageOptions<Data, Custom>,
 ): void => {
   const { extendPage, injectPage } = getConfig();
 
@@ -48,7 +48,7 @@ export const $Page: PageConstructor = <
       callLog("onAppLaunch");
 
       void options.onAppLaunch(
-        onLaunchOptions as WechatMiniprogram.App.LaunchShowOption
+        onLaunchOptions as WechatMiniprogram.App.LaunchShowOption,
       );
     } else
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
@@ -68,7 +68,7 @@ export const $Page: PageConstructor = <
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onNavigate!(query);
-      }
+      },
     );
 
     registerLog("onNavigate");
@@ -81,7 +81,7 @@ export const $Page: PageConstructor = <
         callLog("onPreload", query);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onPreload!(query);
-      }
+      },
     );
 
     registerLog("onPreload");
@@ -106,11 +106,11 @@ export const $Page: PageConstructor = <
   });
 
   options.onReady = wrapFunction(options.onReady, () =>
-    appEmitter.emit(ON_PAGE_READY)
+    appEmitter.emit(ON_PAGE_READY),
   );
 
   options.onUnload = wrapFunction(options.onUnload, () =>
-    appEmitter.emit(ON_PAGE_UNLOAD)
+    appEmitter.emit(ON_PAGE_UNLOAD),
   );
 
   mount(options);

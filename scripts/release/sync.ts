@@ -14,9 +14,9 @@ export const sync = (): Promise<void[]> => {
         new Promise<void>((resolve) => {
           get(`https://npmmirror.com/sync/${content.name as string}`).on(
             "finish",
-            () => resolve()
+            () => resolve(),
           );
-        })
+        }),
     );
   });
 

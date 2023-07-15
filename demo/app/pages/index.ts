@@ -7,7 +7,7 @@ $Page("index", {
   data: {},
   onRegister() {
     console.log(
-      `from [pages/index] Page register：${new Date().getTime() - date}ms`
+      `from [pages/index] Page register：${new Date().getTime() - date}ms`,
     );
   },
   onAppLaunch(opts) {

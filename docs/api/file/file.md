@@ -83,7 +83,7 @@
   ```ts
   function readFile<T = unknown>(
     path: string,
-    encoding = "utf-8"
+    encoding = "utf-8",
   ): T | undefined;
   ```
 
@@ -106,7 +106,7 @@
   ```ts
   function readJSON<T = unknown>(
     path: string,
-    encoding = "utf-8"
+    encoding = "utf-8",
   ): T | undefined;
   ```
 
@@ -209,7 +209,7 @@
   ```ts
   function saveOnlineFile(
     onlinePath: string,
-    targetPath: string
+    targetPath: string,
   ): Promise<void>;
   ```
 

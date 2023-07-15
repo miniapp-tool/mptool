@@ -16,7 +16,7 @@ import type {
 let componentIndex = 0;
 
 export const handleProperties = (
-  props: PropsOptions = {}
+  props: PropsOptions = {},
 ): WechatMiniprogram.Component.PropertyOption => {
   const properties: WechatMiniprogram.Component.PropertyOption = {};
 
@@ -75,7 +75,7 @@ export const $Component: ComponentConstructor = <
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-  IsPage extends boolean = false
+  IsPage extends boolean = false,
 >(
   options: ComponentOptions<
     Data,
@@ -83,7 +83,7 @@ export const $Component: ComponentConstructor = <
     Method,
     CustomInstanceProperty,
     IsPage
-  >
+  >,
 ): string => {
   // extend page config
   const { extendComponent, injectComponent } = getConfig();
@@ -103,12 +103,12 @@ export const $Component: ComponentConstructor = <
         Method,
         CustomInstanceProperty,
         IsPage
-      >
+      >,
     ) {
       mount(this);
       if (injectComponent)
         injectComponent(options as unknown as TrivialComponentOptions);
-    }
+    },
   );
 
   options.lifetimes.attached = wrapFunction(
@@ -121,7 +121,7 @@ export const $Component: ComponentConstructor = <
         Method,
         CustomInstanceProperty,
         IsPage
-      >
+      >,
     ) {
       const id = (componentIndex += 1);
 
@@ -130,7 +130,7 @@ export const $Component: ComponentConstructor = <
       this.$refID = this.properties.ref as string;
 
       this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
-    }
+    },
   );
 
   options.lifetimes.detached = wrapFunction(
@@ -143,7 +143,7 @@ export const $Component: ComponentConstructor = <
         Method,
         CustomInstanceProperty,
         IsPage
-      >
+      >,
     ) {
       removeRef(this.$id);
 
@@ -155,7 +155,7 @@ export const $Component: ComponentConstructor = <
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       delete this.$parent;
-    }
+    },
   );
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -195,7 +195,7 @@ export const $Component: ComponentConstructor = <
         CustomInstanceProperty,
         IsPage
       >,
-      parent: TrivialComponentInstance | TrivialPageInstance
+      parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
@@ -215,7 +215,7 @@ export const $Component: ComponentConstructor = <
         CustomInstanceProperty,
         IsPage
       >,
-      value: string
+      value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
         if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
@@ -236,6 +236,6 @@ export const $Component: ComponentConstructor = <
       Data,
       WechatMiniprogram.Component.PropertyOption,
       Method
-    >
+    >,
   );
 };

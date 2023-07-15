@@ -1,20 +1,20 @@
 {
-  "name": "@mptool/file",
+  "name": "@mptool/cookie",
   "version": "0.2.2",
-  "description": "File enhance plugin for QQ/Wechat miniapp",
+  "description": "Cookie handler for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
     "miniapp",
-    "file"
+    "cookie"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/file#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/cookie#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/file"
+    "directory": "packages/cookie"
   },
   "license": "MIT",
   "author": {
@@ -38,10 +38,8 @@
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "@mptool/shared": "workspace:*"
-  },
-  "peerDependencies": {
-    "miniprogram-api-typings": "^3.10.0"
+    "@types/set-cookie-parser": "2.4.2",
+    "set-cookie-parser": "2.6.0"
   },
   "publishConfig": {
     "access": "public"

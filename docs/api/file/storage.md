@@ -55,7 +55,7 @@
   function set<T = unknown>(
     key: string,
     value: T,
-    expire: number | "keep" | "once" = "once"
+    expire: number | "keep" | "once" = "once",
   ): void;
   ```
 
@@ -87,7 +87,7 @@
   function setAsync<T = unknown>(
     key: string,
     value: T,
-    expire: number | "keep" | "once"
+    expire: number | "keep" | "once",
   ): Promise<WechatMiniprogram.GeneralCallbackResult | void>;
   ```
 
@@ -143,7 +143,7 @@
 
   ```ts
   function removeAsync(
-    key: string
+    key: string,
   ): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 

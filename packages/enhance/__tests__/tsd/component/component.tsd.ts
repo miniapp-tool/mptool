@@ -1,5 +1,5 @@
 import { expectType, expectError } from "tsd";
-import { $Component } from "../../../src";
+import { $Component } from "../../../src/index.js";
 
 expectType<string>($Component({}));
 
@@ -78,7 +78,7 @@ $Component({
           bubbles: true,
           composed: true,
           capturePhase: true,
-        }
+        },
       );
     },
     _myPrivateMethod() {
@@ -121,7 +121,7 @@ expectError(
         this.custom;
       },
     },
-  })
+  }),
 );
 
 expectError(
@@ -136,7 +136,7 @@ expectError(
         });
       },
     },
-  })
+  }),
 );
 
 $Component({
@@ -188,9 +188,9 @@ $Component({
             { opacity: true, rotate: true },
             function () {
               console.log("清除了#container上的opacity和rotate属性");
-            }
+            },
           );
-        }
+        },
       );
 
       this.animate(
@@ -205,7 +205,7 @@ $Component({
           this.clearAnimation(".block", function () {
             console.log("清除了.block上的所有动画属性");
           });
-        }
+        },
       );
     },
   },
@@ -242,7 +242,7 @@ $Component({
           timeRange: 2000,
           startScrollOffset: 0,
           endScrollOffset: 85,
-        }
+        },
       );
 
       this.animate(
@@ -263,7 +263,7 @@ $Component({
           timeRange: 1000,
           startScrollOffset: 120,
           endScrollOffset: 252,
-        }
+        },
       );
     },
   },

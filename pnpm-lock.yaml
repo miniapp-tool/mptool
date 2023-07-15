@@ -160,15 +160,45 @@ importers:
         specifier: 2.0.0-beta.231
         version: 2.0.0-beta.231(vuepress@2.0.0-beta.64)
 
-  packages/enhance:
-    dependencies:
-      '@mptool/shared':
+  packages/all:
+    devDependencies:
+      '@mptool/cookie':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../cookie
+      '@mptool/enhance':
+        specifier: workspace:*
+        version: link:../enhance
+      '@mptool/file':
+        specifier: workspace:*
+        version: link:../file
+      miniprogram-api-typings:
+        specifier: 3.10.0
+        version: 3.10.0
+
+  packages/cookie:
+    dependencies:
+      miniprogram-api-typings:
+        specifier: ^3.10.0
+        version: 3.10.0
     devDependencies:
       '@mptool/mock':
         specifier: workspace:*
         version: link:../mock
+      '@types/set-cookie-parser':
+        specifier: 2.4.2
+        version: 2.4.2
+      set-cookie-parser:
+        specifier: 2.6.0
+        version: 2.6.0
+
+  packages/enhance:
+    devDependencies:
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
       miniprogram-api-typings:
         specifier: 3.10.0
         version: 3.10.0
@@ -2792,6 +2822,12 @@ packages:
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
+    dev: true
+
+  /@types/set-cookie-parser@2.4.2:
+    resolution: {integrity: sha512-fBZgytwhYAUkj/jC/FAV4RQ5EerRup1YQsXQCh8rZfiHkc4UahC192oH0smGwsXol3cL3A5oETuAHeQHmhXM4w==}
+    dependencies:
+      '@types/node': 20.4.1
     dev: true
 
   /@types/through@0.0.30:
@@ -8918,6 +8954,10 @@ packages:
 
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
+    dev: true
+
+  /set-cookie-parser@2.6.0:
+    resolution: {integrity: sha512-RVnVQxTXuerk653XfuliOxBP81Sf0+qfQE73LIYKcyMYHG94AuH0kgrQpRDuTZnSmjpysHmzxJXKNfa6PjFhyQ==}
     dev: true
 
   /shebang-command@2.0.0:

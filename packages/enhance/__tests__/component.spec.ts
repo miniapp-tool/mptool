@@ -16,7 +16,7 @@ describe("Should handel properties", () => {
         d: Boolean,
         e: Object,
         f: Array,
-      })
+      }),
     ).toEqual({
       a: null,
       b: String,
@@ -37,7 +37,7 @@ describe("Should handel properties", () => {
         d: { type: Boolean },
         e: { type: Object },
         f: { type: Array },
-      })
+      }),
     ).toEqual({
       a: { type: null },
       b: { type: String },
@@ -58,7 +58,7 @@ describe("Should handel properties", () => {
         d: { type: Boolean, default: false },
         e: { type: Object, default: { a: 1 } },
         f: { type: Array, default: ["a", "b"] },
-      })
+      }),
     ).toEqual({
       a: { type: null, value: "" },
       b: { type: String, value: "" },
@@ -75,7 +75,7 @@ describe("Should handel properties", () => {
       handleProperties({
         a: { type: [String, Number, Boolean], default: "" },
         b: { type: [Number, Array], default: 1 },
-      })
+      }),
     ).toEqual({
       a: { type: String, value: "", optionalTypes: [Number, Boolean] },
       b: { type: Number, value: 1, optionalTypes: [Array] },

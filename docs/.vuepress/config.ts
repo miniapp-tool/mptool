@@ -18,7 +18,7 @@ export default defineUserConfig({
       url: "https://mrhope.site",
     },
 
-    iconAssets: "//at.alicdn.com/t/font_2410206_njbtaif35kf.css",
+    iconAssets: "fontawesome",
 
     logo: "/logo.svg",
 
@@ -32,13 +32,13 @@ export default defineUserConfig({
         text: "框架",
         icon: "frame",
         prefix: "/guide/",
-        children: ["enhance", "file"],
+        children: ["enhance", "file", "cookie"],
       },
       {
         text: "API",
         icon: "api",
         prefix: "/api/",
-        children: ["enhance/", "file/"],
+        children: ["enhance/", "file/", "cookie/"],
       },
     ],
 
@@ -48,7 +48,7 @@ export default defineUserConfig({
           text: "介绍",
           icon: "creative",
           prefix: "/guide/",
-          children: ["", "enhance", "file"],
+          children: ["", "enhance", "file", "cookie"],
         },
         {
           text: "API",
@@ -64,6 +64,12 @@ export default defineUserConfig({
               icon: "folder",
               prefix: "/api/file/",
               children: ["file", "storage"],
+            },
+            {
+              text: "Cookie",
+              icon: "folder",
+              prefix: "/api/cookie/",
+              children: ["cookie", "storage"],
             },
           ],
         },

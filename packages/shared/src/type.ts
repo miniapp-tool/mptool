@@ -11,7 +11,7 @@ export const type = (obj: unknown): string => {
     if (obj === null) return "null";
 
     const objType = /\[object (\w+)\]/u.exec(
-      Object.prototype.toString.call(obj)
+      Object.prototype.toString.call(obj),
     );
 
     return objType ? objType[1].toLowerCase() : "";

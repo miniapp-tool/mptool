@@ -203,7 +203,7 @@ export type ComponentInstance<
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-  IsPage extends boolean = false
+  IsPage extends boolean = false,
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
@@ -228,7 +228,7 @@ export type ComponentOptions<
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-  IsPage extends boolean = false
+  IsPage extends boolean = false,
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<{
     /** 组件属性 */
@@ -247,7 +247,7 @@ export interface ComponentConstructor {
     Property extends PropsOptions,
     Method extends WechatMiniprogram.Component.MethodOption,
     CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-    IsPage extends boolean = false
+    IsPage extends boolean = false,
   >(
     options: ComponentOptions<
       Data,
@@ -255,7 +255,7 @@ export interface ComponentConstructor {
       Method,
       CustomInstanceProperty,
       IsPage
-    >
+    >,
   ): string;
 }
 

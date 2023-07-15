@@ -35,7 +35,7 @@ export const $Config = (config: AppConfig): void => {
   else if (typeof routes === "object") {
     nameToRouteMap = routes;
     routeToNameMap = Object.fromEntries(
-      Object.keys(routes).map((route) => [routes[route], route])
+      Object.keys(routes).map((route) => [routes[route], route]),
     );
   }
 
@@ -44,7 +44,7 @@ export const $Config = (config: AppConfig): void => {
       .replace(/^\/?/, "/?")
       .replace(/[.]/g, "\\.")
       .replace("$name", "([\\w\\-]+)")
-      .replace(/\$name/g, "[\\w\\-]+")}`
+      .replace(/\$name/g, "[\\w\\-]+")}`,
   );
 
   appConfig = {

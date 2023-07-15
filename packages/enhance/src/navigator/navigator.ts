@@ -43,18 +43,18 @@ export const getPathDetail = (pageNameWithArg: string): PathDetails => {
 };
 
 export function getTrigger(
-  type: "navigateTo"
+  type: "navigateTo",
 ): (
-  pageName: string
+  pageName: string,
 ) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 export function getTrigger(
-  type: "redirectTo"
+  type: "redirectTo",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 export function getTrigger(
-  type: "switchTab"
+  type: "switchTab",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 export function getTrigger(
-  type: "reLaunch"
+  type: "reLaunch",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 
 /**

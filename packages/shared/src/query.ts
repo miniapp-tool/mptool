@@ -8,7 +8,7 @@
  */
 export const parse = (
   queryString = "",
-  splitter = "&"
+  splitter = "&",
 ): Record<string, string> => {
   /** 参数对象 */
   const queries: Record<string, string> = {};
@@ -36,7 +36,7 @@ export const parse = (
 export const stringify = (
   params: Record<string, string> = {},
   splitter = "&",
-  unencoded = false
+  unencoded = false,
 ): string =>
   Object.keys(params)
     .map((key) => {
@@ -58,7 +58,7 @@ export const stringify = (
 export const join = (
   path: string,
   queries: Record<string, string>,
-  unencoded = false
+  unencoded = false,
 ): string => {
   const queryString = stringify(queries, "&", unencoded);
 

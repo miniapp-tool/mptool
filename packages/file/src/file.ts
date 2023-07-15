@@ -57,7 +57,7 @@ export const isDir = (path: string): boolean =>
  */
 export const rm = (
   path: string,
-  type: "dir" | "file" = isDir(path) ? "dir" : "file"
+  type: "dir" | "file" = isDir(path) ? "dir" : "file",
 ): void => {
   const deleteLog = (): void => logger.debug(`Deleted ${path}`);
   const errorLog = (err: unknown): void =>
@@ -103,7 +103,7 @@ export const ls = (path: string): string[] => {
  */
 export const readFile = (
   path: string,
-  encoding: FileEncoding = "utf-8"
+  encoding: FileEncoding = "utf-8",
 ): string | ArrayBuffer | undefined => {
   try {
     return fileManager.readFileSync(`${userPath}/${path}`, encoding);
@@ -123,14 +123,14 @@ export const readFile = (
  */
 export const readJSON = <T = unknown>(
   path: string,
-  encoding: FileEncoding = "utf-8"
+  encoding: FileEncoding = "utf-8",
 ): T | undefined => {
   let data;
 
   try {
     const fileContent = fileManager.readFileSync(
       `${userPath}/${path}.json`,
-      encoding
+      encoding,
     );
     try {
       data = JSON.parse(fileContent as string) as T;
@@ -189,7 +189,7 @@ export const saveFile = (tempFilePath: string, path: string): void => {
  */
 export const saveOnlineFile = (
   onlinePath: string,
-  localPath: string
+  localPath: string,
 ): Promise<string> => {
   mkdir(dirname(localPath));
 
@@ -203,7 +203,7 @@ export const saveOnlineFile = (
           resolve(res.tempFilePath);
         } else {
           logger.error(
-            `Download ${onlinePath} failed with statusCode ${res.statusCode}`
+            `Download ${onlinePath} failed with statusCode ${res.statusCode}`,
           );
           reject(res.statusCode);
         }
@@ -226,13 +226,13 @@ export const saveOnlineFile = (
 export const writeFile = <T = unknown>(
   path: string,
   data: T,
-  encoding: FileEncoding = data instanceof ArrayBuffer ? "binary" : "utf-8"
+  encoding: FileEncoding = data instanceof ArrayBuffer ? "binary" : "utf-8",
 ): void => {
   mkdir(dirname(path));
   fileManager.writeFileSync(
     `${userPath}/${path}`,
     data instanceof ArrayBuffer ? data : JSON.stringify(data),
-    encoding
+    encoding,
   );
 };
 
@@ -246,7 +246,7 @@ export const writeFile = <T = unknown>(
 export const writeJSON = <T = unknown>(
   path: string,
   data: T,
-  encoding: FileEncoding = "utf-8"
+  encoding: FileEncoding = "utf-8",
 ): void => {
   const jsonString = JSON.stringify(data);
 

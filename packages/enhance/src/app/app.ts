@@ -14,7 +14,7 @@ export const appState = {
 };
 
 const appLaunchHandler = (
-  options: WechatMiniprogram.App.LaunchShowOption
+  options: WechatMiniprogram.App.LaunchShowOption,
 ): void => {
   appState.launch = true;
   appState.lOpt = options;
@@ -42,9 +42,9 @@ const appHideHandler = (): void => {
  * @param appOptions App Option
  */
 export const $App: AppConstructor = <
-  Custom extends WechatMiniprogram.IAnyObject
+  Custom extends WechatMiniprogram.IAnyObject,
 >(
-  appOptions: AppOptions<Custom>
+  appOptions: AppOptions<Custom>,
 ): void => {
   appOptions.onLaunch = wrapFunction(appOptions.onLaunch, appLaunchHandler);
   appOptions.onShow = wrapFunction(appOptions.onShow, appShowHandler);
