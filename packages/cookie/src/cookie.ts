@@ -9,7 +9,7 @@ export class Cookie {
   value: string;
   domain: string;
   path: string;
-  expires: number | "session" | "outdate" = "session";
+  expires: Date | "session" | "outdate" = "session";
   httpOnly: boolean;
 
   constructor(cookie: CookieType) {
@@ -20,10 +20,10 @@ export class Cookie {
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
       ? cookie.maxAge! > 0
-        ? new Date().getTime() + cookie.maxAge! * 1000
+        ? new Date(new Date().getTime() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
-      ? new Date(cookie.expires).getTime()
+      ? new Date(cookie.expires)
       : "session";
   }
 
@@ -33,7 +33,7 @@ export class Cookie {
   isExpired(): boolean {
     return (
       this.expires === "outdate" ||
-      (typeof this.expires === "number" && new Date().getTime() > this.expires)
+      (this.expires instanceof Date && new Date() > this.expires)
     );
   }
 
@@ -65,15 +65,16 @@ export class Cookie {
   }
 
   toJSON(): CookieType {
-    return {
+    const cookieType: CookieType = {
       name: this.name,
       value: this.value,
       domain: this.domain,
-      path: this.path,
-      httpOnly: this.httpOnly,
-      ...(typeof this.expires === "number"
-        ? { expires: new Date(this.expires) }
-        : {}),
     };
+
+    if (this.path !== "/") cookieType.path = this.path;
+    if (this.httpOnly) cookieType.httpOnly = this.httpOnly;
+    if (this.expires instanceof Date) cookieType.expires = this.expires;
+
+    return cookieType;
   }
 }
