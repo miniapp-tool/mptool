@@ -74,8 +74,8 @@ describe("cookies", () => {
     expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBe(false);
   });
 
-  it("values()", () => {
-    const result = cookieStore.values();
+  it("list()", () => {
+    const result = cookieStore.list();
 
     expect(result["baidu.com"]).toBeTypeOf("object");
   });

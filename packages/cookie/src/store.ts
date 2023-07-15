@@ -121,7 +121,7 @@ export class CookieStore {
   /**
    * 获取所有域名和 cookies 结构
    */
-  values(): Record<string, Record<string, string>> {
+  list(): Record<string, Record<string, string>> {
     const dirObj: Record<string, Record<string, string>> = {};
 
     for (const domain of this.store.keys())
@@ -147,6 +147,22 @@ export class CookieStore {
       for (const cookie of cookieMap.values())
         if (cookie.isPathMatched(path) && !cookie.isExpired())
           cookies.push(cookie);
+    }
+
+    return cookies;
+  }
+
+  /**
+   * 获取所有 cookies 对象
+   *
+   * @return Cookie 对象数组
+   */
+  getAllCookies(): Cookie[] {
+    const cookies = [];
+
+    for (const cookieMap of this.store.values()) {
+      for (const cookie of cookieMap.values())
+        if (!cookie.isExpired()) cookies.push(cookie);
     }
 
     return cookies;
