@@ -25,8 +25,14 @@ export interface UrlInfo {
   path: string;
 }
 
+export const getDomain = (domainOrURL: string): string =>
+  domainOrURL
+    .replace(/^https?:\/\//, "")
+    .split("/")
+    .shift()!;
+
 export const parseUrl = (url: string): UrlInfo => {
-  const domain = url.split("/")[2];
+  const domain = getDomain(url);
   const path = url.split(domain).pop() || "/";
 
   return {
@@ -35,9 +41,9 @@ export const parseUrl = (url: string): UrlInfo => {
   };
 };
 
-export type CookeStoreOptions = string | { domain?: string; path?: string };
+export type CookieStoreOptions = string | { domain?: string; path?: string };
 
-export const getCookieOptions = (options?: CookeStoreOptions): UrlInfo => {
+export const getCookieOptions = (options?: CookieStoreOptions): UrlInfo => {
   const { domain = "", path = "/" } =
     typeof options === "object"
       ? options

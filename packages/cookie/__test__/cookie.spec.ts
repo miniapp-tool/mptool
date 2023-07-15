@@ -30,7 +30,9 @@ describe("cookies", () => {
   });
 
   it("set", () => {
-    const result = cookieStore.set(TEST_NAME, TEST_VALUE, {
+    const result = cookieStore.set({
+      name: TEST_NAME,
+      value: TEST_VALUE,
       domain: "baidu.com",
     });
 
