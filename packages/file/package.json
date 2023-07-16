@@ -1,6 +1,6 @@
 {
   "name": "@mptool/file",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "File enhance plugin for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",

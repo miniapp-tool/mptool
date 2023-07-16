@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.5](https://miniapp-tool///compare/v0.3.4...v0.3.5) (2023-07-16)
+
+
+### Bug Fixes
+
+* **cookie:** fix qq android header ([c891d6c](https://miniapp-tool///commit/c891d6c2f2a79de65d0040385869687ad321d5a7))
+
 ## [0.3.4](https://miniapp-tool///compare/v0.3.3...v0.3.4) (2023-07-16)
 
 
