@@ -96,7 +96,7 @@ const bindBack = function touchHandler(
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-    return back(Number(delta)).then(() => {
+    return Promise.resolve(back(Number(delta))).then(() => {
       if (this && after && typeof this[after] === "function")
         (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
     });
