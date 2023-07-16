@@ -241,7 +241,7 @@ export class CookieStore {
       : typeof qq === "object"
       ? setCookieHeader.replace(
           /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
-          ",$1",
+          ",$1=",
         )
       : setCookieHeader;
 
