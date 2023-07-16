@@ -1,6 +1,6 @@
 {
   "name": "@mptool/enhance",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Lifetime enhance for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
