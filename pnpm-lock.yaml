@@ -231,6 +231,9 @@ importers:
       '@mptool/mock':
         specifier: workspace:*
         version: link:../mock
+      base64-arraybuffer:
+        specifier: 1.0.2
+        version: 1.0.2
 
 packages:
 
@@ -3728,6 +3731,11 @@ packages:
 
   /balloon-css@1.2.0:
     resolution: {integrity: sha512-urXwkHgwp6GsXVF+it01485Z2Cj4pnW02ICnM0TemOlkKmCNnDLmyy+ZZiRXBpwldUXO+aRNr7Hdia4CBvXJ5A==}
+    dev: true
+
+  /base64-arraybuffer@1.0.2:
+    resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
+    engines: {node: '>= 0.6.0'}
     dev: true
 
   /base64-js@1.5.1:

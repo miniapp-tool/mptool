@@ -38,6 +38,7 @@
     "miniprogram-api-typings": "^3.10.0"
   },
   "devDependencies": {
+    "base64-arraybuffer": "1.0.2",
     "@mptool/mock": "workspace:*"
   },
   "publishConfig": {
