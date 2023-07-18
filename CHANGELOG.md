@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://miniapp-tool///compare/v0.3.5...v0.3.6) (2023-07-18)
+
+
+### Features
+
+* add buffer2base64 helper ([7481886](https://miniapp-tool///commit/7481886dc08c5c60f474fe6f19b01d83bb80dc0b))
+
 ## [0.3.5](https://miniapp-tool///compare/v0.3.4...v0.3.5) (2023-07-16)
 
 
