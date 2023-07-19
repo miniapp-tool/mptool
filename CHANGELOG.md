@@ -4,58 +4,50 @@ All notable changes to this project will be documented in this file. See [Conven
 
 ## [0.3.6](https://miniapp-tool///compare/v0.3.5...v0.3.6) (2023-07-18)
 
-
 ### Features
 
-* add buffer2base64 helper ([7481886](https://miniapp-tool///commit/7481886dc08c5c60f474fe6f19b01d83bb80dc0b))
+- add buffer2base64 helper ([7481886](https://miniapp-tool///commit/7481886dc08c5c60f474fe6f19b01d83bb80dc0b))
 
 ## [0.3.5](https://miniapp-tool///compare/v0.3.4...v0.3.5) (2023-07-16)
 
-
 ### Bug Fixes
 
-* **cookie:** fix qq android header ([c891d6c](https://miniapp-tool///commit/c891d6c2f2a79de65d0040385869687ad321d5a7))
+- **cookie:** fix qq android header ([c891d6c](https://miniapp-tool///commit/c891d6c2f2a79de65d0040385869687ad321d5a7))
 
 ## [0.3.4](https://miniapp-tool///compare/v0.3.3...v0.3.4) (2023-07-16)
 
-
 ### Bug Fixes
 
-* fix promise issue on QQ miniapp ([b4550d1](https://miniapp-tool///commit/b4550d1e102bf62de151356768c489cce2f6c8a5))
+- fix promise issue on QQ miniapp ([b4550d1](https://miniapp-tool///commit/b4550d1e102bf62de151356768c489cce2f6c8a5))
 
 ## [0.3.3](https://miniapp-tool///compare/v0.3.2...v0.3.3) (2023-07-15)
 
 ## [0.3.2](https://miniapp-tool///compare/v0.3.1...v0.3.2) (2023-07-15)
 
-
 ### Features
 
-* **cookie:** optimize stringify result ([57f56e3](https://miniapp-tool///commit/57f56e3a129f96729e60d97e306fb49f887b49e5))
-
+- **cookie:** optimize stringify result ([57f56e3](https://miniapp-tool///commit/57f56e3a129f96729e60d97e306fb49f887b49e5))
 
 ### Bug Fixes
 
-* fix domain with port ([97599b2](https://miniapp-tool///commit/97599b2e90fbdecf1b038c5166cc84848b58f6eb))
+- fix domain with port ([97599b2](https://miniapp-tool///commit/97599b2e90fbdecf1b038c5166cc84848b58f6eb))
 
 ## [0.3.1](https://miniapp-tool///compare/v0.3.0...v0.3.1) (2023-07-15)
 
-
 ### Features
 
-* add getAllCookies method ([a456bca](https://miniapp-tool///commit/a456bca21f8e3b840077c4b045d673138cb56d52))
-
+- add getAllCookies method ([a456bca](https://miniapp-tool///commit/a456bca21f8e3b840077c4b045d673138cb56d52))
 
 ### Bug Fixes
 
-* fix bugs ([3022891](https://miniapp-tool///commit/30228913beeaf61f189f68c516380079a262a35e))
-* fix cookie ([a58ad12](https://miniapp-tool///commit/a58ad12c98c755a325867cae28a980ae063b5d0b))
+- fix bugs ([3022891](https://miniapp-tool///commit/30228913beeaf61f189f68c516380079a262a35e))
+- fix cookie ([a58ad12](https://miniapp-tool///commit/a58ad12c98c755a325867cae28a980ae063b5d0b))
 
 ## [0.3.0](https://miniapp-tool///compare/v0.2.2...v0.3.0) (2023-07-15)
 
-
 ### Features
 
-* add cookie and all package ([39745cb](https://miniapp-tool///commit/39745cbd36b838b9c0a1c5d841357dba6d7542da))
+- add cookie and all package ([39745cb](https://miniapp-tool///commit/39745cbd36b838b9c0a1c5d841357dba6d7542da))
 
 ## [0.2.2](https://miniapp-tool///compare/v0.2.1...v0.2.2) (2023-07-11)
 
