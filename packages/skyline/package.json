@@ -1,0 +1,50 @@
+{
+  "name": "@mptool/skyline",
+  "version": "0.3.6",
+  "description": "Full back for mptool",
+  "keywords": [
+    "miniprogram",
+    "miniapp"
+  ],
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
+  "bugs": {
+    "url": "https://github.com/miniapp-tool/mptool/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/all"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "mister-hope@outlook.com",
+    "url": "https://mrhope.site"
+  },
+  "main": "./lib/index.js",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.ts --configPlugin esbuild",
+    "clean": "rimraf ./lib",
+    "dev": "rollup -c -w"
+  },
+  "peerDependencies": {
+    "miniprogram-api-typings": "^3.10.0"
+  },
+  "devDependencies": {
+    "@mptool/cookie": "workspace:*",
+    "@mptool/skyline-enhance": "workspace:*",
+    "@mptool/file": "workspace:*",
+    "miniprogram-api-typings": "3.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "tsd": {
+    "directory": "__tests__/tsd"
+  }
+}
