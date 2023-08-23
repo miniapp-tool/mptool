@@ -1,8 +1,7 @@
 import { getRef } from "./component/store";
 import { getConfig } from "./config/index.js";
-import { ON_PAGE_PRELOAD } from "./constant.js";
-import { routeEmitter, userEmitter } from "./emitter/index.js";
-import { getPathDetail, getTrigger } from "./navigator/index.js";
+import { userEmitter } from "./emitter/index.js";
+import { getTrigger } from "./navigator/index.js";
 
 import type {
   ComponentOptions,
@@ -114,18 +113,6 @@ const getPage = <
 >(): PageInstance<Data, Custom> =>
   getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
-/**
- * 预加载
- *
- * @param pageNameWithArg 需要预加载的地址
- */
-const preload = (pageNameWithArg: string): void => {
-  /** 页面名称 */
-  const { name, query } = getPathDetail(pageNameWithArg);
-
-  routeEmitter.emit(`${ON_PAGE_PRELOAD}:${name}`, query);
-};
-
 export function bind(
   this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
@@ -230,9 +217,6 @@ export function mount(
   ctx.$switch = switchTab;
   ctx.$reLaunch = reLaunch;
   ctx.$back = back;
-
-  // 页面预加载
-  ctx.$preload = preload;
 
   // 页面信息
   ctx.$currentPage = getPage;

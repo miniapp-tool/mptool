@@ -38,7 +38,6 @@ export type {
   PageConstructor,
   PageOptions,
   PageInstance,
-  PageQuery,
   PageState,
   TrivialPageOptions,
   TrivialPageInstance,

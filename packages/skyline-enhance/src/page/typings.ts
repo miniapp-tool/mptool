@@ -4,10 +4,6 @@ import type { RefMap } from "../component/index.js";
 import type { InstanceEmitterMethods } from "../emitter/index.js";
 import type { NavigatorMethods } from "../navigator/index.js";
 
-export interface PageQuery {
-  [props: string]: string;
-}
-
 export interface PageState {
   /** 是否是打开的第一个页面 */
   firstOpen: boolean;
@@ -22,40 +18,11 @@ export interface ExtendedPageLifeCycles {
   onRegister(): void;
 
   /**
-   * 在 `App.onLaunch` 触发时调用
-   *
-   * @param App.onLaunch 参数
-   */
-  onAppLaunch(
-    options: WechatMiniprogram.App.LaunchShowOption,
-  ): void | Promise<void>;
-
-  /**
    * 小程序在切入后台后被唤醒
    *
    * @param time 休眠时间 (单位 ms)
    */
   onAwake(time: number): void | Promise<void>;
-
-  /**
-   * 页面预加载时触发
-   *
-   * 可在其他页面中使用 `this.$preload(pageNameWithArgs|pageUrl)` 触发特定页面的预加载周期
-   *
-   * @param options url 参数对象
-   */
-  onPreload(options: PageQuery): void | Promise<void>;
-
-  /**
-   * 页面即将被导航时触发
-   *
-   * 需要在调用页面中使用框架提供的跳转方式 `this.$go(pageNameWithArgs|pageUrl)`
-   * 才能正确触发 `onNavigate`
-   *
-   * 另外需要特别注意第一次进入一个分包界面
-   * 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
-   */
-  onNavigate(options: PageQuery): void | Promise<void>;
 }
 
 export interface ExtendedPageProperties {

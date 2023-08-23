@@ -8,7 +8,7 @@ export const appState = {
   /** 是否已启动 */
   launch: false,
   /** 启动参数 */
-  lOpt: {},
+  options: {},
   /** 切入后台时的时间戳 */
   hide: 0,
 };
@@ -17,7 +17,7 @@ const appLaunchHandler = (
   options: WechatMiniprogram.App.LaunchShowOption,
 ): void => {
   appState.launch = true;
-  appState.lOpt = options;
+  appState.options = options;
 
   appEmitter.emit(ON_APP_LAUNCH, options);
 };

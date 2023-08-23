@@ -1,19 +1,11 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import { appState } from "../app/index.js";
 import { mount } from "../bridge.js";
-import {
-  ON_APP_AWAKE,
-  ON_APP_LAUNCH,
-  ON_PAGE_NAVIGATE,
-  ON_PAGE_PRELOAD,
-  ON_PAGE_READY,
-  ON_PAGE_UNLOAD,
-} from "../constant.js";
+import { ON_APP_AWAKE } from "../constant.js";
 import { getConfig } from "../config/index.js";
-import { appEmitter, routeEmitter } from "../emitter/index.js";
+import { appEmitter } from "../emitter/index.js";
 
-import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
+import type { PageConstructor, PageOptions } from "./typings.js";
 
 let hasPageLoaded = false;
 
@@ -41,52 +33,6 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
-  if (options.onAppLaunch) {
-    if (appState.launch) {
-      const { lOpt: onLaunchOptions } = appState;
-
-      callLog("onAppLaunch");
-
-      void options.onAppLaunch(
-        onLaunchOptions as WechatMiniprogram.App.LaunchShowOption,
-      );
-    } else
-      appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
-        callLog("onAppLaunch");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        void options.onAppLaunch!(onLaunchOptions);
-      });
-
-    registerLog("onAppLaunch");
-  }
-
-  if (options.onNavigate) {
-    routeEmitter.on(
-      `${ON_PAGE_NAVIGATE}:${name}`,
-      (query: PageQuery): Promise<void> | void => {
-        callLog("onNavigate", query);
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return options.onNavigate!(query);
-      },
-    );
-
-    registerLog("onNavigate");
-  }
-
-  if (options.onPreload) {
-    routeEmitter.on(
-      `${ON_PAGE_PRELOAD}:${name}`,
-      (query: PageQuery): void | Promise<void> => {
-        callLog("onPreload", query);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return options.onPreload!(query);
-      },
-    );
-
-    registerLog("onPreload");
-  }
-
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
@@ -104,14 +50,6 @@ export const $Page: PageConstructor = <
       options.$state!.firstOpen = true;
     }
   });
-
-  options.onReady = wrapFunction(options.onReady, () =>
-    appEmitter.emit(ON_PAGE_READY),
-  );
-
-  options.onUnload = wrapFunction(options.onUnload, () =>
-    appEmitter.emit(ON_PAGE_UNLOAD),
-  );
 
   mount(options);
 
