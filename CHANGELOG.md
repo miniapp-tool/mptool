@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.0](https://miniapp-tool///compare/v0.3.6...v0.4.0) (2023-08-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **file:** update expire default value
+
+### Features
+
+* add skyline package ([6e4e99b](https://miniapp-tool///commit/6e4e99b1592a7ff8c045b46fe8de05f8ef55c40d))
+* **file:** update expire default value ([cd0172e](https://miniapp-tool///commit/cd0172e506173480689be83b3c34169eed877e5d))
+
 ## [0.3.6](https://miniapp-tool///compare/v0.3.5...v0.3.6) (2023-07-18)
 
 ### Features
