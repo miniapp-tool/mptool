@@ -85,7 +85,7 @@ const prepareData = <T = unknown>(
 
     // 使用上次过期时间
     data.expired = oldData.expired || 0;
-  } else
+  } else if (expire)
     data.expired =
       expire === "once"
         ? // 仅本次会话有效
@@ -102,6 +102,7 @@ const prepareData = <T = unknown>(
  * @param key key
  * @param value value
  * @param [expire='once'] 过期时间
+ *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
  *   - `'once'`:默认仅本次启动有效
@@ -109,7 +110,7 @@ const prepareData = <T = unknown>(
 export const set = <T = unknown>(
   key: string,
   value: T,
-  expire: number | "keep" | "once" = "once",
+  expire: number | "keep" | "once" = 0,
 ): void => {
   wx.setStorageSync(`_cache_${key}`, prepareData(key, value, expire));
 };
@@ -120,15 +121,16 @@ export const set = <T = unknown>(
  * @param key key
  * @param value value
  * @param [expire='once'] 过期时间
- * - 数字：过期时间，毫秒
- * - `'keep'`: 表示保持上一次缓存时间
- * - `'once'`:默认仅本次启动有效
+ *   - 0: 永久有效
+ *   - 数字：过期时间，毫秒
+ *   - `'keep'`: 表示保持上一次缓存时间
+ *   - `'once'`:默认仅本次启动有效
  * @param [asyncCB] 异步回调方法，不填为同步
  */
 export const setAsync = <T = unknown>(
   key: string,
   value: T,
-  expire: number | "keep" | "once" = "once",
+  expire: number | "keep" | "once" = 0,
 ): Promise<WechatMiniprogram.GeneralCallbackResult | void> =>
   wx
     .setStorage({

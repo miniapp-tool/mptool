@@ -55,7 +55,7 @@
   function set<T = unknown>(
     key: string,
     value: T,
-    expire: number | "keep" | "once" = "once",
+    expire: number | "keep" | "once" = 0,
   ): void;
   ```
 
@@ -70,6 +70,7 @@
     - `'once'`: 仅本次启动有效
     - `'keep'`: 表示保持上一次缓存时间
     - 数字: 代表过期时间，单位为毫秒
+    - 0: 代表永久有效
 
   ::: tip
 
@@ -87,7 +88,7 @@
   function setAsync<T = unknown>(
     key: string,
     value: T,
-    expire: number | "keep" | "once",
+    expire: number | "keep" | "once" = 0,
   ): Promise<WechatMiniprogram.GeneralCallbackResult | void>;
   ```
 
