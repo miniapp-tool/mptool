@@ -235,6 +235,33 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
 
+  packages/skyline:
+    devDependencies:
+      '@mptool/cookie':
+        specifier: workspace:*
+        version: link:../cookie
+      '@mptool/file':
+        specifier: workspace:*
+        version: link:../file
+      '@mptool/skyline-enhance':
+        specifier: workspace:*
+        version: link:../skyline-enhance
+      miniprogram-api-typings:
+        specifier: 3.10.0
+        version: 3.10.0
+
+  packages/skyline-enhance:
+    devDependencies:
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
+      miniprogram-api-typings:
+        specifier: 3.10.0
+        version: 3.10.0
+
 packages:
 
   /@aashutoshrathi/word-wrap@1.2.6:

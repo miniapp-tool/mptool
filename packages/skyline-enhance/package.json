@@ -1,0 +1,51 @@
+{
+  "name": "@mptool/skyline-enhance",
+  "version": "0.3.6",
+  "description": "Lifetime enhance for Wechat lib 3.0 miniapp",
+  "keywords": [
+    "miniprogram",
+    "miniapp",
+    "life"
+  ],
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/enhance#readme",
+  "bugs": {
+    "url": "https://github.com/miniapp-tool/mptool/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/enhance"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "mister-hope@outlook.com",
+    "url": "https://mrhope.site"
+  },
+  "main": "./lib/index.js",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.ts --configPlugin esbuild",
+    "clean": "rimraf ./lib",
+    "dev": "rollup -c -w",
+    "tsd": "tsd"
+  },
+  "peerDependencies": {
+    "miniprogram-api-typings": "^3.10.0"
+  },
+  "devDependencies": {
+    "@mptool/mock": "workspace:*",
+    "@mptool/shared": "workspace:*",
+    "miniprogram-api-typings": "3.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "tsd": {
+    "directory": "__tests__/tsd"
+  }
+}
