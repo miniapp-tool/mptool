@@ -34,12 +34,13 @@
     "clean": "rimraf ./lib",
     "dev": "rollup -c -w"
   },
-  "dependencies": {
+  "peerDependencies": {
     "miniprogram-api-typings": "^3.12.0"
   },
   "devDependencies": {
     "base64-arraybuffer": "1.0.2",
-    "@mptool/mock": "workspace:*"
+    "@mptool/mock": "workspace:*",
+    "miniprogram-api-typings": "3.12.0"
   },
   "publishConfig": {
     "access": "public"
