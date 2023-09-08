@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.0-beta.0](https://miniapp-tool///compare/v0.4.0...v0.5.0-beta.0) (2023-09-08)
+
+### Features
+
+- add encoder package ([fe5deae](https://miniapp-tool///commit/fe5deae4876a94b9628b7b222d5da0ef4a625487))
+
 ## [0.4.0](https://miniapp-tool///compare/v0.3.6...v0.4.0) (2023-08-23)
 
 ### ⚠ BREAKING CHANGES
