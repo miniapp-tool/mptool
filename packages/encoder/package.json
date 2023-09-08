@@ -1,19 +1,20 @@
 {
-  "name": "@mptool/skyline",
+  "name": "@mptool/encoder",
   "version": "0.4.0",
-  "description": "Full back for mptool",
+  "description": "encoder handler for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
-    "miniapp"
+    "miniapp",
+    "encoder"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/encoder#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/all"
+    "directory": "packages/encoder"
   },
   "license": "MIT",
   "author": {
@@ -32,19 +33,7 @@
     "clean": "rimraf ./lib",
     "dev": "rollup -c -w"
   },
-  "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.0"
-  },
-  "devDependencies": {
-    "@mptool/cookie": "workspace:*",
-    "@mptool/skyline-enhance": "workspace:*",
-    "@mptool/file": "workspace:*",
-    "miniprogram-api-typings": "3.12.0"
-  },
   "publishConfig": {
     "access": "public"
-  },
-  "tsd": {
-    "directory": "__tests__/tsd"
   }
 }

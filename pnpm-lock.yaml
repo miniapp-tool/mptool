@@ -176,10 +176,6 @@ importers:
         version: 3.12.0
 
   packages/cookie:
-    dependencies:
-      miniprogram-api-typings:
-        specifier: ^3.12.0
-        version: 3.12.0
     devDependencies:
       '@mptool/mock':
         specifier: workspace:*
@@ -187,9 +183,14 @@ importers:
       '@types/set-cookie-parser':
         specifier: 2.4.3
         version: 2.4.3
+      miniprogram-api-typings:
+        specifier: 3.12.0
+        version: 3.12.0
       set-cookie-parser:
         specifier: 2.6.0
         version: 2.6.0
+
+  packages/encoder: {}
 
   packages/enhance:
     devDependencies:
@@ -204,10 +205,6 @@ importers:
         version: 3.12.0
 
   packages/file:
-    dependencies:
-      miniprogram-api-typings:
-        specifier: ^3.12.0
-        version: 3.12.0
     devDependencies:
       '@mptool/mock':
         specifier: workspace:*
@@ -215,6 +212,9 @@ importers:
       '@mptool/shared':
         specifier: workspace:*
         version: link:../shared
+      miniprogram-api-typings:
+        specifier: 3.12.0
+        version: 3.12.0
 
   packages/mock:
     dependencies:
@@ -223,10 +223,6 @@ importers:
         version: 3.12.0
 
   packages/shared:
-    dependencies:
-      miniprogram-api-typings:
-        specifier: ^3.12.0
-        version: 3.12.0
     devDependencies:
       '@mptool/mock':
         specifier: workspace:*
@@ -234,6 +230,9 @@ importers:
       base64-arraybuffer:
         specifier: 1.0.2
         version: 1.0.2
+      miniprogram-api-typings:
+        specifier: 3.12.0
+        version: 3.12.0
 
   packages/skyline:
     devDependencies:

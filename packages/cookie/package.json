@@ -33,13 +33,14 @@
     "clean": "rimraf ./lib",
     "dev": "rollup -c -w"
   },
-  "dependencies": {
+  "peerDependencies": {
     "miniprogram-api-typings": "^3.12.0"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@types/set-cookie-parser": "2.4.3",
-    "set-cookie-parser": "2.6.0"
+    "set-cookie-parser": "2.6.0",
+    "miniprogram-api-typings": "3.12.0"
   },
   "publishConfig": {
     "access": "public"
