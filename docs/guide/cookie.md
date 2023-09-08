@@ -1,6 +1,6 @@
 ---
 title: "@mptool/cookie"
-icon: tool
+icon: cookie
 ---
 
 ::: tip

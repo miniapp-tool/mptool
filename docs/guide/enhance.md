@@ -1,6 +1,6 @@
 ---
 title: "@mptool/enhance"
-icon: tool
+icon: toolbox
 ---
 
 ::: tip
@@ -690,8 +690,8 @@ emitter.on(
       setTimeout(() => {
         console.log("bar", e);
         resolve();
-      }, 200),
-    ),
+      }, 200)
+    )
 );
 
 // listen to all events

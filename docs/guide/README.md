@@ -1,6 +1,6 @@
 ---
 title: MP Tool
-icon: creative
+icon: info-circle
 ---
 
 轻量的小程序增强框架。
