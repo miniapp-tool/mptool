@@ -1,9 +1,10 @@
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import { encodingIndex } from "../indexes.js";
-import { decoders } from "../textDecoder.js";
-import { encoders } from "../textEncoder.js";
+import { Stream } from "../stream.js";
+import { Decoder, decoders } from "../textDecoder.js";
+import { Encoder, encoders } from "../textEncoder.js";
 import { inRange, isASCIIByte } from "../utils.js";
-import { decoderError } from "./utils.js";
+import { decoderError, encoderError } from "./utils.js";
 
 /**
  * @param pointer The |pointer| to search for.
@@ -98,18 +99,18 @@ const indexGB18030RangesPointerFor = (codePoint: number): number => {
   return pointerOffset + codePoint - offset;
 };
 
-/**
- * @constructor
- * @implements {Decoder}
- * @param {{fatal: boolean}} options
- */
-function GB18030Decoder(options) {
-  const fatal = options.fatal;
+class GB18030Decoder implements Decoder {
   // gb18030's decoder has an associated gb18030 first, gb18030
   // second, and gb18030 third (all initially 0x00).
-  let gb18030First = 0x00,
-    gb18030Second = 0x00,
-    gb18030Third = 0x00;
+  gb18030First = 0x00;
+  gb18030Second = 0x00;
+  gb18030Third = 0x00;
+  fatal = false;
+
+  constructor(options: { fatal: boolean }) {
+    this.fatal = options.fatal;
+  }
+
   /**
    * @param {Stream} stream The stream of bytes being decoded.
    * @param {number} bite The next byte read from the stream.
@@ -117,14 +118,14 @@ function GB18030Decoder(options) {
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
-  this.handler = function (stream, bite) {
+  handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and gb18030 first, gb18030
     // second, and gb18030 third are 0x00, return finished.
     if (
       bite === END_OF_STREAM &&
-      gb18030First === 0x00 &&
-      gb18030Second === 0x00 &&
-      gb18030Third === 0x00
+      this.gb18030First === 0x00 &&
+      this.gb18030Second === 0x00 &&
+      this.gb18030Third === 0x00
     ) {
       return FINISHED;
     }
@@ -133,16 +134,18 @@ function GB18030Decoder(options) {
     // gb18030 second, and gb18030 third to 0x00, and return error.
     if (
       bite === END_OF_STREAM &&
-      (gb18030First !== 0x00 || gb18030Second !== 0x00 || gb18030Third !== 0x00)
+      (this.gb18030First !== 0x00 ||
+        this.gb18030Second !== 0x00 ||
+        this.gb18030Third !== 0x00)
     ) {
-      gb18030First = 0x00;
-      gb18030Second = 0x00;
-      gb18030Third = 0x00;
-      decoderError(fatal);
+      this.gb18030First = 0x00;
+      this.gb18030Second = 0x00;
+      this.gb18030Third = 0x00;
+      decoderError(this.fatal);
     }
     let codePoint;
     // 3. If gb18030 third is not 0x00, run these substeps:
-    if (gb18030Third !== 0x00) {
+    if (this.gb18030Third !== 0x00) {
       // 1. Let code point be null.
       codePoint = null;
       // 2. If byte is in the range 0x30 to 0x39, inclusive, set
@@ -151,8 +154,8 @@ function GB18030Decoder(options) {
       // 126 + gb18030 third − 0x81) × 10 + byte − 0x30.
       if (inRange(bite, 0x30, 0x39)) {
         codePoint = indexGB18030RangesCodePointFor(
-          (((gb18030First - 0x81) * 10 + gb18030Second - 0x30) * 126 +
-            gb18030Third -
+          (((this.gb18030First - 0x81) * 10 + this.gb18030Second - 0x30) * 126 +
+            this.gb18030Third -
             0x81) *
             10 +
             bite -
@@ -162,19 +165,19 @@ function GB18030Decoder(options) {
 
       // 3. Let buffer be a byte sequence consisting of gb18030
       // second, gb18030 third, and byte, in order.
-      const buffer = [gb18030Second, gb18030Third, bite];
+      const buffer = [this.gb18030Second, this.gb18030Third, bite];
 
       // 4. Set gb18030 first, gb18030 second, and gb18030 third to
       // 0x00.
-      gb18030First = 0x00;
-      gb18030Second = 0x00;
-      gb18030Third = 0x00;
+      this.gb18030First = 0x00;
+      this.gb18030Second = 0x00;
+      this.gb18030Third = 0x00;
 
       // 5. If code point is null, prepend buffer to stream and
       // return error.
       if (codePoint === null) {
         stream.prepend(buffer);
-        return decoderError(fatal);
+        return decoderError(this.fatal);
       }
 
       // 6. Return a code point whose value is code point.
@@ -182,36 +185,36 @@ function GB18030Decoder(options) {
     }
 
     // 4. If gb18030 second is not 0x00, run these substeps:
-    if (gb18030Second !== 0x00) {
+    if (this.gb18030Second !== 0x00) {
       // 1. If byte is in the range 0x81 to 0xFE, inclusive, set
       // gb18030 third to byte and return continue.
       if (inRange(bite, 0x81, 0xfe)) {
-        gb18030Third = bite;
+        this.gb18030Third = bite;
         return null;
       }
 
       // 2. Prepend gb18030 second followed by byte to stream, set
       // gb18030 first and gb18030 second to 0x00, and return error.
-      stream.prepend([gb18030Second, bite]);
-      gb18030First = 0x00;
-      gb18030Second = 0x00;
-      return decoderError(fatal);
+      stream.prepend([this.gb18030Second, bite]);
+      this.gb18030First = 0x00;
+      this.gb18030Second = 0x00;
+      return decoderError(this.fatal);
     }
 
     // 5. If gb18030 first is not 0x00, run these substeps:
-    if (gb18030First !== 0x00) {
+    if (this.gb18030First !== 0x00) {
       // 1. If byte is in the range 0x30 to 0x39, inclusive, set
       // gb18030 second to byte and return continue.
       if (inRange(bite, 0x30, 0x39)) {
-        gb18030Second = bite;
+        this.gb18030Second = bite;
         return null;
       }
 
       // 2. Let lead be gb18030 first, let pointer be null, and set
       // gb18030 first to 0x00.
-      const lead = gb18030First;
+      const lead = this.gb18030First;
       let pointer = null;
-      gb18030First = 0x00;
+      this.gb18030First = 0x00;
 
       // 3. Let offset be 0x40 if byte is less than 0x7F and 0x41
       // otherwise.
@@ -251,30 +254,28 @@ function GB18030Decoder(options) {
     // 8. If byte is in the range 0x81 to 0xFE, inclusive, set
     // gb18030 first to byte and return continue.
     if (inRange(bite, 0x81, 0xfe)) {
-      gb18030First = bite;
+      this.gb18030First = bite;
       return null;
     }
 
     // 9. Return error.
-    return decoderError(fatal);
-  };
+    return decoderError(this.fatal);
+  }
 }
 
-// 11.2.2 gb18030 encoder
-/**
- * @constructor
- * @implements {Encoder}
- * @param {{fatal: boolean}} options
- * @param {boolean=} gbkFlag
- */
-function GB18030Encoder(_options, gbkFlag?: boolean) {
-  // gb18030's decoder has an associated gbk flag (initially unset).
+class GB18030Encoder implements Encoder {
+  gbkFlag = false;
+  constructor(_options: { fatal: boolean }, gbkFlag?: boolean) {
+    // gb18030's decoder has an associated gbk flag (initially unset).
+    if (gbkFlag) this.gbkFlag = true;
+  }
+
   /**
    * @param {Stream} stream Input stream.
    * @param {number} codePoint Next code point read from the stream.
    * @return {(number|!Array.<number>)} Byte(s) to emit.
    */
-  this.handler = function (_stream, codePoint: number) {
+  handler(_stream: Stream, codePoint: number) {
     // 1. If code point is end-of-stream, return finished.
     if (codePoint === END_OF_STREAM) return FINISHED;
 
@@ -287,7 +288,7 @@ function GB18030Encoder(_options, gbkFlag?: boolean) {
 
     // 4. If the gbk flag is set and code point is U+20AC, return
     // byte 0x80.
-    if (gbkFlag && codePoint === 0x20ac) return 0x80;
+    if (this.gbkFlag && codePoint === 0x20ac) return 0x80;
 
     // 5. Let pointer be the index pointer for code point in index
     // gb18030.
@@ -296,7 +297,7 @@ function GB18030Encoder(_options, gbkFlag?: boolean) {
     // 6. If pointer is not null, run these substeps:
     if (pointer !== null) {
       // 1. Let lead be floor(pointer / 190) + 0x81.
-      const lead = floor(pointer / 190) + 0x81;
+      const lead = Math.floor(pointer / 190) + 0x81;
 
       // 2. Let trail be pointer % 190.
       const trail = pointer % 190;
@@ -309,7 +310,7 @@ function GB18030Encoder(_options, gbkFlag?: boolean) {
     }
 
     // 7. If gbk flag is set, return error with code point.
-    if (gbkFlag) return encoderError(codePoint);
+    if (this.gbkFlag) return encoderError(codePoint);
 
     // 8. Set pointer to the index gb18030 ranges pointer for code
     // point.
@@ -336,7 +337,7 @@ function GB18030Encoder(_options, gbkFlag?: boolean) {
     // 15. Return four bytes whose values are byte1 + 0x81, byte2 +
     // 0x30, byte3 + 0x81, byte4 + 0x30.
     return [byte1 + 0x81, byte2 + 0x30, byte3 + 0x81, byte4 + 0x30];
-  };
+  }
 }
 
 encoders["gb18030"] = (options) => new GB18030Encoder(options);
@@ -347,4 +348,4 @@ decoders["gb18030"] = (options) => new GB18030Decoder(options);
 decoders["GBK"] = (options) => new GB18030Decoder(options);
 
 // gbk's encoder is gb18030's encoder with its gbk flag set.
-encoders["GBK"] = (options) => new GB18030Encoder(options, true);
+encoders["GBK"] = (options): Encoder => new GB18030Encoder(options, true);
