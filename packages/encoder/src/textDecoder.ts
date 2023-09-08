@@ -22,20 +22,20 @@ export const decoders: Record<
 
 /**
  * @constructor
+ * A TextDecoder object has an associated encoding, decoder,
+ * stream, ignore BOM flag (initially unset), BOM seen flag
+ * (initially unset), error mode (initially replacement), and do
+ * not flush flag (initially unset).
  * @param label The label of the encoding;
  *     defaults to 'utf-8'.
  * @param options
  */
 export class TextDecoder {
-  // A TextDecoder object has an associated encoding, decoder,
-  // stream, ignore BOM flag (initially unset), BOM seen flag
-  // (initially unset), error mode (initially replacement), and do
-  // not flush flag (initially unset).
   _encoding: Encoding;
   _ignoreBOM: boolean = false;
   _decoder: Decoder | null = null;
   _BOMseen: boolean = false;
-  errorMode: string = "replacement";
+  _fatal: boolean = false;
   doNotFlush: boolean = false;
 
   constructor(
@@ -58,11 +58,11 @@ export class TextDecoder {
 
     // 5. If options's fatal member is true, set dec's error mode to
     // fatal.
-    if (options["fatal"]) this.errorMode = "fatal";
+    if (options.fatal) this._fatal = true;
 
     // 6. If options's ignoreBOM member is true, set dec's ignore BOM
     // flag.
-    if (options["ignoreBOM"]) this._ignoreBOM = true;
+    if (options.ignoreBOM) this._ignoreBOM = true;
   }
 
   // The encoding attribute's getter must return encoding's name.
@@ -73,7 +73,7 @@ export class TextDecoder {
   // The fatal attribute's getter must return true if error mode
   // is fatal, and false otherwise.
   get fatal(): boolean {
-    return this.errorMode === "fatal";
+    return this._fatal;
   }
 
   // The ignoreBOM attribute's getter must return true if ignore
@@ -105,7 +105,7 @@ export class TextDecoder {
     // BOM seen flag.
     if (!this.doNotFlush) {
       this._decoder = decoders[this._encoding.name]({
-        fatal: this.errorMode === "fatal",
+        fatal: this._fatal,
       });
       this._BOMseen = false;
     }

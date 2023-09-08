@@ -1,9 +1,9 @@
-import { DEFAULT_ENCODING, END_OF_STREAM, FINISHED } from "./constant.js";
+import { END_OF_STREAM, FINISHED } from "./constant.js";
 import { encodingIndex } from "./indexes.js";
 import { Stream } from "./stream.js";
-import { getEncoding } from "./table.js";
-import { decoders } from "./textDecoder.js";
-import { inRange, isASCIIByte, stringToCodePoints } from "./utils.js";
+import { Decoder, decoders } from "./textDecoder.js";
+import { encoders } from "./textEncoder.js";
+import { inRange, isASCIIByte } from "./utils.js";
 
 //
 // 5. Encodings
@@ -30,22 +30,10 @@ const encoderError = (codePoint: number): void => {
   throw TypeError("The code point " + codePoint + " could not be encoded.");
 };
 
-interface Encoder {
-  /**
-   * @param stream The stream of code points being encoded.
-   * @param code_point Next code point read from the stream.
-   * @return Byte(s) to emit, or |finished|.
-   */
-  handler: (stream: Stream, codePoint: number) => number | number[];
-}
-
 // 5.2 Names and labels
 
 // TODO: Define @typedef for Encoding: {name:string,labels:Array.<string>}
 // https://github.com/google/closure-compiler/issues/247
-
-// Registry of of encoder/decoder factories, by encoding name.
-const encoders: Record<string, (options: { fatal: boolean }) => Encoder> = {};
 
 //
 // 6. Indexes
@@ -144,157 +132,24 @@ const indexGB18030RangesPointerFor = (codePoint: number): number => {
   return pointerOffset + codePoint - offset;
 };
 
-//
-// 8. API
-//
-
-// 8.2 Interface TextEncoder
-
 /**
- * @constructor
- * @param label The label of the encoding. NONSTANDARD.
- * @param options NONSTANDARD.
- */
-export class TextEncoder {
-  constructor(label: string, options = {}) {
-    // Web IDL conventions
-    if (!(this instanceof TextEncoder))
-      throw TypeError("Called as a function. Did you forget 'new'?");
-
-    // A TextEncoder object has an associated encoding and encoder.
-
-    /** @private */
-    this._encoding = null;
-    /** @private @type {?Encoder} */
-    this._encoder = null;
-
-    // Non-standard
-    /** @private @type {boolean} */
-    this._do_not_flush = false;
-    /** @private @type {string} */
-    this._fatal = options["fatal"] ? "fatal" : "replacement";
-
-    // 1. Let enc be a new TextEncoder object.
-    const enc = this;
-
-    // 2. Set enc's encoding to UTF-8's encoder.
-    if (options["NONSTANDARD_allowLegacyEncoding"]) {
-      // NONSTANDARD behavior.
-      label = label !== undefined ? String(label) : DEFAULT_ENCODING;
-      const encoding = getEncoding(label);
-      if (encoding === null || encoding.name === "replacement")
-        throw RangeError("Unknown encoding: " + label);
-      if (!encoders[encoding.name]) {
-        throw Error(
-          "Encoder not present." +
-            " Did you forget to include encoding-indexes.js first?"
-        );
-      }
-      enc._encoding = encoding;
-    } else {
-      // Standard behavior.
-      enc._encoding = getEncoding("utf-8");
-
-      if (label !== undefined && "console" in global) {
-        console.warn(
-          "TextEncoder constructor called with encoding label, " +
-            "which is ignored."
-        );
-      }
-    }
-
-    // For pre-ES5 runtimes:
-    if (!Object.defineProperty)
-      this.encoding = enc._encoding.name.toLowerCase();
-
-    // 3. Return enc.
-    return enc;
-  }
-
-  get encoding(): string {
-    return this._encoding.name.toLowerCase();
-  }
-
-  /**
-   * @param {string=} opt_string The string to encode.
-   * @param {Object=} options
-   * @return {!Uint8Array} Encoded bytes, as a Uint8Array.
-   */
-  encode(opt_string, options = {}) {
-    opt_string = opt_string === undefined ? "" : String(opt_string);
-
-    // NOTE: This option is nonstandard. None of the encodings
-    // permitted for encoding (i.e. UTF-8, UTF-16) are stateful when
-    // the input is a USVString so streaming is not necessary.
-    if (!this._do_not_flush)
-      this._encoder = encoders[this._encoding.name]({
-        fatal: this._fatal === "fatal",
-      });
-    this._do_not_flush = Boolean(options["stream"]);
-
-    // 1. Convert input to a stream.
-    const input = new Stream(stringToCodePoints(opt_string));
-
-    // 2. Let output be a new stream
-    const output = [];
-
-    /** @type {?(number|!Array.<number>)} */
-    let result;
-    // 3. While true, run these substeps:
-    while (true) {
-      // 1. Let token be the result of reading from input.
-      const token = input.read();
-      if (token === END_OF_STREAM) break;
-      // 2. Let result be the result of processing token for encoder,
-      // input, output.
-      result = this._encoder.handler(input, token);
-      if (result === FINISHED) break;
-      if (Array.isArray(result))
-        output.push.apply(output, /**@type {!Array.<number>}*/ result);
-      else output.push(result);
-    }
-    // TODO: Align with spec algorithm.
-    if (!this._do_not_flush) {
-      while (true) {
-        result = this._encoder.handler(input, input.read());
-        if (result === FINISHED) break;
-        if (Array.isArray(result))
-          output.push.apply(output, /**@type {!Array.<number>}*/ result);
-        else output.push(result);
-      }
-      this._encoder = null;
-    }
-    // 3. If result is finished, convert output into a byte sequence,
-    // and then return a Uint8Array object wrapping an ArrayBuffer
-    // containing output.
-    return new Uint8Array(output);
-  }
-}
-
-//
-// 9. The encoding
-//
-
-// 9.1 utf-8
-
-// 9.1.1 utf-8 decoder
-/**
- * @constructor
- * @implements {Decoder}
  * @param {{fatal: boolean}} options
  */
-function UTF8Decoder(options) {
-  const fatal = options.fatal;
-
+class UTF8Decoder implements Decoder {
   // utf-8's decoder's has an associated utf-8 code point, utf-8
   // bytes seen, and utf-8 bytes needed (all initially 0), a utf-8
   // lower boundary (initially 0x80), and a utf-8 upper boundary
   // (initially 0xBF).
-  let /** @type {number} */ utf8CodePoint = 0,
-    /** @type {number} */ utf8BytesSeen = 0,
-    /** @type {number} */ utf8BytesNeeded = 0,
-    /** @type {number} */ utf8LowerBoundary = 0x80,
-    /** @type {number} */ utf8UpperBoundary = 0xbf;
+  utf8CodePoint = 0;
+  utf8BytesSeen = 0;
+  utf8BytesNeeded = 0;
+  utf8LowerBoundary = 0x80;
+  utf8UpperBoundary = 0xbf;
+  fatal = false;
+
+  constructor({ fatal }: { fatal: boolean }) {
+    this.fatal = fatal;
+  }
 
   /**
    * @param {Stream} stream The stream of bytes being decoded.
@@ -303,22 +158,19 @@ function UTF8Decoder(options) {
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
-  this.handler = function (
-    stream: Stream,
-    bite: number
-  ): number | number[] | null {
+  handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and utf-8 bytes needed is not 0,
     // set utf-8 bytes needed to 0 and return error.
-    if (bite === END_OF_STREAM && utf8BytesNeeded !== 0) {
-      utf8BytesNeeded = 0;
-      return decoderError(fatal);
+    if (bite === END_OF_STREAM && this.utf8BytesNeeded !== 0) {
+      this.utf8BytesNeeded = 0;
+      return decoderError(this.fatal);
     }
 
     // 2. If byte is end-of-stream, return finished.
     if (bite === END_OF_STREAM) return FINISHED;
 
     // 3. If utf-8 bytes needed is 0, based on byte:
-    if (utf8BytesNeeded === 0) {
+    if (this.utf8BytesNeeded === 0) {
       // 0x00 to 0x7F
       if (inRange(bite, 0x00, 0x7f)) {
         // Return a code point whose value is byte.
@@ -328,40 +180,40 @@ function UTF8Decoder(options) {
       // 0xC2 to 0xDF
       else if (inRange(bite, 0xc2, 0xdf)) {
         // 1. Set utf-8 bytes needed to 1.
-        utf8BytesNeeded = 1;
+        this.utf8BytesNeeded = 1;
 
         // 2. Set UTF-8 code point to byte & 0x1F.
-        utf8CodePoint = bite & 0x1f;
+        this.utf8CodePoint = bite & 0x1f;
       }
 
       // 0xE0 to 0xEF
       else if (inRange(bite, 0xe0, 0xef)) {
         // 1. If byte is 0xE0, set utf-8 lower boundary to 0xA0.
-        if (bite === 0xe0) utf8LowerBoundary = 0xa0;
+        if (bite === 0xe0) this.utf8LowerBoundary = 0xa0;
         // 2. If byte is 0xED, set utf-8 upper boundary to 0x9F.
-        if (bite === 0xed) utf8UpperBoundary = 0x9f;
+        if (bite === 0xed) this.utf8UpperBoundary = 0x9f;
         // 3. Set utf-8 bytes needed to 2.
-        utf8BytesNeeded = 2;
+        this.utf8BytesNeeded = 2;
         // 4. Set UTF-8 code point to byte & 0xF.
-        utf8CodePoint = bite & 0xf;
+        this.utf8CodePoint = bite & 0xf;
       }
 
       // 0xF0 to 0xF4
       else if (inRange(bite, 0xf0, 0xf4)) {
         // 1. If byte is 0xF0, set utf-8 lower boundary to 0x90.
-        if (bite === 0xf0) utf8LowerBoundary = 0x90;
+        if (bite === 0xf0) this.utf8LowerBoundary = 0x90;
         // 2. If byte is 0xF4, set utf-8 upper boundary to 0x8F.
-        if (bite === 0xf4) utf8UpperBoundary = 0x8f;
+        if (bite === 0xf4) this.utf8UpperBoundary = 0x8f;
         // 3. Set utf-8 bytes needed to 3.
-        utf8BytesNeeded = 3;
+        this.utf8BytesNeeded = 3;
         // 4. Set UTF-8 code point to byte & 0x7.
-        utf8CodePoint = bite & 0x7;
+        this.utf8CodePoint = bite & 0x7;
       }
 
       // Otherwise
       else {
         // Return error.
-        return decoderError(fatal);
+        return decoderError(this.fatal);
       }
 
       // Return continue.
@@ -370,47 +222,47 @@ function UTF8Decoder(options) {
 
     // 4. If byte is not in the range utf-8 lower boundary to utf-8
     // upper boundary, inclusive, run these substeps:
-    if (!inRange(bite, utf8LowerBoundary, utf8UpperBoundary)) {
+    if (!inRange(bite, this.utf8LowerBoundary, this.utf8UpperBoundary)) {
       // 1. Set utf-8 code point, utf-8 bytes needed, and utf-8
       // bytes seen to 0, set utf-8 lower boundary to 0x80, and set
       // utf-8 upper boundary to 0xBF.
-      utf8CodePoint = utf8BytesNeeded = utf8BytesSeen = 0;
-      utf8LowerBoundary = 0x80;
-      utf8UpperBoundary = 0xbf;
+      this.utf8CodePoint = this.utf8BytesNeeded = this.utf8BytesSeen = 0;
+      this.utf8LowerBoundary = 0x80;
+      this.utf8UpperBoundary = 0xbf;
 
       // 2. Prepend byte to stream.
       stream.prepend(bite);
 
       // 3. Return error.
-      return decoderError(fatal);
+      return decoderError(this.fatal);
     }
 
     // 5. Set utf-8 lower boundary to 0x80 and utf-8 upper boundary
     // to 0xBF.
-    utf8LowerBoundary = 0x80;
-    utf8UpperBoundary = 0xbf;
+    this.utf8LowerBoundary = 0x80;
+    this.utf8UpperBoundary = 0xbf;
 
     // 6. Set UTF-8 code point to (UTF-8 code point << 6) | (byte &
     // 0x3F)
-    utf8CodePoint = (utf8CodePoint << 6) | (bite & 0x3f);
+    this.utf8CodePoint = (this.utf8CodePoint << 6) | (bite & 0x3f);
 
     // 7. Increase utf-8 bytes seen by one.
-    utf8BytesSeen += 1;
+    this.utf8BytesSeen += 1;
 
     // 8. If utf-8 bytes seen is not equal to utf-8 bytes needed,
     // continue.
-    if (utf8BytesSeen !== utf8BytesNeeded) return null;
+    if (this.utf8BytesSeen !== this.utf8BytesNeeded) return null;
 
     // 9. Let code point be utf-8 code point.
-    const codePoint = utf8CodePoint;
+    const codePoint = this.utf8CodePoint;
 
     // 10. Set utf-8 code point, utf-8 bytes needed, and utf-8 bytes
     // seen to 0.
-    utf8CodePoint = utf8BytesNeeded = utf8BytesSeen = 0;
+    this.utf8CodePoint = this.utf8BytesNeeded = this.utf8BytesSeen = 0;
 
     // 11. Return a code point whose value is code point.
     return codePoint;
-  };
+  }
 }
 
 // 9.1.2 utf-8 encoder
@@ -485,79 +337,6 @@ decoders["UTF-8"] = function (options) {
 };
 
 //
-// 10. Legacy single-byte encodings
-//
-
-// 10.1 single-byte decoder
-/**
- * @constructor
- * @implements {Decoder}
- * @param {!Array.<number>} index The encoding index.
- * @param {{fatal: boolean}} options
- */
-function SingleByteDecoder(index: number[], options) {
-  const fatal = options.fatal;
-  /**
-   * @param {Stream} stream The stream of bytes being decoded.
-   * @param {number} bite The next byte read from the stream.
-   * @return {?(number|!Array.<number>)} The next code point(s)
-   *     decoded, or null if not enough data exists in the input
-   *     stream to decode a complete code point.
-   */
-  this.handler = function (_stream, bite) {
-    // 1. If byte is end-of-stream, return finished.
-    if (bite === END_OF_STREAM) return FINISHED;
-
-    // 2. If byte is an ASCII byte, return a code point whose value
-    // is byte.
-    if (isASCIIByte(bite)) return bite;
-
-    // 3. Let code point be the index code point for byte − 0x80 in
-    // index single-byte.
-    const code_point = index[bite - 0x80];
-
-    // 4. If code point is null, return error.
-    if (code_point === null) return decoderError(fatal);
-
-    // 5. Return a code point whose value is code point.
-    return code_point;
-  };
-}
-
-// 10.2 single-byte encoder
-/**
- * @constructor
- * @implements {Encoder}
- * @param {!Array.<?number>} index The encoding index.
- * @param {{fatal: boolean}} options
- */
-function SingleByteEncoder(index, _options) {
-  /**
-   * @param {Stream} stream Input stream.
-   * @param {number} code_point Next code point read from the stream.
-   * @return {(number|!Array.<number>)} Byte(s) to emit.
-   */
-  this.handler = function (_stream, code_point) {
-    // 1. If code point is end-of-stream, return finished.
-    if (code_point === END_OF_STREAM) return FINISHED;
-
-    // 2. If code point is an ASCII code point, return a byte whose
-    // value is code point.
-    if (isASCIIByte(code_point)) return code_point;
-
-    // 3. Let pointer be the index pointer for code point in index
-    // single-byte.
-    const pointer = indexPointerFor(code_point, index);
-
-    // 4. If pointer is null, return error with code point.
-    if (pointer === null) encoderError(code_point);
-
-    // 5. Return a byte whose value is pointer + 0x80.
-    return pointer + 0x80;
-  };
-}
-
-//
 // 11. Legacy multi-byte Chinese (simplified) encodings
 //
 
@@ -589,9 +368,9 @@ function GB18030Decoder(options) {
   const fatal = options.fatal;
   // gb18030's decoder has an associated gb18030 first, gb18030
   // second, and gb18030 third (all initially 0x00).
-  let /** @type {number} */ gb18030_first = 0x00,
-    /** @type {number} */ gb18030_second = 0x00,
-    /** @type {number} */ gb18030_third = 0x00;
+  let gb18030_first = 0x00,
+    gb18030_second = 0x00,
+    gb18030_third = 0x00;
   /**
    * @param {Stream} stream The stream of bytes being decoded.
    * @param {number} bite The next byte read from the stream.
