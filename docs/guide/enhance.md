@@ -1,6 +1,6 @@
 ---
 title: "@mptool/enhance"
-icon: tool
+icon: toolbox
 ---
 
 ::: tip
