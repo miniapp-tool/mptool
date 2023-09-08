@@ -1,4 +1,3 @@
-import { BufferSource } from "node:stream/web";
 import { DEFAULT_ENCODING, END_OF_STREAM, FINISHED } from "./constant.js";
 import { Stream } from "./stream.js";
 import { Encoding, getEncoding } from "./table.js";
@@ -87,7 +86,10 @@ export class TextDecoder {
    * @param options
    * @return The decoded string.
    */
-  decode(input: BufferSource, options: { stream?: boolean } = {}): string {
+  decode(
+    input: ArrayBuffer | ArrayBufferView,
+    options: { stream?: boolean } = {},
+  ): string {
     let bytes;
 
     if (typeof input === "object" && input instanceof ArrayBuffer)
