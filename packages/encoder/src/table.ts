@@ -51,10 +51,10 @@ export const labelToEncoding = Object.fromEntries(
   encodingTable
     .map((category) =>
       category.encodings.map((encoding) =>
-        encoding.labels.map<[string, Encoding]>((label) => [label, encoding])
-      )
+        encoding.labels.map<[string, Encoding]>((label) => [label, encoding]),
+      ),
     )
-    .flat(2)
+    .flat(2),
 );
 
 /**

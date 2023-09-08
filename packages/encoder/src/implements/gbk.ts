@@ -14,7 +14,7 @@ import { decoderError, encoderError } from "./utils.js";
  */
 const indexCodePointFor = (
   pointer: number,
-  index: number[] | undefined
+  index: number[] | undefined,
 ): number | null => {
   if (!index) return null;
   return index[pointer] || null;
@@ -159,7 +159,7 @@ class GB18030Decoder implements Decoder {
             0x81) *
             10 +
             bite -
-            0x30
+            0x30,
         );
       }
 
@@ -238,7 +238,7 @@ class GB18030Decoder implements Decoder {
       if (codePoint === null && isASCIIByte(bite)) stream.prepend(bite);
 
       // 7. If code point is null, return error.
-      if (codePoint === null) return decoderError(fatal);
+      if (codePoint === null) return decoderError(this.fatal);
 
       // 8. Return a code point whose value is code point.
       return codePoint;
@@ -271,11 +271,11 @@ class GB18030Encoder implements Encoder {
   }
 
   /**
-   * @param {Stream} stream Input stream.
-   * @param {number} codePoint Next code point read from the stream.
-   * @return {(number|!Array.<number>)} Byte(s) to emit.
+   * @param stream Input stream.
+   * @param codePoint Next code point read from the stream.
+   * @return Byte(s) to emit.
    */
-  handler(_stream: Stream, codePoint: number) {
+  handler(_stream: Stream, codePoint: number): number | number[] {
     // 1. If code point is end-of-stream, return finished.
     if (codePoint === END_OF_STREAM) return FINISHED;
 
@@ -340,12 +340,10 @@ class GB18030Encoder implements Encoder {
   }
 }
 
-encoders["gb18030"] = (options) => new GB18030Encoder(options);
-
-decoders["gb18030"] = (options) => new GB18030Decoder(options);
+decoders["gb18030"] = (options): Decoder => new GB18030Decoder(options);
+encoders["gb18030"] = (options): Encoder => new GB18030Encoder(options);
 
 // gbk's decoder is gb18030's decoder.
-decoders["GBK"] = (options) => new GB18030Decoder(options);
-
+decoders["GBK"] = (options): Decoder => new GB18030Decoder(options);
 // gbk's encoder is gb18030's encoder with its gbk flag set.
 encoders["GBK"] = (options): Encoder => new GB18030Encoder(options, true);

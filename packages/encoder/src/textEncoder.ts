@@ -32,7 +32,11 @@ export class TextEncoder {
 
   constructor(
     label = DEFAULT_ENCODING,
-    options: { fatal?: boolean; NONSTANDARD_allowLegacyEncoding?: boolean } = {}
+    options: {
+      fatal?: boolean;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      NONSTANDARD_allowLegacyEncoding?: boolean;
+    } = {},
   ) {
     // Web IDL conventions
     if (!(this instanceof TextEncoder))
@@ -52,7 +56,7 @@ export class TextEncoder {
       if (!encoders[encoding.name]) {
         throw Error(
           "Encoder not present." +
-            " Did you forget to include encoding-indexes.js first?"
+            " Did you forget to include encoding-indexes.js first?",
         );
       }
       this._encoding = encoding;
@@ -63,7 +67,7 @@ export class TextEncoder {
       if (label !== undefined && "console" in global) {
         console.warn(
           "TextEncoder constructor called with encoding label, " +
-            "which is ignored."
+            "which is ignored.",
         );
       }
     }

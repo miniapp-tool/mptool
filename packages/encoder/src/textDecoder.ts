@@ -40,7 +40,7 @@ export class TextDecoder {
 
   constructor(
     label = DEFAULT_ENCODING,
-    options: { fatal?: boolean; ignoreBOM?: boolean } = {}
+    options: { fatal?: boolean; ignoreBOM?: boolean } = {},
   ) {
     // 1. Let encoding be the result of getting an encoding from
     // label.

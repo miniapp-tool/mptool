@@ -13,6 +13,6 @@ export const decoderError = (fatal: boolean, codePoint?: number): number => {
  * @param {number} codePoint The code point that could not be encoded.
  * @return {number} Always throws, no value is actually returned.
  */
-export const encoderError = (codePoint: number): void => {
+export const encoderError = (codePoint: number): number => {
   throw TypeError("The code point " + codePoint + " could not be encoded.");
 };
