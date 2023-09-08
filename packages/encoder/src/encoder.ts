@@ -1,95 +1,13 @@
-import { encodingIndex } from "./encodingIndex.js";
+import { END_OF_STREAM } from "./constant.js";
+import { encodingIndex } from "./indexes.js";
+import { Stream } from "./stream.js";
+import { getEncoding } from "./table.js";
 import {
-  inRange,
-  toDict,
-  stringToCodePoints,
   codePointsToString,
+  inRange,
   isASCIIByte,
+  stringToCodePoints,
 } from "./utils.js";
-
-//
-// Implementation of Encoding specification
-// https://encoding.spec.whatwg.org/
-//
-
-//
-// 4. Terminology
-//
-
-/**
- * End-of-stream is a special token that signifies no more tokens
- * are in the stream.
- */
-const END_OF_STREAM = -1;
-
-/**
- * A stream represents an ordered sequence of tokens.
- *
- * @constructor
- * @param {!(Array.<number>|Uint8Array)} tokens Array of tokens that provide
- * the stream.
- */
-function Stream(tokens: number[] | Uint8Array) {
-  /** @type {!Array.<number>} */
-  this.tokens = [].slice.call(tokens);
-  // Reversed as push/pop is more efficient than shift/unshift.
-  this.tokens.reverse();
-}
-
-Stream.prototype = {
-  /**
-   * @return {boolean} True if end-of-stream has been hit.
-   */
-  endOfStream: function (): boolean {
-    return !this.tokens.length;
-  },
-
-  /**
-   * When a token is read from a stream, the first token in the
-   * stream must be returned and subsequently removed, and
-   * end-of-stream must be returned otherwise.
-   *
-   * @return {number} Get the next token from the stream, or
-   * end_of_stream.
-   */
-  read: function (): number {
-    if (!this.tokens.length) return END_OF_STREAM;
-
-    return this.tokens.pop();
-  },
-
-  /**
-   * When one or more tokens are prepended to a stream, those tokens
-   * must be inserted, in given order, before the first token in the
-   * stream.
-   *
-   * @param {(number|!Array.<number>)} token The token(s) to prepend to the
-   * stream.
-   */
-  prepend: function (token: number | number[]): void {
-    if (Array.isArray(token)) {
-      while (token.length) this.tokens.push(token.pop());
-    } else {
-      this.tokens.push(token);
-    }
-  },
-
-  /**
-   * When one or more tokens are pushed to a stream, those tokens
-   * must be inserted, in given order, after the last token in the
-   * stream.
-   *
-   * @param {(number|!Array.<number>)} token The tokens(s) to push to the
-   * stream.
-   */
-  push: function (token: number | number[]): void {
-    if (Array.isArray(token)) {
-      while (token.length) this.tokens.unshift(token.shift());
-    } else {
-      this.tokens.unshift(token);
-    }
-  },
-};
 
 //
 // 5. Encodings
@@ -97,182 +15,91 @@ Stream.prototype = {
 
 // 5.1 Encoders and decoders
 
-/** @const */
 const FINISHED = -1;
 
 /**
  * @param fatal If true, decoding errors raise an exception.
- * @param opt_code_point Override the standard fallback code point.
+ * @param codePoint Override the standard fallback code point.
  * @return The code point to insert on a decoding error.
  */
-function decoderError(fatal: boolean, opt_code_point?: number): number {
+const decoderError = (fatal: boolean, codePoint?: number): number => {
   if (fatal) throw TypeError("Decoder error");
 
-  return opt_code_point || 0xfffd;
-}
+  return codePoint || 0xfffd;
+};
 
 /**
- * @param {number} code_point The code point that could not be encoded.
+ * @param {number} codePoint The code point that could not be encoded.
  * @return {number} Always throws, no value is actually returned.
  */
-function encoderError(code_point: number): void {
-  throw TypeError("The code point " + code_point + " could not be encoded.");
-}
+const encoderError = (codePoint: number): void => {
+  throw TypeError("The code point " + codePoint + " could not be encoded.");
+};
 
-/** @interface */
-function Decoder() {}
-Decoder.prototype = {
+interface Decoder {
   /**
-   * @param {Stream} stream The stream of bytes being decoded.
-   * @param {number} bite The next byte read from the stream.
-   * @return {?(number|!Array.<number>)} The next code point(s)
+   * @param stream The stream of bytes being decoded.
+   * @param bite The next byte read from the stream.
+   * @return The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point, or |finished|.
    */
-  handler: function (_stream, _bite) {},
-};
+  handler: (stream: Stream, bite: number) => number | number[] | null;
+}
 
-/** @interface */
-function Encoder() {}
-Encoder.prototype = {
+interface Encoder {
   /**
-   * @param {Stream} stream The stream of code points being encoded.
-   * @param {number} code_point Next code point read from the stream.
-   * @return {(number|!Array.<number>)} Byte(s) to emit, or |finished|.
+   * @param stream The stream of code points being encoded.
+   * @param code_point Next code point read from the stream.
+   * @return Byte(s) to emit, or |finished|.
    */
-  handler: function (_stream, _code_point: number) {},
-};
+  handler: (stream: Stream, codePoint: number) => number | number[];
+}
 
 // 5.2 Names and labels
 
 // TODO: Define @typedef for Encoding: {name:string,labels:Array.<string>}
 // https://github.com/google/closure-compiler/issues/247
 
-/**
- * @param {string} label The encoding label.
- * @return {?{name:string,labels:Array.<string>}}
- */
-function getEncoding(label: string): { name: string; labels: string[] } | null {
-  // 1. Remove any leading and trailing ASCII whitespace from label.
-  label = String(label).trim().toLowerCase();
-
-  // 2. If label is an ASCII case-insensitive match for any of the
-  // labels listed in the table below, return the corresponding
-  // encoding, and failure otherwise.
-  if (Object.prototype.hasOwnProperty.call(label_to_encoding, label)) {
-    return label_to_encoding[label];
-  }
-  return null;
-}
-
-/**
- * Encodings table: https://encoding.spec.whatwg.org/encodings.json
- * @const
- * @type {!Array.<{
- *          heading: string,
- *          encodings: Array.<{name:string,labels:Array.<string>}>
- *        }>}
- */
-const encodings = [
-  {
-    encodings: [
-      {
-        labels: ["unicode-1-1-utf-8", "utf-8", "utf8"],
-        name: "UTF-8",
-      },
-    ],
-    heading: "The Encoding",
-  },
-  {
-    encodings: [
-      {
-        labels: [
-          "chinese",
-          "csgb2312",
-          "csiso58gb231280",
-          "gb2312",
-          "gb_2312",
-          "gb_2312-80",
-          "gbk",
-          "iso-ir-58",
-          "x-gbk",
-        ],
-        name: "GBK",
-      },
-      {
-        labels: ["gb18030"],
-        name: "gb18030",
-      },
-    ],
-    heading: "Legacy multi-byte Chinese (simplified) encodings",
-  },
-];
-
-// Label to encoding registry.
-/** @type {Object.<string,{name:string,labels:Array.<string>}>} */
-const label_to_encoding: Record<string, { name: string; labels: string[] }> =
-  {};
-
-encodings.forEach(function (category) {
-  category.encodings.forEach(function (encoding) {
-    encoding.labels.forEach(function (label) {
-      label_to_encoding[label] = encoding;
-    });
-  });
-});
-
 // Registry of of encoder/decoder factories, by encoding name.
-/** @type {Object.<string, function({fatal:boolean}): Encoder>} */
-const encoders: Record<
-  string,
-  (options: { fatal: boolean }) => typeof Encoder
-> = {};
-/** @type {Object.<string, function({fatal:boolean}): Decoder>} */
-const decoders: Record<
-  string,
-  (options: { fatal: boolean }) => typeof Decoder
-> = {};
+const encoders: Record<string, (options: { fatal: boolean }) => Encoder> = {};
+const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 //
 // 6. Indexes
 //
 
 /**
- * @param {number} pointer The |pointer| to search for.
- * @param {(!Array.<?number>|undefined)} index The |index| to search within.
- * @return {?number} The code point corresponding to |pointer| in |index|,
+ * @param pointer The |pointer| to search for.
+ * @param index The |index| to search within.
+ * @return The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in |index|.
  */
-function indexCodePointFor(pointer, index) {
+const indexCodePointFor = (
+  pointer: number,
+  index: number[] | undefined
+): number | null => {
   if (!index) return null;
   return index[pointer] || null;
-}
+};
 
 /**
- * @param {number} code_point The |code point| to search for.
- * @param {!Array.<?number>} index The |index| to search within.
- * @return {?number} The first pointer corresponding to |code point| in
+ * @param codePoint The |code point| to search for.
+ * @param index The |index| to search within.
+ * @return The first pointer corresponding to |code point| in
  *     |index|, or null if |code point| is not in |index|.
  */
-function indexPointerFor(code_point, index) {
-  const pointer = index.indexOf(code_point);
+const indexPointerFor = (codePoint: number, index: number[]): number | null => {
+  const pointer = index.indexOf(codePoint);
   return pointer === -1 ? null : pointer;
-}
+};
 
 /**
- * @param {string} name Name of the index.
- * @return {(!Array.<number>|!Array.<Array.<number>>)}
- *  */
-function index(name) {
-  return encodingIndex[name];
-}
-
-/**
- * @param {number} pointer The |pointer| to search for in the gb18030 index.
- * @return {?number} The code point corresponding to |pointer| in |index|,
+ * @param pointer The |pointer| to search for in the gb18030 index.
+ * @return The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in the gb18030 index.
  */
-function indexGB18030RangesCodePointFor(pointer) {
+const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
   // 1. If pointer is greater than 39419 and less than 189000, or
   // pointer is greater than 1237575, return null.
   if ((pointer > 39419 && pointer < 189000) || pointer > 1237575) return null;
@@ -284,15 +111,15 @@ function indexGB18030RangesCodePointFor(pointer) {
   // is equal to or less than pointer and let code point offset be
   // its corresponding code point.
   let offset = 0;
-  let code_point_offset = 0;
-  const idx = index("gb18030-ranges");
+  let codePointOffset = 0;
+  const idx = encodingIndex["gb18030-ranges"];
   let i;
   for (i = 0; i < idx.length; ++i) {
     /** @type {!Array.<number>} */
     const entry = idx[i];
     if (entry[0] <= pointer) {
       offset = entry[0];
-      code_point_offset = entry[1];
+      codePointOffset = entry[1];
     } else {
       break;
     }
@@ -300,31 +127,31 @@ function indexGB18030RangesCodePointFor(pointer) {
 
   // 4. Return a code point whose value is code point offset +
   // pointer − offset.
-  return code_point_offset + pointer - offset;
-}
+  return codePointOffset + pointer - offset;
+};
 
 /**
- * @param {number} code_point The |code point| to locate in the gb18030 index.
- * @return {number} The first pointer corresponding to |code point| in the
+ * @param codePoint The |code point| to locate in the gb18030 index.
+ * @return The first pointer corresponding to |code point| in the
  *     gb18030 index.
  */
-function indexGB18030RangesPointerFor(code_point) {
+const indexGB18030RangesPointerFor = (codePoint: number): number => {
   // 1. If code point is U+E7C7, return pointer 7457.
-  if (code_point === 0xe7c7) return 7457;
+  if (codePoint === 0xe7c7) return 7457;
 
   // 2. Let offset be the last code point in index gb18030 ranges
   // that is equal to or less than code point and let pointer offset
   // be its corresponding pointer.
   let offset = 0;
-  let pointer_offset = 0;
-  const idx = index("gb18030-ranges");
+  let pointerOffset = 0;
+  const idx = encodingIndex["gb18030-ranges"];
   let i;
   for (i = 0; i < idx.length; ++i) {
     /** @type {!Array.<number>} */
     const entry = idx[i];
-    if (entry[1] <= code_point) {
+    if (entry[1] <= codePoint) {
       offset = entry[1];
-      pointer_offset = entry[0];
+      pointerOffset = entry[0];
     } else {
       break;
     }
@@ -332,14 +159,14 @@ function indexGB18030RangesPointerFor(code_point) {
 
   // 3. Return a pointer whose value is pointer offset + code point
   // − offset.
-  return pointer_offset + code_point - offset;
-}
+  return pointerOffset + codePoint - offset;
+};
 
 //
 // 8. API
 //
 
-/** @const */ const DEFAULT_ENCODING = "utf-8";
+const DEFAULT_ENCODING = "utf-8";
 
 // 8.1 Interface TextDecoder
 
@@ -349,12 +176,10 @@ function indexGB18030RangesPointerFor(code_point) {
  *     defaults to 'utf-8'.
  * @param {Object=} options
  */
-export function TextDecoder(label, options) {
+export function TextDecoder(label = DEFAULT_ENCODING, options = {}) {
   // Web IDL conventions
   if (!(this instanceof TextDecoder))
     throw TypeError("Called as a function. Did you forget 'new'?");
-  label = label !== undefined ? String(label) : DEFAULT_ENCODING;
-  options = toDict(options);
 
   // A TextDecoder object has an associated encoding, decoder,
   // stream, ignore BOM flag (initially unset), BOM seen flag
@@ -446,7 +271,7 @@ if (Object.defineProperty) {
  * @param {Object=} options
  * @return {string} The decoded string.
  */
-TextDecoder.prototype.decode = function decode(input, options) {
+TextDecoder.prototype.decode = function decode(input, options = {}) {
   let bytes;
   if (typeof input === "object" && input instanceof ArrayBuffer) {
     bytes = new Uint8Array(input);
@@ -459,8 +284,6 @@ TextDecoder.prototype.decode = function decode(input, options) {
   } else {
     bytes = new Uint8Array(0);
   }
-
-  options = toDict(options);
 
   // 1. If the do not flush flag is unset, set decoder to a new
   // encoding's decoder, set stream to a new stream, and unset the
@@ -536,7 +359,7 @@ TextDecoder.prototype.decode = function decode(input, options) {
    * @return {string}
    * @this {TextDecoder}
    */
-  function serializeStream(stream) {
+  function serializeStream(stream: number[]) {
     // 1. Let token be the result of reading from stream.
     // (Done in-place on array, rather than as a stream)
 
@@ -979,24 +802,6 @@ function SingleByteEncoder(index, _options) {
   };
 }
 
-(function () {
-  encodings.forEach(function (category) {
-    if (category.heading !== "Legacy single-byte encodings") return;
-    category.encodings.forEach(function (encoding) {
-      const name = encoding.name;
-      const idx = index(name.toLowerCase());
-      /** @param {{fatal: boolean}} options */
-      decoders[name] = function (options) {
-        return new SingleByteDecoder(idx, options);
-      };
-      /** @param {{fatal: boolean}} options */
-      encoders[name] = function (options) {
-        return new SingleByteEncoder(idx, options);
-      };
-    });
-  });
-})();
-
 //
 // 11. Legacy multi-byte Chinese (simplified) encodings
 //
@@ -1150,7 +955,9 @@ function GB18030Decoder(options) {
       // 5. Let code point be null if pointer is null and the index
       // code point for pointer in index gb18030 otherwise.
       code_point =
-        pointer === null ? null : indexCodePointFor(pointer, index("gb18030"));
+        pointer === null
+          ? null
+          : indexCodePointFor(pointer, encodingIndex["gb18030"]);
 
       // 6. If code point is null and byte is an ASCII byte, prepend
       // byte to stream.
@@ -1213,7 +1020,7 @@ function GB18030Encoder(_options, gbk_flag?: boolean) {
 
     // 5. Let pointer be the index pointer for code point in index
     // gb18030.
-    let pointer = indexPointerFor(code_point, index("gb18030"));
+    let pointer = indexPointerFor(code_point, encodingIndex["gb18030"]);
 
     // 6. If pointer is not null, run these substeps:
     if (pointer !== null) {

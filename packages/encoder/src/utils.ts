@@ -8,16 +8,6 @@ export const inRange = (a: number, min: number, max: number): boolean =>
   min <= a && a <= max;
 
 /**
- * @param {*} o
- * @return {Object}
- */
-export const toDict = (o: any) => {
-  if (o === undefined) return {};
-  if (o === Object(o)) return o;
-  throw TypeError("Could not convert argument to dictionary");
-};
-
-/**
  * An ASCII byte is a byte in the range 0x00 to 0x7F, inclusive.
  * @param a The number to test.
  * @return True if a is in the range 0x00 to 0x7F, inclusive.
