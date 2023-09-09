@@ -47,7 +47,7 @@
     "bumpp": "9.2.0",
     "c8": "8.0.1",
     "commit-and-tag-version": "11.2.3",
-    "conventional-changelog-cli": "4.0.0",
+    "conventional-changelog-cli": "4.1.0",
     "cross-env": "7.0.3",
     "cz-conventional-changelog": "3.3.0",
     "esbuild": "0.19.2",
