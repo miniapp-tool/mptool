@@ -38,9 +38,9 @@
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "@types/set-cookie-parser": "2.4.4",
+    "@types/set-cookie-parser": "2.4.5",
     "set-cookie-parser": "2.6.0",
-    "miniprogram-api-typings": "3.12.0"
+    "miniprogram-api-typings": "3.12.1"
   },
   "publishConfig": {
     "access": "public"
