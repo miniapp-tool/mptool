@@ -23,8 +23,8 @@ export class Cookie {
         ? new Date(new Date().getTime() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
-      ? new Date(cookie.expires)
-      : "session";
+        ? new Date(cookie.expires)
+        : "session";
   }
 
   /**

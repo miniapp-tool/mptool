@@ -46,17 +46,17 @@ export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
 export type InferFromType<Type> = [Type] extends [null]
   ? any // null would fail to infer
   : [Type] extends [ArrayConstructor]
-  ? any[]
-  : [Type] extends [ObjectConstructor]
-  ? WechatMiniprogram.IAnyObject
-  : [Type] extends [BooleanConstructor]
-  ? boolean
-  : [Type] extends [PropConstructor<infer V>]
-  ? unknown extends V
-    ? // fail to infer
-      any
-    : V
-  : Type;
+    ? any[]
+    : [Type] extends [ObjectConstructor]
+      ? WechatMiniprogram.IAnyObject
+      : [Type] extends [BooleanConstructor]
+        ? boolean
+        : [Type] extends [PropConstructor<infer V>]
+          ? unknown extends V
+            ? // fail to infer
+              any
+            : V
+          : Type;
 
 type RequiredKeys<T> = {
   [K in keyof T]: T[K] extends { required: true } | { default: any }
@@ -71,18 +71,18 @@ type OptionalKeys<Type> = Exclude<keyof Type, RequiredKeys<Type>>;
 export type InferPropType<Type> = [Type] extends [null]
   ? any // null would fail to infer
   : [Type] extends [{ type: null }]
-  ? any // As TS issue https://github.com/Microsoft/TypeScript/issues/14829 // somehow `ObjectConstructor` when inferred from { (): T } becomes `any` // `BooleanConstructor` when inferred from PropConstructor(with PropMethod) becomes `Boolean`
-  : [Type] extends [ArrayConstructor | { type: ArrayConstructor }]
-  ? any[]
-  : [Type] extends [ObjectConstructor | { type: ObjectConstructor }]
-  ? WechatMiniprogram.IAnyObject
-  : [Type] extends [BooleanConstructor | { type: BooleanConstructor }]
-  ? boolean
-  : [Type] extends [PropItem<infer Value, infer Default>]
-  ? unknown extends Value
-    ? Default
-    : Value
-  : Type;
+    ? any // As TS issue https://github.com/Microsoft/TypeScript/issues/14829 // somehow `ObjectConstructor` when inferred from { (): T } becomes `any` // `BooleanConstructor` when inferred from PropConstructor(with PropMethod) becomes `Boolean`
+    : [Type] extends [ArrayConstructor | { type: ArrayConstructor }]
+      ? any[]
+      : [Type] extends [ObjectConstructor | { type: ObjectConstructor }]
+        ? WechatMiniprogram.IAnyObject
+        : [Type] extends [BooleanConstructor | { type: BooleanConstructor }]
+          ? boolean
+          : [Type] extends [PropItem<infer Value, infer Default>]
+            ? unknown extends Value
+              ? Default
+              : Value
+            : Type;
 
 export type InferPropTypes<O> = O extends object
   ? {

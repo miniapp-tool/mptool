@@ -49,8 +49,8 @@ export const getCookieOptions = (options?: CookieStoreOptions): UrlInfo => {
     typeof options === "object"
       ? options
       : typeof options === "string"
-      ? parseUrl(options)
-      : {};
+        ? parseUrl(options)
+        : {};
 
   return { domain, path };
 };

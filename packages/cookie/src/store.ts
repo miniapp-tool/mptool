@@ -239,11 +239,11 @@ export class CookieStore {
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
       : typeof qq === "object"
-      ? setCookieHeader.replace(
-          /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
-          ",$1=",
-        )
-      : setCookieHeader;
+        ? setCookieHeader.replace(
+            /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
+            ",$1=",
+          )
+        : setCookieHeader;
 
     return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
