@@ -26,7 +26,7 @@ interface GetStorageSuccessCallbackResult<T = any> {
 
 /** 接口调用成功的回调函数 */
 type GetStorageSuccessCallback<T = any> = (
-  result: GetStorageSuccessCallbackResult<T>,
+  result: GetStorageSuccessCallbackResult<T>
 ) => void;
 
 /** 接口调用结束的回调函数（调用成功、失败都会执行） */
@@ -118,7 +118,7 @@ try {
 }
 ``` */
   getStorage<T = any, U extends GetStorageOption<T> = GetStorageOption<T>>(
-    option: U,
+    option: U
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
@@ -167,7 +167,7 @@ try {
 ``` */
   getStorageSync<T = any>(
     /** 本地缓存中指定的 key */
-    key: string,
+    key: string
   ): T {
     return Object.prototype.hasOwnProperty.call(storage, key)
       ? (storage[key] as T)
@@ -193,7 +193,7 @@ try {
 } catch (e) { }
 ``` */
   setStorage<T = any, U extends SetStorageOption<T> = SetStorageOption<T>>(
-    option: U,
+    option: U
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
   ): PromisifySuccessResult<U, SetStorageOption<T>> {
@@ -235,13 +235,13 @@ try {
     /** 本地缓存中指定的 key */
     key: string,
     /** 需要存储的内容。只支持原生类型、Date、及能够通过`JSON.stringify`序列化的对象。 */
-    data: T,
+    data: T
   ): void {
     storage[key] = data;
   },
 
   removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
-    option: T,
+    option: T
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
   ): PromisifySuccessResult<T, RemoveStorageOption> {
@@ -285,7 +285,7 @@ try {
 ``` */
   removeStorageSync(
     /** 本地缓存中指定的 key */
-    key: string,
+    key: string
   ): void {
     delete storage[key];
   },
@@ -313,7 +313,10 @@ logger.warn('key3', 'value3')
 *
 * 最低基础库： `2.7.1` */
   // TODO: Finish
-  getRealtimeLogManager(): Console {
+  getRealtimeLogManager(): Pick<
+    Console,
+    "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
+  > {
     return console;
   },
 
