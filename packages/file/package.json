@@ -39,7 +39,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "3.12.1"
+    "miniprogram-api-typings": "3.12.2"
   },
   "publishConfig": {
     "access": "public"
