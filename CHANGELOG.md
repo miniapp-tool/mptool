@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.0](https://miniapp-tool///compare/v0.5.0-beta.0...v0.5.0) (2023-12-20)
+
+### Features
+
+- **cookie:** add applyHeader ([d32abc6](https://miniapp-tool///commit/d32abc6b0358c4e48344c96082d30d3ec039285d))
+
 ## [0.5.0-beta.0](https://miniapp-tool///compare/v0.4.0...v0.5.0-beta.0) (2023-09-08)
 
 ### Features
