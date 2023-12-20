@@ -223,18 +223,15 @@ export class CookieStore {
   }
 
   /**
-   * 设置 response cookies
+   * 应用 header cookies
    *
-   * @param response 小程序 response
+   * @param header 小程序 response header
    * @param domainOrURL Url 或域名
    */
-  applyResponse(
-    response: WechatMiniprogram.RequestSuccessCallbackResult,
-    domainOrURL: string,
-  ): void {
+  applyHeader(header: WechatMiniprogram.IAnyObject, domainOrURL: string): void {
     const setCookieHeader =
-      <string | undefined>response.header["Set-Cookie"] ||
-      <string | undefined>response.header["set-cookie"] ||
+      <string | undefined>header["Set-Cookie"] ||
+      <string | undefined>header["set-cookie"] ||
       "";
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
@@ -246,6 +243,19 @@ export class CookieStore {
         : setCookieHeader;
 
     return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+  }
+
+  /**
+   * 应用响应 cookies
+   *
+   * @param response 小程序 response
+   * @param domainOrURL Url 或域名
+   */
+  applyResponse(
+    response: WechatMiniprogram.RequestSuccessCallbackResult,
+    domainOrURL: string,
+  ): void {
+    return this.applyHeader(response.header, domainOrURL);
   }
 
   /**

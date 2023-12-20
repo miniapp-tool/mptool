@@ -35,5 +35,6 @@ const cookieStore = new CookieStore(key);
 - `getCookiesMap(options)`: 获取满足条件的 Cookie 键值 Map
 - `apply(cookies)`: 向存储中应用 Cookie
 - `clear(domain?)`: 清除 `domain` 下的全部 cookie
+- `applyHeader(header, domainOrURL)`: 应用 header 中的 cookies
 - `applyResponse(response, domainOrURL)`: 应用 response 中的 cookies
 - `getHeader(options)`: 获取 cookie header

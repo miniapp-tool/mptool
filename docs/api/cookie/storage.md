@@ -94,7 +94,14 @@ class CookieStore {
    */
   clear(domain?: string): void;
   /**
-   * 设置 response cookies
+   * 应用 header cookies
+   *
+   * @param header 小程序 response header
+   * @param domainOrURL Url 或域名
+   */
+  applyHeader(header: WechatMiniprogram.IAnyObject, domainOrURL: string): void;
+  /**
+   * 应用响应 cookies
    *
    * @param response 小程序 response
    * @param domainOrURL Url 或域名
