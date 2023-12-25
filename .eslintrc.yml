@@ -18,8 +18,6 @@ ignorePatterns:
   - demo/**/*.js
   - lib/
   - node_modules/
-  # workaround
-  - scripts/release/release.ts
 
 overrides:
   - files:
@@ -130,7 +128,7 @@ overrides:
         - off
 
   - files:
-      - "rollup.config.js"
+      - "rollup.config.mjs"
       - "scripts/**/*.js"
 
     env:
