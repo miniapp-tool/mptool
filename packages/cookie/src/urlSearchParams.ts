@@ -49,31 +49,38 @@ export class URLSearchParams {
         )
           .split("&")
           .map((pair) => {
-            const [, key, value] = /^(.+?)=(.*?)$/.exec(pair) ?? [];
+            const [, key, value] = /^([^=]+)=?(.*?)$/.exec(pair) ?? [];
 
-            this.append(decode(key), decode(value));
+            if (key) this.append(decode(key), decode(value));
           });
       else if (Symbol.iterator in init)
-        for (const [key, value] of init)
-          this.params.set(key, Array.isArray(value) ? value : [value]);
+        for (const item of init) {
+          if (item.length !== 2)
+            throw new TypeError(
+              "Failed to construct 'URLSearchParams': Sequence initializer must only contain pair elements",
+            );
+          const [key, value] = item;
+
+          this.append(key, value);
+        }
       else
         for (const key of Object.keys(init)) {
           const value = init[key];
 
-          this.params.set(key, Array.isArray(value) ? value : [value]);
+          this.params.set(key, [String(value)]);
         }
     }
   }
 
   get size(): number {
-    return this.params.size;
+    return Array.from(this.params.values()).flat().length;
   }
 
   /**
    * Append a new name-value pair to the query string.
    */
   append(name: string, value: string): void {
-    this.params.set(name, this.getAll(name).concat(value) ?? [value]);
+    this.params.set(name, this.getAll(name).concat(String(value)));
   }
 
   /**
@@ -224,9 +231,8 @@ export class URLSearchParams {
   toString(): string {
     const query: string[] = [];
 
-    for (const key in this.params) {
+    for (const [key, value] of this.params) {
       const name = encode(key);
-      const value = this.params.get(key)!;
 
       for (let i = 0; i < value.length; i++) {
         query.push(`${name}=${encode(value[i])}`);
