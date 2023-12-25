@@ -36,7 +36,7 @@
     "miniprogram-api-typings": "^3.12.0"
   },
   "devDependencies": {
-    "@mptool/cookie": "workspace:*",
+    "@mptool/net": "workspace:*",
     "@mptool/skyline-enhance": "workspace:*",
     "@mptool/file": "workspace:*",
     "miniprogram-api-typings": "3.12.2"

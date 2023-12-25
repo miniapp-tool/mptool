@@ -1,3 +1,3 @@
-# @mptool/cookie
+# @mptool/all
 
-Cookie parser and store for QQ and wechat miniapp.
+All in one package for mptool toolkit.

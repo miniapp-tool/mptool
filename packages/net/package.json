@@ -1,5 +1,5 @@
 {
-  "name": "@mptool/cookie",
+  "name": "@mptool/net",
   "version": "0.5.0",
   "description": "Cookie handler for QQ/Wechat miniapp",
   "keywords": [

@@ -32,13 +32,13 @@ export default defineUserConfig({
         text: "框架",
         icon: "sitemap",
         prefix: "/guide/",
-        children: ["enhance", "file", "cookie"],
+        children: ["enhance", "file", "net"],
       },
       {
         text: "API",
         icon: "microchip",
         prefix: "/api/",
-        children: ["enhance/", "file/", "cookie/"],
+        children: ["enhance/", "file/", "net/"],
       },
     ],
 
@@ -48,7 +48,7 @@ export default defineUserConfig({
           text: "介绍",
           icon: "info-circle",
           prefix: "/guide/",
-          children: ["", "enhance", "file", "cookie"],
+          children: ["", "enhance", "file", "net"],
         },
         {
           text: "API",
@@ -68,10 +68,10 @@ export default defineUserConfig({
               children: ["file", "storage"],
             },
             {
-              text: "Cookie",
+              text: "Net",
               icon: "cookie",
-              prefix: "cookie/",
-              children: ["cookie", "storage"],
+              prefix: "net/",
+              children: ["fetch", "cookie", "cookie-store"],
             },
           ],
         },

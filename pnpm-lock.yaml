@@ -159,37 +159,18 @@ importers:
 
   packages/all:
     devDependencies:
-      '@mptool/cookie':
-        specifier: workspace:*
-        version: link:../cookie
       '@mptool/enhance':
         specifier: workspace:*
         version: link:../enhance
       '@mptool/file':
         specifier: workspace:*
         version: link:../file
+      '@mptool/net':
+        specifier: workspace:*
+        version: link:../net
       miniprogram-api-typings:
         specifier: 3.12.2
         version: 3.12.2
-
-  packages/cookie:
-    dependencies:
-      '@mptool/shared':
-        specifier: workspace:*
-        version: link:../shared
-    devDependencies:
-      '@mptool/mock':
-        specifier: workspace:*
-        version: link:../mock
-      '@types/set-cookie-parser':
-        specifier: 2.4.7
-        version: 2.4.7
-      miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
-      set-cookie-parser:
-        specifier: 2.6.0
-        version: 2.6.0
 
   packages/encoder: {}
 
@@ -223,6 +204,25 @@ importers:
         specifier: ^3.12.2
         version: 3.12.2
 
+  packages/net:
+    dependencies:
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
+      '@types/set-cookie-parser':
+        specifier: 2.4.7
+        version: 2.4.7
+      miniprogram-api-typings:
+        specifier: 3.12.2
+        version: 3.12.2
+      set-cookie-parser:
+        specifier: 2.6.0
+        version: 2.6.0
+
   packages/shared:
     devDependencies:
       '@mptool/mock':
@@ -237,12 +237,12 @@ importers:
 
   packages/skyline:
     devDependencies:
-      '@mptool/cookie':
-        specifier: workspace:*
-        version: link:../cookie
       '@mptool/file':
         specifier: workspace:*
         version: link:../file
+      '@mptool/net':
+        specifier: workspace:*
+        version: link:../net
       '@mptool/skyline-enhance':
         specifier: workspace:*
         version: link:../skyline-enhance

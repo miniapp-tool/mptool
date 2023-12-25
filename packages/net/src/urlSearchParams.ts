@@ -216,7 +216,6 @@ export class URLSearchParams {
    * console.log(params.toString());
    * // Prints query%5B%5D=abc&#x26;query%5B%5D=123&#x26;type=search
    * ```
-   * @since v7.7.0, v6.13.0
    */
   sort(): void {
     this.params = new Map(
