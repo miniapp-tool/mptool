@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.2](https://miniapp-tool///compare/v0.6.0-beta.1...v0.6.0-beta.2) (2023-12-25)
+
 ## [0.6.0-beta.1](https://miniapp-tool///compare/v0.6.0-beta.0...v0.6.0-beta.1) (2023-12-25)
 
 ### Bug Fixes
