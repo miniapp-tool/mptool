@@ -7,7 +7,9 @@ const globalCookieStore = new CookieStore();
 
 export type FetchBody = ArrayBuffer | URLSearchParams | null | string;
 
-export interface FetchOptions {
+export interface FetchOptions<
+  T extends string | Record<string, string> | ArrayBuffer,
+> {
   method?:
     | "options"
     | "OPTIONS"
@@ -33,9 +35,9 @@ export interface FetchOptions {
   responseType?: "text" | "arraybuffer" | undefined;
   redirect?: "follow" | "manual";
 
-  success?: (res: any) => void;
-  fail?: (err: any) => void;
-  complete?: (val: any) => void;
+  success?: WechatMiniprogram.RequestSuccessCallback<T>;
+  fail?: WechatMiniprogram.RequestFailCallback;
+  complete?: WechatMiniprogram.RequestCompleteCallback;
 }
 
 export interface FetchResult<
@@ -48,7 +50,7 @@ export interface FetchResult<
 
 export const fetch = <T extends string | Record<string, string> | ArrayBuffer>(
   url: string,
-  { method = "GET", headers, body, ...options }: FetchOptions = {},
+  { method = "GET", headers, body, ...options }: FetchOptions<T> = {},
 ): Promise<FetchResult<T>> =>
   new Promise((resolve, reject) => {
     const cookieScope = options.domain || url;
@@ -152,13 +154,13 @@ export const Fetch = ({ domain, ...options }: FetchInitOptions = {}): (<
   T extends string | Record<string, string> | ArrayBuffer,
 >(
   url: string,
-  fetchOptions?: FetchOptions,
+  fetchOptions?: FetchOptions<T>,
 ) => Promise<FetchResult<T>>) => {
   const server = domain?.replace(/\/$/g, "");
 
   return <T extends string | Record<string, string> | ArrayBuffer>(
     url: string,
-    fetchOptions: FetchOptions = {},
+    fetchOptions: FetchOptions<T> = {},
   ): Promise<FetchResult<T>> => {
     if (url.startsWith("/") && !server) throw new Error("No domain provided");
 

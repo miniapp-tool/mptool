@@ -1,67 +1,72 @@
 import { splitCookiesString } from "set-cookie-parser";
 
-export type HeadersInit = [string, string][] | Record<string, string> | Headers;
+const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
+const TOKENS = [
+  0x7f,
+  0x20,
+  "(",
+  ")",
+  "<",
+  ">",
+  "@",
+  ",",
+  ";",
+  ":",
+  "\\",
+  '"',
+  "/",
+  "[",
+  "]",
+  "?",
+  "=",
+  "{",
+  "}",
+];
+const NORMALIZED_HEADERS = Symbol("normalizedHeaders");
+const RAW_HEADER_NAMES = Symbol("rawHeaderNames");
+const HEADER_VALUE_DELIMITER = ", " as const;
+const REMOVED_CHARS = [
+  String.fromCharCode(0x0a),
+  String.fromCharCode(0x0d),
+  String.fromCharCode(0x09),
+  String.fromCharCode(0x20),
+];
+const HEADER_VALUE_REMOVE_REGEXP = new RegExp(
+  `(^[${REMOVED_CHARS.join("")}]|$[${REMOVED_CHARS.join("")}])`,
+  "g",
+);
+
+const isToken = (value: string | number): boolean => !TOKENS.includes(value);
 
 /**
  * Validate the given header name.
  * @see https://fetch.spec.whatwg.org/#header-name
  */
-function isValidHeaderName(value: unknown) {
-  if (typeof value !== "string") {
-    return false;
-  }
-
-  if (value.length === 0) {
-    return false;
-  }
+const isValidHeaderName = (value: unknown): boolean => {
+  if (typeof value !== "string" || value.length === 0) return false;
 
   for (let i = 0; i < value.length; i++) {
     const character = value.charCodeAt(i);
 
-    if (character > 0x7f || !isToken(character)) {
-      return false;
-    }
+    if (character > 0x7f || !isToken(character)) return false;
   }
 
   return true;
-}
+};
 
-function isToken(value: string | number): boolean {
-  return ![
-    0x7f,
-    0x20,
-    "(",
-    ")",
-    "<",
-    ">",
-    "@",
-    ",",
-    ";",
-    ":",
-    "\\",
-    '"',
-    "/",
-    "[",
-    "]",
-    "?",
-    "=",
-    "{",
-    "}",
-  ].includes(value);
-}
+const normalizeHeaderName = (name: string): string => {
+  if (HEADERS_INVALID_CHARACTERS.test(name) || name.trim() === "")
+    throw new TypeError("Invalid character in header field name");
+
+  return name.trim().toLowerCase();
+};
 
 /**
  * Validate the given header value.
  * @see https://fetch.spec.whatwg.org/#header-value
  */
-function isValidHeaderValue(value: unknown): boolean {
-  if (typeof value !== "string") {
-    return false;
-  }
-
-  if (value.trim() !== value) {
-    return false;
-  }
+const isValidHeaderValue = (value: unknown): boolean => {
+  if (typeof value !== "string" || value.trim() !== value) return false;
 
   for (let i = 0; i < value.length; i++) {
     const character = value.charCodeAt(i);
@@ -72,50 +77,21 @@ function isValidHeaderValue(value: unknown): boolean {
       // HTTP newline bytes.
       character === 0x0a ||
       character === 0x0d
-    ) {
+    )
       return false;
-    }
   }
 
   return true;
-}
-
-const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
-
-function normalizeHeaderName(name: string): string {
-  if (HEADERS_INVALID_CHARACTERS.test(name) || name.trim() === "") {
-    throw new TypeError("Invalid character in header field name");
-  }
-
-  return name.trim().toLowerCase();
-}
-
-const charCodesToRemove = [
-  String.fromCharCode(0x0a),
-  String.fromCharCode(0x0d),
-  String.fromCharCode(0x09),
-  String.fromCharCode(0x20),
-];
-
-const HEADER_VALUE_REMOVE_REGEXP = new RegExp(
-  `(^[${charCodesToRemove.join("")}]|$[${charCodesToRemove.join("")}])`,
-  "g",
-);
+};
 
 /**
  * Normalize the given header value.
  * @see https://fetch.spec.whatwg.org/#concept-header-value-normalize
  */
-function normalizeHeaderValue(value: string): string {
-  const nextValue = value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
-  return nextValue;
-}
+const normalizeHeaderValue = (value: string): string =>
+  value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
 
-const NORMALIZED_HEADERS: unique symbol = Symbol("normalizedHeaders");
-
-const RAW_HEADER_NAMES: unique symbol = Symbol("rawHeaderNames");
-
-const HEADER_VALUE_DELIMITER = ", " as const;
+export type HeadersInit = [string, string][] | Record<string, string> | Headers;
 
 export class Headers {
   // Normalized header {"name":"a, b"} storage.
