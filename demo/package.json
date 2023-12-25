@@ -7,8 +7,7 @@
     "demo:dev": "tsc -w"
   },
   "dependencies": {
-    "@mptool/enhance": "workspace:*",
-    "@mptool/file": "workspace:*"
+    "@mptool/all": "workspace:*"
   },
   "devDependencies": {
     "miniprogram-api-typings": "3.12.2",

@@ -1,5 +1,4 @@
-import { put } from "@mptool/file";
-import { $Page } from "@mptool/enhance";
+import { $Page, put } from "@mptool/all";
 
 const date = new Date().getTime();
 

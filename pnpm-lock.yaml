@@ -125,12 +125,9 @@ importers:
 
   demo:
     dependencies:
-      '@mptool/enhance':
+      '@mptool/all':
         specifier: workspace:*
-        version: link:../packages/enhance
-      '@mptool/file':
-        specifier: workspace:*
-        version: link:../packages/file
+        version: link:../packages/all
     devDependencies:
       miniprogram-api-typings:
         specifier: 3.12.2

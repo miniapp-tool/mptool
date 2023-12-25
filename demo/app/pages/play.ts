@@ -1,5 +1,4 @@
-import { take } from "@mptool/file";
-import { $Page } from "@mptool/enhance";
+import { $Page, take } from "@mptool/all";
 
 $Page("play", {
   data: {

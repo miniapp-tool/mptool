@@ -1,4 +1,4 @@
-import { $App, $Config } from "@mptool/enhance";
+import { $App, $Config } from "@mptool/all";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
