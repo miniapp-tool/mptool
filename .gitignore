@@ -12,4 +12,4 @@ docs/.vuepress/dist
 # Demo
 demo/**/*.js
 demo/**/*.js.map
-
+demo/project.private.config.json

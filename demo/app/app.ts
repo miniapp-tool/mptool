@@ -1,4 +1,4 @@
-import { $App, $Config } from "@mptool/all";
+import { $App, $Config, fetch } from "@mptool/all";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -17,6 +17,9 @@ $App({
     this.$on("message to app", (msg: string) => {
       console.log(`Receive message:${msg}`);
     });
+    void fetch("https://authserver.nenu.edu.cn/authserver/info", {
+      redirect: "manual",
+    }).then((res) => console.log(res));
   },
   onAwake(time) {
     console.log(`App awake after ${time}ms`, this);

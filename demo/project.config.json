@@ -1,15 +1,11 @@
 {
+  "projectname": "mptool%20demo",
   "description": "项目配置文件",
-  "packOptions": {
-    "ignore": []
-  },
   "miniprogramRoot": "app/",
   "compileType": "miniprogram",
   "libVersion": "2.21.0",
-  "appid": "wx379c0a8a4769a135",
   "qqLibVersion": "1.29.0",
   "qqappid": "1108100302",
-  "projectname": "mptool%20demo",
   "setting": {
     "urlCheck": true,
     "scopeDataCheck": false,
@@ -28,8 +24,6 @@
     "nodeModules": false,
     "enhance": true,
     "useMultiFrameRuntime": true,
-    "useApiHook": true,
-    "useApiHostProcess": true,
     "showShadowRootInWxmlPanel": true,
     "packNpmManually": true,
     "packNpmRelationList": [
@@ -40,30 +34,25 @@
     ],
     "minifyWXSS": true,
     "disableUseStrict": false,
-    "minifyWXML": true
+    "minifyWXML": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "ignoreUploadUnusedFiles": true
   },
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
-  "scripts": {
-    "beforeCompile": "",
-    "beforePreview": "",
-    "beforeUpload": ""
+  "condition": {},
+  "srcMiniprogramRoot": "app/",
+  "packOptions": {
+    "ignore": [],
+    "include": []
   },
-  "condition": {
-    "search": {
-      "list": []
-    },
-    "conversation": {
-      "list": []
-    },
-    "plugin": {
-      "list": []
-    },
-    "game": {
-      "list": []
-    },
-    "miniprogram": {
-      "list": []
-    }
+  "appid": "wx379c0a8a4769a135",
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
   }
 }

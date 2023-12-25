@@ -3,7 +3,7 @@ import { Headers } from "./headers.js";
 import { CookieStore } from "./store.js";
 import { URLSearchParams } from "./urlSearchParams.js";
 
-const globalCookieStore = new CookieStore();
+export const fetchCookieStore = new CookieStore("__global__");
 
 export type FetchBody = ArrayBuffer | URLSearchParams | null | string;
 
@@ -54,7 +54,7 @@ export const fetch = <T extends string | Record<string, string> | ArrayBuffer>(
 ): Promise<FetchResult<T>> =>
   new Promise((resolve, reject) => {
     const cookieScope = options.domain || url;
-    const cookieHeader = globalCookieStore.getHeader(cookieScope);
+    const cookieHeader = fetchCookieStore.getHeader(cookieScope);
     const requestHeaders = new Headers(headers);
 
     requestHeaders.append("Cookie", cookieHeader);
@@ -110,7 +110,7 @@ Options:
     });
 
     task.onHeadersReceived(({ header }) => {
-      globalCookieStore.applyHeader(header, cookieScope);
+      fetchCookieStore.applyHeader(header, cookieScope);
     });
   });
 
