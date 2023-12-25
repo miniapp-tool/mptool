@@ -176,6 +176,10 @@ importers:
         version: 3.12.2
 
   packages/cookie:
+    dependencies:
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@mptool/mock':
         specifier: workspace:*
