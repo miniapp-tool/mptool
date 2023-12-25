@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.0](https://miniapp-tool///compare/v0.5.0...v0.6.0-beta.0) (2023-12-25)
+
+### Features
+
+- rename @mptool/cookie to @mptool/net ([8324920](https://miniapp-tool///commit/83249206b9747d8780d131436461d954e1e4dcfb))
+- update cookie package ([52962aa](https://miniapp-tool///commit/52962aa8e203285acd8cbf9ffff66bbe7da4ad2f))
+
 ## [0.5.0](https://miniapp-tool///compare/v0.5.0-beta.0...v0.5.0) (2023-12-20)
 
 ### Features
