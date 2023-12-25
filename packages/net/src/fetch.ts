@@ -8,7 +8,11 @@ export const fetchCookieStore = new CookieStore("__global__");
 export type FetchBody = ArrayBuffer | URLSearchParams | string | null;
 
 export interface FetchOptions<
-  T extends string | Record<string, string> | ArrayBuffer,
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+    string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >,
 > extends Omit<
     WechatMiniprogram.RequestOption<T>,
     "url" | "method" | "header" | "data"
@@ -57,7 +61,11 @@ export interface FetchOptions<
 }
 
 export interface FetchResult<
-  T extends string | Record<string, string> | ArrayBuffer,
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+    string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >,
 > {
   /** Status Code */
   status: number;
@@ -68,13 +76,23 @@ export interface FetchResult<
 }
 
 export type FetchType = <
-  T extends string | Record<string, string> | ArrayBuffer,
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+    string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >,
 >(
   url: string,
   options?: FetchOptions<T>,
 ) => Promise<FetchResult<T>>;
 
-export const fetch = <T extends string | Record<string, string> | ArrayBuffer>(
+export const fetch = <
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+    string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >,
+>(
   /** 接口地址 */
   url: string,
   {
