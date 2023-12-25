@@ -5,7 +5,12 @@ import { URLSearchParams } from "./urlSearchParams.js";
 
 export const fetchCookieStore = new CookieStore("__global__");
 
-export type FetchBody = ArrayBuffer | URLSearchParams | string | null;
+export type FetchBody =
+  | WechatMiniprogram.IAnyObject
+  | ArrayBuffer
+  | URLSearchParams
+  | string
+  | null;
 
 export interface FetchOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
