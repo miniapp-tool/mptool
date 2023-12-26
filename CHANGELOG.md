@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.7](https://miniapp-tool///compare/v0.6.0-beta.6...v0.6.0-beta.7) (2023-12-26)
+
+
+### Features
+
+* **net:** add errorHandler ([70059e5](https://miniapp-tool///commit/70059e5bd2d7c157089de5e3fdc7ec4746580c59))
+
 ## [0.6.0-beta.6](https://miniapp-tool///compare/v0.6.0-beta.5...v0.6.0-beta.6) (2023-12-26)
 
 ### Features
