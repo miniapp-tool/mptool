@@ -88,7 +88,7 @@ export type FetchType = <
   >,
 >(
   url: string,
-  options?: FetchOptions<T>,
+  options?: FetchOptions<T>
 ) => Promise<FetchResponse<T>>;
 
 export const mpFetch = <
@@ -107,7 +107,7 @@ export const mpFetch = <
     cookieScope = url,
     cookieStore = fetchCookieStore,
     ...options
-  }: FetchOptions<T> = {},
+  }: FetchOptions<T> = {}
 ): Promise<FetchResponse<T>> =>
   new Promise((resolve, reject) => {
     const cookieHeader = cookieStore.getHeader(cookieScope);
@@ -121,7 +121,7 @@ export const mpFetch = <
     if (body instanceof URLSearchParams) {
       requestHeaders.set(
         "Content-Type",
-        "application/x-www-form-urlencoded; charset=UTF-8",
+        "application/x-www-form-urlencoded; charset=UTF-8"
       );
     }
 
@@ -131,7 +131,7 @@ Requesting ${url}:
 Cookie: ${cookieHeader}
 Options:
 `,
-      options,
+      options
     );
 
     const task = wx.request<T>({
@@ -197,9 +197,9 @@ export interface FetchInitOptions
    */
   cookieStore?: CookieStore | string;
   /**
-   * 相应处理器
+   * 响应处理器
    *
-   * @param response 相应
+   * @param response 响应
    * @returns 数据
    * @throws {Error} 自定义的错误数据
    */
@@ -210,13 +210,23 @@ export interface FetchInitOptions
       any
     >,
   >(
-    /** 相应数据 */
+    /** 响应数据 */
     response: FetchResponse<T>,
     /** 请求地址 */
     url: string,
     /** 请求配置 */
-    options: FetchOptions<T>,
+    options: FetchOptions<T>
   ) => FetchResponse<T>;
+  errorHandler?: <
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >,
+  >(err: {
+    errMsg: string;
+    errno: number;
+  }) => FetchResponse<T> | never;
 }
 
 export interface FetchFactory {
@@ -239,8 +249,9 @@ export const createMpFetch = ({
       any
     >,
   >(
-    response: FetchResponse<T>,
+    response: FetchResponse<T>
   ): FetchResponse<T> => response,
+  errorHandler,
   ...defaultOptions
 }: FetchInitOptions = {}): FetchFactory => {
   const domain = server?.replace(/\/$/g, "");
@@ -269,7 +280,8 @@ export const createMpFetch = ({
 
     return mpFetch(link, options)
       .then((response) => responseHandler(response, url, options))
-      .catch((err) => {
+      .catch((err: { errMsg: string; errno: number }) => {
+        if (errorHandler) throw errorHandler(err);
         throw err;
       });
   };

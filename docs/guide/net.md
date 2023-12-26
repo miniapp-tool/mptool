@@ -30,7 +30,7 @@ icon: network-wired
 
 在使用时，你应该避免使用 `url` `data` 和 `header` 选项。前者已经作为第一个参数提供，后两者的的替代选项是 `body` 和 `headers`。
 
-`fetch` 会自动保存相应的 Cookie，并在请求时附加对应的 Cookie，同时完善了以下选项:
+`fetch` 会自动保存响应的 Cookie，并在请求时附加对应的 Cookie，同时完善了以下选项:
 
 - `method` 额外支持小写的方法名
 - `body` 额外支持 `URLSearchParams` 和 `null`
@@ -42,7 +42,7 @@ icon: network-wired
 
 在微信基础库 `3.2.3` 版本及以上，你可以设置 `redirect: manual` 到每一个请求，这样状态码为 301 的请求会被原样保留而不是直接跳转，重定向请求下发的 Cookie 也可以被记录。
 
-其他版本的基础库或者未设置 `redirect` 选项发出的请求，框架无法解析重定向相应中的 Cookie 。
+其他版本的基础库或者未设置 `redirect` 选项发出的请求，框架无法解析重定向响应中的 Cookie 。
 
 :::
 
