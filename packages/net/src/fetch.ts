@@ -154,7 +154,7 @@ Options:
         | "CONNECT"
       >method.toUpperCase(),
 
-      header: requestHeaders,
+      header: requestHeaders.toObject(),
       data,
 
       enableHttp2: true,
@@ -241,14 +241,18 @@ export interface FetchInitOptions
 }
 
 export interface FetchFactory {
+  /**
+   * Cookie 存储
+   */
   cookieStore: CookieStore;
+  /**
+   * 请求方法
+   */
   fetch: FetchType;
 }
 
 /**
- *
  * @param options fetch 配置选项
- * @returns fetch 函数
  */
 export const createMpFetch = ({
   cookieStore,
