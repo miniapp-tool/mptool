@@ -210,7 +210,12 @@ export interface FetchInitOptions
       any
     >,
   >(
+    /** 相应数据 */
     response: FetchResponse<T>,
+    /** 请求地址 */
+    url: string,
+    /** 请求配置 */
+    options: FetchOptions<T>,
   ) => FetchResponse<T>;
 }
 
@@ -232,7 +237,7 @@ export const Fetch = ({
   >(
     response: FetchResponse<T>,
   ): FetchResponse<T> => response,
-  ...options
+  ...defaultOptions
 }: FetchInitOptions = {}): FetchType => {
   const domain = server?.replace(/\/$/g, "");
   const defaultCookieStore =
@@ -243,7 +248,8 @@ export const Fetch = ({
         : fetchCookieStore;
 
   const customFetch: FetchType = (url: string, fetchOptions = {}) => {
-    if (url.startsWith("/") && !domain) throw new Error("No domain provided");
+    if (url.startsWith("/") && !domain)
+      throw { message: "No server provided", errno: -1 };
 
     const link = url.startsWith("/")
       ? `${domain}${url}`
@@ -251,12 +257,14 @@ export const Fetch = ({
         ? url
         : `https://${url}`;
 
-    return fetch(link, {
+    const options = {
       cookieStore: defaultCookieStore,
-      ...options,
+      ...defaultOptions,
       ...fetchOptions,
-    })
-      .then(responseHandler)
+    };
+
+    return fetch(link, options)
+      .then((response) => responseHandler(response, url, options))
       .catch((err) => {
         throw err;
       });
