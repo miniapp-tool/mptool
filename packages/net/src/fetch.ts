@@ -91,6 +91,13 @@ export type FetchType = <
   options?: FetchOptions<T>
 ) => Promise<FetchResponse<T>>;
 
+export interface FetchErrorInfo {
+  /** 错误信息 */
+  errMsg: string;
+  /** 错误码 */
+  errno: number;
+}
+
 export const mpFetch = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
@@ -223,10 +230,14 @@ export interface FetchInitOptions
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >,
-  >(err: {
-    errMsg: string;
-    errno: number;
-  }) => FetchResponse<T> | never;
+  >(
+    /** 错误信息 */
+    errInfo: FetchErrorInfo,
+    /** 请求地址 */
+    url: string,
+    /** 请求配置 */
+    options: FetchOptions<T>
+  ) => FetchResponse<T> | never;
 }
 
 export interface FetchFactory {
@@ -281,7 +292,7 @@ export const createMpFetch = ({
     return mpFetch(link, options)
       .then((response) => responseHandler(response, url, options))
       .catch((err: { errMsg: string; errno: number }) => {
-        if (errorHandler) throw errorHandler(err);
+        if (errorHandler) throw errorHandler(err, url, options);
         throw err;
       });
   };
