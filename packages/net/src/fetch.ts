@@ -91,7 +91,7 @@ export type FetchType = <
   options?: FetchOptions<T>,
 ) => Promise<FetchResponse<T>>;
 
-export const fetch = <
+export const mpFetch = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -224,8 +224,7 @@ export interface FetchInitOptions
  * @param options fetch 配置选项
  * @returns fetch 函数
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const Fetch = ({
+export const createMpFetch = ({
   cookieStore,
   server,
   responseHandler = <
@@ -263,7 +262,7 @@ export const Fetch = ({
       ...fetchOptions,
     };
 
-    return fetch(link, options)
+    return mpFetch(link, options)
       .then((response) => responseHandler(response, url, options))
       .catch((err) => {
         throw err;
