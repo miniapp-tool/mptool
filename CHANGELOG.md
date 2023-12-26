@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.5](https://miniapp-tool///compare/v0.6.0-beta.4...v0.6.0-beta.5) (2023-12-26)
+
+### Bug Fixes
+
+- **net:** update export name ([3cf4bc6](https://miniapp-tool///commit/3cf4bc64409ed8dd31873e2ceccf86018f8494b0))
+
 ## [0.6.0-beta.4](https://miniapp-tool///compare/v0.6.0-beta.3...v0.6.0-beta.4) (2023-12-26)
 
 ### Features
