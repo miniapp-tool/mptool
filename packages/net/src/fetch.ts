@@ -3,7 +3,7 @@ import { Headers } from "./headers.js";
 import { CookieStore } from "./store.js";
 import { URLSearchParams } from "./urlSearchParams.js";
 
-export const fetchCookieStore = new CookieStore("__global__");
+export const fetchCookieStore = new CookieStore("__fetch_cookie__");
 
 export type FetchBody =
   | WechatMiniprogram.IAnyObject
