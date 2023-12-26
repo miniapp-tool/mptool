@@ -219,6 +219,11 @@ export interface FetchInitOptions
   ) => FetchResponse<T>;
 }
 
+export interface FetchFactory {
+  cookieStore: CookieStore;
+  fetch: FetchType;
+}
+
 /**
  *
  * @param options fetch 配置选项
@@ -237,7 +242,7 @@ export const createMpFetch = ({
     response: FetchResponse<T>,
   ): FetchResponse<T> => response,
   ...defaultOptions
-}: FetchInitOptions = {}): FetchType => {
+}: FetchInitOptions = {}): FetchFactory => {
   const domain = server?.replace(/\/$/g, "");
   const defaultCookieStore =
     cookieStore instanceof CookieStore
@@ -269,5 +274,5 @@ export const createMpFetch = ({
       });
   };
 
-  return customFetch;
+  return { cookieStore: defaultCookieStore, fetch: customFetch };
 };
