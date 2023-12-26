@@ -13,3 +13,6 @@ docs/.vuepress/dist
 demo/**/*.js
 demo/**/*.js.map
 demo/project.private.config.json
+
+# coverage
+coverage/

@@ -27,7 +27,7 @@
     "release": "pnpm release:bump && pnpm clean && pnpm build && pnpm release:publish",
     "release:bump": "bumpp -r --execute=\"pnpm commit-and-tag-version && git add CHANGELOG.md\" --commit \"chore(release): publish v%s\" --all --tag --push",
     "release:publish": "cross-env NODE_OPTIONS=\"--experimental-json-modules\" tsx scripts/release/index.ts",
-    "test": "vitest run && pnpm -r --stream run tsd"
+    "test": "vitest run --coverage && pnpm -r --stream run tsd"
   },
   "config": {
     "commitizen": {
@@ -44,6 +44,7 @@
     "@types/node": "20.10.5",
     "@typescript-eslint/eslint-plugin": "6.15.0",
     "@typescript-eslint/parser": "6.15.0",
+    "@vitest/coverage-v8": "1.1.0",
     "bumpp": "9.2.1",
     "c8": "8.0.1",
     "commit-and-tag-version": "12.0.0",
