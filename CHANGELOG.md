@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.9](https://miniapp-tool///compare/v0.6.0-beta.8...v0.6.0-beta.9) (2023-12-26)
+
+
+### Bug Fixes
+
+* **net:** fix headers ([0d57739](https://miniapp-tool///commit/0d577393ead042d45d0c2603f360d1fdfcceba54))
+
 ## [0.6.0-beta.8](https://miniapp-tool///compare/v0.6.0-beta.7...v0.6.0-beta.8) (2023-12-26)
 
 
