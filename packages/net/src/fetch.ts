@@ -65,7 +65,7 @@ export interface FetchOptions<
   cookieStore?: CookieStore;
 }
 
-export interface FetchResult<
+export interface FetchResponse<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,7 +89,7 @@ export type FetchType = <
 >(
   url: string,
   options?: FetchOptions<T>,
-) => Promise<FetchResult<T>>;
+) => Promise<FetchResponse<T>>;
 
 export const fetch = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -108,7 +108,7 @@ export const fetch = <
     cookieStore = fetchCookieStore,
     ...options
   }: FetchOptions<T> = {},
-): Promise<FetchResult<T>> =>
+): Promise<FetchResponse<T>> =>
   new Promise((resolve, reject) => {
     const cookieHeader = cookieStore.getHeader(cookieScope);
     const requestHeaders = new Headers(headers);
@@ -193,15 +193,45 @@ export interface FetchInitOptions
    */
   server?: string;
   /**
-   * Cookie Store
+   * Cookie 存储
    */
   cookieStore?: CookieStore | string;
+  /**
+   * 相应处理器
+   *
+   * @param response 相应
+   * @returns 数据
+   * @throws {Error} 自定义的错误数据
+   */
+  responseHandler?: <
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >,
+  >(
+    response: FetchResponse<T>,
+  ) => FetchResponse<T>;
 }
 
+/**
+ *
+ * @param options fetch 配置选项
+ * @returns fetch 函数
+ */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Fetch = ({
   cookieStore,
   server,
+  responseHandler = <
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >,
+  >(
+    response: FetchResponse<T>,
+  ): FetchResponse<T> => response,
   ...options
 }: FetchInitOptions = {}): FetchType => {
   const domain = server?.replace(/\/$/g, "");
@@ -225,7 +255,11 @@ export const Fetch = ({
       cookieStore: defaultCookieStore,
       ...options,
       ...fetchOptions,
-    });
+    })
+      .then(responseHandler)
+      .catch((err) => {
+        throw err;
+      });
   };
 
   return customFetch;
