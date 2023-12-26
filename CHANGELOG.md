@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.3](https://miniapp-tool///compare/v0.6.0-beta.2...v0.6.0-beta.3) (2023-12-26)
+
+### Features
+
+- support response handler ([22ec91f](https://miniapp-tool///commit/22ec91f88de9986c0a7d83560aff3c3ee8437f6f))
+
 ## [0.6.0-beta.2](https://miniapp-tool///compare/v0.6.0-beta.1...v0.6.0-beta.2) (2023-12-25)
 
 ## [0.6.0-beta.1](https://miniapp-tool///compare/v0.6.0-beta.0...v0.6.0-beta.1) (2023-12-25)
