@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.4](https://miniapp-tool///compare/v0.6.0-beta.3...v0.6.0-beta.4) (2023-12-26)
+
+### Features
+
+- **net:** update Fetch options ([28f80f9](https://miniapp-tool///commit/28f80f98ece067a4de499d9020fedeadf7b99dbd))
+
 ## [0.6.0-beta.3](https://miniapp-tool///compare/v0.6.0-beta.2...v0.6.0-beta.3) (2023-12-26)
 
 ### Features
