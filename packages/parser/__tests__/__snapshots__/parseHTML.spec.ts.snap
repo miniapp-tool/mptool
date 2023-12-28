@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parseHTML() 1`] = `
+[
+  <div
+    class="test"
+  >
+    hello
+  </div>,
+]
+`;
+
+exports[`parseHTML() 2`] = `
+[
+  <div
+    class="test"
+  >
+    <span>
+      hello
+    </span>
+  </div>,
+]
+`;
+
+exports[`parseHTML() 3`] = `
+[
+  <div
+    class="test"
+  >
+    <span>
+      hello
+    </span>
+    <span>
+      world
+    </span>
+  </div>,
+]
+`;
+
+exports[`parseHTML() 4`] = `
+[
+  <table>
+    <tr>
+      <td>
+        hello
+      </td>
+    </tr>
+  </table>,
+]
+`;
+
+exports[`parseHTML() 5`] = `
+[
+  <table>
+    <tr>
+      <td>
+        hello
+      </td>
+      <td>
+        world
+      </td>
+    </tr>
+  </table>,
+]
+`;
+
+exports[`parseHTML() 6`] = `
+[
+  ProcessingInstruction {
+    "data": "!doctype html",
+    "endIndex": null,
+    "name": "!doctype",
+    "next": <html>
+      <head>
+        <title>
+          hello
+        </title>
+      </head>
+      <body>
+        world
+      </body>
+    </html>,
+    "parent": Document {
+      "children": [
+        [Circular],
+        <html>
+          <head>
+            <title>
+              hello
+            </title>
+          </head>
+          <body>
+            world
+          </body>
+        </html>,
+      ],
+      "endIndex": null,
+      "next": null,
+      "parent": null,
+      "prev": null,
+      "startIndex": null,
+      "type": "root",
+    },
+    "prev": null,
+    "startIndex": null,
+    "type": "directive",
+  },
+  <html>
+    <head>
+      <title>
+        hello
+      </title>
+    </head>
+    <body>
+      world
+    </body>
+  </html>,
+]
+`;

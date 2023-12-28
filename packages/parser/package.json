@@ -1,0 +1,52 @@
+{
+  "name": "@mptool/parser",
+  "version": "0.6.0-beta.9",
+  "description": "RichText parser for QQ/Wechat miniapp",
+  "keywords": [
+    "miniprogram",
+    "miniapp",
+    "html",
+    "parser",
+    "rich text"
+  ],
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/parser#readme",
+  "bugs": {
+    "url": "https://github.com/miniapp-tool/mptool/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/parser"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "mister-hope@outlook.com",
+    "url": "https://mrhope.site"
+  },
+  "main": "./lib/index.js",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.mts --configPlugin esbuild",
+    "clean": "rimraf ./lib",
+    "dev": "rollup -c -w"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0-rc.12",
+    "@mptool/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "miniprogram-api-typings": "^3.12.0"
+  },
+  "devDependencies": {
+    "@mptool/mock": "workspace:*",
+    "miniprogram-api-typings": "3.12.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
