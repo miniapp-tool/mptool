@@ -123,11 +123,23 @@ export const request = <
     const data =
       body instanceof URLSearchParams ? body.toString() : body ?? undefined;
 
-    if (body instanceof URLSearchParams) {
-      requestHeaders.set(
-        "Content-Type",
-        "application/x-www-form-urlencoded; charset=UTF-8",
-      );
+    // automatically set content-type header
+    if (!requestHeaders.has("Content-Type")) {
+      if (body instanceof URLSearchParams)
+        requestHeaders.set(
+          "Content-Type",
+          "application/x-www-form-urlencoded; charset=UTF-8",
+        );
+      else if (body instanceof ArrayBuffer)
+        requestHeaders.set(
+          "Content-Type",
+          "application/octet-stream; charset=UTF-8",
+        );
+      else if (
+        // is plain object
+        Object.prototype.toString.call(body) === "[object Object]"
+      )
+        requestHeaders.set("Content-Type", "application/json; charset=UTF-8");
     }
 
     logger.debug(
