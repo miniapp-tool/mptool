@@ -26,57 +26,22 @@ export default defineUserConfig({
 
     docsDir: "docs",
 
-    navbar: [
-      "/guide/",
+    navbar: ["/guide/", "/api/"],
+
+    sidebar: [
       {
-        text: "框架",
-        icon: "sitemap",
+        text: "介绍",
+        icon: "info-circle",
         prefix: "/guide/",
-        children: ["enhance", "file", "net"],
+        children: ["", "enhance", "file", "net"],
       },
       {
         text: "API",
         icon: "microchip",
         prefix: "/api/",
-        children: ["enhance/", "file/", "net/"],
+        children: "structure",
       },
     ],
-
-    sidebar: {
-      "/": [
-        {
-          text: "介绍",
-          icon: "info-circle",
-          prefix: "/guide/",
-          children: ["", "enhance", "file", "net"],
-        },
-        {
-          text: "API",
-          icon: "microchip",
-          prefix: "/api/",
-          children: [
-            {
-              text: "Enhance",
-              icon: "toolbox",
-              prefix: "enhance/",
-              children: ["config", "app", "page", "component", "emitter"],
-            },
-            {
-              text: "File",
-              icon: "folder",
-              prefix: "file/",
-              children: ["file", "storage"],
-            },
-            {
-              text: "Net",
-              icon: "cookie",
-              prefix: "net/",
-              children: ["fetch", "cookie", "cookie-store"],
-            },
-          ],
-        },
-      ],
-    },
 
     footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
 

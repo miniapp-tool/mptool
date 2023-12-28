@@ -42,9 +42,9 @@ export const parseUrl = (url: string): UrlInfo => {
   };
 };
 
-export type CookieStoreOptions = string | { domain?: string; path?: string };
+export type CookieOptions = string | { domain?: string; path?: string };
 
-export const getCookieOptions = (options?: CookieStoreOptions): UrlInfo => {
+export const getCookieOptions = (options: CookieOptions): UrlInfo => {
   const { domain = "", path = "/" } =
     typeof options === "object"
       ? options

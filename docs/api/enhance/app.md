@@ -1,4 +1,7 @@
-# $App
+---
+title: $App
+order: 3
+---
 
 ## 配置
 

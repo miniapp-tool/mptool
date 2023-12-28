@@ -1,77 +1,54 @@
 # Cookie
 
-```ts
-interface CookieType {
-  /**
-   * cookie name
-   */
-  name: string;
-  /**
-   * cookie value
-   */
-  value: string;
-  /**
-   * cookie path
-   */
-  path?: string | undefined;
-  /**
-   * absolute expiration date for the cookie
-   */
-  expires?: Date | undefined;
-  /**
-   * relative max age of the cookie in seconds from when the client receives it (integer or undefined)
-   * Note: when using with express's res.cookie() method, multiply maxAge by 1000 to convert to milliseconds
-   */
-  maxAge?: number | undefined;
-  /**
-   * domain for the cookie,
-   * may begin with "." to indicate the named domain or any subdomain of it
-   */
-  domain?: string | undefined;
-  /**
-   * indicates that this cookie should only be sent over HTTPs
-   */
-  secure?: boolean | undefined;
-  /**
-   * indicates that this cookie should not be accessible to client-side JavaScript
-   */
-  httpOnly?: boolean | undefined;
-  /**
-   * indicates a cookie ought not to be sent along with cross-site requests
-   */
-  sameSite?: string | undefined;
-}
+## Cookie 对象
 
-/**
- * Cookie 类
- */
-class Cookie {
-  name: string;
-  value: string;
-  domain: string;
-  path: string;
-  expires: number | "session" | "outdate";
-  httpOnly: boolean;
-  constructor(cookie: CookieType);
-  /**
-   * @returns 是否已过期
-   */
-  isExpired(): boolean;
-  /**
-   * @returns 是否可持久化
-   */
-  isPersistence(): boolean;
-  /**
-   * @param domain 域名
-   * @returns 是否匹配
-   */
-  isDomainMatched(domain: string): boolean;
-  /**
-   * @param path 路径
-   * @returns 是否匹配
-   */
-  isPathMatched(path: string): boolean;
-  toString(): string;
-  toJSON(): CookieType;
-}
-```
+`@mptool/net` 通过如下的对象格式格式生成/序列化 Cookie:
+
+- `name`: Cookie 名称
+- `value`: Cookie 值
+- `path`: Cookie 路径
+- `expires`: 过期时间 (Date 对象)
+- `maxAge`: 最大存活时间 (秒)
+- `domain`: Cookie 域名
+- `secure`: 是否只在 HTTPS 下使用
+- `httpOnly`: 是否只在 HTTP 下使用
+- `sameSite`: 是否只在同域下使用
+
+其中 `name` 和 `value` 时必须的，其他项是可选的。
+
+## Cookie 类
+
+`@mptool/net` 有一个 `Cookie` 类，用于处理 Cookie 对象。
+
+构造函数:
+
+- `constructor(cookie: CookieType)`
+
+  - `cookie`: Cookie 对象
+
+静态成员:
+
+- `name: string`: Cookie 名称
+- `value: string`: Cookie 值
+- `domain: string`: Cookie 域名
+- `path: string`: Cookie 路径
+- `expires: number | "session" | "outdate"`: 过期时间
+- `httpOnly: boolean`: 是否只在 HTTP 下使用
+
+方法:
+
+- `isExpired(): boolean`: 判断 Cookie 是否已过期
+
+- `isPersistence(): boolean`: 判断 Cookie 是否可持久化
+
+- `isDomainMatched(domain: string): boolean`: 判断 Cookie 是否匹配域名
+
+  - `domain`: 域名
+
+- `isPathMatched(path: string): boolean`: 判断 Cookie 是否匹配路径
+
+  - `path`: 路径
+
+- `toString(): string`: 将 Cookie 转换为字符串
+
+- `toJSON(): CookieType`: 将 Cookie 序列化为对象

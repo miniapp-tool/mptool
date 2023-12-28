@@ -1,4 +1,7 @@
-# $Page
+---
+title: $Page
+order: 4
+---
 
 - 类型:
 

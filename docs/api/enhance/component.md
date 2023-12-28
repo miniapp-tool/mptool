@@ -1,4 +1,7 @@
-# $Component
+---
+title: $Component
+order: 5
+---
 
 - 类型: `$Component(options: ComponentOPtions): string`
 

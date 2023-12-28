@@ -1,4 +1,7 @@
-# $Config
+---
+title: $Config
+order: 2
+---
 
 全局配置器，必须放置在应用主脚本中在 `$App` 前调用。
 

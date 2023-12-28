@@ -1,9 +1,7 @@
 ---
 title: "@mptool/file"
-icon: folder
+icon: network-wired
+index: false
 ---
 
-## 目录
-
-- [文件类](file.md)
-- [缓存类](storage.md)
+<AutoCatalog />

@@ -1,6 +1,6 @@
 import { Cookie } from "./cookie.js";
 import {
-  type CookieStoreOptions,
+  type CookieOptions,
   getCookieOptions,
   getCookieScopeDomain,
   normalizeDomain,
@@ -44,7 +44,7 @@ export class CookieStore {
    * @param options Cookie 选项
    * @return cookie 对象
    */
-  get(name: string, options: CookieStoreOptions): Cookie | null {
+  get(name: string, options: CookieOptions): Cookie | null {
     const { domain, path } = getCookieOptions(options);
     const scopeDomains = getCookieScopeDomain(domain);
 
@@ -66,7 +66,7 @@ export class CookieStore {
    * @param options Cookie 选项
    * @return Cookie 值
    */
-  getValue(name: string, options: CookieStoreOptions): string | undefined {
+  getValue(name: string, options: CookieOptions): string | undefined {
     return this.get(name, options)?.value;
   }
 
@@ -77,7 +77,7 @@ export class CookieStore {
    * @param options Cookie 选项
    * @return 是否存在
    */
-  has(name: string, options: CookieStoreOptions): boolean {
+  has(name: string, options: CookieOptions): boolean {
     // 返回是否存在 cookie 值
     return Boolean(this.get(name, options));
   }
@@ -139,7 +139,7 @@ export class CookieStore {
    * @param options Cookie 选项
    * @return Cookie 对象数组
    */
-  getCookies(options?: CookieStoreOptions): Cookie[] {
+  getCookies(options: CookieOptions): Cookie[] {
     const { domain, path } = getCookieOptions(options);
     const scopeDomains = getCookieScopeDomain(domain);
     const cookies = [];
@@ -176,7 +176,7 @@ export class CookieStore {
    *
    * @return 键值 Map
    */
-  getCookiesMap(options: CookieStoreOptions): Record<string, string> {
+  getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
     return Object.fromEntries(
       this.getCookies(options).map(({ name, value }) => [name, value]),
@@ -264,7 +264,7 @@ export class CookieStore {
    * @param options Cookie 选项
    * @return request cookie header
    */
-  getHeader(options: CookieStoreOptions): string {
+  getHeader(options: CookieOptions): string {
     // 转化为 request cookies 字符串
     return this.getCookies(options)
       .map((item) => item.toString())

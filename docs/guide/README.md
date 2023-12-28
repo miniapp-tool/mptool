@@ -1,6 +1,6 @@
 ---
 title: MP Tool
-icon: info-circle
+icon: lightbulb
 ---
 
 轻量的小程序增强框架。

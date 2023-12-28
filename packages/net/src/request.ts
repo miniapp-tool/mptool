@@ -1,18 +1,18 @@
 import { logger } from "@mptool/shared";
 import { Headers } from "./headers.js";
-import { CookieStore } from "./store.js";
+import { CookieStore } from "./cookieStore.js";
 import { URLSearchParams } from "./urlSearchParams.js";
 
-export const fetchCookieStore = new CookieStore("__fetch_cookie__");
+export const requestCookieStore = new CookieStore("__request_cookie__");
 
-export type FetchBody =
+export type RequestBody =
   | WechatMiniprogram.IAnyObject
   | ArrayBuffer
   | URLSearchParams
   | string
   | null;
 
-export interface FetchOptions<
+export interface RequestOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +52,7 @@ export interface FetchOptions<
   /**
    * 请求主体
    */
-  body?: FetchBody;
+  body?: RequestBody;
 
   /**
    * Cookie 作用域
@@ -65,7 +65,7 @@ export interface FetchOptions<
   cookieStore?: CookieStore;
 }
 
-export interface FetchResponse<
+export interface RequestResponse<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +80,12 @@ export interface FetchResponse<
   data: T;
 }
 
-export type FetchType = <
+export interface RequestError extends Error {
+  /** 错误码 */
+  errno?: number;
+}
+
+export type RequestType = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,17 +93,10 @@ export type FetchType = <
   >,
 >(
   url: string,
-  options?: FetchOptions<T>
-) => Promise<FetchResponse<T>>;
+  options?: RequestOptions<T>,
+) => Promise<RequestResponse<T>>;
 
-export interface FetchErrorInfo {
-  /** 错误信息 */
-  errMsg: string;
-  /** 错误码 */
-  errno: number;
-}
-
-export const mpFetch = <
+export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,10 +110,10 @@ export const mpFetch = <
     headers,
     body,
     cookieScope = url,
-    cookieStore = fetchCookieStore,
+    cookieStore = requestCookieStore,
     ...options
-  }: FetchOptions<T> = {}
-): Promise<FetchResponse<T>> =>
+  }: RequestOptions<T> = {},
+): Promise<RequestResponse<T>> =>
   new Promise((resolve, reject) => {
     const cookieHeader = cookieStore.getHeader(cookieScope);
     const requestHeaders = new Headers(headers);
@@ -128,7 +126,7 @@ export const mpFetch = <
     if (body instanceof URLSearchParams) {
       requestHeaders.set(
         "Content-Type",
-        "application/x-www-form-urlencoded; charset=UTF-8"
+        "application/x-www-form-urlencoded; charset=UTF-8",
       );
     }
 
@@ -138,7 +136,7 @@ Requesting ${url}:
 Cookie: ${cookieHeader}
 Options:
 `,
-      options
+      options,
     );
 
     const task = wx.request<T>({
@@ -170,9 +168,12 @@ Options:
       },
 
       fail: ({ errMsg, errno }) => {
+        const requestError = new Error(errMsg) as RequestError;
+
         // 调试
         logger.warn(`Request ${url} failed: ${errMsg}`);
-        reject({ errMsg, errno });
+        requestError.errno = errno;
+        reject(requestError);
       },
       ...options,
     });
@@ -182,7 +183,7 @@ Options:
     });
   });
 
-export interface FetchInitOptions
+export interface RequestInitOptions
   extends Pick<
     WechatMiniprogram.RequestOption,
     | "redirect"
@@ -206,9 +207,7 @@ export interface FetchInitOptions
   /**
    * 响应处理器
    *
-   * @param response 响应
-   * @returns 数据
-   * @throws {Error} 自定义的错误数据
+   * @throws {RequestError} 自定义的错误数据
    */
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -218,12 +217,18 @@ export interface FetchInitOptions
     >,
   >(
     /** 响应数据 */
-    response: FetchResponse<T>,
+    response: RequestResponse<T>,
     /** 请求地址 */
     url: string,
     /** 请求配置 */
-    options: FetchOptions<T>
-  ) => FetchResponse<T>;
+    options: RequestOptions<T>,
+  ) => RequestResponse<T>;
+
+  /**
+   * 错误处理器
+   *
+   * @throws {RequestError} 自定义的错误数据
+   */
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
@@ -232,15 +237,15 @@ export interface FetchInitOptions
     >,
   >(
     /** 错误信息 */
-    errInfo: FetchErrorInfo,
+    error: RequestError,
     /** 请求地址 */
     url: string,
     /** 请求配置 */
-    options: FetchOptions<T>
-  ) => FetchResponse<T> | never;
+    options: RequestOptions<T>,
+  ) => RequestResponse<T> | never;
 }
 
-export interface FetchFactory {
+export interface RequestFactory {
   /**
    * Cookie 存储
    */
@@ -248,13 +253,13 @@ export interface FetchFactory {
   /**
    * 请求方法
    */
-  fetch: FetchType;
+  request: RequestType;
 }
 
 /**
- * @param options fetch 配置选项
+ * @param options request 配置选项
  */
-export const createMpFetch = ({
+export const createRequest = ({
   cookieStore,
   server,
   responseHandler = <
@@ -264,22 +269,21 @@ export const createMpFetch = ({
       any
     >,
   >(
-    response: FetchResponse<T>
-  ): FetchResponse<T> => response,
+    response: RequestResponse<T>,
+  ): RequestResponse<T> => response,
   errorHandler,
   ...defaultOptions
-}: FetchInitOptions = {}): FetchFactory => {
+}: RequestInitOptions = {}): RequestFactory => {
   const domain = server?.replace(/\/$/g, "");
   const defaultCookieStore =
     cookieStore instanceof CookieStore
       ? cookieStore
       : typeof cookieStore === "string"
         ? new CookieStore(cookieStore)
-        : fetchCookieStore;
+        : requestCookieStore;
 
-  const customFetch: FetchType = (url: string, fetchOptions = {}) => {
-    if (url.startsWith("/") && !domain)
-      throw { message: "No server provided", errno: -1 };
+  const newRequest: RequestType = (url: string, requestOptions = {}) => {
+    if (url.startsWith("/") && !domain) throw new Error("No server provided");
 
     const link = url.startsWith("/")
       ? `${domain}${url}`
@@ -290,16 +294,16 @@ export const createMpFetch = ({
     const options = {
       cookieStore: defaultCookieStore,
       ...defaultOptions,
-      ...fetchOptions,
+      ...requestOptions,
     };
 
-    return mpFetch(link, options)
+    return request(link, options)
       .then((response) => responseHandler(response, url, options))
-      .catch((err: { errMsg: string; errno: number }) => {
+      .catch((err: RequestError) => {
         if (errorHandler) throw errorHandler(err, url, options);
         throw err;
       });
   };
 
-  return { cookieStore: defaultCookieStore, fetch: customFetch };
+  return { cookieStore: defaultCookieStore, request: newRequest };
 };

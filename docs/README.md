@@ -58,6 +58,9 @@ highlights:
         icon: cookie
         details: 全自动保存并附加 Cookie
 
+  - header: "@mptool/parser"
+    description: HTML 解析器
+
   - header: "@mptool/encoder"
     description: 支持 GBK 和 GB2312 的编码器
 

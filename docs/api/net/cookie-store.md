@@ -1,7 +1,7 @@
 # CookieStore
 
 ```ts
-type CookieStoreOptions =
+type CookieOptions =
   | string
   | {
       domain?: string;
@@ -30,7 +30,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return cookie 对象
    */
-  get(name: string, options: CookieStoreOptions): Cookie | null;
+  get(name: string, options: CookieOptions): Cookie | null;
   /**
    * 获取 Cookie 值
    *
@@ -38,7 +38,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return Cookie 值
    */
-  getValue(name: string, options: CookieStoreOptions): string | undefined;
+  getValue(name: string, options: CookieOptions): string | undefined;
   /**
    * 是否有特定的 Cookie
    *
@@ -46,7 +46,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return 是否存在
    */
-  has(name: string, options: CookieStoreOptions): boolean;
+  has(name: string, options: CookieOptions): boolean;
   /**
    * 设置 cookie
    */
@@ -68,7 +68,7 @@ class CookieStore {
    * @param options Cookie 选项
    * @return Cookie 对象数组
    */
-  getCookies(options?: CookieStoreOptions): Cookie[];
+  getCookies(options?: CookieOptions): Cookie[];
   /**
    * 获取所有 cookies 对象
    *
@@ -80,7 +80,7 @@ class CookieStore {
    *
    * @return 键值 Map
    */
-  getCookiesMap(options: CookieStoreOptions): Record<string, string>;
+  getCookiesMap(options: CookieOptions): Record<string, string>;
   /**
    * 应用 Cookies
    *
@@ -116,6 +116,6 @@ class CookieStore {
    * @param options Cookie 选项
    * @return request cookie header
    */
-  getHeader(options: CookieStoreOptions): string;
+  getHeader(options: CookieOptions): string;
 }
 ```

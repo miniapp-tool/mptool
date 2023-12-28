@@ -36,6 +36,8 @@
   - URLSearchParams
   - 自动解析并携带 Cookie
 
+- [x] @mptool/parser: HTML 解析器 <Badge text="Stable" />
+
 - [ ] @mptool/eval: 为小程序添加 eval <Badge text="Building" type="danger" />
 
 ## 感谢
