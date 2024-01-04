@@ -96,6 +96,9 @@ export type RequestType = <
   options?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 
+// FIXME: This is a temp fix for https://developers.weixin.qq.com/community/develop/doc/0008aa3a38cc60571ee0a11a96b400
+const { platform } = wx.getSystemInfoSync();
+
 export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
@@ -172,6 +175,8 @@ Options:
       success: ({ data, statusCode, header }) => {
         logger.debug(`Request ends with ${statusCode}`, data);
 
+        if (platform === "ios") cookieStore.applyHeader(header, cookieScope);
+
         return resolve({
           data,
           headers: new Headers(header),
@@ -191,7 +196,7 @@ Options:
     });
 
     task.onHeadersReceived(({ header }) => {
-      cookieStore.applyHeader(header, cookieScope);
+      if (platform !== "ios") cookieStore.applyHeader(header, cookieScope);
     });
   });
 
