@@ -2,26 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.6.0-beta.9](https://miniapp-tool///compare/v0.6.0-beta.8...v0.6.0-beta.9) (2023-12-26)
+## [0.6.0-beta.10](https://miniapp-tool///compare/v0.6.0-beta.9...v0.6.0-beta.10) (2024-01-04)
 
+### Features
+
+- add parser package ([31485dc](https://miniapp-tool///commit/31485dc547c3e49d98ec9d87ecea811d9b1bd484))
+- **net:** set content-type header ([58a2b69](https://miniapp-tool///commit/58a2b69adbd7620ec747b01b73012118fb95abc9))
 
 ### Bug Fixes
 
-* **net:** fix headers ([0d57739](https://miniapp-tool///commit/0d577393ead042d45d0c2603f360d1fdfcceba54))
+- **net:** fix a bug on iOS ([01efae1](https://miniapp-tool///commit/01efae13d3dc865ddf4b50fa7d08d33bf91c02c7))
+
+## [0.6.0-beta.9](https://miniapp-tool///compare/v0.6.0-beta.8...v0.6.0-beta.9) (2023-12-26)
+
+### Bug Fixes
+
+- **net:** fix headers ([0d57739](https://miniapp-tool///commit/0d577393ead042d45d0c2603f360d1fdfcceba54))
 
 ## [0.6.0-beta.8](https://miniapp-tool///compare/v0.6.0-beta.7...v0.6.0-beta.8) (2023-12-26)
 
-
 ### Features
 
-* **net:** improve errorHandler ([0cc79ed](https://miniapp-tool///commit/0cc79eda83fabbdf6b1c7788853fcba31edfe27f))
+- **net:** improve errorHandler ([0cc79ed](https://miniapp-tool///commit/0cc79eda83fabbdf6b1c7788853fcba31edfe27f))
 
 ## [0.6.0-beta.7](https://miniapp-tool///compare/v0.6.0-beta.6...v0.6.0-beta.7) (2023-12-26)
 
-
 ### Features
 
-* **net:** add errorHandler ([70059e5](https://miniapp-tool///commit/70059e5bd2d7c157089de5e3fdc7ec4746580c59))
+- **net:** add errorHandler ([70059e5](https://miniapp-tool///commit/70059e5bd2d7c157089de5e3fdc7ec4746580c59))
 
 ## [0.6.0-beta.6](https://miniapp-tool///compare/v0.6.0-beta.5...v0.6.0-beta.6) (2023-12-26)
 
