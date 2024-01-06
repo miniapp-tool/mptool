@@ -268,7 +268,7 @@ export class CookieStore {
   ): void {
     if (isMp)
       return this.applyHeader(
-        <WechatMiniprogram.RequestSuccessCallbackResult>response.header,
+        (<WechatMiniprogram.RequestSuccessCallbackResult>response).header,
         domainOrURL,
       );
 
