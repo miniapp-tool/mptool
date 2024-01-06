@@ -1,4 +1,4 @@
-import { isMp } from "@mptool/shared";
+import { isMp, isQQ } from "@mptool/shared";
 import { Cookie } from "./cookie.js";
 import {
   type CookieOptions,
@@ -9,8 +9,6 @@ import {
   getDomain,
 } from "./utils.js";
 import { type CookieType } from "./typings.js";
-
-declare const qq: unknown;
 
 export type CookieMap = Map<string, Cookie>;
 export type CookieStoreType = Map<string, CookieMap>;
@@ -229,21 +227,33 @@ export class CookieStore {
    * @param header 小程序 response header
    * @param domainOrURL Url 或域名
    */
-  applyHeader(header: WechatMiniprogram.IAnyObject, domainOrURL: string): void {
-    const setCookieHeader =
-      <string | undefined>header["Set-Cookie"] ||
-      <string | undefined>header["set-cookie"] ||
-      "";
-    const realHeader = Array.isArray(setCookieHeader)
-      ? setCookieHeader.filter(Boolean).join(",")
-      : typeof qq === "object"
-        ? setCookieHeader.replace(
-            /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
-            ",$1=",
-          )
-        : setCookieHeader;
+  applyHeader(
+    header: WechatMiniprogram.IAnyObject | Headers,
+    domainOrURL: string,
+  ): void {
+    if (isMp) {
+      const setCookieHeader =
+        (<Record<string, string[] | string>>header)["Set-Cookie"] ||
+        (<Record<string, string[] | string>>header)["set-cookie"] ||
+        "";
+      const realHeader = Array.isArray(setCookieHeader)
+        ? setCookieHeader.filter(Boolean).join(",")
+        : isQQ
+          ? setCookieHeader.replace(
+              /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
+              ",$1=",
+            )
+          : setCookieHeader;
 
-    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+      return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    }
+
+    return this.apply(
+      parseCookieHeader(
+        (<Headers>header).getSetCookie().join(","),
+        domainOrURL,
+      ),
+    );
   }
 
   /**
@@ -253,10 +263,16 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(
-    response: WechatMiniprogram.RequestSuccessCallbackResult,
+    response: WechatMiniprogram.RequestSuccessCallbackResult | Response,
     domainOrURL: string,
   ): void {
-    return this.applyHeader(response.header, domainOrURL);
+    if (isMp)
+      return this.applyHeader(
+        <WechatMiniprogram.RequestSuccessCallbackResult>response.header,
+        domainOrURL,
+      );
+
+    return this.applyHeader((<Response>response).headers, domainOrURL);
   }
 
   /**
