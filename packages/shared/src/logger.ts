@@ -2,17 +2,15 @@
 /** 实时日志管理器 */
 const log =
   typeof wx === "object"
-    ? wx.getRealtimeLogManager
-      ? wx.getRealtimeLogManager()
-      : wx.getLogManager({ level: 1 })
+    ? wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 })
     : console;
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const realtime = Boolean(wx.getRealtimeLogManager);
+const isRealtime =
+  typeof wx === "object" && typeof wx.getRealtimeLogManager === "function";
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
   if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
-    if (realtime) log.info("debug", ...args);
+    if (isRealtime) log.info("debug", ...args);
     else (log as WechatMiniprogram.LogManager).debug(...args);
   }
 };
@@ -31,7 +29,7 @@ export const warn = (...args: any[]): void => {
 
 /** 写入错误日志 */
 export const error = (...args: any[]): void => {
-  if (realtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
+  if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
   else log.warn("error", ...args);
   if (log !== console) console.error(...args);
 };
@@ -42,6 +40,6 @@ export const error = (...args: any[]): void => {
  * @param filterMsg 过滤信息
  */
 export const filter = (filterMsg: string): void => {
-  if (realtime)
+  if (isRealtime)
     (log as WechatMiniprogram.RealtimeLogManager).setFilterMsg(filterMsg);
 };
