@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.16](https://miniapp-tool///compare/v0.6.0-beta.15...v0.6.0-beta.16) (2024-01-06)
+
+### Bug Fixes
+
+- fix cookieStore ([a3dbbdc](https://miniapp-tool///commit/a3dbbdce7370266d78bd877f2818bc27a6edcafb))
+
 ## [0.6.0-beta.15](https://miniapp-tool///compare/v0.6.0-beta.14...v0.6.0-beta.15) (2024-01-06)
 
 ### Features
