@@ -6,5 +6,5 @@ export * from "./env.js";
 export * from "./emitter.js";
 export * as logger from "./logger.js";
 export * as query from "./query.js";
-export type * from "./type.js";
+export * from "./type.js";
 export * from "./utils.js";
