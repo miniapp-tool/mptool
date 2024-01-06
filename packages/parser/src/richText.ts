@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import type { AnyNode } from "cheerio/lib/slim";
 
-import { ALLOWED_TAGS } from "./allowedTags.js";
+import { ALLOWED_TAGS, AllowTag } from "./allowedTags.js";
 import { parseHTML } from "./parser.js";
-import { ElementNode, NodeHandler, RichTextNode } from "./typings.js";
+import type { ElementNode, RichTextNode } from "./typings.js";
+import { ParserOptions } from "./options.js";
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const result: RichTextNode[] = nodes.filter(
@@ -27,7 +28,7 @@ const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
 
 const handleNode = async (
   node: AnyNode,
-  handler?: NodeHandler,
+  { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
   if (node.type === "text")
@@ -48,7 +49,9 @@ const handleNode = async (
 
       const children = handleNodes(
         await Promise.all(
-          node.children.map((node) => handleNode(node, handler)),
+          node.children.map((node) =>
+            handleNode(node, { appendClass, transform }),
+          ),
         ),
       );
 
@@ -59,14 +62,14 @@ const handleNode = async (
         ...(children.length ? { children } : {}),
       };
 
-      if (handler) return handler(convertedNode);
+      if (appendClass)
+        attrs["class"] = attrs["class"]
+          ? `${attrs["class"]} ${node.name}`
+          : node.name;
 
-      // Default behavior: add node name to class
-      attrs["class"] = attrs["class"]
-        ? `${attrs["class"]} ${node.name}`
-        : node.name;
-
-      return convertedNode;
+      return (
+        (await transform[<AllowTag>node.name]?.(convertedNode)) || convertedNode
+      );
     }
   }
 
@@ -75,12 +78,12 @@ const handleNode = async (
 
 export const getRichTextNodes = async (
   content: string | AnyNode[],
-  handler?: NodeHandler,
+  { appendClass = true, transform = {} }: ParserOptions = {},
 ): Promise<RichTextNode[]> =>
   handleNodes(
     await Promise.all(
       (Array.isArray(content) ? content : parseHTML(content)).map((node) =>
-        handleNode(node, handler),
+        handleNode(node, { appendClass, transform }),
       ),
     ),
   );

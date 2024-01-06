@@ -156,3 +156,46 @@ it("getRichTextNodes()", async () => {
     }),
   );
 });
+
+it("getRichTextNodes() with transform", async () => {
+  expect(
+    await getRichTextNodes('<p class="test">hello<img src="test.jpg"></p>', {
+      transform: {
+        img: (node) => {
+          if (node.attrs?.src && !node.attrs.src.startsWith("http"))
+            return {
+              ...node,
+              attrs: {
+                ...node.attrs,
+                src: `https://example.com/${node.attrs.src}`,
+              },
+            };
+
+          return node;
+        },
+      },
+    }),
+  ).toEqual([
+    {
+      attrs: {
+        class: "test p",
+      },
+      children: [
+        {
+          text: "hello",
+          type: "text",
+        },
+        {
+          attrs: {
+            class: "img",
+            src: "https://example.com/test.jpg",
+          },
+          name: "img",
+          type: "node",
+        },
+      ],
+      name: "p",
+      type: "node",
+    },
+  ]);
+});

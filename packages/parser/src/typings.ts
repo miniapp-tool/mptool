@@ -1,5 +1,3 @@
-export type NodeHandler = (node: ElementNode) => ElementNode | null;
-
 export interface ElementNode {
   type: "node";
   name: string;
