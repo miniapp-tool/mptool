@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.14](https://miniapp-tool///compare/v0.6.0-beta.13...v0.6.0-beta.14) (2024-01-06)
+
+### Bug Fixes
+
+- **net:** fix error when outside mp env ([5db86df](https://miniapp-tool///commit/5db86dff44eca6e0fb351c497dad46f0039cdb88))
+
 ## [0.6.0-beta.13](https://miniapp-tool///compare/v0.6.0-beta.12...v0.6.0-beta.13) (2024-01-06)
 
 ### Bug Fixes
