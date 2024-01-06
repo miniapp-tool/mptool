@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { URLSearchParams } from "../src/urlSearchParams.js";
 
-const getSimpleObj = () => new URLSearchParams("a=1&b=2&c=3");
+const getSimpleObj = (): URLSearchParams => new URLSearchParams("a=1&b=2&c=3");
 
-const getKeyRepeatObj = () =>
+const getKeyRepeatObj = (): URLSearchParams =>
   new URLSearchParams("id=xx&id=yy&id=zz&test=true");
 
 describe("Constructor", () => {
@@ -27,9 +27,7 @@ describe("Constructor", () => {
       f: "hello",
       g: ["a", "2", false],
       h: {
-        toString: () => {
-          return "h";
-        },
+        toString: (): string => "h",
       },
     });
 
@@ -66,7 +64,7 @@ describe("Constructor", () => {
   });
 
   it("Construct with an invalid sequence", () => {
-    const badFunc = () => {
+    const badFunc = (): void => {
       const a = new URLSearchParams([["foo", 1], ["bar", 2], ["baz"]]);
       a.get("foo");
     };

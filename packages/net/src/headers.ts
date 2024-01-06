@@ -4,7 +4,7 @@ const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
 const HEADER_VALUE_REMOVE_REGEXP = new RegExp(
   `(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`,
-  "g"
+  "g",
 );
 
 /**
@@ -175,9 +175,9 @@ export class Headers {
       this: ThisArg,
       value: string,
       name: string,
-      parent: this
+      parent: this,
     ) => void,
-    thisArg?: ThisArg
+    thisArg?: ThisArg,
   ): void {
     for (const [name, value] of this.entries()) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -197,7 +197,7 @@ export class Headers {
   *entries(): IterableIterator<[string, string]> {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
     const sortedKeys = Object.keys(this["headers"]).sort((a, b) =>
-      a.localeCompare(b)
+      a.localeCompare(b),
     );
 
     for (const name of sortedKeys) {

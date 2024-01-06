@@ -1,4 +1,4 @@
-import { $App, $Config, mpFetch } from "@mptool/all";
+import { $App, $Config, request } from "@mptool/all";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -17,7 +17,7 @@ $App({
     this.$on("message to app", (msg: string) => {
       console.log(`Receive message:${msg}`);
     });
-    void mpFetch("https://authserver.nenu.edu.cn/authserver/info", {
+    void request("https://authserver.nenu.edu.cn/authserver/info", {
       redirect: "manual",
     }).then((res) => console.log(res));
   },
