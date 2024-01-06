@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /** 实时日志管理器 */
-const log = wx.getRealtimeLogManager
-  ? wx.getRealtimeLogManager()
-  : wx.getLogManager({ level: 1 });
+const log =
+  typeof wx === "object"
+    ? wx.getRealtimeLogManager
+      ? wx.getRealtimeLogManager()
+      : wx.getLogManager({ level: 1 })
+    : console;
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const realtime = Boolean(wx.getRealtimeLogManager);
 
@@ -16,21 +19,21 @@ export const debug = (...args: any[]): void => {
 
 /** 写入信息日志 */
 export const info = (...args: any[]): void => {
-  console.info(...args);
   log.info(...args);
+  if (log !== console) console.info(...args);
 };
 
 /** 写入警告日志 */
 export const warn = (...args: any[]): void => {
-  console.warn(...args);
   log.warn(...args);
+  if (log !== console) console.warn(...args);
 };
 
 /** 写入错误日志 */
 export const error = (...args: any[]): void => {
-  console.error(...args);
   if (realtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
   else log.warn("error", ...args);
+  if (log !== console) console.error(...args);
 };
 
 /**
