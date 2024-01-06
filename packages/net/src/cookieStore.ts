@@ -227,10 +227,7 @@ export class CookieStore {
    * @param header 小程序 response header
    * @param domainOrURL Url 或域名
    */
-  applyHeader(
-    header: WechatMiniprogram.IAnyObject | Headers,
-    domainOrURL: string,
-  ): void {
+  applyHeader(header: unknown, domainOrURL: string): void {
     if (isMp) {
       const setCookieHeader =
         (<Record<string, string[] | string>>header)["Set-Cookie"] ||
@@ -262,10 +259,7 @@ export class CookieStore {
    * @param response 小程序 response
    * @param domainOrURL Url 或域名
    */
-  applyResponse(
-    response: WechatMiniprogram.RequestSuccessCallbackResult | Response,
-    domainOrURL: string,
-  ): void {
+  applyResponse(response: unknown, domainOrURL: string): void {
     return this.applyHeader(
       isMp
         ? (<WechatMiniprogram.RequestSuccessCallbackResult>response).header
