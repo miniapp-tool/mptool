@@ -96,9 +96,6 @@ export type RequestType = <
   options?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 
-// FIXME: This is a temp fix for https://developers.weixin.qq.com/community/develop/doc/0008aa3a38cc60571ee0a11a96b400
-const { platform } = wx.getSystemInfoSync();
-
 export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
@@ -154,7 +151,7 @@ Options:
       options,
     );
 
-    const task = wx.request<T>({
+    wx.request<T>({
       url,
       method: <
         | "OPTIONS"
@@ -175,7 +172,7 @@ Options:
       success: ({ data, statusCode, header }) => {
         logger.debug(`Request ends with ${statusCode}`, data);
 
-        if (platform === "ios") cookieStore.applyHeader(header, cookieScope);
+        cookieStore.applyHeader(header, cookieScope);
 
         return resolve({
           data,
@@ -193,10 +190,6 @@ Options:
         reject(requestError);
       },
       ...options,
-    });
-
-    task.onHeadersReceived(({ header }) => {
-      if (platform !== "ios") cookieStore.applyHeader(header, cookieScope);
     });
   });
 
