@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.11](https://miniapp-tool///compare/v0.6.0-beta.10...v0.6.0-beta.11) (2024-01-06)
+
+### Features
+
+- **parser:** update options ([f5661fe](https://miniapp-tool///commit/f5661fe552ddee0f4c9315fc5b74e8080bd49dfe))
+
 ## [0.6.0-beta.10](https://miniapp-tool///compare/v0.6.0-beta.9...v0.6.0-beta.10) (2024-01-04)
 
 ### Features
