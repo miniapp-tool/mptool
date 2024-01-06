@@ -1,6 +1,6 @@
 {
   "name": "@mptool/encoder",
-  "version": "0.6.0-beta.16",
+  "version": "0.6.0",
   "description": "encoder handler for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
