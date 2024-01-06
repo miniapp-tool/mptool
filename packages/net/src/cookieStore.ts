@@ -1,3 +1,4 @@
+import { isMp } from "@mptool/shared";
 import { Cookie } from "./cookie.js";
 import {
   type CookieOptions,
@@ -277,7 +278,9 @@ export class CookieStore {
   private init(): void {
     try {
       // 从本地存储读取 cookie 数据数组
-      const cookiesData = wx.getStorageSync<CookieType[]>(this.key) || [];
+      const cookiesData = isMp
+        ? wx.getStorageSync<CookieType[]>(this.key) || []
+        : [];
 
       // 转化为 cookie map 对象
       this.apply(cookiesData.map((item) => new Cookie(item)));
@@ -305,7 +308,7 @@ export class CookieStore {
         }
 
       // 保存到本地存储
-      wx.setStorageSync(this.key, saveCookies);
+      if (isMp) wx.setStorageSync(this.key, saveCookies);
     } catch (err) {
       console.warn("Error setting cookies", err);
     }
