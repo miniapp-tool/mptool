@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0-beta.15](https://miniapp-tool///compare/v0.6.0-beta.14...v0.6.0-beta.15) (2024-01-06)
+
+### Features
+
+- **net:** compact with Node env ([05fbc9d](https://miniapp-tool///commit/05fbc9dfb8cdf3b28b7772121334814027fa0379))
+
+### Bug Fixes
+
+- **shared:** fix exports ([297d727](https://miniapp-tool///commit/297d727eaf6b0c7c688e47473f81ef26c15bf506))
+
 ## [0.6.0-beta.14](https://miniapp-tool///compare/v0.6.0-beta.13...v0.6.0-beta.14) (2024-01-06)
 
 ### Bug Fixes
