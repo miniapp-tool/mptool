@@ -1,5 +1,5 @@
 ---
-title: "@mptool/enhance"
+title: API of @mptool/enhance
 icon: toolbox
 index: false
 ---
