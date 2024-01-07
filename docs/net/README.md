@@ -3,11 +3,9 @@ title: "@mptool/net"
 icon: network-wired
 ---
 
-::: tip
-
 小程序网络框架，大小仅 12.02kb。
 
-:::
+<!-- more -->
 
 ## request 与 createRequest
 
