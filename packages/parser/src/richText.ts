@@ -67,9 +67,9 @@ const handleNode = async (
           ? `${attrs["class"]} ${node.name}`
           : node.name;
 
-      return (
-        (await transform[<AllowTag>node.name]?.(convertedNode)) || convertedNode
-      );
+      const converter = transform[<AllowTag>node.name];
+
+      return await (converter ? converter(convertedNode) : convertedNode);
     }
   }
 
