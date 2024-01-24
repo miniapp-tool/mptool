@@ -108,8 +108,8 @@ importers:
         specifier: 2.6.0
         version: 2.6.0
       tsd:
-        specifier: 0.30.3
-        version: 0.30.3
+        specifier: 0.30.4
+        version: 0.30.4
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -7176,8 +7176,8 @@ packages:
     resolution: {integrity: sha512-+1iDGY6NmOGidq7i7xZGA4cm8DAa6fqdYcvO5Z6yBevH++Bdo9Qt/mN0TzHUgcCcKv1gmh9+W5dHqz8pMWbCbg==}
     dev: true
 
-  /tsd@0.30.3:
-    resolution: {integrity: sha512-xoEp6JPqpT9Ti9wGX5qgy7URp0lrmxN7YkbsyphBzdc1SYiXvJYgRXSIVvSZz42+/Wd/R1kBOMbgGC6rtiKxqQ==}
+  /tsd@0.30.4:
+    resolution: {integrity: sha512-ncC4SwAeUk0OTcXt5h8l0/gOLHJSp9ogosvOADT6QYzrl0ITm398B3wkz8YESqefIsEEwvYAU8bvo7/rcN/M0Q==}
     engines: {node: '>=14.16'}
     hasBin: true
     dependencies:
