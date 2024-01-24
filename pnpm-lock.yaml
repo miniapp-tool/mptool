@@ -102,8 +102,8 @@ importers:
         specifier: 6.1.0
         version: 6.1.0(rollup@4.9.6)(typescript@5.3.3)
       rollup-plugin-esbuild:
-        specifier: 6.1.0
-        version: 6.1.0(esbuild@0.19.12)(rollup@4.9.6)
+        specifier: 6.1.1
+        version: 6.1.1(esbuild@0.19.12)(rollup@4.9.6)
       sort-package-json:
         specifier: 2.6.0
         version: 2.6.0
@@ -386,6 +386,7 @@ packages:
   /@commitlint/config-validator@18.5.0:
     resolution: {integrity: sha512-mDAA6WQPjh9Ida8ACdInDylBQcqeUD2gBHE+dQu+B3OIHiWiSSrq4F2+wg3nDU9EzfcQSwPwYL+QbMmiW5SmLA==}
     engines: {node: '>=v18'}
+    requiresBuild: true
     dependencies:
       '@commitlint/types': 18.4.4
       ajv: 8.12.0
@@ -482,6 +483,7 @@ packages:
   /@commitlint/resolve-extends@18.5.0:
     resolution: {integrity: sha512-OxCYOMnlkOEEIkwTaRiFjHyuWBq962WBZQVHfMHej8tr3d+SfjznvqZhPmW8/SuqtfmGEiJPGWUNOxgwH+O0MA==}
     engines: {node: '>=v18'}
+    requiresBuild: true
     dependencies:
       '@commitlint/config-validator': 18.5.0
       '@commitlint/types': 18.4.4
@@ -6551,8 +6553,8 @@ packages:
       '@babel/code-frame': 7.23.5
     dev: true
 
-  /rollup-plugin-esbuild@6.1.0(esbuild@0.19.12)(rollup@4.9.6):
-    resolution: {integrity: sha512-HPpXU65V8bSpW8eSYPahtUJaJHmbxJGybuf/M8B3bz/6i11YaYHlNNJIQ38gSEV0FyohQOgVxJ2YMEEZtEmwvA==}
+  /rollup-plugin-esbuild@6.1.1(esbuild@0.19.12)(rollup@4.9.6):
+    resolution: {integrity: sha512-CehMY9FAqJD5OUaE/Mi1r5z0kNeYxItmRO2zG4Qnv2qWKF09J2lTy5GUzjJR354ZPrLkCj4fiBN41lo8PzBUhw==}
     engines: {node: '>=14.18.0'}
     peerDependencies:
       esbuild: '>=0.18.0'
