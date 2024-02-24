@@ -105,8 +105,8 @@ importers:
         specifier: 2.7.0
         version: 2.7.0
       tsd:
-        specifier: 0.30.6
-        version: 0.30.6
+        specifier: 0.30.7
+        version: 0.30.7
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -7261,8 +7261,8 @@ packages:
       typescript: 5.3.3
     dev: true
 
-  /tsd@0.30.6:
-    resolution: {integrity: sha512-GfzYfAJwbHTUY0FHC84fgJAX6w2FB6JXM4uvVc2jYyY16bHXVzen5PEXGOjISluMfG7z82otu57n2OzQhnRzwQ==}
+  /tsd@0.30.7:
+    resolution: {integrity: sha512-oTiJ28D6B/KXoU3ww/Eji+xqHJojiuPVMwA12g4KYX1O72N93Nb6P3P3h2OAhhf92Xl8NIhb/xFmBZd5zw/xUw==}
     engines: {node: '>=14.16'}
     hasBin: true
     dependencies:
