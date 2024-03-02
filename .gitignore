@@ -16,3 +16,5 @@ demo/project.private.config.json
 
 # coverage
 coverage/
+
+.npmrc

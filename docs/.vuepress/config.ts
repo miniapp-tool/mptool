@@ -1,3 +1,4 @@
+import { viteBundler } from "@vuepress/bundler-vite";
 import { defineUserConfig } from "vuepress";
 import { hopeTheme } from "vuepress-theme-hope";
 
@@ -5,6 +6,8 @@ export default defineUserConfig({
   lang: "zh-CN",
   title: "MP Tool",
   description: "极其轻量的小程序框架",
+
+  bundler: viteBundler(),
 
   theme: hopeTheme({
     hostname: "https://miniapp-tool.github.io",
