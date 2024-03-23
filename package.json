@@ -45,7 +45,7 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@types/inquirer": "9.0.7",
-    "@types/node": "20.11.28",
+    "@types/node": "20.11.30",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "@vitest/coverage-v8": "1.4.0",
