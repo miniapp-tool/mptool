@@ -75,7 +75,7 @@
     "tslib": "2.6.2",
     "tsx": "4.7.2",
     "typescript": "5.4.4",
-    "vite": "5.2.7",
+    "vite": "5.2.8",
     "vitest": "1.4.0"
   },
   "packageManager": "pnpm@8.15.5",
