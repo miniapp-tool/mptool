@@ -1,11 +1,10 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import { mount } from "../bridge.js";
-import { ON_APP_AWAKE } from "../constant.js";
-import { getConfig } from "../config/index.js";
-import { appEmitter } from "../emitter/index.js";
-
 import type { PageConstructor, PageOptions } from "./typings.js";
+import { mount } from "../bridge.js";
+import { getConfig } from "../config/index.js";
+import { ON_APP_AWAKE } from "../constant.js";
+import { appEmitter } from "../emitter/index.js";
 
 let hasPageLoaded = false;
 
@@ -38,7 +37,7 @@ export const $Page: PageConstructor = <
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -46,7 +45,7 @@ export const $Page: PageConstructor = <
 
     if (!hasPageLoaded) {
       hasPageLoaded = true;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       options.$state!.firstOpen = true;
     }
   });

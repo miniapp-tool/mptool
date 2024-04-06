@@ -1,12 +1,11 @@
 import "@mptool/mock";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { CookieStore } from "../src/index.js";
 import { Cookie } from "../src/cookie.js";
+import { CookieStore } from "../src/index.js";
 
 const cookieStore = new CookieStore();
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const response: WechatMiniprogram.RequestSuccessCallbackResult = {
   header: {

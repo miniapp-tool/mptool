@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Emitter, EmitterInstance, EventHandlerMap } from "../src/emitter";
+
+import type { EmitterInstance, EventHandlerMap } from "../src/emitter";
+import { Emitter } from "../src/emitter";
 
 describe("mitt", () => {
   it("should default export be a function", () => {
@@ -11,8 +13,10 @@ describe("mitt", () => {
     const map = new Map();
     const a = vi.fn();
     const b = vi.fn();
+
     map.set("foo", [a, b]);
     const events = Emitter<{ foo: undefined }>(map);
+
     events.emit("foo");
     expect(a).toBeCalledTimes(1);
     expect(b).toBeCalledTimes(1);
@@ -21,6 +25,7 @@ describe("mitt", () => {
 
 describe("mitt#", () => {
   const eventType = Symbol("eventType");
+
   type Events = {
     foo: unknown;
     constructor: unknown;
@@ -56,6 +61,7 @@ describe("mitt#", () => {
 
     it("should register handler for new type", () => {
       const foo = vi.fn();
+
       inst.on("foo", foo);
 
       expect(events.get("foo")).toEqual([foo]);
@@ -63,6 +69,7 @@ describe("mitt#", () => {
 
     it("should register handlers for any type strings", () => {
       const foo = vi.fn();
+
       inst.on("constructor", foo);
 
       expect(events.get("constructor")).toEqual([foo]);
@@ -71,6 +78,7 @@ describe("mitt#", () => {
     it("should append handler for existing type", () => {
       const foo = vi.fn();
       const bar = vi.fn();
+
       inst.on("foo", foo);
       inst.on("foo", bar);
 
@@ -79,6 +87,7 @@ describe("mitt#", () => {
 
     it("should NOT normalize case", () => {
       const foo = vi.fn();
+
       inst.on("FOO", foo);
       inst.on("Bar", foo);
       inst.on("baz:baT!", foo);
@@ -92,6 +101,7 @@ describe("mitt#", () => {
 
     it("can take symbols for event types", () => {
       const foo = vi.fn();
+
       inst.on(eventType, foo);
       expect(events.get(eventType)).toEqual([foo]);
     });
@@ -100,6 +110,7 @@ describe("mitt#", () => {
     // See https://nodejs.org/api/events.html#events_emitter_on_eventname_listener
     it("should add duplicate listeners", () => {
       const foo = vi.fn();
+
       inst.on("foo", foo);
       inst.on("foo", foo);
       expect(events.get("foo")).toEqual([foo, foo]);
@@ -114,6 +125,7 @@ describe("mitt#", () => {
 
     it("should remove handler for type", () => {
       const foo = vi.fn();
+
       inst.on("foo", foo);
       inst.off("foo", foo);
 
@@ -122,6 +134,7 @@ describe("mitt#", () => {
 
     it("should NOT normalize case", () => {
       const foo = vi.fn();
+
       inst.on("FOO", foo);
       inst.on("Bar", foo);
       inst.on("baz:bat!", foo);
@@ -139,6 +152,7 @@ describe("mitt#", () => {
 
     it("should remove only the first matching listener", () => {
       const foo = vi.fn();
+
       inst.on("foo", foo);
       inst.on("foo", foo);
       inst.off("foo", foo);
@@ -179,6 +193,7 @@ describe("mitt#", () => {
     it("should NOT ignore case", () => {
       const onFoo = vi.fn(),
         onFOO = vi.fn();
+
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
 

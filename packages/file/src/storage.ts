@@ -85,13 +85,14 @@ const prepareData = <T = unknown>(
 
     // 使用上次过期时间
     data.expired = oldData.expired || 0;
-  } else if (expire)
+  } else if (expire) {
     data.expired =
       expire === "once"
         ? // 仅本次会话有效
           sessionId
         : // 计算过期时间
           expire + new Date().getTime();
+  }
 
   return data;
 };
@@ -166,6 +167,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
     .then(({ data }) => getData(key, data))
     .catch(() => {
       logger.error(`set "${key}" fail`);
+
       return undefined;
     });
 

@@ -2,8 +2,9 @@ import { execaCommand } from "execa";
 import inquirer from "inquirer";
 import ora from "ora";
 import picocolors from "picocolors";
-import pkg from "../../package.json" assert { type: "json" };
+
 import { sync } from "./sync.js";
+import pkg from "../../package.json" assert { type: "json" };
 
 const { version: currentVersion } = pkg;
 const { prompt } = inquirer;

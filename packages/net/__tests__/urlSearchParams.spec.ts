@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { URLSearchParams } from "../src/urlSearchParams.js";
 
 const getSimpleObj = (): URLSearchParams => new URLSearchParams("a=1&b=2&c=3");
@@ -9,6 +10,7 @@ const getKeyRepeatObj = (): URLSearchParams =>
 describe("Constructor", () => {
   it("Construct with a search string", () => {
     const a = new URLSearchParams("?a=1&b=2");
+
     expect(a.toString()).toEqual("a=1&b=2");
   });
 
@@ -45,6 +47,7 @@ describe("Constructor", () => {
 
   it("Construct an empty object", () => {
     const a = new URLSearchParams();
+
     expect(a.toString()).toEqual("");
     // @ts-expect-error: non-standard value
     a.append("a", 1);
@@ -54,11 +57,13 @@ describe("Constructor", () => {
   it("Construct with another URLSearchParams object", () => {
     const obj = getSimpleObj();
     const b = new URLSearchParams(obj);
+
     expect(b.toString()).toEqual(obj.toString());
   });
 
   it("Construct with a key without value", () => {
     const a = new URLSearchParams("a&b&c");
+
     expect(a.get("a")).toEqual("");
     expect(a.toString()).toEqual("a=&b=&c=");
   });
@@ -70,6 +75,7 @@ describe("Constructor", () => {
       // @ts-expect-error: non-standard value
       ["bar", 2],
     ]);
+
     expect(a.get("foo")).toEqual("1");
   });
 
@@ -77,6 +83,7 @@ describe("Constructor", () => {
     const badFunc = (): void => {
       // @ts-expect-error: non-standard value
       const a = new URLSearchParams([["foo", 1], ["bar", 2], ["baz"]]);
+
       a.get("foo");
     };
 
@@ -95,6 +102,7 @@ describe("Constructor", () => {
 describe("Append data", () => {
   it("Append data", () => {
     const a = getSimpleObj();
+
     // @ts-expect-error: non-standard value
     a.append("id", 1);
     expect(a.toString()).toEqual("a=1&b=2&c=3&id=1");
@@ -102,6 +110,7 @@ describe("Append data", () => {
 
   it("Append data with repetitive key", () => {
     const a = getSimpleObj();
+
     // @ts-expect-error: non-standard value
     a.append("id", 1);
     // @ts-expect-error: non-standard value
@@ -113,22 +122,26 @@ describe("Append data", () => {
 describe("Get data", () => {
   it("Get simple data", () => {
     const a = getSimpleObj();
+
     expect(a.get("a")).toEqual("1");
   });
 
   it("Get a boolean data, should return string", () => {
     const a = new URLSearchParams("a=true");
+
     expect(a.get("a")).toEqual("true");
   });
 
   it("Get data which from append", () => {
     const a = getSimpleObj();
+
     a.append("id", "xx");
     expect(a.get("id")).toEqual("xx");
   });
 
   it("Get data with repetitive key, should return the first one", () => {
     const a = getSimpleObj();
+
     a.append("id", "xx");
     a.append("id", "yy");
     expect(a.get("id")).toEqual("xx");
@@ -154,6 +167,7 @@ describe("Get data", () => {
 
   it("Get data with special keys", () => {
     const a = getSimpleObj();
+
     expect(a.get("hasOwnProperty")).toEqual(null);
     expect(a.getAll("hasOwnProperty").length).toEqual(0);
   });
@@ -162,18 +176,21 @@ describe("Get data", () => {
 describe("Delete data", () => {
   it("Remove simple data", () => {
     const a = getSimpleObj();
+
     a.delete("a");
     expect(a.toString()).toEqual("b=2&c=3");
   });
 
   it("Remove data with repetitive key", () => {
     const a = getKeyRepeatObj();
+
     a.delete("id");
     expect(a.toString()).toEqual("test=true");
   });
 
   it("Remove data which doesn't exists", () => {
     const a = getSimpleObj();
+
     a.delete("notExists");
     expect(a.toString()).toEqual("a=1&b=2&c=3");
   });
@@ -182,6 +199,7 @@ describe("Delete data", () => {
 describe("Has check key exists", () => {
   it("Check the key exists", () => {
     const a = getSimpleObj();
+
     expect(a.has("a")).toEqual(true);
     expect(a.has("notExists")).toEqual(false);
     expect(a.has("hasOwnProperty")).toEqual(false);
@@ -191,12 +209,14 @@ describe("Has check key exists", () => {
 describe("Set data", () => {
   it("Set a new data", () => {
     const a = getSimpleObj();
+
     a.set("a", "xx");
     expect(a.toString()).toEqual("a=xx&b=2&c=3");
   });
 
   it("Set a nonexistent key", () => {
     const a = getSimpleObj();
+
     a.set("id", "xx");
     expect(a.toString()).toEqual("a=1&b=2&c=3&id=xx");
   });
@@ -232,6 +252,7 @@ describe("Iterator", () => {
   it("for...of", () => {
     const obj = getSimpleObj(),
       ret: string[] = [];
+
     for (const p of obj) ret.push(`${p[0]},${p[1]}`);
 
     expect(ret.join(";")).toEqual("a,1;b,2;c,3");
@@ -251,9 +272,9 @@ describe("Iterator", () => {
   it("values", () => {
     const obj = getSimpleObj(),
       ret: string[] = [];
-    for (const value of obj.values()) {
-      ret.push(value);
-    }
+
+    for (const value of obj.values()) ret.push(value);
+
     expect(ret.join(";")).toEqual("1;2;3");
 
     expect(Array.from(obj.values())).toEqual(["1", "2", "3"]);
@@ -263,6 +284,7 @@ describe("Iterator", () => {
 describe("Sort", () => {
   it("Sort keys", () => {
     const obj = new URLSearchParams("q=flag&key=hello&s=world");
+
     obj.sort();
     expect(obj.toString()).toEqual("key=hello&q=flag&s=world");
   });
@@ -271,8 +293,10 @@ describe("Sort", () => {
 describe("Size", () => {
   it("Get size", () => {
     const a = new URLSearchParams("c=4&a=2&b=3&a=1");
+
     expect(a.size).toEqual(4);
     const b = new URLSearchParams("c=4&a=2&b=3");
+
     expect(b.size).toEqual(3);
   });
 });
@@ -292,6 +316,7 @@ describe("Others", () => {
 
   it("URL encode", () => {
     const a = new URLSearchParams(testObj);
+
     expect(a.toString()).toEqual(testStr);
   });
 

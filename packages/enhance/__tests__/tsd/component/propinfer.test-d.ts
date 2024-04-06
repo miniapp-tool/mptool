@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { expectType } from "vitest";
-import {
+
+import type {
   InferFromType,
-  InferPropTypes,
   InferPropType,
-  PropsOptions,
+  InferPropTypes,
   PropType,
+  PropsOptions,
 } from "../../../src/component";
 
 const numberConstructor = Number;

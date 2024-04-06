@@ -10,10 +10,9 @@ const isRealtime = isMp && typeof wx.getRealtimeLogManager === "function";
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
-  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
+  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined)
     if (isRealtime) log.info("debug", ...args);
     else (log as WechatMiniprogram.LogManager).debug(...args);
-  }
 };
 
 /** 写入信息日志 */

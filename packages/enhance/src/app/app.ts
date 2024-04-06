@@ -1,8 +1,8 @@
 import { logger, wrapFunction } from "@mptool/shared";
-import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
-import { appEmitter, userEmitter } from "../emitter/index.js";
 
 import type { AppConstructor, AppOptions } from "./typings.js";
+import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
+import { appEmitter, userEmitter } from "../emitter/index.js";
 
 export const appState = {
   /** 是否已启动 */
@@ -54,7 +54,6 @@ export const $App: AppConstructor = <
   if (appOptions.onAwake) {
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       appOptions.onAwake!(time);
     });
     logger.debug("App: registered onAwake");

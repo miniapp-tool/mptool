@@ -119,7 +119,7 @@ try {
 ``` */
   getStorage<T = any, U extends GetStorageOption<T> = GetStorageOption<T>>(
     option: U,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
     const value: T = Object.prototype.hasOwnProperty.call(storage, option.key)
@@ -127,7 +127,6 @@ try {
       : (undefined as unknown as T);
 
     if (!option.success && !option.fail && !option.complete)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -194,11 +193,10 @@ try {
 ``` */
   setStorage<T = any, U extends SetStorageOption<T> = SetStorageOption<T>>(
     option: U,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
   ): PromisifySuccessResult<U, SetStorageOption<T>> {
     if (!option.success && !option.fail && !option.complete)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -242,11 +240,10 @@ try {
 
   removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
     option: T,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
   ): PromisifySuccessResult<T, RemoveStorageOption> {
     if (!option.success && !option.fail && !option.complete)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       return new Promise((resolve) => {
         setTimeout(() => {

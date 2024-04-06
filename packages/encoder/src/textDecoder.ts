@@ -1,6 +1,7 @@
 import { DEFAULT_ENCODING, END_OF_STREAM, FINISHED } from "./constant.js";
 import { Stream } from "./stream.js";
-import { Encoding, getEncoding } from "./table.js";
+import type { Encoding } from "./table.js";
+import { getEncoding } from "./table.js";
 import { codePointsToString } from "./utils.js";
 
 export interface Decoder {
@@ -48,9 +49,7 @@ export class TextDecoder {
     // 2. If encoding is failure or replacement, throw a RangeError.
     if (encoding === null || encoding.name === "replacement")
       throw RangeError("Unknown encoding: " + label);
-    if (!decoders[encoding.name]) {
-      throw Error("Decoder not present.");
-    }
+    if (!decoders[encoding.name]) throw Error("Decoder not present.");
 
     // 4. Set encoding.
     this._encoding = encoding;
@@ -145,10 +144,9 @@ export class TextDecoder {
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
 
-      if (result !== null) {
+      if (result !== null)
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
-      }
 
       // 3. Otherwise, if result is error, throw a TypeError.
       // (Thrown in handler)
@@ -186,7 +184,7 @@ export class TextDecoder {
       ["UTF-8", "UTF-16LE", "UTF-16BE"].includes(this._encoding.name) &&
       !this._ignoreBOM &&
       !this._BOMseen
-    ) {
+    )
       if (stream.length > 0 && stream[0] === 0xfeff) {
         // 1. If token is U+FEFF, set BOM seen flag.
         this._BOMseen = true;
@@ -200,7 +198,7 @@ export class TextDecoder {
         // to output.
         // (no-op)
       }
-    }
+
     // 4. Otherwise, return output.
     return codePointsToString(stream);
   }

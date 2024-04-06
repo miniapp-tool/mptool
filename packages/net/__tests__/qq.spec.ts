@@ -1,5 +1,5 @@
-import { expect, it } from "vitest";
 import { splitCookiesString } from "set-cookie-parser";
+import { expect, it } from "vitest";
 
 it("Should fix qq wrong header", () => {
   const header =

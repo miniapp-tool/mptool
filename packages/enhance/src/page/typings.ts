@@ -1,5 +1,4 @@
-import { bind } from "../bridge.js";
-
+import type { bind } from "../bridge.js";
 import type { RefMap } from "../component/index.js";
 import type { InstanceEmitterMethods } from "../emitter/index.js";
 import type { NavigatorMethods } from "../navigator/index.js";

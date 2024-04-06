@@ -1,18 +1,17 @@
-import { getRef } from "./component/store";
-import { getConfig } from "./config/index.js";
-import { userEmitter } from "./emitter/index.js";
-import { getTrigger } from "./navigator/index.js";
-
 import type {
   ComponentOptions,
   InferPropTypes,
   PropsOptions,
   TrivialComponentInstance,
 } from "./component/index.js";
+import { getRef } from "./component/store";
+import { getConfig } from "./config/index.js";
+import { userEmitter } from "./emitter/index.js";
+import { getTrigger } from "./navigator/index.js";
 import type {
   ExtendedPageMethods,
-  PageOptions,
   PageInstance,
+  PageOptions,
   TrivialPageInstance,
 } from "./page/index.js";
 

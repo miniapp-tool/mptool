@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+
 import { TextDecoder } from "../src/index.js";
 
 it("gb18030", () => {

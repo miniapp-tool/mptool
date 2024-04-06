@@ -1,7 +1,9 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
+import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
 import { appState } from "../app/index.js";
 import { mount } from "../bridge.js";
+import { getConfig } from "../config/index.js";
 import {
   ON_APP_AWAKE,
   ON_APP_LAUNCH,
@@ -10,10 +12,7 @@ import {
   ON_PAGE_READY,
   ON_PAGE_UNLOAD,
 } from "../constant.js";
-import { getConfig } from "../config/index.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
-
-import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
 
 let hasPageLoaded = false;
 
@@ -50,12 +49,13 @@ export const $Page: PageConstructor = <
       void options.onAppLaunch(
         onLaunchOptions as WechatMiniprogram.App.LaunchShowOption,
       );
-    } else
+    } else {
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
         callLog("onAppLaunch");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         void options.onAppLaunch!(onLaunchOptions);
       });
+    }
 
     registerLog("onAppLaunch");
   }
@@ -66,7 +66,6 @@ export const $Page: PageConstructor = <
       (query: PageQuery): Promise<void> | void => {
         callLog("onNavigate", query);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onNavigate!(query);
       },
     );
@@ -79,7 +78,7 @@ export const $Page: PageConstructor = <
       `${ON_PAGE_PRELOAD}:${name}`,
       (query: PageQuery): void | Promise<void> => {
         callLog("onPreload", query);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         return options.onPreload!(query);
       },
     );
@@ -92,7 +91,7 @@ export const $Page: PageConstructor = <
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -100,7 +99,7 @@ export const $Page: PageConstructor = <
 
     if (!hasPageLoaded) {
       hasPageLoaded = true;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       options.$state!.firstOpen = true;
     }
   });

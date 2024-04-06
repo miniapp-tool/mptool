@@ -1,4 +1,5 @@
-import { expectType, expectError } from "vitest";
+import { expectError, expectType } from "vitest";
+
 import { $Page } from "../../src";
 
 expectType<void>($Page("example", {}));
@@ -25,19 +26,19 @@ $Page("example", {
     });
   },
   onLoad() {
-    if (app.globalData.userInfo) {
+    if (app.globalData.userInfo)
       this.setData({
         userInfo: app.globalData.userInfo,
         hasUserInfo: true,
       });
-    } else if (this.data.canIUse) {
+    else if (this.data.canIUse)
       app.userInfoReadyCallback = (res): void => {
         this.setData({
           userInfo: res,
           hasUserInfo: true,
         });
       };
-    } else {
+    else
       wx.getUserInfo({
         success: (res) => {
           app.globalData.userInfo = res.userInfo;
@@ -47,7 +48,6 @@ $Page("example", {
           });
         },
       });
-    }
   },
 
   getUserInfo(e: any) {
@@ -71,6 +71,7 @@ $Page("example", {
     const app = getApp<{
       globalData: { userInfo: WechatMiniprogram.UserInfo };
     }>();
+
     expectType<string>(app.globalData.userInfo.nickName);
   },
   onReady() {
@@ -85,9 +86,8 @@ $Page("example", {
   onPullDownRefresh() {},
   onShareAppMessage(res) {
     expectType<"button" | "menu">(res.from);
-    if (res.from === "button") {
-      expectType<string | undefined>(res.webViewUrl);
-    }
+    if (res.from === "button") expectType<string | undefined>(res.webViewUrl);
+
     return {
       title: "自定义转发标题",
       path: "/page/user?id=123",
@@ -121,6 +121,7 @@ $Page("example", {
       { a: number },
       { customData: { b: number } }
     >;
+
     p.customData.b = p.data.a;
   },
   customData: {
@@ -139,6 +140,7 @@ $Page("example", {
   },
   jump() {
     const query = wx.createSelectorQuery();
+
     query.select("#a").boundingClientRect((res) => {
       expectType<WechatMiniprogram.BoundingClientRectCallbackResult>(res);
     });
@@ -197,6 +199,7 @@ $Page<DataType, CustomOption>("example", {
   },
   onLoad() {
     const logs = this.getLogs();
+
     expectType<string[]>(logs);
     this.setData({ logs });
     expectError(this.logs);
@@ -207,6 +210,7 @@ $Page<DataType, CustomOption>("example", {
 $Page("example", {
   test() {
     const channel = this.getOpenerEventChannel();
+
     expectType<WechatMiniprogram.EventChannel>(channel);
     channel.emit("test", {});
     channel.on("xxx", () => {});
@@ -217,9 +221,8 @@ $Page("example", {
 $Page("example", {
   onAddToFavorites(res) {
     // webview 页面返回 webviewUrl
-    if (res.webviewUrl) {
-      console.log("WebviewUrl: ", res.webviewUrl);
-    }
+    if (res.webviewUrl) console.log("WebviewUrl: ", res.webviewUrl);
+
     return {
       title: "自定义标题",
       imageUrl: "http://demo.png",

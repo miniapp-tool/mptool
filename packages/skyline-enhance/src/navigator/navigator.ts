@@ -36,7 +36,6 @@ export function getTrigger(
 export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
   return (pageNameWithArg: string): any => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return wx[type]({ url: getFullPath(pageNameWithArg) });

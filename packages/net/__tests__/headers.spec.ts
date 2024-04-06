@@ -1,27 +1,32 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { describe, expect, it } from "vitest";
+
 import { Headers } from "../src/headers.js";
 
 describe("constructor()", () => {
   it("can be created without any arguments", () => {
     const headers = new Headers();
+
     expect(Object.fromEntries(headers.entries())).toEqual({});
   });
 
   it("can be created given a Headers instance", () => {
     const headers = new Headers(new Headers({ Accept: "*/*" }));
+
     expect(Object.fromEntries(headers.entries())).toEqual({ accept: "*/*" });
   });
 
   it("can be created given a polyfilled Headers instance", () => {
     const firstHeaders = new Headers({ Accept: "*/*" });
     const headers = new Headers(firstHeaders);
+
     expect(Object.fromEntries(headers.entries())).toEqual({ accept: "*/*" });
   });
 
   it('can be created given a ["name", "a"] list', () => {
     const headers = new Headers([["accept", "*/*"]]);
+
     expect(headers.get("accept")).toEqual("*/*");
   });
 
@@ -30,16 +35,19 @@ describe("constructor()", () => {
       // @ts-expect-error
       ["accept", ["application/json", "image/png"]],
     ]);
+
     expect(headers.get("accept")).toEqual("application/json, image/png");
   });
 
   it('can be created given a ["name", "a, b"] list', () => {
     const headers = new Headers([["accept", "application/json, image/png"]]);
+
     expect(headers.get("accept")).toEqual("application/json, image/png");
   });
 
   it("can be created given an headers object", () => {
     const headers = new Headers({ accept: "*/*" });
+
     expect(headers.get("accept")).toEqual("*/*");
   });
 
@@ -48,6 +56,7 @@ describe("constructor()", () => {
       "accept-encoding": "gzip, deflate, br",
       "Accept-Encoding": "gzip, deflate, br",
     });
+
     expect(headers.get("accept-encoding")).toEqual(
       "gzip, deflate, br, gzip, deflate, br",
     );
@@ -64,9 +73,7 @@ describe("[Symbol.iterator]", () => {
 
     const entries: Array<[string, string]> = [];
 
-    for (const entry of headers) {
-      entries.push(entry);
-    }
+    for (const entry of headers) entries.push(entry);
 
     expect(entries).toEqual([
       ["accept", "*/*"],
@@ -79,9 +86,7 @@ describe("[Symbol.iterator]", () => {
     const headers = new Headers();
     const entries: Array<[string, string]> = [];
 
-    for (const entry of headers) {
-      entries.push(entry);
-    }
+    for (const entry of headers) entries.push(entry);
 
     expect(entries).toEqual([]);
   });
@@ -96,9 +101,7 @@ describe(".keys()", () => {
     });
     const keys: Array<string> = [];
 
-    for (const name of headers.keys()) {
-      keys.push(name);
-    }
+    for (const name of headers.keys()) keys.push(name);
 
     expect(keys).toEqual(["accept", "accept-language", "content-type"]);
   });
@@ -107,15 +110,14 @@ describe(".keys()", () => {
     const headers = new Headers();
     const keys: Array<string> = [];
 
-    for (const name of headers.keys()) {
-      keys.push(name);
-    }
+    for (const name of headers.keys()) keys.push(name);
 
     expect(keys).toEqual([]);
   });
 
   it("sorts returned keys alphabetically", () => {
     const headers = new Headers();
+
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
@@ -124,6 +126,7 @@ describe(".keys()", () => {
 
   it("does not combine set-cookie headers", () => {
     const headers = new Headers();
+
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
     expect(Array.from(headers.keys())).toEqual(["set-cookie", "set-cookie"]);
@@ -139,9 +142,7 @@ describe(".values()", () => {
     });
     const values: Array<string> = [];
 
-    for (const value of headers.values()) {
-      values.push(value);
-    }
+    for (const value of headers.values()) values.push(value);
 
     expect(values).toEqual(["*/*", "en-US", "application/json"]);
   });
@@ -150,15 +151,14 @@ describe(".values()", () => {
     const headers = new Headers();
     const values: Array<string> = [];
 
-    for (const value of headers.values()) {
-      values.push(value);
-    }
+    for (const value of headers.values()) values.push(value);
 
     expect(values).toEqual([]);
   });
 
   it("sorts returned values alphabetically", () => {
     const headers = new Headers();
+
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
@@ -167,6 +167,7 @@ describe(".values()", () => {
 
   it("does not combine set-cookie headers", () => {
     const headers = new Headers();
+
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
     expect(Array.from(headers.values())).toEqual(["a=1", "b=2"]);
@@ -182,9 +183,7 @@ describe(".entries()", () => {
     });
     const entries: Array<[string, string]> = [];
 
-    for (const entry of headers.entries()) {
-      entries.push(entry);
-    }
+    for (const entry of headers.entries()) entries.push(entry);
 
     expect(entries).toEqual([
       ["accept", "*/*"],
@@ -197,15 +196,14 @@ describe(".entries()", () => {
     const headers = new Headers();
     const entries: Array<[string, string]> = [];
 
-    for (const entry of headers.entries()) {
-      entries.push(entry);
-    }
+    for (const entry of headers.entries()) entries.push(entry);
 
     expect(entries).toEqual([]);
   });
 
   it("sorts alphabetically", () => {
     const headers = new Headers();
+
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
@@ -218,6 +216,7 @@ describe(".entries()", () => {
 
   it("does not combine set-cookie headers", () => {
     const headers = new Headers();
+
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
     expect(Array.from(headers.entries())).toEqual([
@@ -230,6 +229,7 @@ describe(".entries()", () => {
 describe(".has()", () => {
   it("throws a TypeError given an invalid header name", () => {
     const headers = new Headers();
+
     expect(() =>
       headers.has(
         // @ts-expect-error
@@ -240,12 +240,14 @@ describe(".has()", () => {
 
   it("returns true given an existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
+
     expect(headers.has("accept")).toBe(true);
     expect(headers.has("AcCePt")).toBe(true);
   });
 
   it("returns false given a non-existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
+
     expect(headers.has("content-type")).toBe(false);
     expect(headers.has("CoNtEnT-TyPe")).toBe(false);
   });
@@ -254,6 +256,7 @@ describe(".has()", () => {
 describe(".get()", () => {
   it("throws a TypeError given an invalid header name", () => {
     const headers = new Headers();
+
     expect(() =>
       headers.get(
         // @ts-expect-error
@@ -264,6 +267,7 @@ describe(".get()", () => {
 
   it("returns the value of the existing header name", () => {
     const headers = new Headers({ "Content-Type": "text/plain" });
+
     expect(headers.get("Content-Type")).toEqual("text/plain");
     expect(headers.get("content-type")).toEqual("text/plain");
     expect(headers.get("CoNtEnT-TyPe")).toEqual("text/plain");
@@ -271,6 +275,7 @@ describe(".get()", () => {
 
   it("returns null given a non-existing header name", () => {
     const headers = new Headers({ "Content-Type": "text/plain" });
+
     expect(headers.get("accept")).toBeNull();
     expect(headers.get("Accept")).toBeNull();
     expect(headers.get("AcCePt")).toBeNull();
@@ -278,6 +283,7 @@ describe(".get()", () => {
 
   it("return an empty string for an empty header value", () => {
     const headers = new Headers({ "Content-Type": "" });
+
     expect(headers.get("Content-Type")).toEqual("");
   });
 });
@@ -285,6 +291,7 @@ describe(".get()", () => {
 describe(".set()", () => {
   it("returns if given an invalid header name", () => {
     const headers = new Headers();
+
     expect(
       headers.set(
         // @ts-expect-error
@@ -297,6 +304,7 @@ describe(".set()", () => {
 
   it("returns if given an invalid header value", () => {
     const headers = new Headers();
+
     expect(
       headers.set(
         "foo",
@@ -354,6 +362,7 @@ describe(".append()", () => {
 describe(".delete()", () => {
   it("returns if given an invalid header name", () => {
     const headers = new Headers({ accept: "*/*" });
+
     expect(
       headers.delete(
         // @ts-expect-error
@@ -416,11 +425,13 @@ describe(".forEach()", () => {
 describe(".getSetCookie()", () => {
   it("returns an empty array given no Set-Cookie headers", () => {
     const headers = new Headers();
+
     expect(headers.getSetCookie()).toEqual([]);
   });
 
   it("returns empty string if Set-Cookie header was set to empty string", () => {
     const headers = new Headers({ "Set-Cookie": "" });
+
     expect(headers.getSetCookie()).toEqual([""]);
   });
 
@@ -428,6 +439,7 @@ describe(".getSetCookie()", () => {
     const headers = new Headers({
       "Set-Cookie": "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
     });
+
     expect(headers.getSetCookie()).toEqual([
       "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
     ]);
@@ -435,6 +447,7 @@ describe(".getSetCookie()", () => {
 
   it("returns a list of all existing Set-Cookie headers", () => {
     const headers = new Headers();
+
     headers.append(
       "Set-Cookie",
       "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",

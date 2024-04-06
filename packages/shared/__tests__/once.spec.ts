@@ -1,5 +1,6 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
+
 import { once } from "../src";
 
 describe("once", () => {

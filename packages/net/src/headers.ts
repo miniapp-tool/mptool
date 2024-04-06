@@ -85,6 +85,7 @@ export class Headers {
     } else if (init) {
       Object.getOwnPropertyNames(init).forEach((name) => {
         const value = init[name];
+
         this.append(name, Array.isArray(value) ? value.join(", ") : value);
       });
     }
@@ -179,11 +180,10 @@ export class Headers {
     ) => void,
     thisArg?: ThisArg,
   ): void {
-    for (const [name, value] of this.entries()) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // prettier-ignore
+    for (const [name, value] of this.entries()) 
       // @ts-ignore
       callback.call(thisArg, value, name, this);
-    }
   }
 
   *keys(): IterableIterator<string> {
@@ -200,13 +200,10 @@ export class Headers {
       a.localeCompare(b),
     );
 
-    for (const name of sortedKeys) {
-      if (name === "set-cookie") {
+    for (const name of sortedKeys)
+      if (name === "set-cookie")
         for (const value of this.getSetCookie()) yield [name, value];
-      } else {
-        yield [name, this.get(name)!];
-      }
-    }
+      else yield [name, this.get(name)!];
   }
 
   toObject(): Record<string, string> {

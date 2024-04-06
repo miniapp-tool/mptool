@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import type { AnyNode } from "cheerio/lib/slim";
 
-import { ALLOWED_TAGS, AllowTag } from "./allowedTags.js";
+import type { AllowTag } from "./allowedTags.js";
+import { ALLOWED_TAGS } from "./allowedTags.js";
+import type { ParserOptions } from "./options.js";
 import { parseHTML } from "./parser.js";
 import type { ElementNode, RichTextNode } from "./typings.js";
-import { ParserOptions } from "./options.js";
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const result: RichTextNode[] = nodes.filter(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     (item): item is RichTextNode => item,
   );

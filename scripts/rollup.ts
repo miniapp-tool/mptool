@@ -1,8 +1,8 @@
 import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import type { ModuleFormat, Plugin, RollupOptions } from "rollup";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
-import type { ModuleFormat, RollupOptions, Plugin } from "rollup";
 
 const isProduction = process.env["NODE_ENV"] === "production";
 
@@ -45,10 +45,9 @@ export const rollupTypescript = (
       },
     ],
     plugins: [
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       ...(resolve ? [nodeResolve(), commonjs() as Plugin] : []),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
       // @ts-ignore
       esbuild({ charset: "utf8", minify: isProduction, target: "es2015" }),
     ],

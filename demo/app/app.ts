@@ -1,6 +1,5 @@
 import { $App, $Config, request } from "@mptool/all";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 wx.env.DEBUG = true;
 

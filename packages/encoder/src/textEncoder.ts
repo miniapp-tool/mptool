@@ -1,6 +1,7 @@
 import { DEFAULT_ENCODING, END_OF_STREAM, FINISHED } from "./constant.js";
 import { Stream } from "./stream.js";
-import { Encoding, getEncoding } from "./table.js";
+import type { Encoding } from "./table.js";
+import { getEncoding } from "./table.js";
 import { stringToCodePoints } from "./utils.js";
 
 export interface Encoder {
@@ -51,25 +52,25 @@ export class TextEncoder {
       // NONSTANDARD behavior.
       label = label !== undefined ? String(label) : DEFAULT_ENCODING;
       const encoding = getEncoding(label);
+
       if (encoding === null || encoding.name === "replacement")
         throw RangeError("Unknown encoding: " + label);
-      if (!encoders[encoding.name]) {
+      if (!encoders[encoding.name])
         throw Error(
           "Encoder not present." +
             " Did you forget to include encoding-indexes.js first?",
         );
-      }
+
       this._encoding = encoding;
     } else {
       // Standard behavior.
       this._encoding = getEncoding("utf-8")!;
 
-      if (label !== undefined && "console" in global) {
+      if (label !== undefined && "console" in global)
         console.warn(
           "TextEncoder constructor called with encoding label, " +
             "which is ignored.",
         );
-      }
     }
   }
 
@@ -107,6 +108,7 @@ export class TextEncoder {
     while (true) {
       // 1. Let token be the result of reading from input.
       const token = input.read();
+
       if (token === END_OF_STREAM) break;
       // 2. Let result be the result of processing token for encoder,
       // input, output.
@@ -126,6 +128,7 @@ export class TextEncoder {
       }
       this._encoder = null;
     }
+
     // 3. If result is finished, convert output into a byte sequence,
     // and then return a Uint8Array object wrapping an ArrayBuffer
     // containing output.

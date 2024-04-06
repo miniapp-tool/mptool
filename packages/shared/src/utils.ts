@@ -135,8 +135,7 @@ export class Queue {
   ) {}
 
   /** 回调队列 */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public funcQueue: Task<any, any>[] = [];
+  public funcQueue: Task[] = [];
 
   /** 正在运行的数量 */
   public running = 0;
@@ -147,7 +146,6 @@ export class Queue {
     const task = this.funcQueue.shift();
 
     if (task) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { func, ctx, args } = task;
 
       const taskFunc = (): void => {
@@ -171,12 +169,14 @@ export class Queue {
    * @param ctx 函数运行上下文
    * @param args 函数参数
    */
-  add<A extends unknown[], T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  add<A extends any[], T>(
     func: (next: () => void, ...args: A) => void,
     ctx?: T,
     ...args: A
   ): void {
     this.funcQueue.push({
+      // @ts-ignore
       func,
       ctx,
       args: [].slice.call(args, 0),

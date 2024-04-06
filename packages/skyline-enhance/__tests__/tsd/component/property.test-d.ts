@@ -1,5 +1,7 @@
 import { expectType } from "vitest";
-import { $Component, PropType } from "../../../src";
+
+import type { PropType } from "../../../src";
+import { $Component } from "../../../src";
 
 interface Config {
   a: number;
@@ -78,6 +80,7 @@ $Component({
   methods: {
     g() {
       const str = (1).toFixed(0);
+
       return str;
     },
     f() {

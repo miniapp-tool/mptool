@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 
-import { type RichTextNode, getRichTextNodes } from "../src/index.js";
+import type { RichTextNode } from "../src/index.js";
+import { getRichTextNodes } from "../src/index.js";
 
 it("getRichTextNodes()", async () => {
   const cases: [content: string, nodes: RichTextNode[]][] = [

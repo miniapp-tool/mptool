@@ -1,10 +1,11 @@
-import { END_OF_STREAM, FINISHED } from "../constant.js";
-import { Stream } from "../stream.js";
-import { Decoder, decoders } from "../textDecoder.js";
-import { Encoder, encoders } from "../textEncoder.js";
-import { inRange, isASCIIByte } from "../utils.js";
-
 import { decoderError } from "./utils.js";
+import { END_OF_STREAM, FINISHED } from "../constant.js";
+import type { Stream } from "../stream.js";
+import type { Decoder } from "../textDecoder.js";
+import { decoders } from "../textDecoder.js";
+import type { Encoder } from "../textEncoder.js";
+import { encoders } from "../textEncoder.js";
+import { inRange, isASCIIByte } from "../utils.js";
 
 class UTF8Decoder implements Decoder {
   // utf-8's decoder's has an associated utf-8 code point, utf-8
@@ -34,6 +35,7 @@ class UTF8Decoder implements Decoder {
     // set utf-8 bytes needed to 0 and return error.
     if (bite === END_OF_STREAM && this.utf8BytesNeeded !== 0) {
       this.utf8BytesNeeded = 0;
+
       return decoderError(this.fatal);
     }
 
@@ -159,6 +161,7 @@ class UTF8Encoder implements Encoder {
     // 3. Set count and offset based on the range code point is in:
     let count: number = 0;
     let offset: number = 0;
+
     // U+0080 to U+07FF, inclusive:
     if (inRange(codePoint, 0x0080, 0x07ff)) {
       // 1 and 0xC0

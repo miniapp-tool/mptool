@@ -1,12 +1,12 @@
+import type { EmitterInstance } from "@mptool/shared";
 import { Emitter } from "@mptool/shared";
-import {
-  ON_APP_LAUNCH,
+
+import type {
   ON_APP_AWAKE,
+  ON_APP_LAUNCH,
   ON_PAGE_READY,
   ON_PAGE_UNLOAD,
 } from "../constant.js";
-
-import type { EmitterInstance } from "@mptool/shared";
 import type { PageQuery } from "../page/index.js";
 
 export type AppEventType = {

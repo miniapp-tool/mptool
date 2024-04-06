@@ -1,4 +1,4 @@
-import { type CookieType } from "./typings.js";
+import type { CookieType } from "./typings.js";
 import { getCookieScopeDomain } from "./utils.js";
 
 /**

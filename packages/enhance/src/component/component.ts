@@ -1,9 +1,6 @@
 import { logger, wrapFunction } from "@mptool/shared";
-import { getRef, setRef, removeRef } from "./store.js";
-import { bind, mount } from "../bridge.js";
-import { getConfig } from "../config/index.js";
-import { TrivialPageInstance } from "../page/index.js";
 
+import { getRef, removeRef, setRef } from "./store.js";
 import type {
   ComponentConstructor,
   ComponentInstance,
@@ -12,6 +9,9 @@ import type {
   TrivialComponentInstance,
   TrivialComponentOptions,
 } from "./typings.js";
+import { bind, mount } from "../bridge.js";
+import { getConfig } from "../config/index.js";
+import type { TrivialPageInstance } from "../page/index.js";
 
 let componentIndex = 0;
 
@@ -24,10 +24,10 @@ export const handleProperties = (
     const vueSyntaxValue = props[propertyName];
 
     // Constructor or null
-    if (vueSyntaxValue === null || typeof vueSyntaxValue === "function")
+    if (vueSyntaxValue === null || typeof vueSyntaxValue === "function") {
       properties[propertyName] =
         vueSyntaxValue as WechatMiniprogram.Component.ShortProperty;
-    else {
+    } else {
       const { type } = vueSyntaxValue;
 
       // null type
@@ -40,17 +40,15 @@ export const handleProperties = (
       else if (Array.isArray(type))
         // array type syntax
         properties[propertyName] = {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           type: type[0],
           value: vueSyntaxValue.default,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
           // @ts-ignore
           optionalTypes: type.slice(1),
         };
       else
         properties[propertyName] = {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           type,
           value: vueSyntaxValue.default,
@@ -152,13 +150,11 @@ export const $Component: ComponentConstructor = <
 
       if (refName && $refs) delete $refs[refName];
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       delete this.$parent;
     },
   );
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   options.methods = {
     ...options.methods,
@@ -226,7 +222,6 @@ export const $Component: ComponentConstructor = <
     },
   };
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   options.properties = handleProperties(options.properties);
 

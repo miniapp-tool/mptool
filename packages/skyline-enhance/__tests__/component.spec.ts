@@ -1,5 +1,6 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
+
 import { handleProperties } from "../src/component/index.js";
 
 describe("Should handel properties", () => {

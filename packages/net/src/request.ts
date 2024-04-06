@@ -1,6 +1,7 @@
 import { logger } from "@mptool/shared";
-import { Headers } from "./headers.js";
+
 import { CookieStore } from "./cookieStore.js";
+import { Headers } from "./headers.js";
 import { URLSearchParams } from "./urlSearchParams.js";
 
 export const requestCookieStore = new CookieStore("__request_cookie__");
@@ -124,7 +125,7 @@ export const request = <
       body instanceof URLSearchParams ? body.toString() : body ?? undefined;
 
     // automatically set content-type header
-    if (!requestHeaders.has("Content-Type")) {
+    if (!requestHeaders.has("Content-Type"))
       if (body instanceof URLSearchParams)
         requestHeaders.set(
           "Content-Type",
@@ -140,7 +141,6 @@ export const request = <
         Object.prototype.toString.call(body) === "[object Object]"
       )
         requestHeaders.set("Content-Type", "application/json; charset=UTF-8");
-    }
 
     logger.debug(
       `\

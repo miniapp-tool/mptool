@@ -1,4 +1,5 @@
 import { query } from "@mptool/shared";
+
 import { getConfig } from "../config/index.js";
 import {
   ON_PAGE_NAVIGATE,
@@ -6,7 +7,6 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
-
 import type { PageQuery } from "../page/index.js";
 
 export interface NavigatorTriggerOptions {
@@ -80,7 +80,6 @@ export function getTrigger(type: NavigatorType) {
         // release navigate lock
         canNavigate = true;
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return wx[type]({ url });

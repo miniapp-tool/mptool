@@ -132,6 +132,7 @@ export const readJSON = <T = unknown>(
       `${userPath}/${path}.json`,
       encoding,
     );
+
     try {
       data = JSON.parse(fileContent as string) as T;
 

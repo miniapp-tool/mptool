@@ -1,14 +1,15 @@
 import { isMp, isQQ } from "@mptool/shared";
+
 import { Cookie } from "./cookie.js";
+import type { CookieType } from "./typings.js";
+import type { CookieOptions } from "./utils.js";
 import {
-  type CookieOptions,
   getCookieOptions,
   getCookieScopeDomain,
+  getDomain,
   normalizeDomain,
   parseCookieHeader,
-  getDomain,
 } from "./utils.js";
-import { type CookieType } from "./typings.js";
 
 export type CookieMap = Map<string, Cookie>;
 export type CookieStoreType = Map<string, CookieMap>;
@@ -162,10 +163,9 @@ export class CookieStore {
   getAllCookies(): Cookie[] {
     const cookies = [];
 
-    for (const cookieMap of this.store.values()) {
+    for (const cookieMap of this.store.values())
       for (const cookie of cookieMap.values())
         if (!cookie.isExpired()) cookies.push(cookie);
-    }
 
     return cookies;
   }
@@ -308,13 +308,12 @@ export class CookieStore {
       const saveCookies = [];
 
       // 获取需要持久化的 cookie
+      // 清除无效 cookie
       for (const cookies of this.store.values())
-        for (const cookie of cookies.values()) {
-          // 清除无效 cookie
+        for (const cookie of cookies.values())
           if (cookie.isExpired()) cookies.delete(cookie.name);
           // 只存储可持久化 cookie
           else if (cookie.isPersistence()) saveCookies.push(cookie);
-        }
 
       // 保存到本地存储
       if (isMp) wx.setStorageSync(this.key, saveCookies);

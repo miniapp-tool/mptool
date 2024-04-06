@@ -41,22 +41,18 @@ export const stringToCodePoints = (content: string): number[] => {
     // 2. Depending on the value of c:
 
     // c < 0xD800 or c > 0xDFFF
-    if (c < 0xd800 || c > 0xdfff) {
+    if (c < 0xd800 || c > 0xdfff)
       // Append to U the Unicode character with code point c.
       u.push(c);
-    }
-
     // 0xDC00 ≤ c ≤ 0xDFFF
-    else if (0xdc00 <= c && c <= 0xdfff) {
+    else if (0xdc00 <= c && c <= 0xdfff)
       // Append to U a U+FFFD REPLACEMENT CHARACTER.
       u.push(0xfffd);
-    }
-
     // 0xD800 ≤ c ≤ 0xDBFF
-    else if (0xd800 <= c && c <= 0xdbff) {
-      // 1. If i = n−1, then append to U a U+FFFD REPLACEMENT
-      // CHARACTER.
+    else if (0xd800 <= c && c <= 0xdbff)
       if (i === n - 1) {
+        // 1. If i = n−1, then append to U a U+FFFD REPLACEMENT
+        // CHARACTER.
         u.push(0xfffd);
       }
       // 2. Otherwise, i < n−1:
@@ -86,7 +82,6 @@ export const stringToCodePoints = (content: string): number[] => {
           u.push(0xfffd);
         }
       }
-    }
 
     // 3. Set i to i+1.
     i += 1;

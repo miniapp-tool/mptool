@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+
 import { TextDecoder, TextEncoder } from "../src/index.js";
 
 const encodeUtf8 = (content: string): Uint8Array => {
@@ -31,6 +32,7 @@ const generateBlock = (from: number, len: number, skip: number): string => {
     block.push(String.fromCharCode(0xd800 + (cp >> 10)));
     block.push(String.fromCharCode(0xdc00 + (cp & 0x3ff)));
   }
+
   return block.join("");
 };
 
@@ -79,6 +81,7 @@ const testUtfSamples = (): void => {
     const decoded = new TextDecoder(t.encoding).decode(
       new Uint8Array(t.expected),
     );
+
     expect(decoded).toEqual(sample);
   });
 };

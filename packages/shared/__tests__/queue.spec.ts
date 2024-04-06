@@ -1,15 +1,15 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
+
 import { funcQueue } from "../src";
 
 describe("queue", () => {
   it("Run by sequence", () =>
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       const result: number[] = [];
       const fn = funcQueue((next, num: number, timer: number) => {
         setTimeout(() => {
           result.push(num);
-          // eslint-disable-next-line callback-return
           next();
         }, timer);
       });

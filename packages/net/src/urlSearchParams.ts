@@ -35,8 +35,9 @@ export class URLSearchParams {
       | Record<string, string | string[]>
       | Iterable<[string, string]>,
   ) {
-    if (!init) this.params = new Map();
-    else if (init instanceof URLSearchParams) {
+    if (!init) {
+      this.params = new Map();
+    } else if (init instanceof URLSearchParams) {
       this.params = new Map(init.params);
     } else {
       this.params = new Map();
@@ -233,9 +234,8 @@ export class URLSearchParams {
     for (const [key, value] of this.params) {
       const name = encode(key);
 
-      for (let i = 0; i < value.length; i++) {
+      for (let i = 0; i < value.length; i++)
         query.push(`${name}=${encode(value[i])}`);
-      }
     }
 
     return query.join("&");

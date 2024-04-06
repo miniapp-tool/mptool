@@ -1,4 +1,5 @@
-import { expectType, expectError } from "vitest";
+import { expectError, expectType } from "vitest";
+
 import { $Component } from "../../../src/index.js";
 
 expectType<string>($Component({}));
@@ -95,6 +96,7 @@ $Component({
   export() {
     expectType<string>(this.is);
     expectType<void>(this.onMyButtonTap());
+
     return {};
   },
 });
@@ -273,6 +275,7 @@ $Component({
   methods: {
     test() {
       const channel = this.getOpenerEventChannel();
+
       expectType<WechatMiniprogram.EventChannel>(channel);
       channel.emit("test", {});
       channel.on("xxx", () => {});
@@ -301,6 +304,7 @@ $Component<{}, {}, { fn(): void }>({
       value: 4,
     },
   };
+
   $Component<
     typeof data,
     typeof properties,
@@ -317,6 +321,7 @@ $Component<{}, {}, { fn(): void }>({
       fn() {
         expectType<() => void | Promise<void>>(this.onShow);
         expectError(this.notExists);
+
         return "test";
       },
     },

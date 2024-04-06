@@ -1,4 +1,5 @@
 import { logger } from "@mptool/shared";
+
 import type { AppConfig } from "./typings.js";
 
 export interface Config extends Omit<AppConfig, "defaultRoute" | "routeMap"> {
@@ -23,16 +24,17 @@ export const $Config = (config: AppConfig): void => {
 
   const addRoute = (name: string, route: string): void => {
     const actualRoute = route.replace(/\$name/g, name);
+
     nameToRouteMap[name] = actualRoute;
     routeToNameMap[actualRoute] = name;
   };
 
-  if (Array.isArray(routes))
+  if (Array.isArray(routes)) {
     routes.forEach(([name, route]) => {
       if (typeof name === "string") addRoute(name, route);
       else name.forEach((item) => addRoute(item, route));
     });
-  else if (typeof routes === "object") {
+  } else if (typeof routes === "object") {
     nameToRouteMap = routes;
     routeToNameMap = Object.fromEntries(
       Object.keys(routes).map((route) => [routes[route], route]),

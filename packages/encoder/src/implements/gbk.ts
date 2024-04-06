@@ -1,10 +1,12 @@
+import { decoderError, encoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import { encodingIndex } from "../indexes.js";
-import { Stream } from "../stream.js";
-import { Decoder, decoders } from "../textDecoder.js";
-import { Encoder, encoders } from "../textEncoder.js";
+import type { Stream } from "../stream.js";
+import type { Decoder } from "../textDecoder.js";
+import { decoders } from "../textDecoder.js";
+import type { Encoder } from "../textEncoder.js";
+import { encoders } from "../textEncoder.js";
 import { inRange, isASCIIByte } from "../utils.js";
-import { decoderError, encoderError } from "./utils.js";
 
 /**
  * @param pointer The |pointer| to search for.
@@ -17,6 +19,7 @@ const indexCodePointFor = (
   index: number[] | undefined,
 ): number | null => {
   if (!index) return null;
+
   return index[pointer] || null;
 };
 
@@ -28,6 +31,7 @@ const indexCodePointFor = (
  */
 const indexPointerFor = (codePoint: number, index: number[]): number | null => {
   const pointer = index.indexOf(codePoint);
+
   return pointer === -1 ? null : pointer;
 };
 
@@ -51,9 +55,11 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
   let codePointOffset = 0;
   const idx = encodingIndex["gb18030-ranges"];
   let i;
+
   for (i = 0; i < idx.length; ++i) {
     /** @type {!Array.<number>} */
     const entry = idx[i];
+
     if (entry[0] <= pointer) {
       offset = entry[0];
       codePointOffset = entry[1];
@@ -83,9 +89,11 @@ const indexGB18030RangesPointerFor = (codePoint: number): number => {
   let pointerOffset = 0;
   const idx = encodingIndex["gb18030-ranges"];
   let i;
+
   for (i = 0; i < idx.length; ++i) {
     /** @type {!Array.<number>} */
     const entry = idx[i];
+
     if (entry[1] <= codePoint) {
       offset = entry[1];
       pointerOffset = entry[0];
@@ -126,9 +134,9 @@ class GB18030Decoder implements Decoder {
       this.gb18030First === 0x00 &&
       this.gb18030Second === 0x00 &&
       this.gb18030Third === 0x00
-    ) {
+    )
       return FINISHED;
-    }
+
     // 2. If byte is end-of-stream, and gb18030 first, gb18030
     // second, or gb18030 third is not 0x00, set gb18030 first,
     // gb18030 second, and gb18030 third to 0x00, and return error.
@@ -144,6 +152,7 @@ class GB18030Decoder implements Decoder {
       decoderError(this.fatal);
     }
     let codePoint;
+
     // 3. If gb18030 third is not 0x00, run these substeps:
     if (this.gb18030Third !== 0x00) {
       // 1. Let code point be null.
@@ -152,7 +161,7 @@ class GB18030Decoder implements Decoder {
       // code point to the index gb18030 ranges code point for
       // (((gb18030 first − 0x81) × 10 + gb18030 second − 0x30) ×
       // 126 + gb18030 third − 0x81) × 10 + byte − 0x30.
-      if (inRange(bite, 0x30, 0x39)) {
+      if (inRange(bite, 0x30, 0x39))
         codePoint = indexGB18030RangesCodePointFor(
           (((this.gb18030First - 0x81) * 10 + this.gb18030Second - 0x30) * 126 +
             this.gb18030Third -
@@ -161,7 +170,6 @@ class GB18030Decoder implements Decoder {
             bite -
             0x30,
         );
-      }
 
       // 3. Let buffer be a byte sequence consisting of gb18030
       // second, gb18030 third, and byte, in order.
@@ -177,6 +185,7 @@ class GB18030Decoder implements Decoder {
       // return error.
       if (codePoint === null) {
         stream.prepend(buffer);
+
         return decoderError(this.fatal);
       }
 
@@ -190,6 +199,7 @@ class GB18030Decoder implements Decoder {
       // gb18030 third to byte and return continue.
       if (inRange(bite, 0x81, 0xfe)) {
         this.gb18030Third = bite;
+
         return null;
       }
 
@@ -198,6 +208,7 @@ class GB18030Decoder implements Decoder {
       stream.prepend([this.gb18030Second, bite]);
       this.gb18030First = 0x00;
       this.gb18030Second = 0x00;
+
       return decoderError(this.fatal);
     }
 
@@ -207,6 +218,7 @@ class GB18030Decoder implements Decoder {
       // gb18030 second to byte and return continue.
       if (inRange(bite, 0x30, 0x39)) {
         this.gb18030Second = bite;
+
         return null;
       }
 
@@ -214,6 +226,7 @@ class GB18030Decoder implements Decoder {
       // gb18030 first to 0x00.
       const lead = this.gb18030First;
       let pointer = null;
+
       this.gb18030First = 0x00;
 
       // 3. Let offset be 0x40 if byte is less than 0x7F and 0x41
@@ -255,6 +268,7 @@ class GB18030Decoder implements Decoder {
     // gb18030 first to byte and return continue.
     if (inRange(bite, 0x81, 0xfe)) {
       this.gb18030First = bite;
+
       return null;
     }
 

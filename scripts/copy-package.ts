@@ -1,4 +1,5 @@
 import { rmSync } from "node:fs";
+
 import { copy } from "./copy.js";
 
 const parentFolderPath = "./demo/node_modules/@mptool";

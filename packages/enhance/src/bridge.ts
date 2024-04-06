@@ -1,19 +1,18 @@
-import { getRef } from "./component/store";
-import { getConfig } from "./config/index.js";
-import { ON_PAGE_PRELOAD } from "./constant.js";
-import { routeEmitter, userEmitter } from "./emitter/index.js";
-import { getPathDetail, getTrigger } from "./navigator/index.js";
-
 import type {
   ComponentOptions,
   InferPropTypes,
   PropsOptions,
   TrivialComponentInstance,
 } from "./component/index.js";
+import { getRef } from "./component/store";
+import { getConfig } from "./config/index.js";
+import { ON_PAGE_PRELOAD } from "./constant.js";
+import { routeEmitter, userEmitter } from "./emitter/index.js";
+import { getPathDetail, getTrigger } from "./navigator/index.js";
 import type {
   ExtendedPageMethods,
-  PageOptions,
   PageInstance,
+  PageOptions,
   TrivialPageInstance,
 } from "./page/index.js";
 
