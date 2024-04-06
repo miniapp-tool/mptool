@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { expectType } from "tsd";
+import { expectType } from "vitest";
 import {
   InferFromType,
   InferPropTypes,

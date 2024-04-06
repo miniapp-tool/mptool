@@ -77,11 +77,11 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       handler: GenericEventHandler,
     ): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const handlers: Array<GenericEventHandler> | undefined = all!.get(type);
+      const handlers: Array<GenericEventHandler> | undefined = all.get(type);
 
       if (handlers) handlers.push(handler);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      else all!.set(type, [handler] as EventHandlerList<Events[keyof Events]>);
+      else all.set(type, [handler] as EventHandlerList<Events[keyof Events]>);
     },
 
     /**
@@ -98,12 +98,12 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       handler?: GenericEventHandler,
     ): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const handlers: Array<GenericEventHandler> | undefined = all!.get(type);
+      const handlers: Array<GenericEventHandler> | undefined = all.get(type);
 
       if (handlers) {
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        else all!.set(type, []);
+        else all.set(type, []);
       }
     },
 
@@ -120,7 +120,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
      */
     emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      let handlers = all!.get(type);
+      let handlers = all.get(type);
 
       if (handlers) {
         (handlers as EventHandlerList<Events[keyof Events]>)
@@ -131,7 +131,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      handlers = all!.get("*");
+      handlers = all.get("*");
 
       if (handlers) {
         (handlers as WildCardEventHandlerList<Events>)
@@ -161,14 +161,14 @@ export function Emitter<Events extends Record<EventType, unknown>>(
     ): Promise<void> =>
       Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ((all!.get(type) || []) as EventHandlerList<Events[keyof Events]>)
+        ((all.get(type) || []) as EventHandlerList<Events[keyof Events]>)
           .slice()
           .map((handler) => handler(event as Events[Key])),
       )
         .then(() =>
           Promise.all(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ((all!.get("*") || []) as WildCardEventHandlerList<Events>)
+            ((all.get("*") || []) as WildCardEventHandlerList<Events>)
               .slice()
               .map((handler) => handler(type, event as Events[Key])),
           ),

@@ -1,4 +1,4 @@
-import { expectType } from "tsd";
+import { expectType } from "vitest";
 import { $Component, PropType } from "../../../src";
 
 interface Config {

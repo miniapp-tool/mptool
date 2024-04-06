@@ -1,4 +1,4 @@
-import { expectType, expectError } from "tsd";
+import { expectType, expectError } from "vitest";
 import { $Page } from "../../src";
 
 expectType<void>($Page("example", {}));

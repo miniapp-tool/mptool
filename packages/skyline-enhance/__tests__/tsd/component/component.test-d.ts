@@ -1,4 +1,4 @@
-import { expectType, expectError } from "tsd";
+import { expectType, expectError } from "vitest";
 import { $Component } from "../../../src/index.js";
 
 expectType<string>($Component({}));

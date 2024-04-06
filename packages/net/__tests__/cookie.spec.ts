@@ -23,8 +23,7 @@ describe("cookies", () => {
   it("request", () => {
     cookieStore.applyResponse(response, "baidu.com");
 
-    expect(
-      cookieStore.getHeader("baidu.com"),
+    expect(cookieStore.getHeader("baidu.com")).toBe(
       "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; PSINO=7; dwf_sg_task_completion=False",
     );
   });
@@ -88,10 +87,10 @@ describe("cookies", () => {
     cookieStore.clear(".baidu.com");
     expect(cookieStore.getCookies({ domain: "baidu.com" }).length).toBe(0);
 
-    const result1 = cookieStore.getCookies();
+    const result1 = cookieStore.getAllCookies();
 
     cookieStore.clear();
-    const result2 = cookieStore.getCookies();
+    const result2 = cookieStore.getAllCookies();
 
     expect(result1.length).not.toBe(result2.length);
   });

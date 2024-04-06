@@ -31,8 +31,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.mts --configPlugin esbuild",
     "clean": "rimraf ./lib",
-    "dev": "rollup -c -w",
-    "tsd": "tsd"
+    "dev": "rollup -c -w"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^3.12.0"
@@ -44,8 +43,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "tsd": {
-    "directory": "__tests__/tsd"
   }
 }

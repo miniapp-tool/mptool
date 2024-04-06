@@ -94,13 +94,14 @@ overrides:
         - warn
 
   - files:
-      - "**/__tests__/**/*.spec.{j,t}s"
-
+      - "**/__tests__/**/*.{spec,test-d}.{j,t}s"
+    plugins:
+      - vitest
+    extends:
+      - plugin:vitest/recommended
     rules:
-      "@typescript-eslint/no-empty-function":
-        - off
-      "@typescript-eslint/no-explicit-any":
-        - off
+      "@typescript-eslint/no-empty-function": off
+      "@typescript-eslint/no-explicit-any": off
       "@typescript-eslint/no-unsafe-assignment":
         - off
       "@typescript-eslint/no-unsafe-call":
@@ -109,23 +110,10 @@ overrides:
         - off
 
   - files:
-      - "**/__tests__/**/*.tsd.ts"
-
+      - "**/__tests__/**/*.test-d.ts"
     rules:
-      "@typescript-eslint/ban-ts-comment":
-        - off
-      "@typescript-eslint/no-empty-function":
-        - off
-      "@typescript-eslint/no-explicit-any":
-        - off
-      "@typescript-eslint/no-unsafe-assignment":
-        - off
-      "@typescript-eslint/no-unsafe-call":
-        - off
-      "@typescript-eslint/no-unsafe-member-access":
-        - off
-      "@typescript-eslint/unbound-method":
-        - off
+      "@typescript-eslint/ban-ts-comment": off
+      "@typescript-eslint/unbound-method": off
 
   - files:
       - "vitest.config.js"
