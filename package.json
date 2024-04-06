@@ -78,7 +78,7 @@
     "vite": "5.2.7",
     "vitest": "1.4.0"
   },
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@8.15.6",
   "commit-and-tag-version": {
     "skip": {
       "bump": true,
