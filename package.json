@@ -62,7 +62,7 @@
     "eslint-plugin-vitest": "0.4.1",
     "execa": "8.0.1",
     "husky": "9.0.11",
-    "inquirer": "9.2.18",
+    "inquirer": "9.2.19",
     "miniprogram-api-typings": "3.12.2",
     "nano-staged": "0.8.0",
     "ora": "8.0.1",
