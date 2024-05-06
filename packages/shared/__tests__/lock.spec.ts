@@ -5,7 +5,7 @@ import { lock } from "../src";
 
 describe("lock", () => {
   it("run once", () =>
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       let count = 0;
 
       const fn = lock((release) => {
@@ -22,8 +22,8 @@ describe("lock", () => {
     }));
 
   it("reuse", () =>
-    new Promise((resolve) => {
-      const fn = lock((release, callbackFunc?: any) => {
+    new Promise<void>((resolve) => {
+      const fn = lock((release, callbackFunc?: () => unknown) => {
         setTimeout(() => {
           release();
           if (callbackFunc) callbackFunc();

@@ -10,7 +10,7 @@ describe("mitt", () => {
 
   it("should accept an optional event handler map", () => {
     expect(() => Emitter(new Map())).not.toThrow();
-    const map = new Map();
+    const map: EventHandlerMap<{ foo: undefined }> = new Map();
     const a = vi.fn();
     const b = vi.fn();
 

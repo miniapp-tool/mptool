@@ -5,7 +5,7 @@ import { once } from "../src";
 
 describe("once", () => {
   it("run once", () =>
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       let count = 0;
       const fn = once((num: number) => {
         count += 1;
@@ -26,7 +26,7 @@ describe("once", () => {
     }));
 
   it("run once with muti args", () =>
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       let count = 0;
       const fn = once((x: number, y: number) => {
         count += x + y;

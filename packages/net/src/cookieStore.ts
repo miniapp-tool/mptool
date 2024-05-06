@@ -89,7 +89,7 @@ export class CookieStore {
     const { name, domain } = cookieOptions;
     const cookie = new Cookie(cookieOptions);
 
-    const cookies = this.store.get(domain) || new Map<string, Cookie>();
+    const cookies = this.store.get(domain) ?? new Map<string, Cookie>();
 
     cookies.set(name, cookie);
     this.store.set(domain, cookies);

@@ -224,14 +224,14 @@ describe("Set data", () => {
 
 describe("ForEach", () => {
   it("ForEach", () => {
-    const a = getSimpleObj(),
-      ret = {};
+    const a = getSimpleObj();
+    const result: Record<string, string> = {};
 
-    a.forEach(function (item, name) {
-      ret[name] = item;
+    a.forEach((item, name) => {
+      result[name] = item;
     });
 
-    expect(ret).toEqual({
+    expect(result).toEqual({
       a: "1",
       b: "2",
       c: "3",
@@ -322,12 +322,12 @@ describe("Others", () => {
 
   it("URL decode", () => {
     const a = new URLSearchParams(testStr);
-    const ret = {};
+    const result: Record<string, string> = {};
 
     a.forEach((value, key) => {
-      ret[key] = value;
+      result[key] = value;
     });
 
-    expect(ret).toEqual(testObj);
+    expect(result).toEqual(testObj);
   });
 });

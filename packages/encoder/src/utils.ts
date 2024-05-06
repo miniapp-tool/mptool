@@ -98,14 +98,15 @@ export const stringToCodePoints = (content: string): number[] => {
 export const codePointsToString = (codePoints: number[]): string => {
   let s = "";
 
-  for (let i = 0; i < codePoints.length; ++i) {
-    let cp = codePoints[i];
-
-    if (cp <= 0xffff) {
-      s += String.fromCharCode(cp);
+  for (let codePoint of codePoints) {
+    if (codePoint <= 0xffff) {
+      s += String.fromCharCode(codePoint);
     } else {
-      cp -= 0x10000;
-      s += String.fromCharCode((cp >> 10) + 0xd800, (cp & 0x3ff) + 0xdc00);
+      codePoint -= 0x10000;
+      s += String.fromCharCode(
+        (codePoint >> 10) + 0xd800,
+        (codePoint & 0x3ff) + 0xdc00,
+      );
     }
   }
 

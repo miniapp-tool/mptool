@@ -6,7 +6,7 @@
 export const decoderError = (fatal: boolean, codePoint?: number): number => {
   if (fatal) throw TypeError("Decoder error");
 
-  return codePoint || 0xfffd;
+  return codePoint ?? 0xfffd;
 };
 
 /**

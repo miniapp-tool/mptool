@@ -13,10 +13,10 @@ export class Cookie {
   httpOnly: boolean;
 
   constructor(cookie: CookieType) {
-    this.name = cookie.name || "";
-    this.value = cookie.value || "";
-    this.domain = cookie.domain || "";
-    this.path = cookie.path || "/";
+    this.name = cookie.name ?? "";
+    this.value = cookie.value ?? "";
+    this.domain = cookie.domain ?? "";
+    this.path = cookie.path ?? "/";
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
       ? cookie.maxAge! > 0

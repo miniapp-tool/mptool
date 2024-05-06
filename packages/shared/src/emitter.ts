@@ -115,14 +115,14 @@ export function Emitter<Events>(
       let handlers = all.get(type);
 
       if (handlers)
-        (handlers as EventHandlerList<Events[keyof Events]>)
+        void (handlers as EventHandlerList<Events[keyof Events]>)
           .slice()
           .map((handler) => handler(event!));
 
       handlers = all.get("*");
 
       if (handlers)
-        (handlers as WildCardEventHandlerList<Events>)
+        void (handlers as WildCardEventHandlerList<Events>)
           .slice()
           .map((handler) => handler(type, event!));
     },

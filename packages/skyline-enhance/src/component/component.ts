@@ -40,16 +40,16 @@ export const handleProperties = (
       else if (Array.isArray(type))
         // array type syntax
         properties[propertyName] = {
-          // @ts-ignore
+          // @ts-expect-error: Force set prop config
           type: type[0],
           value: vueSyntaxValue.default,
 
-          // @ts-ignore
+          // @ts-expect-error: Force set prop config
           optionalTypes: type.slice(1),
         };
       else
         properties[propertyName] = {
-          // @ts-ignore
+          // @ts-expect-error: Force set prop config
           type,
           value: vueSyntaxValue.default,
         };
@@ -150,12 +150,12 @@ export const $Component: ComponentConstructor = <
 
       if (refName && $refs) delete $refs[refName];
 
-      // @ts-ignore
+      // @ts-expect-error: $parent is not optional
       delete this.$parent;
     },
   );
 
-  // @ts-ignore
+  // @ts-expect-error: Force adding methods
   options.methods = {
     ...options.methods,
 
@@ -201,7 +201,7 @@ export const $Component: ComponentConstructor = <
   };
 
   options.observers = {
-    ...(options.observers || {}),
+    ...options.observers,
     // add ref observer to support dynamic ref
     ref(
       this: ComponentInstance<
@@ -222,7 +222,7 @@ export const $Component: ComponentConstructor = <
     },
   };
 
-  // @ts-ignore
+  // @ts-expect-error: convert prop config
   options.properties = handleProperties(options.properties);
 
   // we cast properties into syntax that miniprogram can handle

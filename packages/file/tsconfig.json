@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["node", "miniprogram-api-typings"]
   },
-  "include": ["./src"]
+  "include": ["**/*.ts"]
 }

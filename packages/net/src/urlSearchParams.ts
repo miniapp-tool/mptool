@@ -49,7 +49,7 @@ export class URLSearchParams {
           : init
         )
           .split("&")
-          .map((pair) => {
+          .forEach((pair) => {
             const [, key, value] = /^([^=]+)=?(.*?)$/.exec(pair) ?? [];
 
             if (key) this.append(decode(key), decode(value));
@@ -231,11 +231,10 @@ export class URLSearchParams {
   toString(): string {
     const query: string[] = [];
 
-    for (const [key, value] of this.params) {
+    for (const [key, values] of this.params) {
       const name = encode(key);
 
-      for (let i = 0; i < value.length; i++)
-        query.push(`${name}=${encode(value[i])}`);
+      for (const value of values) query.push(`${name}=${encode(value)}`);
     }
 
     return query.join("&");

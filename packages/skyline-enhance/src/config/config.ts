@@ -56,7 +56,7 @@ export const $Config = (config: AppConfig): void => {
       nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
 
     getName: (url: string): string =>
-      routeToNameMap[url] || defaultRouteReg.exec(url)?.[1] || "Unknown",
+      (routeToNameMap[url] || defaultRouteReg.exec(url)?.[1]) ?? "Unknown",
   };
 };
 

@@ -8,9 +8,8 @@ import { parseHTML } from "./parser.js";
 import type { ElementNode, RichTextNode } from "./typings.js";
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter(
-    // @ts-expect-error
-    (item): item is RichTextNode => item,
+  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode =>
+    Boolean(item),
   );
 
   const first = result[0];

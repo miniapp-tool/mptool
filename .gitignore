@@ -16,5 +16,5 @@ demo/project.private.config.json
 
 # coverage
 coverage/
-
 .npmrc
+tsconfig.vitest-temp.json

@@ -60,9 +60,11 @@ export function getTrigger(
 /**
  * Navigation trigger
  */
-// eslint-disable-next-line
-export function getTrigger(type: NavigatorType) {
-  // eslint-disable-next-line
+export function getTrigger(
+  type: NavigatorType,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): (pageNameWithArg: string) => any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
@@ -74,13 +76,13 @@ export function getTrigger(type: NavigatorType) {
         routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${name}`, query),
         // 等待最小延迟
         new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), getConfig().maxDelay || 200);
+          setTimeout(() => resolve(), getConfig().maxDelay ?? 200);
         }),
       ]).then(() => {
         // release navigate lock
         canNavigate = true;
 
-        // @ts-ignore
+        // @ts-expect-error: argument can not union
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return wx[type]({ url });
       });
@@ -92,7 +94,7 @@ export function getTrigger(type: NavigatorType) {
 appEmitter.on(ON_PAGE_READY, () => {
   setTimeout(() => {
     canNavigate = true;
-  }, getConfig().minInterval || 100);
+  }, getConfig().minInterval ?? 100);
 });
 
 // release navigate lock on page unload

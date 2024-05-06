@@ -119,15 +119,14 @@ try {
 ``` */
   getStorage<T = any, U extends GetStorageOption<T> = GetStorageOption<T>>(
     option: U,
-
-    // @ts-ignore
+    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
     const value: T = Object.prototype.hasOwnProperty.call(storage, option.key)
       ? (storage[option.key] as T)
       : (undefined as unknown as T);
 
     if (!option.success && !option.fail && !option.complete)
-      // @ts-ignore
+      // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ data: value, errMsg: "" });
@@ -193,11 +192,10 @@ try {
 ``` */
   setStorage<T = any, U extends SetStorageOption<T> = SetStorageOption<T>>(
     option: U,
-
-    // @ts-ignore
+    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, SetStorageOption<T>> {
     if (!option.success && !option.fail && !option.complete)
-      // @ts-ignore
+      // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
           storage[option.key] = option.data;
@@ -240,11 +238,10 @@ try {
 
   removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
     option: T,
-
-    // @ts-ignore
+    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, RemoveStorageOption> {
     if (!option.success && !option.fail && !option.complete)
-      // @ts-ignore
+      // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ errMsg: "" });

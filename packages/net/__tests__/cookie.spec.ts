@@ -6,21 +6,20 @@ import { CookieStore } from "../src/index.js";
 
 const cookieStore = new CookieStore();
 
-// @ts-ignore
-const response: WechatMiniprogram.RequestSuccessCallbackResult = {
+const mockedResponse = {
   header: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "Set-Cookie":
       "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; domain=baidu.com; path=/; expires=Fri, 27 Jul 9999 04:02:51 GMT; httponly, dwf_sg_task_completion=False; expires=Sat, 25-Aug-2020 04:04:04 GMT; Max-Age=2592000; Path=/; secure;, PSINO=7; domain=.baidu.com; path=/,prod_crm_session=gBz4cg45F7A5TwRuSNgOw5xSRilpiec9Mht7bS9a; expires=Thu, 26-Jul-2020 06:14:05 GMT; Max-Age=2592000; path=/; domain=.taobao.com; httponly",
   },
-};
+} as unknown as WechatMiniprogram.RequestSuccessCallbackResult;
 
 const TEST_NAME = "session_id";
 const TEST_VALUE = "session_id_value";
 
 describe("cookies", () => {
   it("request", () => {
-    cookieStore.applyResponse(response, "baidu.com");
+    cookieStore.applyResponse(mockedResponse, "baidu.com");
 
     expect(cookieStore.getHeader("baidu.com")).toBe(
       "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; PSINO=7; dwf_sg_task_completion=False",

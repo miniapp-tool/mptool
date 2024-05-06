@@ -180,10 +180,8 @@ export class Headers {
     ) => void,
     thisArg?: ThisArg,
   ): void {
-    // prettier-ignore
-    for (const [name, value] of this.entries()) 
-      // @ts-ignore
-      callback.call(thisArg, value, name, this);
+    for (const [name, value] of this.entries())
+      callback.call(thisArg!, value, name, this);
   }
 
   *keys(): IterableIterator<string> {

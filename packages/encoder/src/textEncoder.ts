@@ -84,8 +84,6 @@ export class TextEncoder {
    * @return Encoded bytes, as a Uint8Array.
    */
   encode(content = "", options: { stream?: boolean } = {}): Uint8Array {
-    content = content === undefined ? "" : String(content);
-
     // NOTE: This option is nonstandard. None of the encodings
     // permitted for encoding (i.e. UTF-8, UTF-16) are stateful when
     // the input is a USVString so streaming is not necessary.
@@ -96,7 +94,7 @@ export class TextEncoder {
     this.doNotFlush = Boolean(options.stream);
 
     // 1. Convert input to a stream.
-    const input = new Stream(stringToCodePoints(content));
+    const input = new Stream(stringToCodePoints(String(content)));
 
     // 2. Let output be a new stream
     const output = [];

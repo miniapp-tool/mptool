@@ -1,6 +1,6 @@
 import { $App, $Config, request } from "@mptool/all";
 
-// @ts-ignore
+// @ts-expect-error: DEBUG is not standard
 wx.env.DEBUG = true;
 
 $Config({

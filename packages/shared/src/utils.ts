@@ -75,7 +75,7 @@ export const lock = <T, A extends unknown[], R>(
     pending = true;
 
     // eslint-disable-next-line no-invalid-this
-    return fn.apply(ctx || this, [
+    return fn.apply(ctx ?? this, [
       (): void => {
         pending = false;
       },
@@ -111,7 +111,7 @@ export const once = <T, A extends unknown[], R>(
     if (called || !func) return undefined;
     called = true;
 
-    return func.apply(ctx || null, args);
+    return func.apply(ctx ?? null, args);
   };
 };
 
@@ -176,7 +176,7 @@ export class Queue {
     ...args: A
   ): void {
     this.funcQueue.push({
-      // @ts-ignore
+      // @ts-expect-error: func is not typed
       func,
       ctx,
       args: [].slice.call(args, 0),

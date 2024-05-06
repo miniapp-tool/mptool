@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["inquirer", "miniprogram-api-typings"]
   },
-  "include": ["**/*.ts", "**/*.mts"]
+  "include": ["**/*.ts", "**/*.mts", "**/.vuepress/**/*.ts", "eslint.config.js"]
 }

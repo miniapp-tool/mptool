@@ -36,7 +36,7 @@ export function getTrigger(
 export function getTrigger(type: NavigatorType) {
   // eslint-disable-next-line
   return (pageNameWithArg: string): any => {
-    // @ts-ignore
+    // @ts-expect-error: param type mismatch
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return wx[type]({ url: getFullPath(pageNameWithArg) });
   };

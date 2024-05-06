@@ -25,9 +25,9 @@ describe("queue", () => {
     }));
 
   it("Parall 3 task", () =>
-    new Promise((resolve) => {
+    new Promise<void>((resolve) => {
       let count = 0;
-      const fn = funcQueue((next: any, timer: number) => {
+      const fn = funcQueue((next, timer: number) => {
         setTimeout(() => {
           count += 1;
           next();
