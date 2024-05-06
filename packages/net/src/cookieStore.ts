@@ -230,8 +230,8 @@ export class CookieStore {
   applyHeader(header: unknown, domainOrURL: string): void {
     if (isMp) {
       const setCookieHeader =
-        (<Record<string, string[] | string>>header)["Set-Cookie"] ||
-        (<Record<string, string[] | string>>header)["set-cookie"] ||
+        (header as Record<string, string[] | string>)["Set-Cookie"] ||
+        (header as Record<string, string[] | string>)["set-cookie"] ||
         "";
       const realHeader = Array.isArray(setCookieHeader)
         ? setCookieHeader.filter(Boolean).join(",")
@@ -247,7 +247,7 @@ export class CookieStore {
 
     return this.apply(
       parseCookieHeader(
-        (<Headers>header).getSetCookie().join(","),
+        (header as Headers).getSetCookie().join(","),
         domainOrURL,
       ),
     );
@@ -262,8 +262,8 @@ export class CookieStore {
   applyResponse(response: unknown, domainOrURL: string): void {
     return this.applyHeader(
       isMp
-        ? (<WechatMiniprogram.RequestSuccessCallbackResult>response).header
-        : (<Response>response).headers,
+        ? (response as WechatMiniprogram.RequestSuccessCallbackResult).header
+        : (response as Response).headers,
       domainOrURL,
     );
   }

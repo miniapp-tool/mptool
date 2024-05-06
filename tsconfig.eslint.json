@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["inquirer", "miniprogram-api-typings"]
   },
-  "include": ["**/*.ts", "vitest.config.js", "./package.json"]
+  "include": ["**/*.ts", "**/*.mts"]
 }

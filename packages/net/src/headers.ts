@@ -69,7 +69,7 @@ export class Headers {
 
   // Keeps the mapping between the raw header name
   // and the normalized header name to ease the lookup.
-  private headerNames: Map<string, string> = new Map();
+  private headerNames = new Map<string, string>();
 
   constructor(init?: HeadersInit) {
     if (init instanceof Headers) {
@@ -196,7 +196,7 @@ export class Headers {
 
   *entries(): IterableIterator<[string, string]> {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
-    const sortedKeys = Object.keys(this["headers"]).sort((a, b) =>
+    const sortedKeys = Object.keys(this.headers).sort((a, b) =>
       a.localeCompare(b),
     );
 

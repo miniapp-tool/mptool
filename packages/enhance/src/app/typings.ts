@@ -21,8 +21,6 @@ export type AppInstance<Custom> = AppOptions<Custom> &
   Custom &
   ExtendedAppMethods;
 
-export interface AppConstructor {
-  <Custom extends WechatMiniprogram.IAnyObject>(
-    appOptions: AppOptions<Custom>,
-  ): void;
-}
+export type AppConstructor = <Custom extends WechatMiniprogram.IAnyObject>(
+  appOptions: AppOptions<Custom>,
+) => void;

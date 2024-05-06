@@ -9,12 +9,12 @@ import type {
 } from "../constant.js";
 import type { PageQuery } from "../page/index.js";
 
-export type AppEventType = {
+export interface AppEventType {
   [ON_APP_LAUNCH]: WechatMiniprogram.App.LaunchShowOption;
   [ON_APP_AWAKE]: number;
   [ON_PAGE_READY]: void;
   [ON_PAGE_UNLOAD]: void;
-};
+}
 
 export type RouteEventType = Record<string, PageQuery>;
 

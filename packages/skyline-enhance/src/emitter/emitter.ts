@@ -3,10 +3,10 @@ import { Emitter } from "@mptool/shared";
 
 import type { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
 
-export type AppEventType = {
+export interface AppEventType {
   [ON_APP_LAUNCH]: WechatMiniprogram.App.LaunchShowOption;
   [ON_APP_AWAKE]: number;
-};
+}
 
 export const appEmitter = Emitter<AppEventType>();
 

@@ -159,8 +159,8 @@ class UTF8Encoder implements Encoder {
     if (isASCIIByte(codePoint)) return codePoint;
 
     // 3. Set count and offset based on the range code point is in:
-    let count: number = 0;
-    let offset: number = 0;
+    let count = 0;
+    let offset = 0;
 
     // U+0080 to U+07FF, inclusive:
     if (inRange(codePoint, 0x0080, 0x07ff)) {

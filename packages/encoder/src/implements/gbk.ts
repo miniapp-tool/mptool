@@ -244,7 +244,7 @@ class GB18030Decoder implements Decoder {
       codePoint =
         pointer === null
           ? null
-          : indexCodePointFor(pointer, encodingIndex["gb18030"]);
+          : indexCodePointFor(pointer, encodingIndex.gb18030);
 
       // 6. If code point is null and byte is an ASCII byte, prepend
       // byte to stream.
@@ -306,7 +306,7 @@ class GB18030Encoder implements Encoder {
 
     // 5. Let pointer be the index pointer for code point in index
     // gb18030.
-    let pointer = indexPointerFor(codePoint, encodingIndex["gb18030"]);
+    let pointer = indexPointerFor(codePoint, encodingIndex.gb18030);
 
     // 6. If pointer is not null, run these substeps:
     if (pointer !== null) {
@@ -354,10 +354,10 @@ class GB18030Encoder implements Encoder {
   }
 }
 
-decoders["gb18030"] = (options): Decoder => new GB18030Decoder(options);
-encoders["gb18030"] = (options): Encoder => new GB18030Encoder(options);
+decoders.gb18030 = (options): Decoder => new GB18030Decoder(options);
+encoders.gb18030 = (options): Encoder => new GB18030Encoder(options);
 
 // gbk's decoder is gb18030's decoder.
-decoders["GBK"] = (options): Decoder => new GB18030Decoder(options);
+decoders.GBK = (options): Decoder => new GB18030Decoder(options);
 // gbk's encoder is gb18030's encoder with its gbk flag set.
-encoders["GBK"] = (options): Encoder => new GB18030Encoder(options, true);
+encoders.GBK = (options): Encoder => new GB18030Encoder(options, true);

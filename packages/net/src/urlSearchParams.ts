@@ -43,7 +43,7 @@ export class URLSearchParams {
       this.params = new Map();
 
       if (typeof init === "string")
-        (init.indexOf("?") === 0
+        (init.startsWith("?")
           ? // remove first '?'
             init.slice(1)
           : init

@@ -153,7 +153,7 @@ Options:
 
     wx.request<T>({
       url,
-      method: <
+      method: method.toUpperCase() as
         | "OPTIONS"
         | "GET"
         | "HEAD"
@@ -161,8 +161,7 @@ Options:
         | "PUT"
         | "DELETE"
         | "TRACE"
-        | "CONNECT"
-      >method.toUpperCase(),
+        | "CONNECT",
 
       header: requestHeaders.toObject(),
       data,

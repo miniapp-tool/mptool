@@ -26,7 +26,7 @@ describe("mitt", () => {
 describe("mitt#", () => {
   const eventType = Symbol("eventType");
 
-  type Events = {
+  interface Events {
     foo: unknown;
     constructor: unknown;
     FOO: unknown;
@@ -38,7 +38,7 @@ describe("mitt#", () => {
     "baz:baT!": unknown;
     Foo: unknown;
     [eventType]: unknown;
-  };
+  }
   let events: EventHandlerMap<Events>, inst: EmitterInstance<Events>;
 
   beforeEach(() => {

@@ -3,9 +3,7 @@ import type { RefMap } from "../component/index.js";
 import type { InstanceEmitterMethods } from "../emitter/index.js";
 import type { NavigatorMethods } from "../navigator/index.js";
 
-export interface PageQuery {
-  [props: string]: string;
-}
+export type PageQuery = Record<string, string>;
 
 export interface PageState {
   /** 是否是打开的第一个页面 */
@@ -136,15 +134,13 @@ export type PageOptions<
   }) &
   ThisType<PageInstance<Data, Custom>>;
 
-export interface PageConstructor {
-  <
-    Data extends WechatMiniprogram.IAnyObject,
-    Custom extends WechatMiniprogram.IAnyObject,
-  >(
-    name: string,
-    options: PageOptions<Data, Custom>,
-  ): void;
-}
+export type PageConstructor = <
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject,
+>(
+  name: string,
+  options: PageOptions<Data, Custom>,
+) => void;
 
 export type TrivialPageInstance = PageInstance<
   WechatMiniprogram.IAnyObject,

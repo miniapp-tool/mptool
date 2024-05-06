@@ -28,8 +28,8 @@ export const encoders: Record<
 export class TextEncoder {
   _encoding: Encoding;
   _encoder: Encoder | null = null;
-  doNotFlush: boolean = false;
-  _fatal: boolean = false;
+  doNotFlush = false;
+  _fatal = false;
 
   constructor(
     label = DEFAULT_ENCODING,
@@ -48,7 +48,7 @@ export class TextEncoder {
     if (options.fatal) this._fatal = true;
 
     // 2. Set enc's encoding to UTF-8's encoder.
-    if (options["NONSTANDARD_allowLegacyEncoding"]) {
+    if (options.NONSTANDARD_allowLegacyEncoding) {
       // NONSTANDARD behavior.
       label = label !== undefined ? String(label) : DEFAULT_ENCODING;
       const encoding = getEncoding(label);

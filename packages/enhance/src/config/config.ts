@@ -61,4 +61,4 @@ export const $Config = (config: AppConfig): void => {
 };
 
 export const getConfig = (): Config =>
-  (appConfig as Config) || logger.error("$Config is not called");
+  appConfig! || logger.error("$Config is not called");

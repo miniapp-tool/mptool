@@ -71,7 +71,7 @@ describe("[Symbol.iterator]", () => {
       "content-type": "application/json",
     });
 
-    const entries: Array<[string, string]> = [];
+    const entries: [string, string][] = [];
 
     for (const entry of headers) entries.push(entry);
 
@@ -84,7 +84,7 @@ describe("[Symbol.iterator]", () => {
 
   it("returns an empty iterator when there is no headers", () => {
     const headers = new Headers();
-    const entries: Array<[string, string]> = [];
+    const entries: [string, string][] = [];
 
     for (const entry of headers) entries.push(entry);
 
@@ -99,7 +99,7 @@ describe(".keys()", () => {
       "accept-language": "en-US",
       "content-type": "application/json",
     });
-    const keys: Array<string> = [];
+    const keys: string[] = [];
 
     for (const name of headers.keys()) keys.push(name);
 
@@ -108,7 +108,7 @@ describe(".keys()", () => {
 
   it("returns an empty iterator when there is no headers", () => {
     const headers = new Headers();
-    const keys: Array<string> = [];
+    const keys: string[] = [];
 
     for (const name of headers.keys()) keys.push(name);
 
@@ -140,7 +140,7 @@ describe(".values()", () => {
       "accept-language": "en-US",
       "content-type": "application/json",
     });
-    const values: Array<string> = [];
+    const values: string[] = [];
 
     for (const value of headers.values()) values.push(value);
 
@@ -149,7 +149,7 @@ describe(".values()", () => {
 
   it("returns an empty iterator when there is no headers", () => {
     const headers = new Headers();
-    const values: Array<string> = [];
+    const values: string[] = [];
 
     for (const value of headers.values()) values.push(value);
 
@@ -181,7 +181,7 @@ describe(".entries()", () => {
       "accept-language": "en-US",
       "content-type": "application/json",
     });
-    const entries: Array<[string, string]> = [];
+    const entries: [string, string][] = [];
 
     for (const entry of headers.entries()) entries.push(entry);
 
@@ -194,7 +194,7 @@ describe(".entries()", () => {
 
   it("returns an empty iterator when there is no headers", () => {
     const headers = new Headers();
-    const entries: Array<[string, string]> = [];
+    const entries: [string, string][] = [];
 
     for (const entry of headers.entries()) entries.push(entry);
 

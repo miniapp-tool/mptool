@@ -4,7 +4,7 @@ import type { ModuleFormat, Plugin, RollupOptions } from "rollup";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
 
-const isProduction = process.env["NODE_ENV"] === "production";
+const isProduction = process.env.NODE_ENV === "production";
 
 export interface RollupTypescriptOptions {
   dts?: boolean;
@@ -45,10 +45,9 @@ export const rollupTypescript = (
       },
     ],
     plugins: [
-      // @ts-ignore
+      // @ts-expect-error: type issue with NodeNext
       ...(resolve ? [nodeResolve(), commonjs() as Plugin] : []),
 
-      // @ts-ignore
       esbuild({ charset: "utf8", minify: isProduction, target: "es2015" }),
     ],
     external,

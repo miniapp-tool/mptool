@@ -37,8 +37,8 @@ type PropMethod<Type, TypeConstructor = any> = Type extends (
   : never;
 
 type PropConstructor<Type = any> =
-  | { new (...args: any[]): Type & {} }
-  | { (): Type }
+  | (new (...args: any[]) => Type & {})
+  | (() => Type)
   | PropMethod<Type>;
 
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
@@ -241,23 +241,21 @@ export type ComponentOptions<
     ComponentInstance<Data, Property, Method, CustomInstanceProperty, IsPage>
   >;
 
-export interface ComponentConstructor {
-  <
-    Data extends WechatMiniprogram.Component.DataOption,
-    Property extends PropsOptions,
-    Method extends WechatMiniprogram.Component.MethodOption,
-    CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
-    IsPage extends boolean = false,
-  >(
-    options: ComponentOptions<
-      Data,
-      Property,
-      Method,
-      CustomInstanceProperty,
-      IsPage
-    >,
-  ): string;
-}
+export type ComponentConstructor = <
+  Data extends WechatMiniprogram.Component.DataOption,
+  Property extends PropsOptions,
+  Method extends WechatMiniprogram.Component.MethodOption,
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
+  IsPage extends boolean = false,
+>(
+  options: ComponentOptions<
+    Data,
+    Property,
+    Method,
+    CustomInstanceProperty,
+    IsPage
+  >,
+) => string;
 
 export type TrivialComponentInstance = ComponentInstance<
   WechatMiniprogram.IAnyObject,

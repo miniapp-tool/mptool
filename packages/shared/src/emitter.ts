@@ -7,18 +7,17 @@ export type WildcardHandler<T = Record<string, unknown>> = (
 ) => void | Promise<void>;
 
 // An array of all currently registered event handlers for a type
-export type EventHandlerList<T = unknown> = Array<Handler<T>>;
-export type WildCardEventHandlerList<T = Record<string, unknown>> = Array<
-  WildcardHandler<T>
->;
+export type EventHandlerList<T = unknown> = Handler<T>[];
+export type WildCardEventHandlerList<T = Record<string, unknown>> =
+  WildcardHandler<T>[];
 
 // A map of event types and their corresponding event handlers.
-export type EventHandlerMap<Events extends Record<EventType, unknown>> = Map<
+export type EventHandlerMap<Events> = Map<
   keyof Events | "*",
   EventHandlerList<Events[keyof Events]> | WildCardEventHandlerList<Events>
 >;
 
-export interface EmitterInstance<Events extends Record<EventType, unknown>> {
+export interface EmitterInstance<Events> {
   all: EventHandlerMap<Events>;
 
   on<Key extends keyof Events>(type: Key, handler: Handler<Events[Key]>): void;
@@ -50,13 +49,12 @@ export interface EmitterInstance<Events extends Record<EventType, unknown>> {
  * @returns Emitter
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Emitter<Events extends Record<EventType, unknown>>(
-  all?: EventHandlerMap<Events>,
+export function Emitter<Events>(
+  all: EventHandlerMap<Events> = new Map(),
 ): EmitterInstance<Events> {
   type GenericEventHandler =
     | Handler<Events[keyof Events]>
     | WildcardHandler<Events>;
-  all = all || new Map();
 
   return {
     /**
@@ -76,7 +74,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       type: Key,
       handler: GenericEventHandler,
     ): void => {
-      const handlers: Array<GenericEventHandler> | undefined = all.get(type);
+      const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers) handlers.push(handler);
       else all.set(type, [handler] as EventHandlerList<Events[keyof Events]>);
@@ -95,7 +93,7 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       type: Key,
       handler?: GenericEventHandler,
     ): void => {
-      const handlers: Array<GenericEventHandler> | undefined = all.get(type);
+      const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers)
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
@@ -119,18 +117,14 @@ export function Emitter<Events extends Record<EventType, unknown>>(
       if (handlers)
         (handlers as EventHandlerList<Events[keyof Events]>)
           .slice()
-          .map((handler) => {
-            void handler(event as Events[Key]);
-          });
+          .map((handler) => handler(event!));
 
       handlers = all.get("*");
 
       if (handlers)
         (handlers as WildCardEventHandlerList<Events>)
           .slice()
-          .map((handler) => {
-            void handler(type, event as Events[Key]);
-          });
+          .map((handler) => handler(type, event!));
     },
 
     /**
@@ -146,22 +140,21 @@ export function Emitter<Events extends Record<EventType, unknown>>(
      * @param event 传递给所有响应函数的事件
      * @memberOf emitter
      */
-    emitAsync: <Key extends keyof Events>(
+    emitAsync: async <Key extends keyof Events>(
       type: Key,
       event?: Events[Key],
-    ): Promise<void> =>
-      Promise.all(
-        ((all.get(type) || []) as EventHandlerList<Events[keyof Events]>)
+    ): Promise<void> => {
+      await Promise.all(
+        ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)
           .slice()
-          .map((handler) => handler(event as Events[Key])),
-      )
-        .then(() =>
-          Promise.all(
-            ((all.get("*") || []) as WildCardEventHandlerList<Events>)
-              .slice()
-              .map((handler) => handler(type, event as Events[Key])),
-          ),
-        )
-        .then(() => void 0),
+          .map((handler) => handler(event!)),
+      );
+
+      await Promise.all(
+        ((all.get("*") ?? []) as WildCardEventHandlerList<Events>)
+          .slice()
+          .map((handler) => handler(type, event!)),
+      );
+    },
   };
 }

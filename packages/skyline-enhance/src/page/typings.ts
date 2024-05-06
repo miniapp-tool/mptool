@@ -103,15 +103,13 @@ export type PageOptions<
   }) &
   ThisType<PageInstance<Data, Custom>>;
 
-export interface PageConstructor {
-  <
-    Data extends WechatMiniprogram.IAnyObject,
-    Custom extends WechatMiniprogram.IAnyObject,
-  >(
-    name: string,
-    options: PageOptions<Data, Custom>,
-  ): void;
-}
+export type PageConstructor = <
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject,
+>(
+  name: string,
+  options: PageOptions<Data, Custom>,
+) => void;
 
 export type TrivialPageInstance = PageInstance<
   WechatMiniprogram.IAnyObject,

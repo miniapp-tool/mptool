@@ -32,11 +32,11 @@ export const decoders: Record<
  */
 export class TextDecoder {
   _encoding: Encoding;
-  _ignoreBOM: boolean = false;
+  _ignoreBOM = false;
   _decoder: Decoder | null = null;
-  _BOMseen: boolean = false;
-  _fatal: boolean = false;
-  doNotFlush: boolean = false;
+  _BOMseen = false;
+  _fatal = false;
+  doNotFlush = false;
 
   constructor(
     label = DEFAULT_ENCODING,
