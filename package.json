@@ -61,7 +61,7 @@
     "miniprogram-api-typings": "3.12.2",
     "nano-staged": "0.8.0",
     "ora": "8.0.1",
-    "picocolors": "1.0.0",
+    "picocolors": "1.0.1",
     "prettier": "3.2.5",
     "rimraf": "5.0.7",
     "rollup": "4.17.2",
