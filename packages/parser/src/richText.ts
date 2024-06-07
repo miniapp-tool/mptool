@@ -54,15 +54,15 @@ const handleNode = async (
         ),
       );
 
+      if (appendClass)
+        attrs.class = attrs.class ? `${attrs.class} ${node.name}` : node.name;
+
       const convertedNode: ElementNode = {
         type: "node",
         name: node.name,
         ...(Object.keys(attrs).length ? { attrs } : {}),
         ...(children.length ? { children } : {}),
       };
-
-      if (appendClass)
-        attrs.class = attrs.class ? `${attrs.class} ${node.name}` : node.name;
 
       const converter = transform[node.name as AllowTag];
 
