@@ -1,4 +1,5 @@
 import { isFunction } from "@mptool/shared";
+
 import type {
   AppConfigCommonOptions,
   AppConfigOptions,

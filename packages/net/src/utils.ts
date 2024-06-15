@@ -8,19 +8,6 @@ import { Cookie } from "./cookie.js";
 export const normalizeDomain = (domain = ""): string =>
   domain.replace(/^(\.*)?(?=\S)/gi, ".");
 
-export const getCookieScopeDomain = (domain = ""): string[] => {
-  if (!domain) return [];
-
-  // 获取 cookie 作用域范围列表
-  domain = domain.replace(/^\.+/gi, "");
-
-  const scopes = domain
-    .split(".")
-    .map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
-
-  return [domain].concat(scopes);
-};
-
 export interface UrlInfo {
   domain: string;
   path: string;

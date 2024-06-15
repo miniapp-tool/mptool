@@ -1,2 +1,2 @@
-export * from "./gbk.js";
-export * from "./utf8.js";
+import "./gbk.js";
+import "./utf8.js";

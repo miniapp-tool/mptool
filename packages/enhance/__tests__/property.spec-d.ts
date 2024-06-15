@@ -9,7 +9,7 @@ interface Config {
 
 it("$Component property", () => {
   $Component({
-    properties: {
+    props: {
       config: {
         type: Object as PropType<Config>,
       },
@@ -30,7 +30,7 @@ it("$Component property", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       n: Number,
       n2: {
         type: Number,
@@ -59,7 +59,7 @@ it("$Component property", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       n: Number,
       n2: {
         type: Number,
@@ -100,7 +100,7 @@ it("$Component property", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       n: {
         type: Number,
         default: 1,
@@ -119,7 +119,7 @@ it("$Component property", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       n: Number,
       a: Array,
     },

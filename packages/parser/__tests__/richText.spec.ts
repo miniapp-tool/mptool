@@ -32,6 +32,9 @@ it("getRichTextNodes()", async () => {
           },
           children: [
             {
+              attrs: {
+                class: "span",
+              },
               children: [
                 {
                   text: "hello",
@@ -56,6 +59,9 @@ it("getRichTextNodes()", async () => {
           },
           children: [
             {
+              attrs: {
+                class: "span",
+              },
               children: [
                 {
                   text: "hello",
@@ -66,6 +72,9 @@ it("getRichTextNodes()", async () => {
               type: "node",
             },
             {
+              attrs: {
+                class: "span",
+              },
               children: [
                 {
                   text: "world",
@@ -85,8 +94,14 @@ it("getRichTextNodes()", async () => {
       "<table><tr><td>hello</td></tr></table>",
       [
         {
+          attrs: {
+            class: "table",
+          },
           children: [
             {
+              attrs: {
+                class: "tr",
+              },
               children: [
                 {
                   children: [
@@ -95,6 +110,9 @@ it("getRichTextNodes()", async () => {
                       type: "text",
                     },
                   ],
+                  attrs: {
+                    class: "td",
+                  },
                   name: "td",
                   type: "node",
                 },
@@ -112,10 +130,19 @@ it("getRichTextNodes()", async () => {
       "<table><tr><td>hello</td><td>world</td></tr></table>",
       [
         {
+          attrs: {
+            class: "table",
+          },
           children: [
             {
+              attrs: {
+                class: "tr",
+              },
               children: [
                 {
+                  attrs: {
+                    class: "td",
+                  },
                   children: [
                     {
                       text: "hello",
@@ -126,6 +153,9 @@ it("getRichTextNodes()", async () => {
                   type: "node",
                 },
                 {
+                  attrs: {
+                    class: "td",
+                  },
                   children: [
                     {
                       text: "world",

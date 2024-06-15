@@ -1,11 +1,10 @@
 import { isMp, isQQ } from "@mptool/shared";
 
-import { Cookie } from "./cookie.js";
+import { Cookie, getCookieScopeDomain } from "./cookie.js";
 import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
 import {
   getCookieOptions,
-  getCookieScopeDomain,
   getDomain,
   normalizeDomain,
   parseCookieHeader,

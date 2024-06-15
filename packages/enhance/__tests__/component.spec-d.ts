@@ -1,4 +1,4 @@
-import { it, expectTypeOf, assertType } from "vitest";
+import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
 
@@ -8,7 +8,7 @@ it("$Component", () => {
   $Component({
     behaviors: [""],
 
-    properties: {
+    props: {
       myProperty: {
         type: String,
         default: "",
@@ -164,7 +164,7 @@ it("$Component", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       a: {
         type: Number,
         // observer: "onAChange",
@@ -302,7 +302,7 @@ it("$Component", () => {
       a: 1,
       b: "",
     };
-    const properties = {
+    const props = {
       c: String,
       d: {
         type: Number,
@@ -312,13 +312,13 @@ it("$Component", () => {
 
     $Component<
       typeof data,
-      typeof properties,
+      typeof props,
       /* methods= */ { fn(): string },
       /* customProperties= */ {},
       /* isPage= */ true
     >({
       data,
-      properties,
+      props,
       methods: {
         onLoad(q) {
           assertType<string[]>(Object.keys(q));

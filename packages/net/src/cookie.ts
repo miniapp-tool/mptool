@@ -1,5 +1,17 @@
 import type { CookieType } from "./typings.js";
-import { getCookieScopeDomain } from "./utils.js";
+
+export const getCookieScopeDomain = (domain = ""): string[] => {
+  if (!domain) return [];
+
+  // 获取 cookie 作用域范围列表
+  domain = domain.replace(/^\.+/gi, "");
+
+  const scopes = domain
+    .split(".")
+    .map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+
+  return [domain].concat(scopes);
+};
 
 /**
  * Cookie 类

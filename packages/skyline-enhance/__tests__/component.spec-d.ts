@@ -1,4 +1,4 @@
-import { it, expectTypeOf, assertType } from "vitest";
+import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
 

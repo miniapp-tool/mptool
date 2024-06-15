@@ -38,6 +38,7 @@ export default config(
           },
         },
       ],
+      "import/export": "off",
     },
   },
 
