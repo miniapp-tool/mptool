@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://miniapp-tool///compare/v0.7.1...v0.7.2) (2024-06-15)
+
+### Features
+
+- **skyline:** add parser ([0f92a42](https://miniapp-tool///commit/0f92a42b1071ac7201a59f23f084de93f48ba31b))
+- **skyline:** remove getName ([b2cd445](https://miniapp-tool///commit/b2cd445d92fcda0a7db9b5ef3fceeba014eb2287))
+
 ## [0.7.1](https://miniapp-tool///compare/v0.7.0...v0.7.1) (2024-06-15)
 
 ## [0.7.0](https://miniapp-tool///compare/v0.6.4...v0.7.0) (2024-06-15)
