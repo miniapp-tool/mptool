@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.3](https://github.com/miniapp-tool/mptool/compare/v0.7.2...v0.7.3) (2024-06-15)
+
+### Features
+
+- remove path to name logic ([f556744](https://github.com/miniapp-tool/mptool/commit/f5567447c45202522573ea96c96f1c37203d9ad8))
+
+### Bug Fixes
+
+- fix docs ([73ec60f](https://github.com/miniapp-tool/mptool/commit/73ec60f00d95f95912e3c2b02da9b1d060e0a01d))
+
 ## [0.7.2](https://miniapp-tool///compare/v0.7.1...v0.7.2) (2024-06-15)
 
 ### Features
