@@ -8,7 +8,7 @@ import type {
 } from "./typings.js";
 
 export interface Config
-  extends Omit<AppConfigOptions, "defaultRoute" | "routeMap"> {
+  extends Omit<AppConfigOptions, "defaultRoute" | "routes"> {
   /**
    * @returns name
    */

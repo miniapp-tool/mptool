@@ -122,14 +122,6 @@ export interface RoutePathConfig {
 
 export interface RouteCustomConfig {
   /**
-   * 获得页面简称
-   *
-   * @param url 页面路径
-   * @returns 页面名称
-   */
-  getName: (url: string) => string;
-
-  /**
    * 获得页面路径
    *
    * @param pageName 页面简称

@@ -8,12 +8,7 @@ import type {
 } from "./typings.js";
 
 export interface Config
-  extends Omit<AppConfigOptions, "defaultRoute" | "routeMap"> {
-  /**
-   * @returns name
-   */
-  getName: (url: string) => string;
-
+  extends Omit<AppConfigOptions, "defaultRoute" | "routes"> {
   /**
    * @returns route
    */
@@ -26,31 +21,27 @@ export const $Config = (config: AppConfigOptions): void => {
   const {
     defaultRoute,
     getRoute,
-    getName,
     routes = [],
     ...options
   } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
   >;
 
-  if (isFunction(getRoute) && isFunction(getName)) {
+  if (isFunction(getRoute)) {
     appConfig = {
       ...options,
       getRoute,
-      getName,
     };
 
     return;
   }
 
   let nameToRouteMap: Record<string, string> = {};
-  let routeToNameMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
     const actualRoute = route.replace(/\$name/g, name);
 
     nameToRouteMap[name] = actualRoute;
-    routeToNameMap[actualRoute] = name;
   };
 
   if (Array.isArray(routes)) {
@@ -60,27 +51,13 @@ export const $Config = (config: AppConfigOptions): void => {
     });
   } else if (typeof routes === "object") {
     nameToRouteMap = routes;
-    routeToNameMap = Object.fromEntries(
-      Object.keys(routes).map((route) => [routes[route], route]),
-    );
   }
-
-  const defaultRouteReg = new RegExp(
-    `^${defaultRoute
-      .replace(/^\/?/, "/?")
-      .replace(/[.]/g, "\\.")
-      .replace("$name", "([\\w\\-]+)")
-      .replace(/\$name/g, "[\\w\\-]+")}`,
-  );
 
   appConfig = {
     ...options,
 
     getRoute: (name: string): string =>
       nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
-
-    getName: (url: string): string =>
-      (routeToNameMap[url] || defaultRouteReg.exec(url)?.[1]) ?? "Unknown",
   };
 };
 

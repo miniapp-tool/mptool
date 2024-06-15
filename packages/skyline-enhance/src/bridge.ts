@@ -196,6 +196,8 @@ export function mount(
   > &
     WechatMiniprogram.IAnyObject,
 ): void {
+  const config = getConfig();
+
   ctx.$ = bind;
 
   // 实例引用集合
@@ -219,8 +221,7 @@ export function mount(
 
   // 页面信息
   ctx.$currentPage = getPage;
-  ctx.$getName = getConfig().getName;
-  ctx.$getPath = getConfig().getRoute;
+  ctx.$getPath = config.getRoute;
 
   // 点击跳转代理
   ctx.$bindGo = bindGo;
