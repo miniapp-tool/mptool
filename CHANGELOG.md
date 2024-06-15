@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.0](https://miniapp-tool///compare/v0.6.4...v0.7.0) (2024-06-15)
+
+### Features
+
+- support getName and getRoute in config and reshape $Component ([06d01e7](https://miniapp-tool///commit/06d01e752f8d9985be3b59a8aff0bc767015d59d))
+
 ## [0.6.4](https://miniapp-tool///compare/v0.6.3...v0.6.4) (2024-06-07)
 
 ### Bug Fixes
