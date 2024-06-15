@@ -3,7 +3,7 @@
   "version": "0.7.2",
   "private": true,
   "description": "Miniapp is a lightweight framework for QQ/Wechat miniapp.",
-  "repository": "github.com:miniapp-tool/mptool.git",
+  "repository": "https://github.com/miniapp-tool/mptool",
   "license": "MIT",
   "author": {
     "name": "Mr.Hope",
