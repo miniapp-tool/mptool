@@ -8,7 +8,7 @@ it("$Component", () => {
   $Component({
     behaviors: [""],
 
-    properties: {
+    props: {
       myProperty: {
         type: String,
         default: "",
@@ -164,7 +164,7 @@ it("$Component", () => {
   });
 
   $Component({
-    properties: {
+    props: {
       a: {
         type: Number,
         // observer: "onAChange",
@@ -318,7 +318,7 @@ it("$Component", () => {
       /* isPage= */ true
     >({
       data,
-      properties,
+      props: properties,
       methods: {
         onLoad(q) {
           assertType<string[]>(Object.keys(q));

@@ -16,30 +16,30 @@ import type { TrivialPageInstance } from "../page/index.js";
 let componentIndex = 0;
 
 export const handleProperties = (
-  props: PropsOptions = {},
+  oldProps: PropsOptions = {},
 ): WechatMiniprogram.Component.PropertyOption => {
-  const properties: WechatMiniprogram.Component.PropertyOption = {};
+  const props: WechatMiniprogram.Component.PropertyOption = {};
 
-  Object.keys(props).forEach((propertyName) => {
-    const vueSyntaxValue = props[propertyName];
+  Object.keys(oldProps).forEach((propertyName) => {
+    const vueSyntaxValue = oldProps[propertyName];
 
     // Constructor or null
     if (vueSyntaxValue === null || typeof vueSyntaxValue === "function") {
-      properties[propertyName] =
+      props[propertyName] =
         vueSyntaxValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = vueSyntaxValue;
 
       // null type
       if (type === null)
-        properties[propertyName] = {
+        props[propertyName] = {
           type: null,
           value: vueSyntaxValue.default,
         };
       // array type, should push rest into `optionalTypes`
       else if (Array.isArray(type))
         // array type syntax
-        properties[propertyName] = {
+        props[propertyName] = {
           // @ts-expect-error: Force set prop config
           type: type[0],
           value: vueSyntaxValue.default,
@@ -48,7 +48,7 @@ export const handleProperties = (
           optionalTypes: type.slice(1),
         };
       else
-        properties[propertyName] = {
+        props[propertyName] = {
           // @ts-expect-error: Force set prop config
           type,
           value: vueSyntaxValue.default,
@@ -57,7 +57,7 @@ export const handleProperties = (
   });
 
   return {
-    ...properties,
+    ...props,
     // add ref
     ref: { type: String, value: "" },
   };
@@ -223,7 +223,8 @@ export const $Component: ComponentConstructor = <
   };
 
   // @ts-expect-error: convert prop config
-  options.properties = handleProperties(options.properties);
+  options.props = handleProperties(options.props);
+  delete options.props;
 
   // we cast properties into syntax that miniprogram can handle
   return Component(

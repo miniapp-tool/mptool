@@ -32,11 +32,13 @@ export function getTrigger(
 /**
  * Navigation trigger
  */
-// eslint-disable-next-line
-export function getTrigger(type: NavigatorType) {
-  // eslint-disable-next-line
+export function getTrigger(
+  type: NavigatorType,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): (pageNameWithArg: string) => any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (pageNameWithArg: string): any => {
-    // @ts-expect-error: param type mismatch
+    // @ts-expect-error: argument can not union
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return wx[type]({ url: getFullPath(pageNameWithArg) });
   };

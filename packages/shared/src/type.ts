@@ -7,7 +7,9 @@
 export const type = (obj: unknown): string => {
   if (obj === undefined) return "undefined";
 
-  if (typeof obj === "object") {
+  const objType = typeof obj;
+
+  if (objType === "object") {
     if (obj === null) return "null";
 
     const objType = /\[object (\w+)\]/u.exec(
@@ -17,5 +19,8 @@ export const type = (obj: unknown): string => {
     return objType ? objType[1].toLowerCase() : "";
   }
 
-  return typeof obj;
+  return objType;
 };
+
+export const isFunction = <T extends Function>(obj: unknown): obj is T =>
+  type(obj) === "function";

@@ -6,7 +6,7 @@ import { isMp } from "./env.js";
 const log = isMp
   ? wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 })
   : console;
-const isRealtime = isMp && typeof wx.getRealtimeLogManager === "function";
+const isRealtime = isMp && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {

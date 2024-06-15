@@ -6,7 +6,7 @@ import { getConfig } from "../config/index.js";
 import { ON_APP_AWAKE } from "../constant.js";
 import { appEmitter } from "../emitter/index.js";
 
-let hasPageLoaded = false;
+let shouldBeFirstPage = true;
 
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
@@ -43,8 +43,8 @@ export const $Page: PageConstructor = <
       registerLog("onAwake");
     }
 
-    if (!hasPageLoaded) {
-      hasPageLoaded = true;
+    if (shouldBeFirstPage) {
+      shouldBeFirstPage = false;
 
       options.$state!.firstOpen = true;
     }

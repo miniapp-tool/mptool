@@ -1,8 +1,13 @@
-import { logger } from "@mptool/shared";
+import { isFunction } from "@mptool/shared";
+import type {
+  AppConfigCommonOptions,
+  AppConfigOptions,
+  RouteCustomConfig,
+  RoutePathConfig,
+} from "./typings.js";
 
-import type { AppConfig } from "./typings.js";
-
-export interface Config extends Omit<AppConfig, "defaultRoute" | "routeMap"> {
+export interface Config
+  extends Omit<AppConfigOptions, "defaultRoute" | "routeMap"> {
   /**
    * @returns name
    */
@@ -16,8 +21,26 @@ export interface Config extends Omit<AppConfig, "defaultRoute" | "routeMap"> {
 
 let appConfig: Config | null;
 
-export const $Config = (config: AppConfig): void => {
-  const { defaultRoute, routes = [], ...options } = config;
+export const $Config = (config: AppConfigOptions): void => {
+  const {
+    defaultRoute,
+    getRoute,
+    getName,
+    routes = [],
+    ...options
+  } = config as Required<
+    AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
+  >;
+
+  if (isFunction(getRoute) && isFunction(getName)) {
+    appConfig = {
+      ...options,
+      getRoute,
+      getName,
+    };
+
+    return;
+  }
 
   let nameToRouteMap: Record<string, string> = {};
   let routeToNameMap: Record<string, string> = {};
@@ -60,5 +83,8 @@ export const $Config = (config: AppConfig): void => {
   };
 };
 
-export const getConfig = (): Config =>
-  appConfig! || logger.error("$Config is not called");
+export const getConfig = (): Config => {
+  if (!appConfig) throw new Error("$Config is not called");
+
+  return appConfig;
+};

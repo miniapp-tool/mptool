@@ -199,62 +199,54 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
 
 export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends PropsOptions,
+  Props extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false,
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
   Method &
   (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {}) &
-  CustomInstanceProperty &
+  InstanceProps &
   ExtendedComponentProperty &
   ExtendedPageMethods<
-    Data & InferPropTypes<Property>,
-    CustomInstanceProperty &
+    Data & InferPropTypes<Props>,
+    InstanceProps &
       Method &
       (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
   > & {
     /** 组件数据，**包括内部数据和属性值** */
-    data: Data & InferPropTypes<Property>;
+    data: Data & InferPropTypes<Props>;
     /** 组件数据，**包括内部数据和属性值**（与 `data` 一致） */
-    properties: Data & InferPropTypes<Property>;
+    properties: Data & InferPropTypes<Props>;
   };
 
 export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends PropsOptions,
+  Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false,
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<{
     /** 组件属性 */
-    properties: Property;
+    props: Props;
   }> &
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
   Partial<ComponentLifetimes> &
-  ThisType<
-    ComponentInstance<Data, Property, Method, CustomInstanceProperty, IsPage>
-  >;
+  ThisType<ComponentInstance<Data, Props, Method, InstanceProps, IsPage>>;
 
 export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
-  Property extends PropsOptions,
+  Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = {},
   IsPage extends boolean = false,
 >(
-  options: ComponentOptions<
-    Data,
-    Property,
-    Method,
-    CustomInstanceProperty,
-    IsPage
-  >,
+  options: ComponentOptions<Data, Props, Method, InstanceProps, IsPage>,
 ) => string;
 
 export type TrivialComponentInstance = ComponentInstance<
