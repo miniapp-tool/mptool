@@ -23,7 +23,8 @@ export const $Page: PageConstructor = <
   name: string,
   options: PageOptions<Data, Custom>,
 ): void => {
-  const { extendPage, injectPage } = getConfig();
+  const { getPath: getRoute, extendPage, injectPage } = getConfig();
+  const route = getRoute(name);
 
   const callLog = (lifeCycle: string, args?: unknown): void =>
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args || "");
@@ -62,7 +63,7 @@ export const $Page: PageConstructor = <
 
   if (options.onNavigate) {
     routeEmitter.on(
-      `${ON_PAGE_NAVIGATE}:${name}`,
+      `${ON_PAGE_NAVIGATE}:${route}`,
       (query: PageQuery): Promise<void> | void => {
         callLog("onNavigate", query);
 
@@ -75,7 +76,7 @@ export const $Page: PageConstructor = <
 
   if (options.onPreload) {
     routeEmitter.on(
-      `${ON_PAGE_PRELOAD}:${name}`,
+      `${ON_PAGE_PRELOAD}:${route}`,
       (query: PageQuery): void | Promise<void> => {
         callLog("onPreload", query);
 

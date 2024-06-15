@@ -221,7 +221,7 @@ export function mount(
 
   // 页面信息
   ctx.$currentPage = getPage;
-  ctx.$getPath = config.getRoute;
+  ctx.$getPath = config.getPath;
 
   // 点击跳转代理
   ctx.$bindGo = bindGo;

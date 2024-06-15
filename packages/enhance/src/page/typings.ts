@@ -96,13 +96,6 @@ export interface ExtendedPageMethods<
   $currentPage(): PageInstance<Data, Custom>;
 
   /**
-   * 获得页面简称
-   *
-   * @param url 页面地址
-   */
-  $getName(url: string): string;
-
-  /**
    * 获得页面路径
    *
    * @param name 页面简称

@@ -25,7 +25,7 @@ export type NavigatorType =
   | "reLaunch";
 
 export interface PathDetails {
-  name: string;
+  path: string;
   query: PageQuery;
   url: string;
 }
@@ -33,12 +33,12 @@ export interface PathDetails {
 export const getPathDetail = (pageNameWithArg: string): PathDetails => {
   const config = getConfig();
   const [pageName, queryString] = pageNameWithArg.split("?");
-  const path = pageName.startsWith("/") ? pageName : config.getRoute(pageName);
+  const path = pageName.startsWith("/") ? pageName : config.getPath(pageName);
 
   return {
-    name: config.getName(path),
-    url: `${path}${queryString ? `?${queryString}` : ""}`,
+    path,
     query: query.parse(queryString),
+    url: `${path}${queryString ? `?${queryString}` : ""}`,
   };
 };
 
@@ -70,10 +70,10 @@ export function getTrigger(
       // set navigate lock
       canNavigate = false;
 
-      const { name, url, query } = getPathDetail(pageNameWithArg);
+      const { path, url, query } = getPathDetail(pageNameWithArg);
 
       return Promise.race([
-        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${name}`, query),
+        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, query),
         // 等待最小延迟
         new Promise<void>((resolve) => {
           setTimeout(() => resolve(), getConfig().maxDelay ?? 200);

@@ -127,7 +127,7 @@ export interface RouteCustomConfig {
    * @param pageName 页面简称
    * @returns 页面路径
    */
-  getRoute: (pageName: string) => string;
+  getPath: (pageName: string) => string;
 }
 
 export type AppConfigOptions = AppConfigCommonOptions &

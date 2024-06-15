@@ -61,6 +61,18 @@ export interface AppConfigCommonOptions {
 }
 export interface RoutePathConfig {
   /**
+   * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
+   *
+   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
+   *
+   * 例子: 你可以填入 `/pages/$name/$name` 来表达:
+   *
+   * - `main': '/pages/main/main`
+   * - `user': '/pages/user/user`
+   */
+  defaultPage: string;
+
+  /**
    * 你可以直接以对象形式表示简称到路径的映射。如:
    *
    * ```js
@@ -105,37 +117,17 @@ export interface RoutePathConfig {
    *
    * @description 无法解析的路径会回退到 `defaultRoute`
    */
-  routes?: Record<string, string> | [string | string[], string][];
-
-  /**
-   * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
-   *
-   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
-   *
-   * 例子: 你可以填入 `/pages/$name/$name` 来表达:
-   *
-   * - `main': '/pages/main/main`
-   * - `user': '/pages/user/user`
-   */
-  defaultRoute: string;
+  pages?: Record<string, string> | [string | string[], string][];
 }
 
 export interface RouteCustomConfig {
-  /**
-   * 获得页面简称
-   *
-   * @param url 页面路径
-   * @returns 页面名称
-   */
-  getName: (url: string) => string;
-
   /**
    * 获得页面路径
    *
    * @param pageName 页面简称
    * @returns 页面路径
    */
-  getRoute: (pageName: string) => string;
+  getPath: (pageName: string) => string;
 }
 
 export type AppConfigOptions = AppConfigCommonOptions &

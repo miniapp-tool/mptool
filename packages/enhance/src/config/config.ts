@@ -10,34 +10,30 @@ import type {
 export interface Config
   extends Omit<AppConfigOptions, "defaultRoute" | "routes"> {
   /**
-   * @returns name
+   * 获得页面路径
+   *
+   * @param pageName 页面简称
+   * @returns 页面路径
    */
-  getName: (url: string) => string;
-
-  /**
-   * @returns route
-   */
-  getRoute: (pageName: string) => string;
+  getPath: (pageName: string) => string;
 }
 
 let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
   const {
-    defaultRoute,
-    getRoute,
-    getName,
-    routes = [],
+    defaultPage: defaultRoute,
+    pages: routes = [],
+    getPath,
     ...options
   } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
   >;
 
-  if (isFunction(getRoute) && isFunction(getName)) {
+  if (isFunction(getPath)) {
     appConfig = {
       ...options,
-      getRoute,
-      getName,
+      getPath,
     };
 
     return;
@@ -65,22 +61,11 @@ export const $Config = (config: AppConfigOptions): void => {
     );
   }
 
-  const defaultRouteReg = new RegExp(
-    `^${defaultRoute
-      .replace(/^\/?/, "/?")
-      .replace(/[.]/g, "\\.")
-      .replace("$name", "([\\w\\-]+)")
-      .replace(/\$name/g, "[\\w\\-]+")}`,
-  );
-
   appConfig = {
     ...options,
 
-    getRoute: (name: string): string =>
+    getPath: (name: string): string =>
       nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
-
-    getName: (url: string): string =>
-      (routeToNameMap[url] || defaultRouteReg.exec(url)?.[1]) ?? "Unknown",
   };
 };
 

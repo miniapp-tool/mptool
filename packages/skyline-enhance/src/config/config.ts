@@ -12,7 +12,7 @@ export interface Config
   /**
    * @returns route
    */
-  getRoute: (pageName: string) => string;
+  getPath: (pageName: string) => string;
 }
 
 let appConfig: Config | null;
@@ -20,17 +20,17 @@ let appConfig: Config | null;
 export const $Config = (config: AppConfigOptions): void => {
   const {
     defaultRoute,
-    getRoute,
+    getPath,
     routes = [],
     ...options
   } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
   >;
 
-  if (isFunction(getRoute)) {
+  if (isFunction(getPath)) {
     appConfig = {
       ...options,
-      getRoute,
+      getPath,
     };
 
     return;
@@ -56,7 +56,7 @@ export const $Config = (config: AppConfigOptions): void => {
   appConfig = {
     ...options,
 
-    getRoute: (name: string): string =>
+    getPath: (name: string): string =>
       nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
   };
 };

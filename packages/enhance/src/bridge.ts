@@ -120,9 +120,9 @@ const getPage = <
  */
 const preload = (pageNameWithArg: string): void => {
   /** 页面名称 */
-  const { name, query } = getPathDetail(pageNameWithArg);
+  const { path, query } = getPathDetail(pageNameWithArg);
 
-  routeEmitter.emit(`${ON_PAGE_PRELOAD}:${name}`, query);
+  routeEmitter.emit(`${ON_PAGE_PRELOAD}:${path}`, query);
 };
 
 export function bind(
@@ -237,8 +237,7 @@ export function mount(
 
   // 页面信息
   ctx.$currentPage = getPage;
-  ctx.$getName = config.getName;
-  ctx.$getPath = config.getRoute;
+  ctx.$getPath = config.getPath;
 
   // 点击跳转代理
   ctx.$bindGo = bindGo;

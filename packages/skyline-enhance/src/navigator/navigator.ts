@@ -9,7 +9,7 @@ export type NavigatorType =
 export const getFullPath = (pageNameWithArg: string): string => {
   const config = getConfig();
   const [pageName, queryString] = pageNameWithArg.split("?");
-  const path = pageName.startsWith("/") ? pageName : config.getRoute(pageName);
+  const path = pageName.startsWith("/") ? pageName : config.getPath(pageName);
 
   return `${path}${queryString ? `?${queryString}` : ""}`;
 };

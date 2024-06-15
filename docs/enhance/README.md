@@ -582,8 +582,6 @@ $Page("main", {
 
 - `$currentPage(): PageInstance`: 获取当前页面实例
 
-- `$getName(url: string): string`: 获取传入页面地址的页面简称
-
 - `$getPath(name: string): string`: 获取传入页面简称的页面路径
 
 - `$on`, `$off`, `$emit`, `$emitAsync`: [Emitter](#emitter) 实例方法

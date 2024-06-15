@@ -5,66 +5,51 @@ import { $Config, getConfig } from "../src/config/index.js";
 
 describe("$Config Test", () => {
   it("Should work when only have 'defaultRoute'", () => {
-    $Config({ defaultRoute: "/pages/$name" });
+    $Config({ defaultPage: "/pages/$name" });
 
-    expect(getConfig().getRoute("main")).toEqual("/pages/main");
-    expect(getConfig().getRoute("user")).toEqual("/pages/user");
-    expect(getConfig().getName("/pages/main")).toEqual("main");
-    expect(getConfig().getName("/pages/user")).toEqual("user");
+    expect(getConfig().getPath("main")).toEqual("/pages/main");
+    expect(getConfig().getPath("user")).toEqual("/pages/user");
   });
 
   it("Should work with mutiple $name", () => {
-    $Config({ defaultRoute: "/pages/$name/$name" });
+    $Config({ defaultPage: "/pages/$name/$name" });
 
-    expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
-    expect(getConfig().getRoute("user")).toEqual("/pages/user/user");
-    expect(getConfig().getName("/pages/main/main")).toEqual("main");
-    expect(getConfig().getName("/pages/user/user")).toEqual("user");
+    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
+    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
   });
 
   it("Should work with object 'routes'", () => {
     $Config({
-      routes: {
+      pages: {
         user: "/pages/user/user",
         about: "/others/about/about",
       },
-      defaultRoute: "/pages/$name/$name",
+      defaultPage: "/pages/$name/$name",
     });
 
-    expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
-    expect(getConfig().getRoute("user")).toEqual("/pages/user/user");
-    expect(getConfig().getRoute("about")).toEqual("/others/about/about");
-    expect(getConfig().getName("/pages/main/main")).toEqual("main");
-    expect(getConfig().getName("/pages/user/user")).toEqual("user");
-    expect(getConfig().getName("/others/about/about")).toEqual("about");
+    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
+    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
+    expect(getConfig().getPath("about")).toEqual("/others/about/about");
   });
 
   it("Should work with array 'routes'", () => {
     $Config({
-      routes: [
+      pages: [
         [["main", "cart", "user"], "/pages/$name/$name"],
         [["search", "details", "order"], "/shop/$name/$name"],
         ["about", "/others/about/about"],
         ["info", "/others/$name/$name"],
       ],
-      defaultRoute: "/pages/$name/$name",
+      defaultPage: "/pages/$name/$name",
     });
 
-    expect(getConfig().getRoute("main")).toEqual("/pages/main/main");
-    expect(getConfig().getRoute("cart")).toEqual("/pages/cart/cart");
-    expect(getConfig().getRoute("user")).toEqual("/pages/user/user");
-    expect(getConfig().getRoute("search")).toEqual("/shop/search/search");
-    expect(getConfig().getRoute("details")).toEqual("/shop/details/details");
-    expect(getConfig().getRoute("order")).toEqual("/shop/order/order");
-    expect(getConfig().getRoute("about")).toEqual("/others/about/about");
-    expect(getConfig().getRoute("info")).toEqual("/others/info/info");
-    expect(getConfig().getName("/pages/main/main")).toEqual("main");
-    expect(getConfig().getName("/pages/cart/cart")).toEqual("cart");
-    expect(getConfig().getName("/pages/user/user")).toEqual("user");
-    expect(getConfig().getName("/shop/search/search")).toEqual("search");
-    expect(getConfig().getName("/shop/details/details")).toEqual("details");
-    expect(getConfig().getName("/shop/order/order")).toEqual("order");
-    expect(getConfig().getName("/others/about/about")).toEqual("about");
-    expect(getConfig().getName("/others/info/info")).toEqual("info");
+    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
+    expect(getConfig().getPath("cart")).toEqual("/pages/cart/cart");
+    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
+    expect(getConfig().getPath("search")).toEqual("/shop/search/search");
+    expect(getConfig().getPath("details")).toEqual("/shop/details/details");
+    expect(getConfig().getPath("order")).toEqual("/shop/order/order");
+    expect(getConfig().getPath("about")).toEqual("/others/about/about");
+    expect(getConfig().getPath("info")).toEqual("/others/info/info");
   });
 });
