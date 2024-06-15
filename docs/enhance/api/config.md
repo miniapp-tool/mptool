@@ -5,7 +5,7 @@ order: 2
 
 全局配置器，必须放置在应用主脚本中在 `$App` 前调用。
 
-## defaultRoute
+## defaultPage
 
 - 类型: `string`
 - 必填: 是
@@ -25,7 +25,7 @@ order: 2
 
 :::
 
-## routes
+## pages
 
 - 类型: `Record<string, string> | Array<[string, string] | [string[], string]>`
 - 必填: 否
@@ -76,7 +76,7 @@ order: 2
 
 ::: tip
 
-无法解析的路径会回退到 `defaultRoute`
+无法解析的路径会回退到 `defaultPage`
 
 :::
 

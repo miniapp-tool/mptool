@@ -4,27 +4,27 @@ import { describe, expect, it } from "vitest";
 import { $Config, getConfig } from "../src/config/index.js";
 
 describe("$Config Test", () => {
-  it("Should work when only have 'defaultRoute'", () => {
-    $Config({ defaultRoute: "/pages/$name" });
+  it("Should work when only have 'defaultPage'", () => {
+    $Config({ defaultPage: "/pages/$name" });
 
     expect(getConfig().getPath("main")).toEqual("/pages/main");
     expect(getConfig().getPath("user")).toEqual("/pages/user");
   });
 
   it("Should work with mutiple $name", () => {
-    $Config({ defaultRoute: "/pages/$name/$name" });
+    $Config({ defaultPage: "/pages/$name/$name" });
 
     expect(getConfig().getPath("main")).toEqual("/pages/main/main");
     expect(getConfig().getPath("user")).toEqual("/pages/user/user");
   });
 
-  it("Should work with object 'routes'", () => {
+  it("Should work with object 'pages'", () => {
     $Config({
-      routes: {
+      pages: {
         user: "/pages/user/user",
         about: "/others/about/about",
       },
-      defaultRoute: "/pages/$name/$name",
+      defaultPage: "/pages/$name/$name",
     });
 
     expect(getConfig().getPath("main")).toEqual("/pages/main/main");
@@ -32,15 +32,15 @@ describe("$Config Test", () => {
     expect(getConfig().getPath("about")).toEqual("/others/about/about");
   });
 
-  it("Should work with array 'routes'", () => {
+  it("Should work with array 'pages'", () => {
     $Config({
-      routes: [
+      pages: [
         [["main", "cart", "user"], "/pages/$name/$name"],
         [["search", "details", "order"], "/shop/$name/$name"],
         ["about", "/others/about/about"],
         ["info", "/others/$name/$name"],
       ],
-      defaultRoute: "/pages/$name/$name",
+      defaultPage: "/pages/$name/$name",
     });
 
     expect(getConfig().getPath("main")).toEqual("/pages/main/main");

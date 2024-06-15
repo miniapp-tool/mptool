@@ -103,9 +103,9 @@ export interface RoutePathConfig {
    * }
    * ```
    *
-   * @description 无法解析的路径会回退到 `defaultRoute`
+   * @description 无法解析的路径会回退到 `defaultPage`
    */
-  routes?: Record<string, string> | [string | string[], string][];
+  pages?: Record<string, string> | [string | string[], string][];
 
   /**
    * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
@@ -117,7 +117,7 @@ export interface RoutePathConfig {
    * - `main': '/pages/main/main`
    * - `user': '/pages/user/user`
    */
-  defaultRoute: string;
+  defaultPage: string;
 }
 
 export interface RouteCustomConfig {

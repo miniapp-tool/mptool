@@ -4,7 +4,7 @@ import { $App, $Config, request } from "@mptool/all";
 wx.env.DEBUG = true;
 
 $Config({
-  defaultRoute: "/pages/$name",
+  defaultPage: "/pages/$name",
 });
 
 $App({

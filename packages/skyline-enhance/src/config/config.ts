@@ -8,7 +8,7 @@ import type {
 } from "./typings.js";
 
 export interface Config
-  extends Omit<AppConfigOptions, "defaultRoute" | "routes"> {
+  extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
   /**
    * @returns route
    */
@@ -19,9 +19,9 @@ let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
   const {
-    defaultRoute,
+    defaultPage,
     getPath,
-    routes = [],
+    pages = [],
     ...options
   } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
@@ -44,20 +44,20 @@ export const $Config = (config: AppConfigOptions): void => {
     nameToRouteMap[name] = actualRoute;
   };
 
-  if (Array.isArray(routes)) {
-    routes.forEach(([name, route]) => {
+  if (Array.isArray(pages)) {
+    pages.forEach(([name, route]) => {
       if (typeof name === "string") addRoute(name, route);
       else name.forEach((item) => addRoute(item, route));
     });
-  } else if (typeof routes === "object") {
-    nameToRouteMap = routes;
+  } else if (typeof pages === "object") {
+    nameToRouteMap = pages;
   }
 
   appConfig = {
     ...options,
 
     getPath: (name: string): string =>
-      nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
+      nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
   };
 };
 

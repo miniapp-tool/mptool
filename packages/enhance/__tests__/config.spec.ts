@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { $Config, getConfig } from "../src/config/index.js";
 
 describe("$Config Test", () => {
-  it("Should work when only have 'defaultRoute'", () => {
+  it("Should work when only have 'defaultPage'", () => {
     $Config({ defaultPage: "/pages/$name" });
 
     expect(getConfig().getPath("main")).toEqual("/pages/main");
@@ -18,7 +18,7 @@ describe("$Config Test", () => {
     expect(getConfig().getPath("user")).toEqual("/pages/user/user");
   });
 
-  it("Should work with object 'routes'", () => {
+  it("Should work with object 'pages'", () => {
     $Config({
       pages: {
         user: "/pages/user/user",
@@ -32,7 +32,7 @@ describe("$Config Test", () => {
     expect(getConfig().getPath("about")).toEqual("/others/about/about");
   });
 
-  it("Should work with array 'routes'", () => {
+  it("Should work with array 'pages'", () => {
     $Config({
       pages: [
         [["main", "cart", "user"], "/pages/$name/$name"],

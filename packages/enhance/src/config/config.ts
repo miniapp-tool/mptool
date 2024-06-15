@@ -8,7 +8,7 @@ import type {
 } from "./typings.js";
 
 export interface Config
-  extends Omit<AppConfigOptions, "defaultRoute" | "routes"> {
+  extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
   /**
    * 获得页面路径
    *
@@ -22,8 +22,8 @@ let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
   const {
-    defaultPage: defaultRoute,
-    pages: routes = [],
+    defaultPage: defaultPage,
+    pages: pages = [],
     getPath,
     ...options
   } = config as Required<
@@ -49,15 +49,15 @@ export const $Config = (config: AppConfigOptions): void => {
     routeToNameMap[actualRoute] = name;
   };
 
-  if (Array.isArray(routes)) {
-    routes.forEach(([name, route]) => {
+  if (Array.isArray(pages)) {
+    pages.forEach(([name, route]) => {
       if (typeof name === "string") addRoute(name, route);
       else name.forEach((item) => addRoute(item, route));
     });
-  } else if (typeof routes === "object") {
-    nameToRouteMap = routes;
+  } else if (typeof pages === "object") {
+    nameToRouteMap = pages;
     routeToNameMap = Object.fromEntries(
-      Object.keys(routes).map((route) => [routes[route], route]),
+      Object.keys(pages).map((route) => [pages[route], route]),
     );
   }
 
@@ -65,7 +65,7 @@ export const $Config = (config: AppConfigOptions): void => {
     ...options,
 
     getPath: (name: string): string =>
-      nameToRouteMap[name] || defaultRoute.replace(/\$name/g, name),
+      nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
   };
 };
 

@@ -115,7 +115,7 @@ export interface RoutePathConfig {
    * }
    * ```
    *
-   * @description 无法解析的路径会回退到 `defaultRoute`
+   * @description 无法解析的路径会回退到 `defaultPage`
    */
   pages?: Record<string, string> | [string | string[], string][];
 }
