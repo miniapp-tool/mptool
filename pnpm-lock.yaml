@@ -156,9 +156,6 @@ importers:
       '@mptool/net':
         specifier: workspace:*
         version: link:../net
-      '@mptool/parser':
-        specifier: workspace:*
-        version: link:../parser
       miniprogram-api-typings:
         specifier: 3.12.2
         version: 3.12.2
@@ -250,9 +247,6 @@ importers:
       '@mptool/net':
         specifier: workspace:*
         version: link:../net
-      '@mptool/parser':
-        specifier: workspace:*
-        version: link:../parser
       '@mptool/skyline-enhance':
         specifier: workspace:*
         version: link:../skyline-enhance
