@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.0](https://github.com/miniapp-tool/mptool/compare/v0.7.3...v0.8.0) (2024-06-16)
+
+### ⚠ BREAKING CHANGES
+
+- remove parser from all package
+
+### Features
+
+- remove parser from all package ([a5d75d9](https://github.com/miniapp-tool/mptool/commit/a5d75d944e0e0424db1b33c6d3adac00bf6ae9b6))
+
 ## [0.7.3](https://github.com/miniapp-tool/mptool/compare/v0.7.2...v0.7.3) (2024-06-15)
 
 ### Features
