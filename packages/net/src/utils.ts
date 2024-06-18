@@ -1,17 +1,8 @@
-import { parse, splitCookiesString } from "set-cookie-parser";
-
-import { Cookie } from "./cookie.js";
-
 /**
  * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/gi, ".");
-
-export interface UrlInfo {
-  domain: string;
-  path: string;
-}
+  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
 export const getDomain = (domainOrURL: string): string =>
   domainOrURL
@@ -19,6 +10,24 @@ export const getDomain = (domainOrURL: string): string =>
     .split("/")
     .shift()!
     .replace(/:\d+$/, "");
+
+export const getCookieScopeDomain = (domain = ""): string[] => {
+  if (!domain) return [];
+
+  // 获取 cookie 作用域范围列表
+  domain = normalizeDomain(domain).replace(/^\.+/gi, "");
+
+  const scopes = domain
+    .split(".")
+    .map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+
+  return [domain].concat(scopes);
+};
+
+export interface UrlInfo {
+  domain: string;
+  path: string;
+}
 
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
@@ -30,9 +39,10 @@ export const parseUrl = (url: string): UrlInfo => {
   };
 };
 
-export type CookieOptions = string | { domain?: string; path?: string };
+type Url = string;
+export type CookieOptions = Url | { domain?: string; path?: string };
 
-export const getCookieOptions = (options: CookieOptions): UrlInfo => {
+export const getUrlInfo = (options: CookieOptions): UrlInfo => {
   const { domain = "", path = "/" } =
     typeof options === "object"
       ? options
@@ -40,19 +50,5 @@ export const getCookieOptions = (options: CookieOptions): UrlInfo => {
         ? parseUrl(options)
         : {};
 
-  return { domain, path };
+  return { domain: normalizeDomain(domain), path };
 };
-
-export const parseCookieHeader = (
-  setCookieHeader: string,
-  domain: string,
-): Cookie[] =>
-  parse(splitCookiesString(setCookieHeader), {
-    decodeValues: false,
-  }).map(
-    (item) =>
-      new Cookie({
-        ...item,
-        domain: normalizeDomain(item.domain) || domain,
-      }),
-  );

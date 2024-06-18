@@ -20,4 +20,22 @@ it("Should parse domain and path for url", () => {
     domain: "example.com",
     path: "/a/b.html",
   });
+
+  expect(parseUrl("https://sub.example.com")).toStrictEqual({
+    domain: "sub.example.com",
+    path: "/",
+  });
+  expect(parseUrl("https://sub.example.com/a.jpg")).toStrictEqual({
+    domain: "sub.example.com",
+    path: "/a.jpg",
+  });
+
+  expect(parseUrl("https://sub.example.com/a/b.html")).toStrictEqual({
+    domain: "sub.example.com",
+    path: "/a/b.html",
+  });
+  expect(parseUrl("https://sub.example.com:443/a/b.html")).toStrictEqual({
+    domain: "sub.example.com",
+    path: "/a/b.html",
+  });
 });

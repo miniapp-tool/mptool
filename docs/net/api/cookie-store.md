@@ -92,7 +92,7 @@ class CookieStore {
    *
    * @param domain 指定域名
    */
-  clear(domain?: string): void;
+  clear(domain?: string, exact = false): void;
   /**
    * 应用 header cookies
    *

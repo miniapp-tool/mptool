@@ -126,7 +126,7 @@ const cookieStore = new CookieStore(key);
 - `getAllCookies()`: 获取全部 Cookies
 - `getCookiesMap(options)`: 获取满足条件的 Cookie 键值 Map
 - `apply(cookies)`: 向存储中应用 Cookie
-- `clear(domain?)`: 清除 `domain` 下的全部 cookie，不填 domain 则清除全部 Cookies
+- `clear(domain?, exact=false)`: 清除 `domain` 范围内（若 `exact` 为 `true` 则仅 `domain` 下）的全部 cookie，不填 domain 则清除全部 Cookies
 - `applyHeader(header, domainOrURL)`: 应用 header 中的 cookies
 - `applyResponse(response, domainOrURL)`: 应用 response 中的 cookies，其中 response 为 `wx.request` 的 `success` 回调对象
 - `getHeader(options)`: 获取 cookie header

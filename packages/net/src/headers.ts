@@ -1,4 +1,7 @@
-import { splitCookiesString } from "set-cookie-parser";
+import { parse, splitCookiesString } from "set-cookie-parser";
+
+import { Cookie } from "./cookie.js";
+import { normalizeDomain } from "./utils.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
@@ -60,6 +63,20 @@ const isValidHeaderValue = (value: unknown): boolean => {
  */
 const normalizeHeaderValue = (value: string): string =>
   value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
+
+export const parseCookieHeader = (
+  setCookieHeader: string,
+  domain: string,
+): Cookie[] =>
+  parse(splitCookiesString(setCookieHeader), {
+    decodeValues: false,
+  }).map(
+    (item) =>
+      new Cookie({
+        ...item,
+        domain: normalizeDomain(item.domain) || domain,
+      }),
+  );
 
 export type HeadersInit = [string, string][] | Record<string, string> | Headers;
 

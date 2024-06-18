@@ -1,13 +1,14 @@
 import { isMp, isQQ } from "@mptool/shared";
 
-import { Cookie, getCookieScopeDomain } from "./cookie.js";
+import { Cookie } from "./cookie.js";
+import { parseCookieHeader } from "./headers.js";
 import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
 import {
-  getCookieOptions,
+  getCookieScopeDomain,
   getDomain,
+  getUrlInfo,
   normalizeDomain,
-  parseCookieHeader,
 } from "./utils.js";
 
 export type CookieMap = Map<string, Cookie>;
@@ -44,7 +45,7 @@ export class CookieStore {
    * @return cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
-    const { domain, path } = getCookieOptions(options);
+    const { domain, path } = getUrlInfo(options);
     const scopeDomains = getCookieScopeDomain(domain);
 
     for (const [key, cookies] of this.store.entries()) {
@@ -139,7 +140,7 @@ export class CookieStore {
    * @return Cookie 对象数组
    */
   getCookies(options: CookieOptions): Cookie[] {
-    const { domain, path } = getCookieOptions(options);
+    const { domain, path } = getUrlInfo(options);
     const scopeDomains = getCookieScopeDomain(domain);
     const cookies = [];
 
@@ -207,11 +208,17 @@ export class CookieStore {
    *
    * @param domain 指定域名
    */
-  clear(domain = ""): void {
+  clear(domain = "", exact = false): void {
     if (domain) {
-      const cookies = this.store.get(domain);
+      const exactCookieMap = this.store.get(domain);
 
-      if (cookies) cookies.clear();
+      if (exactCookieMap) exactCookieMap.clear();
+
+      if (!exact) {
+        const domainCookieMap = this.store.get(normalizeDomain(domain));
+
+        if (domainCookieMap) domainCookieMap.clear();
+      }
     } else {
       this.store.clear();
     }
