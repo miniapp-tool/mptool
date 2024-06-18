@@ -26,7 +26,7 @@
     "packages:update": "pnpm dlx npm-check-updates -u --deep",
     "release": "pnpm release:bump && pnpm clean && pnpm build && pnpm release:publish",
     "release:bump": "bumpp -r --execute=\"pnpm commit-and-tag-version && git add CHANGELOG.md\" --commit \"chore(release): publish v%s\" --all --tag --push",
-    "release:publish": "cross-env NODE_OPTIONS=\"--experimental-json-modules\" tsx scripts/release/index.ts",
+    "release:sync": " tsx scripts/sync.ts",
     "test": "vitest run --coverage"
   },
   "nano-staged": {
