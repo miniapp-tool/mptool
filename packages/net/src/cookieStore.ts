@@ -33,7 +33,7 @@ export class CookieStore {
     /** 存储键值 */
     private key = "__cookie_store__",
   ) {
-    this.init();
+    this.#init();
   }
 
   /**
@@ -93,7 +93,7 @@ export class CookieStore {
     cookies.set(name, cookie);
     this.store.set(domain, cookies);
 
-    this.save();
+    this.#save();
 
     return cookie;
   }
@@ -117,7 +117,7 @@ export class CookieStore {
       for (const cookies of this.store.values()) cookies.delete(name);
     }
 
-    this.save();
+    this.#save();
   }
 
   /**
@@ -199,7 +199,7 @@ export class CookieStore {
     });
 
     // 保存到 Storage
-    this.save();
+    this.#save();
   }
 
   /**
@@ -217,7 +217,7 @@ export class CookieStore {
     }
 
     // 保存到 Storage
-    this.save();
+    this.#save();
   }
 
   /**
@@ -283,7 +283,7 @@ export class CookieStore {
   /**
    * 从 Storage 读取 cookies
    */
-  private init(): void {
+  #init(): void {
     try {
       // 从本地存储读取 cookie 数据数组
       const cookiesData = isMp
@@ -302,7 +302,7 @@ export class CookieStore {
   /**
    * 将 cookies 保存到 Storage
    */
-  private save(): void {
+  #save(): void {
     try {
       const saveCookies = [];
 
