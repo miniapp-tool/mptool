@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/miniapp-tool/mptool/compare/v0.8.0...v0.8.1) (2024-06-18)
+
+### Bug Fixes
+
+- **net:** fix cookieStore.clear() ([e11f417](https://github.com/miniapp-tool/mptool/commit/e11f417a2ca2516379a4a79ead0498c1d4ff31c0))
+
+### Reverts
+
+- Revert "feat!: remove parser from all package" ([851a02b](https://github.com/miniapp-tool/mptool/commit/851a02b4449db020ce8efdd07e71fa5bb872ecf5))
+
 ## [0.8.0](https://github.com/miniapp-tool/mptool/compare/v0.7.3...v0.8.0) (2024-06-16)
 
 ### ⚠ BREAKING CHANGES

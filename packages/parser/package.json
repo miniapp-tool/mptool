@@ -1,6 +1,6 @@
 {
   "name": "@mptool/parser",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "RichText parser for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
