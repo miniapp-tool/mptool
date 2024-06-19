@@ -45,7 +45,7 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.3",
     "@types/inquirer": "9.0.7",
-    "@types/node": "20.14.2",
+    "@types/node": "20.14.5",
     "@vitest/coverage-v8": "1.6.0",
     "bumpp": "9.4.1",
     "commit-and-tag-version": "12.4.1",
@@ -74,7 +74,7 @@
     "vite": "5.3.1",
     "vitest": "1.6.0"
   },
-  "packageManager": "pnpm@9.3.0",
+  "packageManager": "pnpm@9.4.0",
   "commit-and-tag-version": {
     "skip": {
       "bump": true,
