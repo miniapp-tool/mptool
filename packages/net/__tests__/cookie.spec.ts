@@ -78,7 +78,7 @@ describe("cookies", () => {
   });
 
   it("clear", () => {
-    cookieStore.clear("baidu.com");
+    cookieStore.clear("baidu.com", true);
 
     expect(cookieStore.getCookies({ domain: "baidu.com" }).length).toBe(1);
 
