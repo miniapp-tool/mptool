@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](https://github.com/miniapp-tool/mptool/compare/v0.8.1...v0.8.2) (2024-06-19)
+
 ## [0.8.1](https://github.com/miniapp-tool/mptool/compare/v0.8.0...v0.8.1) (2024-06-18)
 
 ### Bug Fixes
