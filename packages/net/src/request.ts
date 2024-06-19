@@ -169,7 +169,10 @@ Options:
       enableHttp2: true,
 
       success: ({ data, statusCode, header }) => {
-        logger.debug(`Request ends with ${statusCode}`, data);
+        logger.debug(
+          `Request ends with ${statusCode}`,
+          typeof data === "string" ? data.trimEnd() : data,
+        );
 
         cookieStore.applyHeader(header, cookieScope);
 
