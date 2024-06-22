@@ -139,11 +139,11 @@ importers:
         specifier: 2.0.0-rc.14
         version: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
       vuepress-plugin-search-pro:
-        specifier: 2.0.0-rc.49
-        version: 2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+        specifier: 2.0.0-rc.50
+        version: 2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
       vuepress-theme-hope:
         specifier: 2.0.0-rc.49
-        version: 2.0.0-rc.49(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(typescript@5.4.5)(vuepress-plugin-search-pro@2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))))(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+        version: 2.0.0-rc.49(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(typescript@5.4.5)(vuepress-plugin-search-pro@2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))))(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
 
   packages/all:
     devDependencies:
@@ -1215,6 +1215,11 @@ packages:
     peerDependencies:
       vuepress: 2.0.0-rc.13
 
+  '@vuepress/helper@2.0.0-rc.37':
+    resolution: {integrity: sha512-Sa2H6EqRuG0+521Z5WN7I8EQNwLwFe7U+1KtV01zFp2BcehsgD3EigBjBP7hl01ubb4T8wR7CxWv7cGVA4bPcw==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.14
+
   '@vuepress/highlighter-helper@2.0.0-rc.36':
     resolution: {integrity: sha512-tf4gRyLSKJww3DySnYt/yc9b3vUelqJ78y1BBTOqVmLPrfn3Ig7/1fOv0FxbNg1k+HoxHskN3NS9tQDG+pMp8w==}
     peerDependencies:
@@ -1308,6 +1313,15 @@ packages:
     peerDependencies:
       sass-loader: ^14.0.0
       vuepress: 2.0.0-rc.13
+    peerDependenciesMeta:
+      sass-loader:
+        optional: true
+
+  '@vuepress/plugin-sass-palette@2.0.0-rc.37':
+    resolution: {integrity: sha512-/dy47g27diqwbupYsoNTTgqsEv26AbC/rrypFLb6qQwYd+/1sO/b6osAqpqbm1u7mGq5J3nCGLp6mtK9gVLpTg==}
+    peerDependencies:
+      sass-loader: ^14.0.0
+      vuepress: 2.0.0-rc.14
     peerDependenciesMeta:
       sass-loader:
         optional: true
@@ -4471,12 +4485,12 @@ packages:
       sass-loader:
         optional: true
 
-  vuepress-plugin-search-pro@2.0.0-rc.49:
-    resolution: {integrity: sha512-UJxnNK3xL4g5h95kMuszME47WzUZQTx+uvcuPlgMXVwTxOIGUnNsBY3t47JFYICMTDTvBboP+OWKL8HKzL+nQg==}
+  vuepress-plugin-search-pro@2.0.0-rc.50:
+    resolution: {integrity: sha512-MhzFjPVfuDed52d9eCEGtADw7zW+JbjYOzoNcGCUqyRazhefZC32oTitcGWdzvhzXbKOu8QeuQX+ZhiQSkDEfw==}
     engines: {node: '>=18.19.0', npm: '>=8', pnpm: '>=7', yarn: '>=2'}
     peerDependencies:
       sass-loader: ^14.0.0
-      vuepress: 2.0.0-rc.13
+      vuepress: 2.0.0-rc.14
     peerDependenciesMeta:
       sass-loader:
         optional: true
@@ -4486,6 +4500,12 @@ packages:
     engines: {node: '>=18.19.0', npm: '>=8', pnpm: '>=7', yarn: '>=2'}
     peerDependencies:
       vuepress: 2.0.0-rc.13
+
+  vuepress-shared@2.0.0-rc.50:
+    resolution: {integrity: sha512-iOf4r4LpdXVvFJb2Zh1rmXJW8lrq3ZyJv0bTKGun4yhBKE9sW5ZAt9rT/eVEFMDPLJLFYBfRmF4MZ9c4x8BL6A==}
+    engines: {node: '>=18.19.0', npm: '>=8', pnpm: '>=7', yarn: '>=2'}
+    peerDependencies:
+      vuepress: 2.0.0-rc.14
 
   vuepress-theme-hope@2.0.0-rc.49:
     resolution: {integrity: sha512-OiWqxBWRpd2g8BV8ODe9Xqxxcvv0l38eyzjtnOXGnL8WAJ0RmHKFpSHHXtTKN5coaEyJb3wK7k4CCBO5RTYCiw==}
@@ -5686,6 +5706,17 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  '@vuepress/helper@2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
+    dependencies:
+      '@vue/shared': 3.4.30
+      cheerio: 1.0.0-rc.12
+      fflate: 0.8.2
+      gray-matter: 4.0.3
+      vue: 3.4.30(typescript@5.4.5)
+      vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
+    transitivePeerDependencies:
+      - typescript
+
   '@vuepress/highlighter-helper@2.0.0-rc.36(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
     dependencies:
       vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
@@ -5834,6 +5865,15 @@ snapshots:
   '@vuepress/plugin-sass-palette@2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
     dependencies:
       '@vuepress/helper': 2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      chokidar: 3.6.0
+      sass: 1.77.6
+      vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
+    transitivePeerDependencies:
+      - typescript
+
+  '@vuepress/plugin-sass-palette@2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
+    dependencies:
+      '@vuepress/helper': 2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
       chokidar: 3.6.0
       sass: 1.77.6
       vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
@@ -9308,17 +9348,17 @@ snapshots:
       - markdown-it
       - typescript
 
-  vuepress-plugin-search-pro@2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))):
+  vuepress-plugin-search-pro@2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))):
     dependencies:
-      '@vuepress/helper': 2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
-      '@vuepress/plugin-sass-palette': 2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      '@vuepress/helper': 2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      '@vuepress/plugin-sass-palette': 2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
       '@vueuse/core': 10.11.0(vue@3.4.30(typescript@5.4.5))
       cheerio: 1.0.0-rc.12
       chokidar: 3.6.0
       slimsearch: 2.1.1
       vue: 3.4.30(typescript@5.4.5)
       vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
-      vuepress-shared: 2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      vuepress-shared: 2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
     transitivePeerDependencies:
       - '@vue/composition-api'
       - typescript
@@ -9339,7 +9379,23 @@ snapshots:
       - '@vue/composition-api'
       - typescript
 
-  vuepress-theme-hope@2.0.0-rc.49(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(typescript@5.4.5)(vuepress-plugin-search-pro@2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))))(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))):
+  vuepress-shared@2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))):
+    dependencies:
+      '@vuepress/helper': 2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      '@vueuse/core': 10.11.0(vue@3.4.30(typescript@5.4.5))
+      cheerio: 1.0.0-rc.12
+      dayjs: 1.11.11
+      execa: 9.2.0
+      fflate: 0.8.2
+      gray-matter: 4.0.3
+      semver: 7.6.2
+      vue: 3.4.30(typescript@5.4.5)
+      vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+
+  vuepress-theme-hope@2.0.0-rc.49(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(typescript@5.4.5)(vuepress-plugin-search-pro@2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))))(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))):
     dependencies:
       '@vuepress/helper': 2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
       '@vuepress/plugin-active-header-links': 2.0.0-rc.36(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
@@ -9375,7 +9431,7 @@ snapshots:
       vuepress-shared: 2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
     optionalDependencies:
       nodejs-jieba: 0.1.2(encoding@0.1.13)
-      vuepress-plugin-search-pro: 2.0.0-rc.49(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
+      vuepress-plugin-search-pro: 2.0.0-rc.50(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))
     transitivePeerDependencies:
       - '@types/reveal.js'
       - '@vue/composition-api'
