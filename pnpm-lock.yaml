@@ -57,8 +57,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(prettier@3.3.2)(typescript@5.4.5)(vitest@1.6.0(@types/node@20.14.8)(jsdom@23.2.0)(sass@1.77.6))
       execa:
-        specifier: 9.2.0
-        version: 9.2.0
+        specifier: 9.3.0
+        version: 9.3.0
       husky:
         specifier: 9.0.11
         version: 9.0.11
@@ -2289,8 +2289,8 @@ packages:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
 
-  execa@9.2.0:
-    resolution: {integrity: sha512-vpOyYg7UAVKLAWWtRS2gAdgkT7oJbCn0me3gmUmxZih4kd3MF/oo8kNTBTIbkO3yuuF5uB4ZCZfn8BOolITYhg==}
+  execa@9.3.0:
+    resolution: {integrity: sha512-l6JFbqnHEadBoVAVpN5dl2yCyfX28WoBAGaoQcNmLLSedOxTxcn2Qa83s8I/PA5i56vWru2OHOtrwF7Om2vqlg==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
   expand-tilde@2.0.2:
@@ -5773,7 +5773,7 @@ snapshots:
 
   '@vuepress/plugin-git@2.0.0-rc.37(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
     dependencies:
-      execa: 9.2.0
+      execa: 9.3.0
       vuepress: 2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5))
 
   '@vuepress/plugin-links-check@2.0.0-rc.37(typescript@5.4.5)(vuepress@2.0.0-rc.14(@vuepress/bundler-vite@2.0.0-rc.14(@types/node@20.14.8)(jiti@1.21.6)(sass@1.77.6)(tsx@4.15.7)(typescript@5.4.5)(yaml@2.4.5))(typescript@5.4.5)(vue@3.4.30(typescript@5.4.5)))':
@@ -7086,7 +7086,7 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
-  execa@9.2.0:
+  execa@9.3.0:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       cross-spawn: 7.0.3
@@ -9324,7 +9324,7 @@ snapshots:
       '@vueuse/core': 10.11.0(vue@3.4.30(typescript@5.4.5))
       cheerio: 1.0.0-rc.12
       dayjs: 1.11.11
-      execa: 9.2.0
+      execa: 9.3.0
       fflate: 0.8.2
       gray-matter: 4.0.3
       semver: 7.6.2
