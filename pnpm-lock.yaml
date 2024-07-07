@@ -63,8 +63,8 @@ importers:
         specifier: 9.0.11
         version: 9.0.11
       inquirer:
-        specifier: 9.3.4
-        version: 9.3.4
+        specifier: 9.3.5
+        version: 9.3.5
       miniprogram-api-typings:
         specifier: 3.12.2
         version: 3.12.2
@@ -2873,8 +2873,8 @@ packages:
     resolution: {integrity: sha512-QAgPDQMEgrDssk1XiwwHoOGYF9BAbUcc1+j+FhEvaOt8/cKRqyLn0U5qA6F74fGhTMGxf92pOvPBeh29jQJDTQ==}
     engines: {node: '>=12.0.0'}
 
-  inquirer@9.3.4:
-    resolution: {integrity: sha512-Hp6meNSDzp+Oc9JNUUlYsK81dxaPrrBRa7H/s3+yebCDRJe4UNKYSkEUZoIcuKJjNipBLPKsuc7BvO6tLzo/KA==}
+  inquirer@9.3.5:
+    resolution: {integrity: sha512-SVRCRovA7KaT6nqWB2mCNpTvU4cuZ0hOXo5KPyiyOcNNUIZwq/JKtvXuDJNaxfuJKabBYRu1ecHze0YEwDYoRQ==}
     engines: {node: '>=18'}
 
   internal-slot@1.0.7:
@@ -7876,7 +7876,7 @@ snapshots:
       through: 2.3.8
       wrap-ansi: 7.0.0
 
-  inquirer@9.3.4:
+  inquirer@9.3.5:
     dependencies:
       '@inquirer/figures': 1.0.3
       ansi-escapes: 4.3.2
