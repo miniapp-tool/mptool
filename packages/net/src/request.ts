@@ -122,7 +122,7 @@ export const request = <
     requestHeaders.append("Cookie", cookieHeader);
 
     const data =
-      body instanceof URLSearchParams ? body.toString() : body ?? undefined;
+      body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
     if (!requestHeaders.has("Content-Type"))

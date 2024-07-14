@@ -1,6 +1,7 @@
 import { parse, splitCookiesString } from "set-cookie-parser";
 
 import { Cookie } from "./cookie.js";
+import type { CookieType } from "./typings.js";
 import { normalizeDomain } from "./utils.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
@@ -73,7 +74,7 @@ export const parseCookieHeader = (
   }).map(
     (item) =>
       new Cookie({
-        ...item,
+        ...(item as CookieType),
         domain: normalizeDomain(item.domain) || domain,
       }),
   );
