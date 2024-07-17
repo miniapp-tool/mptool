@@ -84,6 +84,7 @@ export interface RequestResponse<
 export interface RequestError extends Error {
   /** 错误码 */
   errno?: number;
+  status?: number;
 }
 
 export type RequestType = <
