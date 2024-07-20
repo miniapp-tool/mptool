@@ -46,7 +46,7 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@types/inquirer": "9.0.7",
     "@types/node": "20.14.11",
-    "@vitest/coverage-v8": "2.0.2",
+    "@vitest/coverage-v8": "2.0.3",
     "bumpp": "9.4.1",
     "commit-and-tag-version": "12.4.1",
     "cz-git": "1.9.4",
@@ -72,7 +72,7 @@
     "tsx": "4.16.2",
     "typescript": "5.5.3",
     "vite": "5.3.4",
-    "vitest": "2.0.2"
+    "vitest": "2.0.3"
   },
   "packageManager": "pnpm@9.5.0",
   "commit-and-tag-version": {
