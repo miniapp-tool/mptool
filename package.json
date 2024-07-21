@@ -57,7 +57,7 @@
     "eslint-config-mister-hope": "0.1.1",
     "execa": "9.3.0",
     "husky": "9.1.1",
-    "inquirer": "10.0.4",
+    "inquirer": "10.1.0",
     "miniprogram-api-typings": "3.12.2",
     "nano-staged": "0.8.0",
     "ora": "8.0.1",
