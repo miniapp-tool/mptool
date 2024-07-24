@@ -215,10 +215,28 @@ export interface RequestInitOptions
    * 访问的默认域名
    */
   server?: string;
+
   /**
    * Cookie 存储
    */
   cookieStore?: CookieStore | string;
+
+  /**
+   * 请求选项处理器
+   */
+  requestHandler?: <
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >,
+  >(
+    /** 请求地址 */
+    url: string,
+    /** 请求配置 */
+    options: RequestOptions<T>,
+  ) => RequestOptions<T>;
+
   /**
    * 响应处理器
    *
@@ -277,6 +295,7 @@ export interface RequestFactory {
 export const createRequest = ({
   cookieStore,
   server,
+  requestHandler,
   responseHandler = <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
@@ -306,11 +325,12 @@ export const createRequest = ({
         ? url
         : `https://${url}`;
 
-    const options = {
+    const mergedOptions = {
       cookieStore: defaultCookieStore,
       ...defaultOptions,
       ...requestOptions,
     };
+    const options = requestHandler?.(link, mergedOptions) ?? mergedOptions;
 
     return request(link, options)
       .then((response) => responseHandler(response, url, options))

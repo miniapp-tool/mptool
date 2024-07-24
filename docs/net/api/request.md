@@ -132,6 +132,21 @@ export interface RequestInitOptions
    */
   cookieStore?: CookieStore | string;
   /**
+   * 请求选项处理器
+   */
+  requestHandler?: <
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    >,
+  >(
+    /** 请求地址 */
+    url: string,
+    /** 请求配置 */
+    options: RequestOptions<T>,
+  ) => RequestOptions<T>;
+  /**
    * 响应处理器
    *
    * @throws {RequestError} 自定义的错误数据
