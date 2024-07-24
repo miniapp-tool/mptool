@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["inquirer", "miniprogram-api-typings"]
+    "types": ["miniprogram-api-typings"]
   },
   "include": ["**/*.ts", "**/*.mts", "**/.vuepress/**/*.ts", "eslint.config.js"]
 }

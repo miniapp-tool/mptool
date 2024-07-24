@@ -44,9 +44,8 @@
     "@rollup/plugin-commonjs": "26.0.1",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.3",
-    "@types/inquirer": "9.0.7",
-    "@types/node": "20.14.11",
-    "@vitest/coverage-v8": "2.0.3",
+    "@types/node": "20.14.12",
+    "@vitest/coverage-v8": "2.0.4",
     "bumpp": "9.4.1",
     "commit-and-tag-version": "12.4.1",
     "cz-git": "1.9.4",
@@ -57,7 +56,6 @@
     "eslint-config-mister-hope": "0.1.1",
     "execa": "9.3.0",
     "husky": "9.1.1",
-    "inquirer": "10.1.0",
     "miniprogram-api-typings": "3.12.2",
     "nano-staged": "0.8.0",
     "ora": "8.0.1",
@@ -70,9 +68,9 @@
     "sort-package-json": "2.10.0",
     "tslib": "2.6.3",
     "tsx": "4.16.2",
-    "typescript": "5.5.3",
+    "typescript": "5.5.4",
     "vite": "5.3.4",
-    "vitest": "2.0.3"
+    "vitest": "2.0.4"
   },
   "packageManager": "pnpm@9.5.0",
   "commit-and-tag-version": {
