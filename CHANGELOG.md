@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.4](https://github.com/miniapp-tool/mptool/compare/v0.8.3...v0.8.4) (2024-07-24)
+
+### Features
+
+- **net:** add requestHandler ([d5c0527](https://github.com/miniapp-tool/mptool/commit/d5c05279bbb7a8b1c4d1aaa1cd830bcb7cbf80be))
+
 ## [0.8.3](https://github.com/miniapp-tool/mptool/compare/v0.8.2...v0.8.3) (2024-07-01)
 
 ### Features
