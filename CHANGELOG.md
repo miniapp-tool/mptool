@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.5](https://github.com/miniapp-tool/mptool/compare/v0.8.4...v0.8.5) (2024-07-25)
+
+### Bug Fixes
+
+- **net:** fix cookieStore on node ([dea6fb0](https://github.com/miniapp-tool/mptool/commit/dea6fb0a5cde51d01a486a4160cb4fedc56afdf7))
+
 ## [0.8.4](https://github.com/miniapp-tool/mptool/compare/v0.8.3...v0.8.4) (2024-07-24)
 
 ### Features
