@@ -254,7 +254,7 @@ export class CookieStore {
     return this.apply(
       parseCookieHeader(
         (header as Headers).getSetCookie().join(","),
-        domainOrURL,
+        getDomain(domainOrURL),
       ),
     );
   }
