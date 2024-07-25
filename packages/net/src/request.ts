@@ -120,7 +120,7 @@ export const request = <
     const cookieHeader = cookieStore.getHeader(cookieScope);
     const requestHeaders = new Headers(headers);
 
-    requestHeaders.append("Cookie", cookieHeader);
+    if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
 
     const data =
       body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
