@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.6](https://github.com/miniapp-tool/mptool/compare/v0.8.5...v0.8.6) (2024-07-25)
+
+### Bug Fixes
+
+- **net:** decode header correctly ([c81840d](https://github.com/miniapp-tool/mptool/commit/c81840d34fcecfbe92a2f81376b03dcd59bbf289))
+
 ## [0.8.5](https://github.com/miniapp-tool/mptool/compare/v0.8.4...v0.8.5) (2024-07-25)
 
 ### Bug Fixes

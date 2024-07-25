@@ -1,6 +1,6 @@
 {
   "name": "@mptool/net",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "Network api for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
