@@ -69,9 +69,7 @@ export const parseCookieHeader = (
   setCookieHeader: string,
   domain: string,
 ): Cookie[] =>
-  parse(splitCookiesString(setCookieHeader), {
-    decodeValues: false,
-  }).map(
+  parse(splitCookiesString(setCookieHeader)).map(
     (item) =>
       new Cookie({
         ...(item as CookieType),
