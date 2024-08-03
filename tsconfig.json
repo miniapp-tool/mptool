@@ -4,5 +4,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["miniprogram-api-typings"]
   },
-  "include": ["**/*.ts", "**/*.mts"]
+  "include": ["**/*.ts", "**/*.mts", "docs/.vuepress/**/*.ts"]
 }

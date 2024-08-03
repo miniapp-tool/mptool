@@ -24,7 +24,6 @@ export default config(
         tsconfigDirName: import.meta.dirname,
         projectService: {
           allowDefaultProject: [
-            "docs/src/.vuepress/*.ts",
             "packages/*/rollup.config.mts",
             "eslint.config.js",
           ],
