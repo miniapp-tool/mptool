@@ -6,7 +6,7 @@ const parentFolderPath = "./demo/node_modules/@mptool";
 
 try {
   rmSync(parentFolderPath, { recursive: true });
-} catch (err) {
+} catch {
   // do nothing
 }
 

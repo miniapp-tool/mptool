@@ -167,7 +167,7 @@ it("$Page", () => {
   $Page("example", {
     data: {},
     f() {
-      assertType<{}>(this.data);
+      assertType<Record<never, never>>(this.data);
       this.setData({
         a: 1,
       });

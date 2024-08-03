@@ -1,4 +1,4 @@
-import { logger } from "@mptool/shared";
+import { MpError, logger } from "@mptool/shared";
 
 /** 文件编码 */
 type FileEncoding =
@@ -28,7 +28,7 @@ export const exists = (path: string): boolean => {
     fileManager.statSync(`${userPath}/${path}`, false);
 
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 };
@@ -107,7 +107,7 @@ export const readFile = (
 ): string | ArrayBuffer | undefined => {
   try {
     return fileManager.readFileSync(`${userPath}/${path}`, encoding);
-  } catch (err) {
+  } catch {
     logger.warn(`${path} don't exist`);
 
     return undefined;
@@ -137,13 +137,13 @@ export const readJSON = <T = unknown>(
       data = JSON.parse(fileContent as string) as T;
 
       logger.debug(`Read ${path}.json success:`, data);
-    } catch (err) {
+    } catch {
       data = undefined;
 
       // 调试
       logger.warn(`Parse ${path}.json failed`);
     }
-  } catch (err) {
+  } catch {
     data = undefined;
 
     // 调试
@@ -162,7 +162,7 @@ export const readJSON = <T = unknown>(
 export const mkdir = (path: string, recursive = true): void => {
   try {
     fileManager.mkdirSync(`${userPath}/${path}`, recursive);
-  } catch (err) {
+  } catch {
     // 调试
     logger.debug(`${path} folder already exists`);
   }
@@ -198,20 +198,23 @@ export const saveOnlineFile = (
     wx.downloadFile({
       url: onlinePath,
       filePath: `${userPath}/${localPath}`,
-      success: (res) => {
-        if (res.statusCode === 200) {
+      success: ({ statusCode, tempFilePath }) => {
+        if (statusCode === 200) {
           logger.info(`${onlinePath} saved`);
-          resolve(res.tempFilePath);
-        } else {
-          logger.error(
-            `Download ${onlinePath} failed with statusCode ${res.statusCode}`,
-          );
-          reject(res.statusCode);
+
+          return resolve(tempFilePath);
         }
+
+        logger.error(
+          `Download ${onlinePath} failed with statusCode ${statusCode}`,
+        );
+
+        reject(new MpError({ code: statusCode }));
       },
-      fail: (failMsg) => {
-        logger.error(`Download ${onlinePath} failed:`, failMsg);
-        reject(failMsg);
+      fail: ({ errMsg }) => {
+        logger.error(`Download ${onlinePath} failed:`, errMsg);
+
+        reject(new MpError({ message: errMsg }));
       },
     });
   });
@@ -270,9 +273,10 @@ export const unzip = (zipFilePath: string, targetPath: string): Promise<void> =>
       success: () => {
         resolve();
       },
-      fail: (failMsg) => {
-        logger.error(`Unzip ${zipFilePath} failed:`, failMsg);
-        reject();
+      fail: ({ errCode, errMsg }) => {
+        logger.error(`Unzip ${zipFilePath} failed:`, errMsg);
+
+        reject(new MpError({ code: errCode, message: errMsg }));
       },
     });
   });

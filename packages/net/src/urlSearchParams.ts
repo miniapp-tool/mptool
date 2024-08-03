@@ -25,7 +25,6 @@ const decode = (str: string): string =>
   decodeURIComponent(str.replace(/\+/g, " "));
 
 export class URLSearchParams {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   private params: Map<string, string[]>;
 
   constructor(

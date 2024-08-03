@@ -1,3 +1,4 @@
+/* eslint-disable import-x/export */
 export * from "@mptool/shared";
 export { $App } from "./app/index.js";
 export { $Config } from "./config/index.js";

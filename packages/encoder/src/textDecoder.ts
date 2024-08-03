@@ -125,7 +125,7 @@ export class TextDecoder {
     let result: number | number[] | null;
 
     // 5. While true:
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       // 1. Let token be the result of reading from stream.
       const token = inputStream.read();

@@ -39,7 +39,7 @@ export function getTrigger(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (pageNameWithArg: string): any => {
     // @ts-expect-error: argument can not union
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
     return wx[type]({ url: getFullPath(pageNameWithArg) });
   };
 }

@@ -4,5 +4,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["miniprogram-api-typings"]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "**/*.mts"]
 }

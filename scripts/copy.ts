@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 export const ensureDirExistSync = (dirPath: string): void => {
   try {
     readdirSync(dirPath);
-  } catch (err) {
+  } catch {
     mkdirSync(dirPath, { recursive: true });
   }
 };

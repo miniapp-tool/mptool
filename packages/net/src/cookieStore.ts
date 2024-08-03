@@ -145,7 +145,7 @@ export class CookieStore {
     const cookies = [];
 
     for (const [key, cookieMap] of this.store.entries()) {
-      if (domain && scopeDomains.indexOf(key) < 0) continue;
+      if (domain && !scopeDomains.includes(key)) continue;
 
       for (const cookie of cookieMap.values())
         if (cookie.isPathMatched(path) && !cookie.isExpired())

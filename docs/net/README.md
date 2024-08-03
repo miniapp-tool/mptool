@@ -52,7 +52,7 @@ icon: network-wired
 - headers: Headers 实例
 - data: 响应数据
 
-如果请求失败 (基础库、底层或网络问题)，会走 `.catch` 逻辑，返回一个 `RequestError` 错误。你可以通过 `message` 属性获取错误信息，或者通过 `errno` 属性获取错误码。
+如果请求失败 (基础库、底层或网络问题)，会走 `.catch` 逻辑，返回一个 `MpError` 错误。你可以通过 `message` 属性获取错误信息，或者通过 `errno` 属性获取错误码。
 
 ## Cookie
 

@@ -64,7 +64,7 @@ export const join = (
 
   return queryString
     ? `${path}${
-        /[?&]$/u.test(path) ? "" : path.indexOf("?") === -1 ? "?" : "&"
+        /[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"
       }${queryString}`
     : path;
 };

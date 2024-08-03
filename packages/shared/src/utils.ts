@@ -74,7 +74,6 @@ export const lock = <T, A extends unknown[], R>(
 
     pending = true;
 
-    // eslint-disable-next-line no-invalid-this
     return fn.apply(ctx ?? this, [
       (): void => {
         pending = false;
@@ -115,7 +114,6 @@ export const once = <T, A extends unknown[], R>(
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Task<ArgType extends unknown[] = unknown[], This = unknown> {
   /** 函数本身 */
   func: (this: This, next: () => void, ...args: ArgType) => void;
@@ -208,7 +206,6 @@ export const funcQueue = <A extends unknown[], T = unknown>(
   const queue = new Queue(capacity);
 
   return function queueFunc(this: T, ...args: A): void {
-    // eslint-disable-next-line no-invalid-this
     queue.add(fn, this, ...args);
   };
 };

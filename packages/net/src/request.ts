@@ -1,4 +1,4 @@
-import { logger } from "@mptool/shared";
+import { MpError, logger } from "@mptool/shared";
 
 import { CookieStore } from "./cookieStore.js";
 import { Headers } from "./headers.js";
@@ -79,12 +79,6 @@ export interface RequestResponse<
   headers: Headers;
   /** Response data */
   data: T;
-}
-
-export interface RequestError extends Error {
-  /** 错误码 */
-  errno?: number;
-  status?: number;
 }
 
 export type RequestType = <
@@ -187,12 +181,9 @@ Options:
       },
 
       fail: ({ errMsg, errno }) => {
-        const requestError = new Error(errMsg) as RequestError;
-
         // 调试
         logger.warn(`Request ${url} failed: ${errMsg}`);
-        requestError.errno = errno;
-        reject(requestError);
+        reject(new MpError({ code: errno, message: errMsg }));
       },
       ...options,
     });
@@ -240,7 +231,7 @@ export interface RequestInitOptions
   /**
    * 响应处理器
    *
-   * @throws {RequestError} 自定义的错误数据
+   * @throws {MpError} 自定义的错误数据
    */
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -260,7 +251,7 @@ export interface RequestInitOptions
   /**
    * 错误处理器
    *
-   * @throws {RequestError} 自定义的错误数据
+   * @throws {MpError} 自定义的错误数据
    */
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -270,7 +261,7 @@ export interface RequestInitOptions
     >,
   >(
     /** 错误信息 */
-    error: RequestError,
+    error: MpError,
     /** 请求地址 */
     url: string,
     /** 请求配置 */
@@ -321,7 +312,7 @@ export const createRequest = ({
 
     const link = url.startsWith("/")
       ? `${domain}${url}`
-      : url.match(/^[a-z][a-z-]*:\/\//)
+      : /^[a-z][a-z-]*:\/\//.test(url)
         ? url
         : `https://${url}`;
 
@@ -334,8 +325,9 @@ export const createRequest = ({
 
     return request(link, options)
       .then((response) => responseHandler(response, url, options))
-      .catch((err: RequestError) => {
-        if (errorHandler) throw errorHandler(err, url, options);
+      .catch((err: MpError) => {
+        if (errorHandler) return errorHandler(err, url, options);
+
         throw err;
       });
   };

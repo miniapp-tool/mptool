@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { InstanceEmitterMethods } from "../emitter/index.js";
 import type {
@@ -201,21 +200,24 @@ export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  InstanceProps extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
   Method &
-  (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {}) &
+  (IsPage extends true
+    ? WechatMiniprogram.Page.ILifetime
+    : Record<never, never>) &
   InstanceProps &
   ExtendedComponentProperty &
   ExtendedPageMethods<
     Data & InferPropTypes<Props>,
     InstanceProps &
       Method &
-      (IsPage extends true ? WechatMiniprogram.Page.ILifetime : {})
+      (IsPage extends true
+        ? WechatMiniprogram.Page.ILifetime
+        : Record<never, never>)
   > & {
     /** 组件数据，**包括内部数据和属性值** */
     data: Data & InferPropTypes<Props>;
@@ -227,7 +229,7 @@ export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  InstanceProps extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<{
@@ -243,7 +245,7 @@ export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  InstanceProps extends WechatMiniprogram.IAnyObject = {},
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
   options: ComponentOptions<Data, Props, Method, InstanceProps, IsPage>,

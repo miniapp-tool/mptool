@@ -288,7 +288,7 @@ it("$Component", () => {
     },
   });
 
-  $Component<{}, {}, { fn(): void }>({
+  $Component<Record<never, never>, Record<never, never>, { fn(): void }>({
     methods: {
       fn() {
         // @ts-expect-error: notExists
@@ -314,7 +314,7 @@ it("$Component", () => {
       typeof data,
       typeof props,
       /* methods= */ { fn(): string },
-      /* customProperties= */ {},
+      /* customProperties= */ Record<never, never>,
       /* isPage= */ true
     >({
       data,

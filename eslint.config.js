@@ -1,7 +1,9 @@
+// eslint-disable-next-line import-x/no-unresolved
 import hopeConfig, { config, tsParser } from "eslint-config-mister-hope";
 
 export default config(
   ...hopeConfig,
+
   {
     ignores: [
       "coverage/**",
@@ -20,25 +22,22 @@ export default config(
       parserOptions: {
         parser: tsParser,
         tsconfigDirName: import.meta.dirname,
-        project: "./tsconfig.eslint.json",
+        projectService: {
+          allowDefaultProject: [
+            "docs/src/.vuepress/*.ts",
+            "packages/*/rollup.config.mts",
+            "eslint.config.js",
+          ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20,
+        },
       },
     },
   },
 
   {
-    files: ["**/*.ts"],
+    files: ["**/rollup.config.mts"],
     rules: {
-      "@typescript-eslint/ban-types": [
-        "warn",
-        {
-          extendDefaults: true,
-          types: {
-            "{}": false,
-            Function: false,
-          },
-        },
-      ],
-      "import/export": "off",
+      "import-x/no-unresolved": "off",
     },
   },
 
@@ -50,6 +49,7 @@ export default config(
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/unbound-method": "off",
     },
   },

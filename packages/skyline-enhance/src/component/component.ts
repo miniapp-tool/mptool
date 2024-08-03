@@ -72,7 +72,10 @@ export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = {},
+  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
+    never,
+    never
+  >,
   IsPage extends boolean = false,
 >(
   options: ComponentOptions<

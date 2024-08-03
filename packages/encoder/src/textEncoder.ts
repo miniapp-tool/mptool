@@ -102,7 +102,7 @@ export class TextEncoder {
     let result: number | number[] | null;
 
     // 3. While true, run these substeps:
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       // 1. Let token be the result of reading from input.
       const token = input.read();
@@ -117,7 +117,6 @@ export class TextEncoder {
     }
     // TODO: Align with spec algorithm.
     if (!this.doNotFlush) {
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         result = this._encoder!.handler(input, input.read());
         if (result === FINISHED) break;

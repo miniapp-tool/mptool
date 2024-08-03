@@ -74,7 +74,7 @@ export interface RequestResponse<
   data: T;
 }
 
-export interface RequestError extends Error {
+export interface MpError extends Error {
   /** 错误码 */
   errno?: number;
 }
@@ -149,7 +149,7 @@ export interface RequestInitOptions
   /**
    * 响应处理器
    *
-   * @throws {RequestError} 自定义的错误数据
+   * @throws {MpError} 自定义的错误数据
    */
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -167,7 +167,7 @@ export interface RequestInitOptions
   /**
    * 错误处理器
    *
-   * @throws {RequestError} 自定义的错误数据
+   * @throws {MpError} 自定义的错误数据
    */
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
@@ -176,7 +176,7 @@ export interface RequestInitOptions
     >,
   >(
     /** 错误信息 */
-    error: RequestError,
+    error: MpError,
     /** 请求地址 */
     url: string,
     /** 请求配置 */
