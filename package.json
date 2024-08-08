@@ -68,7 +68,7 @@
     "rollup-plugin-esbuild": "6.1.1",
     "sort-package-json": "2.10.0",
     "tslib": "2.6.3",
-    "tsx": "4.16.5",
+    "tsx": "4.17.0",
     "typescript": "5.5.4",
     "vite": "5.3.5",
     "vitest": "2.0.5"
