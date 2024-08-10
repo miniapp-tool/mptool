@@ -60,8 +60,8 @@ importers:
         specifier: 9.1.4
         version: 9.1.4
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
       nano-staged:
         specifier: 0.8.0
         version: 0.8.0
@@ -112,8 +112,8 @@ importers:
         version: link:../packages/all
     devDependencies:
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
       typescript:
         specifier: 5.5.4
         version: 5.5.4
@@ -154,8 +154,8 @@ importers:
         specifier: workspace:*
         version: link:../parser
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/encoder: {}
 
@@ -168,8 +168,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/file:
     devDependencies:
@@ -180,8 +180,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/mock:
     dependencies:
@@ -202,8 +202,8 @@ importers:
         specifier: 2.4.10
         version: 2.4.10
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
       set-cookie-parser:
         specifier: 2.7.0
         version: 2.7.0
@@ -221,8 +221,8 @@ importers:
         specifier: workspace:*
         version: link:../mock
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/shared:
     devDependencies:
@@ -233,8 +233,8 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/skyline:
     devDependencies:
@@ -251,8 +251,8 @@ importers:
         specifier: workspace:*
         version: link:../skyline-enhance
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
   packages/skyline-enhance:
     devDependencies:
@@ -263,8 +263,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 3.12.2
-        version: 3.12.2
+        specifier: 3.12.3
+        version: 3.12.3
 
 packages:
 
@@ -3448,6 +3448,9 @@ packages:
 
   miniprogram-api-typings@3.12.2:
     resolution: {integrity: sha512-OJB2uVAfhycX4teG/zEVpoThushQqLOx946XACDpVc6OQydiJWjn7djVzvNCbv0VOA7sbHGPQp/RkXD9vMCDEw==}
+
+  miniprogram-api-typings@3.12.3:
+    resolution: {integrity: sha512-o7bOfrU28MEMCBWo83nXv0ROQSBFxJcfCl4f2wTYqah64ipC5RGqLJfvWJTWhlQt2ECVwspSzM8LgvnfMo7TEQ==}
 
   minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
@@ -8623,6 +8626,8 @@ snapshots:
   minipass@7.1.2: {}
 
   miniprogram-api-typings@3.12.2: {}
+
+  miniprogram-api-typings@3.12.3: {}
 
   minizlib@2.1.2:
     dependencies:
