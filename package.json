@@ -52,7 +52,7 @@
     "conventional-changelog-conventionalcommits": "8.0.0",
     "cross-env": "7.0.3",
     "cz-git": "1.9.4",
-    "esbuild": "0.23.0",
+    "esbuild": "0.23.1",
     "eslint": "9.8.0",
     "eslint-config-mister-hope": "0.2.2",
     "execa": "9.3.0",
