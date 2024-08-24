@@ -56,7 +56,7 @@
     "eslint": "9.8.0",
     "eslint-config-mister-hope": "0.2.2",
     "execa": "9.3.0",
-    "husky": "9.1.4",
+    "husky": "9.1.5",
     "miniprogram-api-typings": "3.12.2",
     "nano-staged": "0.8.0",
     "ora": "8.0.1",
