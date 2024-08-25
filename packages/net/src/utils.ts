@@ -7,6 +7,7 @@ export const normalizeDomain = (domain = ""): string =>
 export const getDomain = (domainOrURL: string): string =>
   domainOrURL
     .replace(/^https?:\/\//, "")
+    .replace(/[#?].*$/, "")
     .split("/")
     .shift()!
     .replace(/:\d+$/, "");
@@ -31,7 +32,11 @@ export interface UrlInfo {
 
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
-  const path = url.split(domain)[1].replace(/^:\d+/, "") || "/";
+  const path =
+    url
+      .split(domain)[1]
+      .replace(/^:\d+/, "")
+      .replace(/[#?].*$/, "") || "/";
 
   return {
     domain,
