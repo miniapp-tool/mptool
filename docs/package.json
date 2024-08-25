@@ -9,7 +9,7 @@
     "docs:dev": "vuepress dev ."
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.14",
+    "@vuepress/bundler-vite": "2.0.0-rc.15",
     "nodejs-jieba": "0.1.2",
     "vue": "3.4.38",
     "vuepress": "2.0.0-rc.14",
