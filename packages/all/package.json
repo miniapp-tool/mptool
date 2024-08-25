@@ -33,14 +33,14 @@
     "dev": "rollup -c -w"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.0"
+    "miniprogram-api-typings": "^3.12.3"
   },
   "devDependencies": {
     "@mptool/enhance": "workspace:*",
     "@mptool/file": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
-    "miniprogram-api-typings": "3.12.2"
+    "miniprogram-api-typings": "3.12.3"
   },
   "publishConfig": {
     "access": "public"

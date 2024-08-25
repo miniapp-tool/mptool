@@ -162,7 +162,6 @@ Options:
       data,
 
       enableHttp2: true,
-      // @ts-expect-error: miniprogram-api-typings is not up-to-date with actual API
       useHighPerformanceMode: true,
 
       success: ({ data, statusCode, header }) => {

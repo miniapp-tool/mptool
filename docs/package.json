@@ -2,6 +2,7 @@
   "name": "docs",
   "version": "0.8.6",
   "private": true,
+  "type": "module",
   "scripts": {
     "docs:build": "vuepress build .",
     "docs:clean-dev": "vuepress dev . --clean-cache",
@@ -10,7 +11,7 @@
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.14",
     "nodejs-jieba": "0.1.2",
-    "vue": "3.4.35",
+    "vue": "3.4.38",
     "vuepress": "2.0.0-rc.14",
     "vuepress-plugin-search-pro": "2.0.0-rc.52",
     "vuepress-theme-hope": "2.0.0-rc.52"

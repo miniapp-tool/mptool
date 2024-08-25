@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-import type { AnyNode } from "cheerio/lib/slim";
+import type { AnyNode } from "domhandler";
 
 import { parseHTML } from "./parser.js";
 
