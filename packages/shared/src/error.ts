@@ -9,4 +9,8 @@ export class MpError extends Error {
     super(message);
     this.code = code ?? null;
   }
+
+  public override toString(): string {
+    return `code: ${this.code}, message: ${this.message}`;
+  }
 }

@@ -200,7 +200,7 @@ export const saveOnlineFile = (
       filePath: `${userPath}/${localPath}`,
       success: ({ statusCode, tempFilePath }) => {
         if (statusCode === 200) {
-          logger.info(`${onlinePath} saved`);
+          logger.debug(`${onlinePath} saved`);
 
           return resolve(tempFilePath);
         }
