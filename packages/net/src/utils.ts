@@ -4,10 +4,11 @@
 export const normalizeDomain = (domain = ""): string =>
   domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
+const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
+
 export const getDomain = (domainOrURL: string): string =>
-  domainOrURL
+  removeHashAndQuery(domainOrURL)
     .replace(/^https?:\/\//, "")
-    .replace(/[#?].*$/, "")
     .split("/")
     .shift()!
     .replace(/:\d+$/, "");
@@ -33,10 +34,7 @@ export interface UrlInfo {
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
   const path =
-    url
-      .split(domain)[1]
-      .replace(/^:\d+/, "")
-      .replace(/[#?].*$/, "") || "/";
+    removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/, "") || "/";
 
   return {
     domain,
