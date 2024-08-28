@@ -1,6 +1,6 @@
 import { MpError } from "@mptool/shared";
 
-import { downLoad } from "../network/index.js";
+import { download } from "../network/index.js";
 import { showModal } from "../ui/index.js";
 
 /**
@@ -9,7 +9,7 @@ import { showModal } from "../ui/index.js";
  * @param imgPath 图片地址
  */
 export const savePhoto = (imgPath: string): Promise<void> =>
-  downLoad(imgPath).then(
+  download(imgPath).then(
     (path) =>
       new Promise<void>((resolve, reject) => {
         // 获取用户设置

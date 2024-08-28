@@ -9,7 +9,7 @@ import { showToast } from "../ui/index.js";
  * @param path 下载路径
  * @param mask 遮罩层
  */
-export const downLoad = (url: string, mask = false): Promise<string> =>
+export const download = (url: string, mask = false): Promise<string> =>
   new Promise((resolve, reject) => {
     const progress = wx.downloadFile({
       url,

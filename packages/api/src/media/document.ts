@@ -1,10 +1,10 @@
 import { logger } from "@mptool/shared";
 
-import { downLoad } from "../network/index.js";
+import { download } from "../network/index.js";
 import { showModal, showToast } from "../ui/index.js";
 
 export const openDocument = (url: string): void => {
-  downLoad(url)
+  download(url)
     .then((filePath) => {
       wx.openDocument({
         filePath,
@@ -33,7 +33,7 @@ export const saveDocument = (
 ): void => {
   // 首选添加到收藏
   if (wx.canIUse("addFileToFavorites"))
-    downLoad(url)
+    download(url)
       .then((filePath) => {
         const docType = url.split(".").pop()!;
 
