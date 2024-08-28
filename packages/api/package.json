@@ -1,19 +1,20 @@
 {
-  "name": "@mptool/all",
+  "name": "@mptool/api",
   "version": "0.10.0",
-  "description": "Full back for mptool",
+  "description": "Common api for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
-    "miniapp"
+    "miniapp",
+    "api"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/api#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/all"
+    "directory": "packages/api"
   },
   "license": "MIT",
   "author": {
@@ -36,11 +37,7 @@
     "miniprogram-api-typings": "^3.12.3"
   },
   "devDependencies": {
-    "@mptool/api": "workspace:*",
-    "@mptool/enhance": "workspace:*",
-    "@mptool/file": "workspace:*",
-    "@mptool/net": "workspace:*",
-    "@mptool/parser": "workspace:*",
+    "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "3.12.3"
   },
   "publishConfig": {
