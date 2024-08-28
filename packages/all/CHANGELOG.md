@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.1 (2024-08-28)</small>
+
+- feat: add api package ([cff4cf6](https://github.com/miniapp-tool/mptool/commit/cff4cf6))
+
 ## [0.10.0](https://github.com/miniapp-tool/mptool/compare/v0.9.1...v0.10.0) (2024-08-26)
 
 **Note:** Version bump only for package @mptool/all

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.1 (2024-08-28)</small>
+
+- feat: add api package ([cff4cf6](https://github.com/miniapp-tool/mptool/commit/cff4cf6))
+- chore(deps): update commitlint monorepo to v19.4.1 ([7497f07](https://github.com/miniapp-tool/mptool/commit/7497f07))
+- chore(deps): update dependency @types/node to v22.5.1 ([2c1a41c](https://github.com/miniapp-tool/mptool/commit/2c1a41c))
+- chore(deps): update dependency rollup to v4.21.1 ([c4d7845](https://github.com/miniapp-tool/mptool/commit/c4d7845))
+- chore(deps): update dependency tsx to v4.19.0 ([2f76a07](https://github.com/miniapp-tool/mptool/commit/2f76a07))
+
 ## [0.10.0](https://github.com/miniapp-tool/mptool/compare/v0.9.1...v0.10.0) (2024-08-26)
 
 ### ✨ Features
