@@ -28,7 +28,7 @@ export type NavigatorOptionsType =
   | WechatMiniprogram.RedirectToOption
   | WechatMiniprogram.SwitchTabOption;
 
-export const navigate = getTrigger("navigateTo");
+export const go = getTrigger("navigateTo");
 export const redirect = getTrigger("redirectTo");
 export const switchTab = getTrigger("switchTab");
 export const reLaunch = getTrigger("reLaunch");
@@ -63,7 +63,7 @@ function clickHandlerFactory(
   };
 }
 
-const bindGo = clickHandlerFactory(navigate);
+const bindGo = clickHandlerFactory(go);
 const bindRedirect = clickHandlerFactory(redirect);
 const bindSwitch = clickHandlerFactory(switchTab);
 const bindRelaunch = clickHandlerFactory(reLaunch);
@@ -231,7 +231,7 @@ export function mount(
   ctx.$emitAsync = userEmitter.emitAsync;
 
   // 路由方法
-  ctx.$go = navigate;
+  ctx.$go = go;
   ctx.$redirect = redirect;
   ctx.$switch = switchTab;
   ctx.$reLaunch = reLaunch;
