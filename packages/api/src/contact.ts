@@ -1,4 +1,4 @@
-import { MpError } from "@mptool/shared";
+import { MpError, env } from "@mptool/shared";
 
 import { showModal } from "./ui/index.js";
 
@@ -14,6 +14,13 @@ export const addContact = (
   >,
 ): Promise<void> =>
   new Promise((resolve, reject) => {
+    if (env === "donut") {
+      return wx.addPhoneContact({
+        ...config,
+        success: () => resolve(),
+      });
+    }
+
     wx.getSetting({
       success: ({ authSetting }) => {
         // 如果已经授权直接写入联系人

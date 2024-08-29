@@ -1,4 +1,4 @@
-import { isMp, isQQ } from "@mptool/shared";
+import { env } from "@mptool/shared";
 
 import { Cookie } from "./cookie.js";
 import { parseCookieHeader } from "./headers.js";
@@ -234,29 +234,29 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyHeader(header: unknown, domainOrURL: string): void {
-    if (isMp) {
-      const setCookieHeader =
-        (header as Record<string, string[] | string>)["Set-Cookie"] ||
-        (header as Record<string, string[] | string>)["set-cookie"] ||
-        "";
-      const realHeader = Array.isArray(setCookieHeader)
-        ? setCookieHeader.filter(Boolean).join(",")
-        : isQQ
-          ? setCookieHeader.replace(
-              /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
-              ",$1=",
-            )
-          : setCookieHeader;
-
-      return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    if (env === "js") {
+      return this.apply(
+        parseCookieHeader(
+          (header as Headers).getSetCookie().join(","),
+          getDomain(domainOrURL),
+        ),
+      );
     }
 
-    return this.apply(
-      parseCookieHeader(
-        (header as Headers).getSetCookie().join(","),
-        getDomain(domainOrURL),
-      ),
-    );
+    const setCookieHeader =
+      (header as Record<string, string[] | string>)["Set-Cookie"] ||
+      (header as Record<string, string[] | string>)["set-cookie"] ||
+      "";
+    const realHeader = Array.isArray(setCookieHeader)
+      ? setCookieHeader.filter(Boolean).join(",")
+      : env === "qq"
+        ? setCookieHeader.replace(
+            /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
+            ",$1=",
+          )
+        : setCookieHeader;
+
+    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
   /**
@@ -267,9 +267,9 @@ export class CookieStore {
    */
   applyResponse(response: unknown, domainOrURL: string): void {
     return this.applyHeader(
-      isMp
-        ? (response as WechatMiniprogram.RequestSuccessCallbackResult).header
-        : (response as Response).headers,
+      env === "js"
+        ? (response as Response).headers
+        : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
       domainOrURL,
     );
   }
@@ -293,9 +293,8 @@ export class CookieStore {
   #init(): void {
     try {
       // 从本地存储读取 cookie 数据数组
-      const cookiesData = isMp
-        ? wx.getStorageSync<CookieType[]>(this.key) || []
-        : [];
+      const cookiesData =
+        env === "js" ? [] : (wx.getStorageSync<CookieType[]>(this.key) ?? []);
 
       // 转化为 cookie map 对象
       this.apply(cookiesData.map((item) => new Cookie(item)));
@@ -322,7 +321,7 @@ export class CookieStore {
           else if (cookie.isPersistence()) saveCookies.push(cookie);
 
       // 保存到本地存储
-      if (isMp) wx.setStorageSync(this.key, saveCookies);
+      if (env !== "js") wx.setStorageSync(this.key, saveCookies);
     } catch (err) {
       console.warn("Error setting cookies", err);
     }

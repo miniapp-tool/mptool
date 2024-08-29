@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-
-import { isMp } from "./env.js";
+import { env } from "./env.js";
 
 /** 实时日志管理器 */
-const log = isMp
-  ? wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 })
-  : console;
-const isRealtime = isMp && "getRealtimeLogManager" in wx;
+const log =
+  env === "js"
+    ? console
+    : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
+const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {

@@ -1,4 +1,14 @@
-// @ts-expect-error: qq is not defined in wx mini app
-export const isQQ = typeof qq === "object";
-export const isWx = typeof wx === "object" && !isQQ;
-export const isMp = isQQ || isWx;
+/** 运行环境 */
+export type Env = "wx" | "qq" | "donut" | "js";
+
+/** 运行环境 */
+/*@__PURE__*/
+export const env: Env =
+  // @ts-expect-error: qq is not defined in wx mini app
+  typeof qq === "object"
+    ? "qq"
+    : typeof wx === "object"
+      ? "miniapp" in wx
+        ? "donut"
+        : "wx"
+      : "js";

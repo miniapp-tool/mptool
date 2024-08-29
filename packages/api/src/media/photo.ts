@@ -1,4 +1,4 @@
-import { MpError } from "@mptool/shared";
+import { MpError, env } from "@mptool/shared";
 
 import { download } from "../network/index.js";
 import { showModal } from "../ui/index.js";
@@ -12,6 +12,13 @@ export const savePhoto = (imgPath: string): Promise<void> =>
   download(imgPath).then(
     (path) =>
       new Promise<void>((resolve, reject) => {
+        if (env === "donut") {
+          return wx.saveImageToPhotosAlbum({
+            filePath: path,
+            success: () => resolve(),
+          });
+        }
+
         // 获取用户设置
         wx.getSetting({
           success: ({ authSetting }) => {
