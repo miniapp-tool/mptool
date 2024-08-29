@@ -7,7 +7,16 @@ import { showModal } from "./modal.js";
  * @param confirmFunc 确定回调函数
  * @param cancelFunc 取消回调函数
  */
-export const confirm = (text: string, warning = ""): Promise<void> =>
-  new Promise((resolve, reject) => {
-    showModal("操作确认", `您确定要${text}么?${warning}`, resolve, reject);
-  });
+export const confirm = (
+  text: string,
+  warning = "",
+  confirmAction: () => Promise<void> | void,
+  cancelAction: () => void | Promise<void> = (): void => void 0,
+): void => {
+  showModal(
+    "操作确认",
+    `您确定要${text}么?${warning}`,
+    confirmAction,
+    cancelAction,
+  );
+};
