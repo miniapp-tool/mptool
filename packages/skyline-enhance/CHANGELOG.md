@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.6 (2024-08-29)</small>
+
+- feat: add correct export ([66ad686](https://github.com/miniapp-tool/mptool/commit/66ad686))
+
 ## <small>0.10.5 (2024-08-29)</small>
 
 - feat(enhance): export navigator methods ([d9c9cb5](https://github.com/miniapp-tool/mptool/commit/d9c9cb5))

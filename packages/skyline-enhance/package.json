@@ -1,6 +1,6 @@
 {
   "name": "@mptool/skyline-enhance",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "description": "Lifetime enhance for Wechat lib 3.0 miniapp",
   "keywords": [
     "miniprogram",
