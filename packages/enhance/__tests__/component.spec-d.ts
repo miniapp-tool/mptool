@@ -57,22 +57,23 @@ it("$Component", () => {
       moved() {},
       detached() {},
       error(err) {
-        assertType<Error>(err);
+        expectTypeOf(err).toMatchTypeOf<Error>();
       },
     },
 
     pageLifetimes: {
       show() {
         // is current component but not the page
-        assertType<string>(this.data.myProperty);
-        assertType<string>(this.is);
+        expectTypeOf(this.data.myProperty).toMatchTypeOf<string>();
+        expectTypeOf(this.is).toMatchTypeOf<string>();
       },
     },
 
     methods: {
       onMyButtonTap() {
-        assertType<string>(this.data.text);
-        assertType<string>(this.data.min.toFixed());
+        expectTypeOf(this.data.text).toMatchTypeOf<string>();
+        expectTypeOf(this.data.min).toMatchTypeOf<number>();
+
         this.triggerEvent(
           "tap",
           { a: 1 },
@@ -90,13 +91,13 @@ it("$Component", () => {
         });
       },
       _propertyChange(newVal: number, oldVal: number) {
-        assertType<number>(newVal);
-        assertType<number>(oldVal);
+        expectTypeOf(newVal).toMatchTypeOf<number>();
+        expectTypeOf(oldVal).toMatchTypeOf<number>();
       },
     },
     export() {
-      assertType<string>(this.is);
-      assertType<void>(this.onMyButtonTap());
+      expectTypeOf(this.is).toMatchTypeOf<string>();
+      expectTypeOf(this.onMyButtonTap()).toMatchTypeOf<void>();
 
       return {};
     },
@@ -279,7 +280,7 @@ it("$Component", () => {
       test() {
         const channel = this.getOpenerEventChannel();
 
-        assertType<WechatMiniprogram.EventChannel>(channel);
+        expectTypeOf(channel).toMatchTypeOf<WechatMiniprogram.EventChannel>();
         channel.emit("test", {});
         channel.on("xxx", () => {});
         // @ts-expect-error: emit key should be string
@@ -321,10 +322,11 @@ it("$Component", () => {
       props,
       methods: {
         onLoad(q) {
-          assertType<string[]>(Object.keys(q));
+          expectTypeOf(q).toMatchTypeOf<Record<string, string | undefined>>();
         },
         fn() {
-          assertType<() => void | Promise<void>>(this.onShow);
+          expectTypeOf(this.onShow).toMatchTypeOf<() => void | Promise<void>>();
+
           // @ts-expect-error: notExists
           assertType(this.notExists);
 

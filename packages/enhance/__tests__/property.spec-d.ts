@@ -1,4 +1,4 @@
-import { assertType, it } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import type { PropType } from "../src";
 import { $Component } from "../src";
@@ -20,8 +20,8 @@ it("$Component property", () => {
     },
     methods: {
       doc() {
-        assertType<Config | undefined>(this.data.config);
-        assertType<Config>(this.data.config2);
+        expectTypeOf(this.data.config).toMatchTypeOf<Config | undefined>();
+        expectTypeOf(this.data.config2).toMatchTypeOf<Config>();
       },
     },
     options: {
@@ -47,13 +47,15 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        assertType<number | undefined>(this.data.n);
-        assertType<number>(this.data.n2);
-        assertType<string | undefined>(this.data.s);
-        assertType<any[] | undefined>(this.data.a);
-        assertType<any[]>(this.data.a2);
-        assertType<boolean | undefined>(this.data.b);
-        assertType<Record<string, any> | undefined>(this.data.o);
+        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
+        expectTypeOf(this.data.n2).toMatchTypeOf<number>();
+        expectTypeOf(this.data.s).toMatchTypeOf<string | undefined>();
+        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
+        expectTypeOf(this.data.a2).toMatchTypeOf<any[]>();
+        expectTypeOf(this.data.b).toMatchTypeOf<boolean | undefined>();
+        expectTypeOf(this.data.o).toMatchTypeOf<
+          Record<string, any> | undefined
+        >();
       },
     },
   });
@@ -85,16 +87,18 @@ it("$Component property", () => {
         return str;
       },
       f() {
-        assertType<string>(this.g());
-        assertType<number | undefined>(this.data.n);
-        assertType<number>(this.data.n2);
-        assertType<string | undefined>(this.data.s);
-        assertType<any[] | undefined>(this.data.a);
-        assertType<any[]>(this.data.a2);
-        assertType<boolean | undefined>(this.data.b);
-        assertType<Record<string, any> | undefined>(this.data.o);
-        assertType<Record<string, any>>(this.data.o2);
-        assertType<any>(this.data.o2.city);
+        expectTypeOf(this.g()).toMatchTypeOf<string>();
+        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
+        expectTypeOf(this.data.n2).toMatchTypeOf<number>();
+        expectTypeOf(this.data.s).toMatchTypeOf<string | undefined>();
+        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
+        expectTypeOf(this.data.a2).toMatchTypeOf<any[]>();
+        expectTypeOf(this.data.b).toMatchTypeOf<boolean | undefined>();
+        expectTypeOf(this.data.o).toMatchTypeOf<
+          Record<string, any> | undefined
+        >();
+        expectTypeOf(this.data.o2).toMatchTypeOf<Record<string, any>>();
+        expectTypeOf(this.data.o2.city).toMatchTypeOf<any>();
       },
     },
   });
@@ -112,8 +116,8 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        assertType<number>(this.data.n);
-        assertType<any[]>(this.data.a);
+        expectTypeOf(this.data.n).toMatchTypeOf<number>();
+        expectTypeOf(this.data.a).toMatchTypeOf<any[]>();
       },
     },
   });
@@ -125,8 +129,8 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        assertType<number | undefined>(this.data.n);
-        assertType<any[] | undefined>(this.data.a);
+        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
+        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
       },
     },
   });

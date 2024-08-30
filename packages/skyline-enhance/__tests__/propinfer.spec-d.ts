@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { assertType, it } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import type {
   InferFromType,
@@ -20,12 +20,11 @@ it("$Component prop infer", () => {
   const convertType = <T>(_type: T): InferFromType<T> =>
     null as unknown as InferFromType<T>;
 
-  assertType<number>(convertType(numberConstructor));
-  assertType<string>(convertType(stringConstructor));
-  assertType<boolean>(convertType(booleanConstructor));
-  assertType<Record<string, any>>(convertType(objectConstructor));
-  assertType<any[]>(convertType(arrayConstructor));
-  assertType<any>(convertType(null));
+  expectTypeOf(convertType(numberConstructor)).toBeNumber();
+  expectTypeOf(convertType(stringConstructor)).toBeString();
+  expectTypeOf(convertType(booleanConstructor)).toBeBoolean();
+  expectTypeOf(convertType(objectConstructor)).toBeObject();
+  expectTypeOf(convertType(arrayConstructor)).toBeArray();
 
   const numberOptions = {
     type: Number,
@@ -54,12 +53,12 @@ it("$Component prop infer", () => {
   const convertOptions = <T>(_type: T): InferPropType<T> =>
     null as unknown as InferPropType<T>;
 
-  assertType<number>(convertOptions(numberOptions));
-  assertType<string>(convertOptions(stringOptions));
-  assertType<boolean>(convertOptions(booleanOptions));
-  assertType<Record<string, any>>(convertOptions(objectOptions));
-  assertType<any[]>(convertOptions(arrayOptions));
-  assertType<any>(convertOptions(nullOptions));
+  expectTypeOf(convertOptions(numberOptions)).toBeNumber();
+  expectTypeOf(convertOptions(stringOptions)).toBeString();
+  expectTypeOf(convertOptions(booleanOptions)).toBeBoolean();
+  expectTypeOf(convertOptions(objectOptions)).toBeObject();
+  expectTypeOf(convertOptions(arrayOptions)).toBeArray();
+  expectTypeOf(convertOptions(nullOptions)).toBeAny();
 
   const numberOptionsWithDefault = {
     type: Number,
@@ -94,14 +93,20 @@ it("$Component prop infer", () => {
   const convertOptionsWithDefault = <T>(_type: T): InferPropType<T> =>
     null as unknown as InferPropType<T>;
 
-  assertType<number>(convertOptionsWithDefault(numberOptionsWithDefault));
-  assertType<string>(convertOptionsWithDefault(stringOptionsWithDefault));
-  assertType<boolean>(convertOptionsWithDefault(booleanOptionsWithDefault));
-  assertType<Record<string, any>>(
+  expectTypeOf(
+    convertOptionsWithDefault(numberOptionsWithDefault),
+  ).toBeNumber();
+  expectTypeOf(
+    convertOptionsWithDefault(stringOptionsWithDefault),
+  ).toBeString();
+  expectTypeOf(
+    convertOptionsWithDefault(booleanOptionsWithDefault),
+  ).toBeBoolean();
+  expectTypeOf(
     convertOptionsWithDefault(objectOptionsWithDefault),
-  );
-  assertType<any[]>(convertOptionsWithDefault(arrayOptionsWithDefault));
-  assertType<any>(convertOptionsWithDefault(nullOptionsWithDefault));
+  ).toBeObject();
+  expectTypeOf(convertOptionsWithDefault(arrayOptionsWithDefault)).toBeArray();
+  expectTypeOf(convertOptionsWithDefault(nullOptionsWithDefault)).toBeAny();
 
   const convertProps = <Props extends PropsOptions>(
     _props: Props,
@@ -111,33 +116,33 @@ it("$Component prop infer", () => {
     a: number;
   }
 
-  assertType<Config | undefined>(
+  expectTypeOf(
     convertProps({
       config: {
         type: Object as PropType<Config>,
       },
     }).config,
-  );
+  ).toMatchTypeOf<Config | undefined>();
 
-  assertType<Config | undefined>(
+  expectTypeOf(
     convertProps({
       myString: String,
       config: {
         type: Object as PropType<Config>,
       },
     }).config,
-  );
+  ).toMatchTypeOf<Config | undefined>();
 
-  assertType<string | undefined>(
+  expectTypeOf(
     convertProps({
       myString: String,
       config: {
         type: Object as PropType<Config>,
       },
     }).myString,
-  );
+  ).toMatchTypeOf<string | undefined>();
 
-  assertType<Config>(
+  expectTypeOf(
     convertProps({
       myString: String,
       config: {
@@ -145,11 +150,11 @@ it("$Component prop infer", () => {
         default: { a: 1 },
       },
     }).config,
-  );
+  ).toMatchTypeOf<Config>();
 
   type Config2 = Config | string[];
 
-  assertType<Config2>(
+  expectTypeOf(
     convertProps({
       myString: String,
       config: {
@@ -157,5 +162,5 @@ it("$Component prop infer", () => {
         default: { a: 1 },
       },
     }).config,
-  );
+  ).toMatchTypeOf<Config2>();
 });

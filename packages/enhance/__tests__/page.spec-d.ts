@@ -1,11 +1,11 @@
-import { assertType, it } from "vitest";
+import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
-  assertType<void>($Page("example", {}));
+  expectTypeOf($Page("example", {})).toMatchTypeOf<void>();
 
-  assertType<Record<string, any>>(getCurrentPages()[0].data);
+  expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
 
   const app = getApp<{
     globalData: {
@@ -68,12 +68,16 @@ it("$Page", () => {
       logs: [] as string[],
     },
     onLoad(options) {
-      assertType<string | undefined>(options.from);
+      expectTypeOf(options).toMatchTypeOf<Record<string, string | undefined>>();
+      expectTypeOf(options.from).toMatchTypeOf<string | undefined>();
       const app = getApp<{
         globalData: { userInfo: WechatMiniprogram.UserInfo };
       }>();
 
-      assertType<string>(app.globalData.userInfo.nickName);
+      expectTypeOf(
+        app.globalData.userInfo,
+      ).toEqualTypeOf<WechatMiniprogram.UserInfo>();
+      expectTypeOf(app.globalData.userInfo.nickName).toEqualTypeOf<string>();
     },
     onReady() {
       this.setData({
@@ -86,8 +90,14 @@ it("$Page", () => {
     onUnload() {},
     onPullDownRefresh() {},
     onShareAppMessage(res) {
-      assertType<"button" | "menu">(res.from);
-      if (res.from === "button") assertType<string | undefined>(res.webViewUrl);
+      expectTypeOf(
+        res,
+      ).toMatchTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
+      expectTypeOf(res.from).toMatchTypeOf<"button" | "menu">();
+
+      if (res.from === "button") {
+        expectTypeOf(res.webViewUrl).toMatchTypeOf<string | undefined>();
+      }
 
       return {
         title: "自定义转发标题",
@@ -97,9 +107,12 @@ it("$Page", () => {
     onPageScroll() {},
     onResize() {},
     onTabItemTap(item) {
-      assertType<string>(item.index);
-      assertType<string>(item.pagePath);
-      assertType<string>(item.text);
+      expectTypeOf(
+        item,
+      ).toMatchTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
+      expectTypeOf(item.index).toMatchTypeOf<string>();
+      expectTypeOf(item.pagePath).toMatchTypeOf<string>();
+      expectTypeOf(item.text).toMatchTypeOf<string>();
     },
     viewTap() {
       this.setData(
@@ -114,8 +127,8 @@ it("$Page", () => {
         },
         function () {},
       );
-      assertType<string>(this.route);
-      assertType<string>(this.data.text);
+      expectTypeOf(this.data.text).toMatchTypeOf<string>();
+      expectTypeOf(this.route).toMatchTypeOf<string>();
       this.viewTap();
 
       const p = getCurrentPages()[1] as WechatMiniprogram.Page.Instance<
@@ -135,8 +148,9 @@ it("$Page", () => {
       a: 1,
     },
     onLoad(q) {
-      assertType<Record<string, string | undefined>>(q);
-      assertType<number>(this.data.a);
+      expectTypeOf(q).toMatchTypeOf<Record<string, string | undefined>>();
+      expectTypeOf(this.data.a).toMatchTypeOf<number>();
+
       // @ts-expect-error: a does not exist
       assertType(this.a);
     },
@@ -144,13 +158,17 @@ it("$Page", () => {
       const query = wx.createSelectorQuery();
 
       query.select("#a").boundingClientRect((res) => {
-        assertType<WechatMiniprogram.BoundingClientRectCallbackResult>(res);
+        expectTypeOf(
+          res,
+        ).toMatchTypeOf<WechatMiniprogram.BoundingClientRectCallbackResult>();
       });
       query.selectViewport().scrollOffset((res) => {
-        assertType<WechatMiniprogram.ScrollOffsetCallbackResult>(res);
+        expectTypeOf(
+          res,
+        ).toMatchTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
-        assertType<any>(res);
+        expectTypeOf(res).toMatchTypeOf<any>;
       });
     },
     jumpBack() {
@@ -160,17 +178,15 @@ it("$Page", () => {
 
   $Page("example", {
     f() {
-      assertType<Record<string, any>>(this.data);
+      expectTypeOf(this.data).toMatchTypeOf<Record<string, any>>();
     },
   });
 
   $Page("example", {
     data: {},
     f() {
-      assertType<Record<never, never>>(this.data);
-      this.setData({
-        a: 1,
-      });
+      expectTypeOf(this.data).toMatchTypeOf<Record<never, never>>();
+      this.setData({ a: 1 });
     },
   });
 
@@ -240,7 +256,7 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
-      assertType<() => number>(this.fn);
+      expectTypeOf(this.fn).toMatchTypeOf<() => number>();
     },
     fn() {
       const a = Math.random();

@@ -94,6 +94,14 @@ export const ls = (path: string): string[] => {
   }
 };
 
+interface ReadFile {
+  (path: string): string | undefined;
+  <T extends FileEncoding>(
+    path: string,
+    encoding: T,
+  ): (T extends "binary" ? ArrayBuffer : string) | undefined;
+}
+
 /**
  * 文件管理器读取文件包装
  *
@@ -101,18 +109,21 @@ export const ls = (path: string): string[] => {
  * @param encoding 文件的编码格式，默认 `utf-8`
  * @returns 文件内容
  */
-export const readFile = (
+export const readFile = (<T extends FileEncoding>(
   path: string,
-  encoding: FileEncoding = "utf-8",
-): string | ArrayBuffer | undefined => {
+  encoding: T = "utf-8" as T,
+): (T extends "binary" ? ArrayBuffer : string) | undefined => {
   try {
-    return fileManager.readFileSync(`${userPath}/${path}`, encoding);
+    return fileManager.readFileSync(
+      `${userPath}/${path}`,
+      encoding ?? "utf-8",
+    ) as (T extends "binary" ? ArrayBuffer : string) | undefined;
   } catch {
     logger.warn(`${path} don't exist`);
 
     return undefined;
   }
-};
+}) as ReadFile;
 
 /**
  * 读取并解析 JSON 文件
