@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.7 (2024-08-30)</small>
+
+- feat: improve types ([15f355f](https://github.com/miniapp-tool/mptool/commit/15f355f))
+
 ## <small>0.10.3 (2024-08-29)</small>
 
 **Note:** Version bump only for package @mptool/file
