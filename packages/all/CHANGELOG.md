@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.8 (2024-08-30)</small>
+
+**Note:** Version bump only for package @mptool/all
+
 ## <small>0.10.7 (2024-08-30)</small>
 
 **Note:** Version bump only for package @mptool/all
