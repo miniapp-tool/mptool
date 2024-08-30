@@ -10,6 +10,8 @@ const sessionId = new Date().getTime();
 
 logger.debug(`Current sessionId is ${sessionId}`);
 
+const CACHE_PREFIX = "_cache_";
+
 /** 存储 */
 export const storage: Record<string, unknown> = {};
 
@@ -59,7 +61,7 @@ const getData = <T = unknown>(
         ? // not expired
           value.data
         : // expired
-          (wx.removeStorageSync(`_cache_${key}`), undefined)
+          (wx.removeStorageSync(`${CACHE_PREFIX}${key}`), undefined)
       : // permanent
         value.data
     : // not exist
@@ -78,7 +80,7 @@ const prepareData = <T = unknown>(
 
   // 保持上一次的缓存时间
   if (expire === "keep") {
-    const oldData = wx.getStorageSync<StorageData<T>>(`_cache_${key}`);
+    const oldData = wx.getStorageSync<StorageData<T>>(`${CACHE_PREFIX}${key}`);
 
     // 上次没有缓存，本次也不更新
     if (!oldData) return undefined;
@@ -113,7 +115,7 @@ export const set = <T = unknown>(
   value: T,
   expire: number | "keep" | "once" = 0,
 ): void => {
-  wx.setStorageSync(`_cache_${key}`, prepareData(key, value, expire));
+  wx.setStorageSync(`${CACHE_PREFIX}${key}`, prepareData(key, value, expire));
 };
 
 /**
@@ -135,7 +137,7 @@ export const setAsync = <T = unknown>(
 ): Promise<WechatMiniprogram.GeneralCallbackResult | void> =>
   wx
     .setStorage({
-      key: `_cache_${key}`,
+      key: `${CACHE_PREFIX}${key}`,
       data: prepareData(key, value, expire),
     })
     .catch(() => {
@@ -150,7 +152,7 @@ export const setAsync = <T = unknown>(
  * @returns 设置值
  */
 export const get = <T = unknown>(key: string): T | undefined =>
-  getData(key, wx.getStorageSync<StorageData<T>>(`_cache_${key}`));
+  getData(key, wx.getStorageSync<StorageData<T>>(`${CACHE_PREFIX}${key}`));
 
 /**
  * 异步获取
@@ -162,7 +164,7 @@ export const get = <T = unknown>(key: string): T | undefined =>
 export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
   wx
     .getStorage<StorageData<T>>({
-      key: `_cache_${key}`,
+      key: `${CACHE_PREFIX}${key}`,
     })
     .then(({ data }) => getData(key, data))
     .catch(() => {
@@ -177,7 +179,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
  * @param key key
  */
 export const remove = (key: string): void => {
-  wx.removeStorageSync(`_cache_${key}`);
+  wx.removeStorageSync(`${CACHE_PREFIX}${key}`);
   getData(key, null);
 };
 
@@ -191,7 +193,7 @@ export const removeAsync = (
   key: string,
 ): Promise<WechatMiniprogram.GeneralCallbackResult> =>
   wx.removeStorage({
-    key: `_cache_${key}`,
+    key: `${CACHE_PREFIX}${key}`,
   });
 
 /**
@@ -201,7 +203,7 @@ export const removeAsync = (
  */
 export const check = (): void => {
   wx.getStorageInfoSync().keys.forEach((key) => {
-    if (key.startsWith("_cache_")) {
+    if (key.startsWith(CACHE_PREFIX)) {
       const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
       if (
@@ -222,7 +224,7 @@ export const checkAsync = (): Promise<void[]> =>
   wx.getStorageInfo().then(({ keys }) =>
     Promise.all<void>(
       keys
-        .filter((key) => key.startsWith("_cache_"))
+        .filter((key) => key.startsWith(CACHE_PREFIX))
         .map((key) =>
           wx
             .getStorage<StorageData<unknown> | undefined>({ key })
