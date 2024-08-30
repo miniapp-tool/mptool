@@ -221,7 +221,11 @@ export type ComponentInstance<
   > & {
     /** 组件数据，**包括内部数据和属性值** */
     data: Data & InferPropTypes<Props>;
-    /** 组件数据，**包括内部数据和属性值**（与 `data` 一致） */
+    /**
+     * @deprecated 优先使用 `data`
+     *
+     * 组件数据，**包括内部数据和属性值**（与 `data` 一致）
+     */
     properties: Data & InferPropTypes<Props>;
   };
 
