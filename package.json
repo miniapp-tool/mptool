@@ -1,6 +1,5 @@
 {
-  "name": "miniapp-root",
-  "version": "0.8.6",
+  "name": "mptool-root",
   "private": true,
   "description": "Miniapp is a lightweight framework for QQ/Wechat miniapp.",
   "repository": "https://github.com/miniapp-tool/mptool",
