@@ -3,7 +3,7 @@ import { assertType, expectTypeOf, it } from "vitest";
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
-  expectTypeOf($Page("example", {})).toMatchTypeOf<void>();
+  expectTypeOf($Page("example", {})).toEqualTypeOf<void>();
 
   expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
 
@@ -68,8 +68,8 @@ it("$Page", () => {
       logs: [] as string[],
     },
     onLoad(options) {
-      expectTypeOf(options).toMatchTypeOf<Record<string, string | undefined>>();
-      expectTypeOf(options.from).toMatchTypeOf<string | undefined>();
+      expectTypeOf(options).toEqualTypeOf<Record<string, string | undefined>>();
+      expectTypeOf(options.from).toEqualTypeOf<string | undefined>();
       const app = getApp<{
         globalData: { userInfo: WechatMiniprogram.UserInfo };
       }>();
@@ -92,11 +92,11 @@ it("$Page", () => {
     onShareAppMessage(res) {
       expectTypeOf(
         res,
-      ).toMatchTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
-      expectTypeOf(res.from).toMatchTypeOf<"button" | "menu">();
+      ).toEqualTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
+      expectTypeOf(res.from).toEqualTypeOf<"button" | "menu">();
 
       if (res.from === "button") {
-        expectTypeOf(res.webViewUrl).toMatchTypeOf<string | undefined>();
+        expectTypeOf(res.webViewUrl).toEqualTypeOf<string | undefined>();
       }
 
       return {
@@ -109,10 +109,10 @@ it("$Page", () => {
     onTabItemTap(item) {
       expectTypeOf(
         item,
-      ).toMatchTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
-      expectTypeOf(item.index).toMatchTypeOf<string>();
-      expectTypeOf(item.pagePath).toMatchTypeOf<string>();
-      expectTypeOf(item.text).toMatchTypeOf<string>();
+      ).toEqualTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
+      expectTypeOf(item.index).toEqualTypeOf<string>();
+      expectTypeOf(item.pagePath).toEqualTypeOf<string>();
+      expectTypeOf(item.text).toEqualTypeOf<string>();
     },
     viewTap() {
       this.setData(
@@ -127,8 +127,8 @@ it("$Page", () => {
         },
         function () {},
       );
-      expectTypeOf(this.data.text).toMatchTypeOf<string>();
-      expectTypeOf(this.route).toMatchTypeOf<string>();
+      expectTypeOf(this.data.text).toEqualTypeOf<string>();
+      expectTypeOf(this.route).toEqualTypeOf<string>();
       this.viewTap();
 
       const p = getCurrentPages()[1] as WechatMiniprogram.Page.Instance<
@@ -148,8 +148,8 @@ it("$Page", () => {
       a: 1,
     },
     onLoad(q) {
-      expectTypeOf(q).toMatchTypeOf<Record<string, string | undefined>>();
-      expectTypeOf(this.data.a).toMatchTypeOf<number>();
+      expectTypeOf(q).toEqualTypeOf<Record<string, string | undefined>>();
+      expectTypeOf(this.data.a).toEqualTypeOf<number>();
 
       // @ts-expect-error: a does not exist
       assertType(this.a);
@@ -160,15 +160,15 @@ it("$Page", () => {
       query.select("#a").boundingClientRect((res) => {
         expectTypeOf(
           res,
-        ).toMatchTypeOf<WechatMiniprogram.BoundingClientRectCallbackResult>();
+        ).toEqualTypeOf<WechatMiniprogram.BoundingClientRectCallbackResult>();
       });
       query.selectViewport().scrollOffset((res) => {
         expectTypeOf(
           res,
-        ).toMatchTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
+        ).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
-        expectTypeOf(res).toMatchTypeOf<any>;
+        expectTypeOf(res).toEqualTypeOf<any>;
       });
     },
     jumpBack() {
@@ -178,14 +178,14 @@ it("$Page", () => {
 
   $Page("example", {
     f() {
-      expectTypeOf(this.data).toMatchTypeOf<Record<string, any>>();
+      expectTypeOf(this.data).toEqualTypeOf<Record<string, any>>();
     },
   });
 
   $Page("example", {
     data: {},
     f() {
-      expectTypeOf(this.data).toMatchTypeOf<Record<never, never>>();
+      expectTypeOf(this.data).toEqualTypeOf<Record<never, never>>();
       this.setData({ a: 1 });
     },
   });
@@ -256,7 +256,7 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
-      expectTypeOf(this.fn).toMatchTypeOf<() => number>();
+      expectTypeOf(this.fn).toEqualTypeOf<() => number>();
     },
     fn() {
       const a = Math.random();

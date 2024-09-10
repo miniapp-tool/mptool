@@ -122,7 +122,7 @@ it("$Component prop infer", () => {
         type: Object as PropType<Config>,
       },
     }).config,
-  ).toMatchTypeOf<Config | undefined>();
+  ).toEqualTypeOf<Config | undefined>();
 
   expectTypeOf(
     convertProps({
@@ -131,7 +131,7 @@ it("$Component prop infer", () => {
         type: Object as PropType<Config>,
       },
     }).config,
-  ).toMatchTypeOf<Config | undefined>();
+  ).toEqualTypeOf<Config | undefined>();
 
   expectTypeOf(
     convertProps({
@@ -140,7 +140,7 @@ it("$Component prop infer", () => {
         type: Object as PropType<Config>,
       },
     }).myString,
-  ).toMatchTypeOf<string | undefined>();
+  ).toEqualTypeOf<string | undefined>();
 
   expectTypeOf(
     convertProps({
@@ -150,7 +150,7 @@ it("$Component prop infer", () => {
         default: { a: 1 },
       },
     }).config,
-  ).toMatchTypeOf<Config>();
+  ).toEqualTypeOf<Config>();
 
   type Config2 = Config | string[];
 
@@ -162,5 +162,5 @@ it("$Component prop infer", () => {
         default: { a: 1 },
       },
     }).config,
-  ).toMatchTypeOf<Config2>();
+  ).toEqualTypeOf<Config2>();
 });

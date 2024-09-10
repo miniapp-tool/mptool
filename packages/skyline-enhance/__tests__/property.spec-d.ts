@@ -20,8 +20,8 @@ it("$Component property", () => {
     },
     methods: {
       doc() {
-        expectTypeOf(this.data.config).toMatchTypeOf<Config | undefined>();
-        expectTypeOf(this.data.config2).toMatchTypeOf<Config>();
+        expectTypeOf(this.data.config).toEqualTypeOf<Config | undefined>();
+        expectTypeOf(this.data.config2).toEqualTypeOf<Config>();
       },
     },
     options: {
@@ -47,13 +47,13 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
-        expectTypeOf(this.data.n2).toMatchTypeOf<number>();
-        expectTypeOf(this.data.s).toMatchTypeOf<string | undefined>();
-        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
-        expectTypeOf(this.data.a2).toMatchTypeOf<any[]>();
-        expectTypeOf(this.data.b).toMatchTypeOf<boolean | undefined>();
-        expectTypeOf(this.data.o).toMatchTypeOf<
+        expectTypeOf(this.data.n).toEqualTypeOf<number | undefined>();
+        expectTypeOf(this.data.n2).toEqualTypeOf<number>();
+        expectTypeOf(this.data.s).toEqualTypeOf<string | undefined>();
+        expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
+        expectTypeOf(this.data.a2).toEqualTypeOf<any[]>();
+        expectTypeOf(this.data.b).toEqualTypeOf<boolean | undefined>();
+        expectTypeOf(this.data.o).toEqualTypeOf<
           Record<string, any> | undefined
         >();
       },
@@ -87,18 +87,18 @@ it("$Component property", () => {
         return str;
       },
       f() {
-        expectTypeOf(this.g()).toMatchTypeOf<string>();
-        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
-        expectTypeOf(this.data.n2).toMatchTypeOf<number>();
-        expectTypeOf(this.data.s).toMatchTypeOf<string | undefined>();
-        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
-        expectTypeOf(this.data.a2).toMatchTypeOf<any[]>();
-        expectTypeOf(this.data.b).toMatchTypeOf<boolean | undefined>();
-        expectTypeOf(this.data.o).toMatchTypeOf<
+        expectTypeOf(this.g()).toEqualTypeOf<string>();
+        expectTypeOf(this.data.n).toEqualTypeOf<number | undefined>();
+        expectTypeOf(this.data.n2).toEqualTypeOf<number>();
+        expectTypeOf(this.data.s).toEqualTypeOf<string | undefined>();
+        expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
+        expectTypeOf(this.data.a2).toEqualTypeOf<any[]>();
+        expectTypeOf(this.data.b).toEqualTypeOf<boolean | undefined>();
+        expectTypeOf(this.data.o).toEqualTypeOf<
           Record<string, any> | undefined
         >();
-        expectTypeOf(this.data.o2).toMatchTypeOf<Record<string, any>>();
-        expectTypeOf(this.data.o2.city).toMatchTypeOf<any>();
+        expectTypeOf(this.data.o2).toEqualTypeOf<Record<string, any>>();
+        expectTypeOf(this.data.o2.city).toEqualTypeOf<any>();
       },
     },
   });
@@ -116,8 +116,8 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        expectTypeOf(this.data.n).toMatchTypeOf<number>();
-        expectTypeOf(this.data.a).toMatchTypeOf<any[]>();
+        expectTypeOf(this.data.n).toEqualTypeOf<number>();
+        expectTypeOf(this.data.a).toEqualTypeOf<any[]>();
       },
     },
   });
@@ -129,8 +129,8 @@ it("$Component property", () => {
     },
     methods: {
       f() {
-        expectTypeOf(this.data.n).toMatchTypeOf<number | undefined>();
-        expectTypeOf(this.data.a).toMatchTypeOf<any[] | undefined>();
+        expectTypeOf(this.data.n).toEqualTypeOf<number | undefined>();
+        expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
       },
     },
   });

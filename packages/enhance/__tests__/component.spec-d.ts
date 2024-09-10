@@ -57,22 +57,22 @@ it("$Component", () => {
       moved() {},
       detached() {},
       error(err) {
-        expectTypeOf(err).toMatchTypeOf<Error>();
+        expectTypeOf(err).toEqualTypeOf<Error>();
       },
     },
 
     pageLifetimes: {
       show() {
         // is current component but not the page
-        expectTypeOf(this.data.myProperty).toMatchTypeOf<string>();
-        expectTypeOf(this.is).toMatchTypeOf<string>();
+        expectTypeOf(this.data.myProperty).toEqualTypeOf<string>();
+        expectTypeOf(this.is).toEqualTypeOf<string>();
       },
     },
 
     methods: {
       onMyButtonTap() {
-        expectTypeOf(this.data.text).toMatchTypeOf<string>();
-        expectTypeOf(this.data.min).toMatchTypeOf<number>();
+        expectTypeOf(this.data.text).toEqualTypeOf<string>();
+        expectTypeOf(this.data.min).toEqualTypeOf<number>();
 
         this.triggerEvent(
           "tap",
@@ -91,13 +91,13 @@ it("$Component", () => {
         });
       },
       _propertyChange(newVal: number, oldVal: number) {
-        expectTypeOf(newVal).toMatchTypeOf<number>();
-        expectTypeOf(oldVal).toMatchTypeOf<number>();
+        expectTypeOf(newVal).toEqualTypeOf<number>();
+        expectTypeOf(oldVal).toEqualTypeOf<number>();
       },
     },
     export() {
-      expectTypeOf(this.is).toMatchTypeOf<string>();
-      expectTypeOf(this.onMyButtonTap()).toMatchTypeOf<void>();
+      expectTypeOf(this.is).toEqualTypeOf<string>();
+      expectTypeOf(this.onMyButtonTap()).toEqualTypeOf<void>();
 
       return {};
     },
@@ -280,7 +280,7 @@ it("$Component", () => {
       test() {
         const channel = this.getOpenerEventChannel();
 
-        expectTypeOf(channel).toMatchTypeOf<WechatMiniprogram.EventChannel>();
+        expectTypeOf(channel).toEqualTypeOf<WechatMiniprogram.EventChannel>();
         channel.emit("test", {});
         channel.on("xxx", () => {});
         // @ts-expect-error: emit key should be string
@@ -322,10 +322,10 @@ it("$Component", () => {
       props,
       methods: {
         onLoad(q) {
-          expectTypeOf(q).toMatchTypeOf<Record<string, string | undefined>>();
+          expectTypeOf(q).toEqualTypeOf<Record<string, string | undefined>>();
         },
         fn() {
-          expectTypeOf(this.onShow).toMatchTypeOf<() => void | Promise<void>>();
+          expectTypeOf(this.onShow).toEqualTypeOf<() => void | Promise<void>>();
 
           // @ts-expect-error: notExists
           assertType(this.notExists);
