@@ -13,7 +13,7 @@
     "nodejs-jieba": "0.1.2",
     "vue": "3.5.7",
     "vuepress": "2.0.0-rc.14",
-    "vuepress-plugin-search-pro": "2.0.0-rc.52",
+    "vuepress-plugin-search-pro": "2.0.0-rc.53",
     "vuepress-theme-hope": "2.0.0-rc.52"
   }
 }
