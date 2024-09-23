@@ -28,10 +28,14 @@ export default defineUserConfig({
     displayFooter: true,
 
     plugins: {
+      markdownTab: {
+        codeTabs: true,
+      },
+
       mdEnhance: {
-        codetabs: true,
         tasklist: true,
       },
+
       searchPro: true,
     },
   }),

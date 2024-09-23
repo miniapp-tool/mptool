@@ -709,4 +709,4 @@ emitter.on("foo", onFoo); // start listening
 emitter.off("foo", onFoo); // stop listening
 ```
 
-具体详情请见 [API 文档](../api/enhance/emitter.md)
+具体详情请见 [API 文档](./api/emitter.md)
