@@ -42,8 +42,8 @@ importers:
         specifier: 7.0.3
         version: 7.0.3
       cz-git:
-        specifier: 1.9.4
-        version: 1.9.4
+        specifier: 1.10.0
+        version: 1.10.0
       esbuild:
         specifier: 0.24.0
         version: 0.24.0
@@ -2461,8 +2461,8 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
-  cz-git@1.9.4:
-    resolution: {integrity: sha512-VntWcIEFfW8+7RgwYaRn1r10NhUkl8/8ZdJQRupEdqE7QXBCSjNP8hKSk9zhSLzYAsdXfGEAwiAYJM1T2Qsh8w==}
+  cz-git@1.10.0:
+    resolution: {integrity: sha512-WJidM6BwqJXPi2KUBzkUgZwZYh9U5VP5tJSIZ5G4+CDDv0lzLo8vrOrsWItE12f3xpAvlZTeQipreSczuaxFRA==}
     engines: {node: '>=v12.20.0'}
 
   dargs@8.1.0:
@@ -7469,7 +7469,7 @@ snapshots:
 
   csstype@3.1.3: {}
 
-  cz-git@1.9.4: {}
+  cz-git@1.10.0: {}
 
   dargs@8.1.0: {}
 
