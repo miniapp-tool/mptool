@@ -43,7 +43,7 @@
     "@commitlint/config-conventional": "19.5.0",
     "@lerna-lite/cli": "3.9.1",
     "@lerna-lite/publish": "3.9.1",
-    "@rollup/plugin-commonjs": "26.0.1",
+    "@rollup/plugin-commonjs": "26.0.3",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.4",
     "@types/node": "22.5.5",
