@@ -41,7 +41,7 @@
     "domhandler": "^5.0.3"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^3.12.3 || ^4.0.0"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
