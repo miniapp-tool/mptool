@@ -21,20 +21,20 @@ export const handleProperties = (
   const props: WechatMiniprogram.Component.PropertyOption = {};
 
   Object.keys(oldProps).forEach((propertyName) => {
-    const vueSyntaxValue = oldProps[propertyName];
+    const advancedValue = oldProps[propertyName];
 
     // Constructor or null
-    if (vueSyntaxValue === null || typeof vueSyntaxValue === "function") {
+    if (advancedValue === null || typeof advancedValue === "function") {
       props[propertyName] =
-        vueSyntaxValue as WechatMiniprogram.Component.ShortProperty;
+        advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
-      const { type } = vueSyntaxValue;
+      const { type } = advancedValue;
 
       // null type
       if (type === null)
         props[propertyName] = {
           type: null,
-          value: vueSyntaxValue.default,
+          value: advancedValue.default,
         };
       // array type, should push rest into `optionalTypes`
       else if (Array.isArray(type))
@@ -42,7 +42,7 @@ export const handleProperties = (
         props[propertyName] = {
           // @ts-expect-error: Force set prop config
           type: type[0],
-          value: vueSyntaxValue.default,
+          value: advancedValue.default,
 
           // @ts-expect-error: Force set prop config
           optionalTypes: type.slice(1),
@@ -51,7 +51,7 @@ export const handleProperties = (
         props[propertyName] = {
           // @ts-expect-error: Force set prop config
           type,
-          value: vueSyntaxValue.default,
+          value: advancedValue.default,
         };
     }
   });
@@ -72,17 +72,16 @@ export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    never,
-    never
-  >,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
   options: ComponentOptions<
     Data,
     Property,
     Method,
-    CustomInstanceProperty,
+    Behavior,
+    InstanceProps,
     IsPage
   >,
 ): string => {
@@ -102,7 +101,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -120,7 +120,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -142,7 +143,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -169,7 +171,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       method: string,
@@ -191,7 +194,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       parent: TrivialComponentInstance | TrivialPageInstance,
@@ -211,7 +215,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       value: string,
@@ -226,7 +231,7 @@ export const $Component: ComponentConstructor = <
   };
 
   // @ts-expect-error: convert prop config
-  options.props = handleProperties(options.props);
+  options.properties = handleProperties(options.props);
   delete options.props;
 
   // we cast properties into syntax that miniprogram can handle
@@ -234,7 +239,10 @@ export const $Component: ComponentConstructor = <
     options as unknown as WechatMiniprogram.Component.Options<
       Data,
       WechatMiniprogram.Component.PropertyOption,
-      Method
+      Method,
+      Behavior,
+      InstanceProps,
+      IsPage
     >,
   );
 };

@@ -167,23 +167,22 @@ export function mount<
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    never,
-    never
-  >,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
   ctx: ComponentOptions<
     Data,
     Property,
     Method,
-    CustomInstanceProperty,
+    Behavior,
+    InstanceProps,
     IsPage
   > &
     Partial<
       ExtendedPageMethods<
         Data & InferPropTypes<Property>,
-        CustomInstanceProperty &
+        InstanceProps &
           Method &
           (IsPage extends true
             ? WechatMiniprogram.Page.ILifetime
