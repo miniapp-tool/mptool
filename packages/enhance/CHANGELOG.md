@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.9 (2024-10-06)</small>
+
+- feat: use miniprogram-api-typings v4 ([10d6856](https://github.com/miniapp-tool/mptool/commit/10d6856))
+- test: improve types ([e922418](https://github.com/miniapp-tool/mptool/commit/e922418))
+
 ## <small>0.10.7 (2024-08-30)</small>
 
 - chore: update typings ([2e09144](https://github.com/miniapp-tool/mptool/commit/2e09144))

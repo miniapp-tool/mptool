@@ -1,6 +1,6 @@
 {
   "name": "@mptool/shared",
-  "version": "0.10.3",
+  "version": "0.10.9",
   "description": "Shared utils for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
