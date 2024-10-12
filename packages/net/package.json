@@ -1,6 +1,6 @@
 {
   "name": "@mptool/net",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "description": "Network api for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
@@ -38,12 +38,12 @@
     "@mptool/shared": "workspace:*"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^4.0.1"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@types/set-cookie-parser": "2.4.10",
-    "miniprogram-api-typings": "3.12.3",
+    "miniprogram-api-typings": "4.0.1",
     "set-cookie-parser": "2.7.0"
   },
   "publishConfig": {

@@ -1,6 +1,6 @@
 {
   "name": "@mptool/all",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "description": "Full back for mptool",
   "keywords": [
     "miniprogram",
@@ -33,7 +33,7 @@
     "dev": "rollup -c -w"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^4.0.1"
   },
   "devDependencies": {
     "@mptool/api": "workspace:*",
@@ -41,7 +41,7 @@
     "@mptool/file": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
-    "miniprogram-api-typings": "3.12.3"
+    "miniprogram-api-typings": "4.0.1"
   },
   "publishConfig": {
     "access": "public"

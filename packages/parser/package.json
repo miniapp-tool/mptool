@@ -1,6 +1,6 @@
 {
   "name": "@mptool/parser",
-  "version": "0.10.3",
+  "version": "0.10.9",
   "description": "RichText parser for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
@@ -41,11 +41,11 @@
     "domhandler": "^5.0.3"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^4.0.1"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "3.12.3"
+    "miniprogram-api-typings": "4.0.1"
   },
   "publishConfig": {
     "access": "public"

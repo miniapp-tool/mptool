@@ -72,17 +72,16 @@ export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
-  CustomInstanceProperty extends WechatMiniprogram.IAnyObject = Record<
-    never,
-    never
-  >,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
   options: ComponentOptions<
     Data,
     Property,
     Method,
-    CustomInstanceProperty,
+    Behavior,
+    InstanceProps,
     IsPage
   >,
 ): string => {
@@ -102,7 +101,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -120,7 +120,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -142,7 +143,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
     ) {
@@ -169,7 +171,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       method: string,
@@ -191,7 +194,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       parent: TrivialComponentInstance | TrivialPageInstance,
@@ -211,7 +215,8 @@ export const $Component: ComponentConstructor = <
         Data,
         Property,
         Method,
-        CustomInstanceProperty,
+        Behavior,
+        InstanceProps,
         IsPage
       >,
       value: string,
@@ -234,7 +239,10 @@ export const $Component: ComponentConstructor = <
     options as unknown as WechatMiniprogram.Component.Options<
       Data,
       WechatMiniprogram.Component.PropertyOption,
-      Method
+      Method,
+      Behavior,
+      InstanceProps,
+      IsPage
     >,
   );
 };

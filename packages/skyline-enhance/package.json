@@ -1,6 +1,6 @@
 {
   "name": "@mptool/skyline-enhance",
-  "version": "0.10.6",
+  "version": "0.10.9",
   "description": "Lifetime enhance for Wechat lib 3.0 miniapp",
   "keywords": [
     "miniprogram",
@@ -34,12 +34,12 @@
     "dev": "rollup -c -w"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^4.0.1"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "3.12.3"
+    "miniprogram-api-typings": "4.0.1"
   },
   "publishConfig": {
     "access": "public"

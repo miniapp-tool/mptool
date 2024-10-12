@@ -130,7 +130,7 @@ export interface ComponentLifetimes {
      *
      * 最低基础库版本：[`2.4.1`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    error(err: Error): void;
+    error(err: WechatMiniprogram.Error): void;
   }>;
 }
 
@@ -200,6 +200,7 @@ export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = WechatMiniprogram.Component.InstanceProperties &
@@ -215,6 +216,7 @@ export type ComponentInstance<
     Data & InferPropTypes<Props>,
     InstanceProps &
       Method &
+      WechatMiniprogram.Component.MixinMethods<Behavior> &
       (IsPage extends true
         ? WechatMiniprogram.Page.ILifetime
         : Record<never, never>)
@@ -233,6 +235,7 @@ export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
@@ -240,31 +243,44 @@ export type ComponentOptions<
     /** 组件属性 */
     props: Props;
   }> &
+  Partial<WechatMiniprogram.Component.Behavior<Behavior>> &
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
   Partial<ComponentLifetimes> &
-  ThisType<ComponentInstance<Data, Props, Method, InstanceProps, IsPage>>;
+  ThisType<
+    ComponentInstance<Data, Props, Method, Behavior, InstanceProps, IsPage>
+  >;
 
 export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
   Props extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
+  Behavior extends WechatMiniprogram.Component.BehaviorOption,
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
-  options: ComponentOptions<Data, Props, Method, InstanceProps, IsPage>,
+  options: ComponentOptions<
+    Data,
+    Props,
+    Method,
+    Behavior,
+    InstanceProps,
+    IsPage
+  >,
 ) => string;
 
 export type TrivialComponentInstance = ComponentInstance<
   WechatMiniprogram.IAnyObject,
   Record<string, null>,
-  Record<string, (...args: unknown[]) => any>
+  Record<string, (...args: unknown[]) => any>,
+  []
 >;
 
-export type TrivialComponentOptions = ComponentInstance<
+export type TrivialComponentOptions = ComponentOptions<
   WechatMiniprogram.IAnyObject,
   Record<string, null>,
-  Record<string, (...args: any[]) => any>
+  Record<string, (...args: any[]) => any>,
+  []
 >;
 
 export type RefMap = Record<string, TrivialComponentInstance>;

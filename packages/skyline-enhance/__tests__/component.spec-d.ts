@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
@@ -57,13 +58,13 @@ it("$Component", () => {
       moved() {},
       detached() {},
       error(err) {
-        expectTypeOf(err).toEqualTypeOf<Error>();
+        expectTypeOf(err).toEqualTypeOf<WechatMiniprogram.Error>();
       },
     },
 
     pageLifetimes: {
       show() {
-        // is current component but not the page
+        // is current $Component but not the page
         expectTypeOf(this.data.myProperty).toEqualTypeOf<string>();
         expectTypeOf(this.is).toEqualTypeOf<string>();
       },
@@ -129,6 +130,19 @@ it("$Component", () => {
     }),
   );
 
+  $Component({
+    props: {
+      n: Number,
+      a: Array,
+    },
+    methods: {
+      f() {
+        expectTypeOf<number | undefined>(this.data.n);
+        expectTypeOf<any[] | undefined>(this.data.a);
+      },
+    },
+  });
+
   assertType(
     $Component({
       data: {
@@ -168,8 +182,7 @@ it("$Component", () => {
     props: {
       a: {
         type: Number,
-        // observer: "onAChange",
-        value: 1,
+        default: 1,
       },
     },
     methods: {
@@ -289,7 +302,7 @@ it("$Component", () => {
     },
   });
 
-  $Component<Record<never, never>, Record<never, never>, { fn(): void }>({
+  $Component<Record<never, never>, Record<never, never>, { fn(): void }, []>({
     methods: {
       fn() {
         // @ts-expect-error: notExists
@@ -307,7 +320,7 @@ it("$Component", () => {
       c: String,
       d: {
         type: Number,
-        value: 4,
+        default: 4,
       },
     };
 
@@ -315,6 +328,7 @@ it("$Component", () => {
       typeof data,
       typeof props,
       /* methods= */ { fn(): string },
+      /* behaviors= */ [],
       /* customProperties= */ Record<never, never>,
       /* isPage= */ true
     >({
@@ -335,4 +349,52 @@ it("$Component", () => {
       },
     });
   }
+
+  $Component({
+    props: {
+      b: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    methods: {
+      test() {
+        expectTypeOf(this.data.b).toBeBoolean();
+      },
+    },
+  });
+
+  $Component({
+    lifetimes: {
+      attached() {
+        this.setUpdatePerformanceListener({ withDataPaths: true }, (res) => {
+          expectTypeOf<string[]>(res.dataPaths);
+          expectTypeOf(res.updateProcessId).toBeNumber();
+        });
+        this.setUpdatePerformanceListener({}, (res) => {
+          expectTypeOf(res.dataPaths).toBeUndefined();
+          expectTypeOf(res.updateProcessId).toBeNumber();
+        });
+        this.setUpdatePerformanceListener({});
+      },
+    },
+  });
+
+  type CustomProperties = {
+    customProp: string;
+  };
+
+  $Component<
+    Record<never, never>,
+    Record<never, never>,
+    Record<never, never>,
+    [],
+    CustomProperties
+  >({
+    lifetimes: {
+      created() {
+        this.customProp = "customProp";
+      },
+    },
+  });
 });

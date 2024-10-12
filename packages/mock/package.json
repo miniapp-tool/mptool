@@ -1,6 +1,6 @@
 {
   "name": "@mptool/mock",
-  "version": "0.10.0",
+  "version": "0.10.9",
   "description": "API mock for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
@@ -35,7 +35,7 @@
     "dev": "rollup -c -w"
   },
   "dependencies": {
-    "miniprogram-api-typings": "^3.12.3"
+    "miniprogram-api-typings": "^4.0.1"
   },
   "publishConfig": {
     "access": "public"
