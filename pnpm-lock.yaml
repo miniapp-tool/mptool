@@ -124,8 +124,8 @@ importers:
         specifier: 2.0.0-rc.18
         version: 2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3)
       nodejs-jieba:
-        specifier: 0.1.2
-        version: 0.1.2(encoding@0.1.13)
+        specifier: 0.2.1
+        version: 0.2.1(encoding@0.1.13)
       sass-embedded:
         specifier: 1.79.5
         version: 1.79.5
@@ -140,7 +140,7 @@ importers:
         version: 2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
       vuepress-theme-hope:
         specifier: 2.0.0-rc.58
-        version: 2.0.0-rc.58(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress-plugin-search-pro@2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))))(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
+        version: 2.0.0-rc.58(markdown-it@14.1.0)(nodejs-jieba@0.2.1(encoding@0.1.13))(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress-plugin-search-pro@2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))))(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
 
   packages/all:
     devDependencies:
@@ -3515,8 +3515,9 @@ packages:
     resolution: {integrity: sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-addon-api@7.1.1:
-    resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
+  node-addon-api@8.2.1:
+    resolution: {integrity: sha512-vmEOvxwiH8tlOcv4SyE8RH34rI5/nWVaigUeAUPawC6f0+HoDthwI0vkMu4tbtsZrXq6QXFfrkhjofzKEs5tpA==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -3543,9 +3544,9 @@ packages:
   node-releases@2.0.18:
     resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
 
-  nodejs-jieba@0.1.2:
-    resolution: {integrity: sha512-VOBhc1muuH00apYn78bVJSPUn7xakyawJNTl+3jVu3038FpxKBp4qxfGkpb07DXWFf12IlcIT4UzmhqXzASKxg==}
-    engines: {node: ^18.0.0 || ^20.0.0}
+  nodejs-jieba@0.2.1:
+    resolution: {integrity: sha512-211M6vWoXBZn9+3C6cBuiAXRmwnidbV4eK5O63VZb7kK0miNMkWknUS5Usv/n5gUrT99kHgps+4xL9g/r0F89A==}
+    engines: {node: ^18.0.0 || ^20.0.0 || ^22.0.0}
 
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
@@ -8584,7 +8585,7 @@ snapshots:
     dependencies:
       type-fest: 2.19.0
 
-  node-addon-api@7.1.1: {}
+  node-addon-api@8.2.1: {}
 
   node-domexception@1.0.0: {}
 
@@ -8617,10 +8618,10 @@ snapshots:
 
   node-releases@2.0.18: {}
 
-  nodejs-jieba@0.1.2(encoding@0.1.13):
+  nodejs-jieba@0.2.1(encoding@0.1.13):
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11(encoding@0.1.13)
-      node-addon-api: 7.1.1
+      node-addon-api: 8.2.1
       node-gyp: 10.2.0
     transitivePeerDependencies:
       - encoding
@@ -9764,7 +9765,7 @@ snapshots:
       - '@vue/composition-api'
       - typescript
 
-  vuepress-theme-hope@2.0.0-rc.58(markdown-it@14.1.0)(nodejs-jieba@0.1.2(encoding@0.1.13))(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress-plugin-search-pro@2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))))(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))):
+  vuepress-theme-hope@2.0.0-rc.58(markdown-it@14.1.0)(nodejs-jieba@0.2.1(encoding@0.1.13))(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress-plugin-search-pro@2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))))(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3))):
     dependencies:
       '@vuepress/helper': 2.0.0-rc.52(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
       '@vuepress/plugin-active-header-links': 2.0.0-rc.52(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
@@ -9802,7 +9803,7 @@ snapshots:
       vuepress-plugin-md-enhance: 2.0.0-rc.57(markdown-it@14.1.0)(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
       vuepress-shared: 2.0.0-rc.57(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
     optionalDependencies:
-      nodejs-jieba: 0.1.2(encoding@0.1.13)
+      nodejs-jieba: 0.2.1(encoding@0.1.13)
       sass-embedded: 1.79.5
       vuepress-plugin-search-pro: 2.0.0-rc.57(sass-embedded@1.79.5)(typescript@5.6.3)(vuepress@2.0.0-rc.17(@vuepress/bundler-vite@2.0.0-rc.18(@types/node@22.7.5)(jiti@1.21.6)(sass-embedded@1.79.5)(tsx@4.19.1)(typescript@5.6.3))(typescript@5.6.3)(vue@3.5.12(typescript@5.6.3)))
     transitivePeerDependencies:
