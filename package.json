@@ -46,7 +46,7 @@
     "@rollup/plugin-commonjs": "28.0.1",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.3.0",
-    "@types/node": "22.8.6",
+    "@types/node": "22.8.7",
     "@vitest/coverage-v8": "2.1.4",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "cross-env": "7.0.3",
