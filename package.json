@@ -47,7 +47,7 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@types/node": "22.9.0",
-    "@vitest/coverage-v8": "2.1.4",
+    "@vitest/coverage-v8": "2.1.5",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "cross-env": "7.0.3",
     "cz-git": "1.11.0",
@@ -70,7 +70,7 @@
     "tsx": "4.19.2",
     "typescript": "5.6.3",
     "vite": "5.4.11",
-    "vitest": "2.1.4"
+    "vitest": "2.1.5"
   },
   "packageManager": "pnpm@9.12.3"
 }
