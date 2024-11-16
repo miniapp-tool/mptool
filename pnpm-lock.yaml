@@ -60,8 +60,8 @@ importers:
         specifier: 9.1.6
         version: 9.1.6
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
       nano-staged:
         specifier: 0.8.0
         version: 0.8.0
@@ -112,8 +112,8 @@ importers:
         version: link:../packages/all
     devDependencies:
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
       typescript:
         specifier: 5.6.3
         version: 5.6.3
@@ -160,8 +160,8 @@ importers:
         specifier: workspace:*
         version: link:../parser
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/api:
     devDependencies:
@@ -169,8 +169,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/encoder: {}
 
@@ -183,8 +183,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/file:
     devDependencies:
@@ -195,8 +195,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/mock:
     dependencies:
@@ -217,8 +217,8 @@ importers:
         specifier: 2.4.10
         version: 2.4.10
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
       set-cookie-parser:
         specifier: 2.7.1
         version: 2.7.1
@@ -239,8 +239,8 @@ importers:
         specifier: workspace:*
         version: link:../mock
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/shared:
     devDependencies:
@@ -251,8 +251,8 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/skyline:
     devDependencies:
@@ -269,8 +269,8 @@ importers:
         specifier: workspace:*
         version: link:../skyline-enhance
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
   packages/skyline-enhance:
     devDependencies:
@@ -281,8 +281,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       miniprogram-api-typings:
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.0.2
+        version: 4.0.2
 
 packages:
 
@@ -3561,6 +3561,9 @@ packages:
 
   miniprogram-api-typings@4.0.1:
     resolution: {integrity: sha512-Ok4SSNCYnNLgbAhHCpIeqx6XICZ3aUxZ2iQDExmwKEinWaQQFzzxobK5JP9skrEOWn9PoKodjw4iUdF8Um0i/A==}
+
+  miniprogram-api-typings@4.0.2:
+    resolution: {integrity: sha512-hDrWCaJamsMB6Sg+0oMzGgSOse8EzumfN+VQFBKtJe2LbeKibGruB/ptNd4viXdcdgfahQ+Ji5Z9v9meoG9iuw==}
 
   minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
@@ -8684,6 +8687,8 @@ snapshots:
   minipass@7.1.2: {}
 
   miniprogram-api-typings@4.0.1: {}
+
+  miniprogram-api-typings@4.0.2: {}
 
   minizlib@2.1.2:
     dependencies:
