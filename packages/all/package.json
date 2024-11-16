@@ -41,7 +41,7 @@
     "@mptool/file": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
-    "miniprogram-api-typings": "4.0.1"
+    "miniprogram-api-typings": "4.0.2"
   },
   "publishConfig": {
     "access": "public"
