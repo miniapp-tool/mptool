@@ -90,7 +90,7 @@ export type InferPropTypes<O> = O extends object
       // This is needed to keep the relation between the option prop and the props, allowing to use ctrl+click to navigate to the prop options. see: #3656
       [K in RequiredKeys<O>]: InferPropType<O[K]>;
     } & { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
-  : { [K in string]: any };
+  : Record<string, any>;
 
 export interface ComponentLifetimes {
   /** 组件生命周期声明对象 */

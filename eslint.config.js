@@ -1,4 +1,3 @@
-// eslint-disable-next-line import-x/no-unresolved
 import hopeConfig, { config, tsParser } from "eslint-config-mister-hope";
 
 export default config(
@@ -23,11 +22,7 @@ export default config(
         parser: tsParser,
         tsconfigDirName: import.meta.dirname,
         projectService: {
-          allowDefaultProject: [
-            "packages/*/rollup.config.mts",
-            "eslint.config.js",
-          ],
-          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 20,
+          allowDefaultProject: ["eslint.config.js"],
         },
       },
     },

@@ -6,6 +6,10 @@ export default defineConfig({
       enabled: true,
       include: ["packages/*/src/**/*.ts"],
     },
+    reporters: ["junit"],
+    outputFile: {
+      junit: "coverage/test-report.junit.xml",
+    },
     typecheck: {
       enabled: true,
     },
