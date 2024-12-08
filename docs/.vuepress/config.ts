@@ -27,16 +27,13 @@ export default defineUserConfig({
     footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
     displayFooter: true,
 
+    markdown: {
+      codeTabs: true,
+      tasklist: true,
+    },
+
     plugins: {
-      markdownTab: {
-        codeTabs: true,
-      },
-
-      mdEnhance: {
-        tasklist: true,
-      },
-
-      searchPro: true,
+      slimsearch: true,
     },
   }),
 });
