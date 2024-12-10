@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { TextDecoder, TextEncoder } from "../src/index.js";
 
 const encodeUtf8 = (content: string): Uint8Array => {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const utf8 = unescape(encodeURIComponent(content));
   const octets = new Uint8Array(utf8.length);
 
@@ -14,6 +15,7 @@ const encodeUtf8 = (content: string): Uint8Array => {
 const decodeUtf8 = (octets: Uint8Array): string => {
   const utf8 = String.fromCharCode(...octets);
 
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   return decodeURIComponent(escape(utf8));
 };
 
@@ -36,7 +38,29 @@ const generateBlock = (from: number, len: number, skip: number): string => {
   return block.join("");
 };
 
-const testUTFRoundtrip = (): void => {
+it("UTF-8 - Encode/Decode - reference sample", () => {
+  // z, cent, CJK water, G-Clef, Private-use character
+  const sample = "z\xA2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
+  const cases = [
+    {
+      encoding: "utf-8",
+      expected: [
+        0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f,
+        0xbf, 0xbd,
+      ],
+    },
+  ];
+
+  cases.forEach((t) => {
+    const decoded = new TextDecoder(t.encoding).decode(
+      new Uint8Array(t.expected),
+    );
+
+    expect(decoded).toEqual(sample);
+  });
+});
+
+it("UTF-8 - Encode/Decode - full roundtrip and agreement with encode/decodeURIComponent", () => {
   const MIN_CODEPOINT = 0;
   const MAX_CODEPOINT = 0x10ffff;
   const BLOCK_SIZE = 0x1000;
@@ -62,34 +86,4 @@ const testUTFRoundtrip = (): void => {
 
     expect(decoded).toEqual(expDecoded);
   }
-};
-
-const testUtfSamples = (): void => {
-  // z, cent, CJK water, G-Clef, Private-use character
-  const sample = "z\xA2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
-  const cases = [
-    {
-      encoding: "utf-8",
-      expected: [
-        0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f,
-        0xbf, 0xbd,
-      ],
-    },
-  ];
-
-  cases.forEach((t) => {
-    const decoded = new TextDecoder(t.encoding).decode(
-      new Uint8Array(t.expected),
-    );
-
-    expect(decoded).toEqual(sample);
-  });
-};
-
-it("UTF-8 - Encode/Decode - reference sample", () => {
-  testUtfSamples();
-});
-
-it("UTF-8 - Encode/Decode - full roundtrip and agreement with encode/decodeURIComponent", () => {
-  testUTFRoundtrip();
 });
