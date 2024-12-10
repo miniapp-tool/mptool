@@ -55,6 +55,7 @@ export class URLSearchParams {
           });
       else if (Symbol.iterator in init)
         for (const item of init) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (item.length !== 2)
             throw new TypeError(
               "Failed to construct 'URLSearchParams': Sequence initializer must only contain pair elements",
@@ -139,7 +140,7 @@ export class URLSearchParams {
    * @return or `null` if there is no name-value pair with the given `name`.
    */
   get(name: string): string | null {
-    return this.getAll(name)?.[0] ?? null;
+    return this.getAll(name)[0] ?? null;
   }
 
   /**
@@ -147,7 +148,7 @@ export class URLSearchParams {
    * no such pairs, an empty array is returned.
    */
   getAll(name: string): string[] {
-    return this.has(name) ? this.params.get(name)!.slice(0) : [];
+    return this.params.get(name)?.slice(0) ?? [];
   }
 
   /**
@@ -200,7 +201,7 @@ export class URLSearchParams {
    * ```
    */
   set(name: string, value: string): void {
-    this.params.set(name, [value ?? ""]);
+    this.params.set(name, [value || ""]);
   }
 
   /**

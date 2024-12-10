@@ -117,6 +117,7 @@ export function Emitter<Events>(
       if (handlers)
         void (handlers as EventHandlerList<Events[keyof Events]>)
           .slice()
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((handler) => handler(event!));
 
       handlers = all.get("*");
@@ -124,6 +125,7 @@ export function Emitter<Events>(
       if (handlers)
         void (handlers as WildCardEventHandlerList<Events>)
           .slice()
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((handler) => handler(type, event!));
     },
 
@@ -147,12 +149,14 @@ export function Emitter<Events>(
       await Promise.all(
         ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)
           .slice()
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((handler) => handler(event!)),
       );
 
       await Promise.all(
         ((all.get("*") ?? []) as WildCardEventHandlerList<Events>)
           .slice()
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((handler) => handler(type, event!)),
       );
     },

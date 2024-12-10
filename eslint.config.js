@@ -29,22 +29,10 @@ export default config(
   },
 
   {
-    files: ["**/rollup.config.mts"],
+    files: ["**/*.ts"],
     rules: {
-      "import-x/no-unresolved": "off",
-    },
-  },
-
-  {
-    files: ["**/*.spec-d.ts"],
-    rules: {
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/unbound-method": "off",
+      // some api use type parameters to define return value types
+      "@typescript-eslint/no-unnecessary-type-parameters": "off",
     },
   },
 );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 import { $Component } from "@mptool/all";
 
 $Component({

@@ -19,9 +19,9 @@ export interface UpdateInfo {
 export const updateApp = (
   onUpdateReady: (applyUpdate: () => void) => Promise<void> | void,
 ): void => {
-  const updateManager = wx.getUpdateManager?.();
+  if (!("getUpdateManager" in wx)) return;
 
-  if (!updateManager) return;
+  const updateManager = wx.getUpdateManager();
 
   // 检查更新
   updateManager.onCheckForUpdate(({ hasUpdate }) => {

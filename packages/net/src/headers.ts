@@ -196,8 +196,10 @@ export class Headers {
     ) => void,
     thisArg?: ThisArg,
   ): void {
-    for (const [name, value] of this.entries())
+    for (const [name, value] of this.entries()) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       callback.call(thisArg!, value, name, this);
+    }
   }
 
   *keys(): IterableIterator<string> {
@@ -217,6 +219,7 @@ export class Headers {
     for (const name of sortedKeys)
       if (name === "set-cookie")
         for (const value of this.getSetCookie()) yield [name, value];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       else yield [name, this.get(name)!];
   }
 

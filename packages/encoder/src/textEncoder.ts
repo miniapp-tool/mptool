@@ -35,8 +35,6 @@ export class TextEncoder {
     label = DEFAULT_ENCODING,
     options: {
       fatal?: boolean;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      NONSTANDARD_allowLegacyEncoding?: boolean;
     } = {},
   ) {
     // Web IDL conventions
@@ -47,31 +45,14 @@ export class TextEncoder {
     this.doNotFlush = false;
     if (options.fatal) this._fatal = true;
 
-    // 2. Set enc's encoding to UTF-8's encoder.
-    if (options.NONSTANDARD_allowLegacyEncoding) {
-      // NONSTANDARD behavior.
-      label = label !== undefined ? String(label) : DEFAULT_ENCODING;
-      const encoding = getEncoding(label);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this._encoding = getEncoding("utf-8")!;
 
-      if (encoding === null || encoding.name === "replacement")
-        throw RangeError("Unknown encoding: " + label);
-      if (!encoders[encoding.name])
-        throw Error(
-          "Encoder not present." +
-            " Did you forget to include encoding-indexes.js first?",
-        );
-
-      this._encoding = encoding;
-    } else {
-      // Standard behavior.
-      this._encoding = getEncoding("utf-8")!;
-
-      if (label !== undefined && "console" in global)
-        console.warn(
-          "TextEncoder constructor called with encoding label, " +
-            "which is ignored.",
-        );
-    }
+    if (label !== DEFAULT_ENCODING && "console" in global)
+      console.warn(
+        "TextEncoder constructor called with encoding label, " +
+          "which is ignored.",
+      );
   }
 
   get encoding(): string {
@@ -110,6 +91,7 @@ export class TextEncoder {
       if (token === END_OF_STREAM) break;
       // 2. Let result be the result of processing token for encoder,
       // input, output.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       result = this._encoder!.handler(input, token);
       if (result === FINISHED) break;
       if (Array.isArray(result)) output.push(...result);
@@ -118,6 +100,7 @@ export class TextEncoder {
     // TODO: Align with spec algorithm.
     if (!this.doNotFlush) {
       while (true) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         result = this._encoder!.handler(input, input.read());
         if (result === FINISHED) break;
         if (Array.isArray(result)) output.push(...result);

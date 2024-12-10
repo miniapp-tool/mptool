@@ -51,11 +51,13 @@ function clickHandlerFactory(
         url?: string;
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this && before && typeof this[before] === "function")
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
       if (url)
         return action(url).then(() => {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (this && after && typeof this[after] === "function")
             (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
         });
@@ -92,10 +94,12 @@ const bindBack = function touchHandler(
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
     return Promise.resolve(back(Number(delta))).then(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this && after && typeof this[after] === "function")
         (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
     });
@@ -144,7 +148,7 @@ export function bind(
 
       const refName = ref.$refID;
 
-      if (refName && this.$refs) this.$refs[refName] = ref;
+      if (refName) this.$refs[refName] = ref;
 
       ref._$attached(this);
       break;

@@ -294,7 +294,9 @@ export class CookieStore {
     try {
       // 从本地存储读取 cookie 数据数组
       const cookiesData =
-        env === "js" ? [] : wx.getStorageSync<CookieType[]>(this.key) || [];
+        env === "js"
+          ? []
+          : (wx.getStorageSync<CookieType[] | undefined>(this.key) ?? []);
 
       // 转化为 cookie map 对象
       this.apply(cookiesData.map((item) => new Cookie(item)));

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
@@ -380,9 +379,9 @@ it("$Component", () => {
     },
   });
 
-  type CustomProperties = {
+  interface CustomProperties {
     customProp: string;
-  };
+  }
 
   $Component<
     Record<never, never>,

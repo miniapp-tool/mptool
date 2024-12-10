@@ -7,6 +7,7 @@ export const normalizeDomain = (domain = ""): string =>
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
 export const getDomain = (domainOrURL: string): string =>
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
     .replace(/^https?:\/\//, "")
     .split("/")

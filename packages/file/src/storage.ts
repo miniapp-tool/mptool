@@ -80,7 +80,9 @@ const prepareData = <T = unknown>(
 
   // 保持上一次的缓存时间
   if (expire === "keep") {
-    const oldData = wx.getStorageSync<StorageData<T>>(`${CACHE_PREFIX}${key}`);
+    const oldData = wx.getStorageSync<StorageData<T> | undefined>(
+      `${CACHE_PREFIX}${key}`,
+    );
 
     // 上次没有缓存，本次也不更新
     if (!oldData) return undefined;

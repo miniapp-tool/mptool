@@ -324,8 +324,9 @@ export const createRequest = ({
 
     return request(link, options)
       .then((response) => responseHandler(response, url, options))
-      .catch((err: MpError) => {
-        if (errorHandler) return errorHandler(err, url, options);
+      .catch((err: unknown) => {
+        if (errorHandler && err instanceof MpError)
+          return errorHandler(err, url, options);
 
         throw err;
       });

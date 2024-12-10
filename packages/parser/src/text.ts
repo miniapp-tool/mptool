@@ -4,8 +4,7 @@ import type { AnyNode } from "domhandler";
 import { parseHTML } from "./parser.js";
 
 export const getText = (content: string | AnyNode[]): string => {
-  const nodes =
-    typeof content === "string" ? parseHTML(content) || [] : content;
+  const nodes = typeof content === "string" ? parseHTML(content) : content;
 
   return nodes
     .map((node) => {

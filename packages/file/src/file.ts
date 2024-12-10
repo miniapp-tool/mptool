@@ -114,10 +114,9 @@ export const readFile = (<T extends FileEncoding>(
   encoding: T = "utf-8" as T,
 ): (T extends "binary" ? ArrayBuffer : string) | undefined => {
   try {
-    return fileManager.readFileSync(
-      `${userPath}/${path}`,
-      encoding ?? "utf-8",
-    ) as (T extends "binary" ? ArrayBuffer : string) | undefined;
+    return fileManager.readFileSync(`${userPath}/${path}`, encoding) as
+      | (T extends "binary" ? ArrayBuffer : string)
+      | undefined;
   } catch {
     logger.warn(`${path} don't exist`);
 

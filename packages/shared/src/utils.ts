@@ -107,7 +107,7 @@ export const once = <T, A extends unknown[], R>(
   let called: boolean;
 
   return function onceFunc(this: T, ...args: A): R | undefined {
-    if (called || !func) return undefined;
+    if (called) return undefined;
     called = true;
 
     return func.apply(ctx ?? null, args);

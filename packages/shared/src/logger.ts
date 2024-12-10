@@ -5,7 +5,8 @@ import { env } from "./env.js";
 const log =
   env === "js"
     ? console
-    : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
+    : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */

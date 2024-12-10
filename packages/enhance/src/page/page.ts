@@ -54,6 +54,7 @@ export const $Page: PageConstructor = <
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
         callLog("onAppLaunch");
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         void options.onAppLaunch!(onLaunchOptions);
       });
     }
@@ -67,6 +68,7 @@ export const $Page: PageConstructor = <
       (query: PageQuery): Promise<void> | void => {
         callLog("onNavigate", query);
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onNavigate!(query);
       },
     );
@@ -80,6 +82,7 @@ export const $Page: PageConstructor = <
       (query: PageQuery): void | Promise<void> => {
         callLog("onPreload", query);
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return options.onPreload!(query);
       },
     );
@@ -93,6 +96,7 @@ export const $Page: PageConstructor = <
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -101,6 +105,7 @@ export const $Page: PageConstructor = <
     if (shouldBeFirstPage) {
       shouldBeFirstPage = false;
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       options.$state!.firstOpen = true;
     }
   });

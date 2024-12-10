@@ -55,6 +55,7 @@ export const $App: AppConstructor = <
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       appOptions.onAwake!(time);
     });
     logger.debug("App: registered onAwake");

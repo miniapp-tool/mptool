@@ -129,7 +129,7 @@ export const $Component: ComponentConstructor = <
 
       this.$id = id;
       setRef(id, this);
-      this.$refID = this.properties.ref as string;
+      this.$refID = this.data.ref as string;
 
       this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
     },
@@ -150,9 +150,11 @@ export const $Component: ComponentConstructor = <
     ) {
       removeRef(this.$id);
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (refName && $refs) delete $refs[refName];
 
       // @ts-expect-error: $parent is not optional
@@ -200,6 +202,7 @@ export const $Component: ComponentConstructor = <
       >,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
@@ -222,6 +225,7 @@ export const $Component: ComponentConstructor = <
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
 
         this.$refID = value;

@@ -293,6 +293,7 @@ describe(".set()", () => {
     const headers = new Headers();
 
     expect(
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       headers.set(
         // @ts-expect-error
         123,
@@ -306,13 +307,17 @@ describe(".set()", () => {
     const headers = new Headers();
 
     expect(
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       headers.set(
         "foo",
         // @ts-expect-error
         123,
       ),
     ).toBeUndefined();
-    expect(headers.set("foo", "  value  ")).toBeUndefined();
+    expect(
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      headers.set("foo", "  value  "),
+    ).toBeUndefined();
     expect(Object.fromEntries(headers.entries())).toEqual({});
   });
 
@@ -364,6 +369,7 @@ describe(".delete()", () => {
     const headers = new Headers({ accept: "*/*" });
 
     expect(
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       headers.delete(
         // @ts-expect-error
         123,

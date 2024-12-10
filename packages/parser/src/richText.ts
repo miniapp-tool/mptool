@@ -15,11 +15,13 @@ const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const first = result[0];
 
   // remove first text node if it's empty
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (first && first.type === "text" && !first.text.trim()) result.shift();
 
   const last = result[result.length - 1];
 
   // remove last text node if it's empty
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (last && last.type === "text" && !last.text.trim()) result.pop();
 
   return result;

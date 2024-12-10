@@ -9,7 +9,7 @@ it("$Page", () => {
 
   const app = getApp<{
     globalData: {
-      userInfo: WechatMiniprogram.UserInfo;
+      userInfo?: WechatMiniprogram.UserInfo;
     };
     userInfoReadyCallback(userInfo: WechatMiniprogram.UserInfo): void;
   }>();
@@ -211,9 +211,11 @@ it("$Page", () => {
       logs: [],
     },
     getLogs() {
-      return (wx.getStorageSync<number[]>("logs") || []).map((log: number) => {
-        return new Date(log).toString();
-      });
+      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map(
+        (log: number) => {
+          return new Date(log).toString();
+        },
+      );
     },
     onLoad() {
       const logs = this.getLogs();

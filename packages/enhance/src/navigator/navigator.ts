@@ -48,13 +48,7 @@ export function getTrigger(
   pageName: string,
 ) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 export function getTrigger(
-  type: "redirectTo",
-): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
-export function getTrigger(
-  type: "switchTab",
-): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
-export function getTrigger(
-  type: "reLaunch",
+  type: "redirectTo" | "switchTab" | "reLaunch",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 
 /**

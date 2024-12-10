@@ -13,14 +13,16 @@ export class Cookie {
   httpOnly: boolean;
 
   constructor(cookie: CookieType) {
-    this.name = cookie.name ?? "";
-    this.value = cookie.value ?? "";
+    this.name = cookie.name || "";
+    this.value = cookie.value || "";
     this.domain = cookie.domain ?? "";
     this.path = cookie.path ?? "/";
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
-      ? cookie.maxAge! > 0
-        ? new Date(new Date().getTime() + cookie.maxAge! * 1000)
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        cookie.maxAge! > 0
+        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          new Date(new Date().getTime() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
         ? new Date(cookie.expires)

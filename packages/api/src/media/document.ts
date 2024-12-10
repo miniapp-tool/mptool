@@ -20,6 +20,7 @@ export const openDocument = (url: string): void => {
     .catch(() => {
       void showToast("下载文档失败");
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       wx.reportEvent?.("resource_load_failed", {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         broken_url: url,
@@ -35,6 +36,7 @@ export const saveDocument = (
   if (wx.canIUse("addFileToFavorites"))
     download(url)
       .then((filePath) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const docType = url.split(".").pop()!;
 
         wx.addFileToFavorites({
@@ -52,6 +54,7 @@ export const saveDocument = (
       .catch(() => {
         void showToast("下载文档失败");
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         wx.reportEvent?.("resource_load_failed", {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           broken_url: url,
