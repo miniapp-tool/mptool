@@ -46,7 +46,7 @@
     "@lerna-lite/publish": "3.10.1",
     "@rollup/plugin-commonjs": "28.0.2",
     "@rollup/plugin-json": "6.1.0",
-    "@rollup/plugin-node-resolve": "15.3.0",
+    "@rollup/plugin-node-resolve": "15.3.1",
     "@types/node": "22.10.2",
     "@vitest/coverage-v8": "2.1.8",
     "conventional-changelog-conventionalcommits": "8.0.0",
