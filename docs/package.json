@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.19",
-    "@vuepress/plugin-slimsearch": "2.0.0-rc.66",
+    "@vuepress/plugin-slimsearch": "2.0.0-rc.67",
     "nodejs-jieba": "0.2.1",
     "sass-embedded": "1.83.0",
     "vue": "3.5.13",
