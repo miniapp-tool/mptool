@@ -4,12 +4,18 @@ export default defineConfig({
   test: {
     coverage: {
       enabled: true,
+      provider: "istanbul",
       include: ["packages/*/src/**/*.ts"],
     },
-    reporters: ["junit"],
-    outputFile: {
-      junit: "coverage/test-report.junit.xml",
-    },
+
+    ...(process.env.CODECOV_TOKEN
+      ? {
+          reporters: ["junit"],
+          outputFile: {
+            junit: "coverage/test-report.junit.xml",
+          },
+        }
+      : {}),
     typecheck: {
       enabled: true,
     },

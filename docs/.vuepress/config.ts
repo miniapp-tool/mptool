@@ -16,7 +16,6 @@ export default defineUserConfig({
       name: "Mr.Hope",
       url: "https://mister-hope.com",
     },
-    iconAssets: "fontawesome",
 
     logo: "/logo.svg",
     repo: "miniapp-tool/mptool",
@@ -33,6 +32,9 @@ export default defineUserConfig({
     },
 
     plugins: {
+      icon: {
+        assets: "fontawesome",
+      },
       slimsearch: true,
     },
   }),
