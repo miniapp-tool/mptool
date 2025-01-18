@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "4.0.2"
+    "miniprogram-api-typings": "4.0.4"
   },
   "publishConfig": {
     "access": "public"

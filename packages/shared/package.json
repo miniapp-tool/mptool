@@ -40,7 +40,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "base64-arraybuffer": "1.0.2",
-    "miniprogram-api-typings": "4.0.2"
+    "miniprogram-api-typings": "4.0.4"
   },
   "publishConfig": {
     "access": "public"

@@ -56,7 +56,7 @@
     "eslint-config-mister-hope": "0.4.1",
     "execa": "9.5.2",
     "husky": "9.1.7",
-    "miniprogram-api-typings": "4.0.2",
+    "miniprogram-api-typings": "4.0.4",
     "nano-staged": "0.8.0",
     "ora": "8.1.1",
     "picocolors": "1.1.1",
