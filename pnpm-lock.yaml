@@ -199,7 +199,7 @@ importers:
     dependencies:
       miniprogram-api-typings:
         specifier: ^4.0.2
-        version: 4.0.2
+        version: 4.0.4
 
   packages/net:
     dependencies:
@@ -3741,9 +3741,6 @@ packages:
   minipass@7.1.2:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
     engines: {node: '>=16 || 14 >=14.17'}
-
-  miniprogram-api-typings@4.0.2:
-    resolution: {integrity: sha512-hDrWCaJamsMB6Sg+0oMzGgSOse8EzumfN+VQFBKtJe2LbeKibGruB/ptNd4viXdcdgfahQ+Ji5Z9v9meoG9iuw==}
 
   miniprogram-api-typings@4.0.4:
     resolution: {integrity: sha512-51SElLHA9t7/v54IFVjZcbeP04dQL4HreCvBLt3XGA3qruKRT9gvBtBvHXfOjXbhjVd6Vy2myOg/0LELPWmhfg==}
@@ -9112,8 +9109,6 @@ snapshots:
   minipass@5.0.0: {}
 
   minipass@7.1.2: {}
-
-  miniprogram-api-typings@4.0.2: {}
 
   miniprogram-api-typings@4.0.4: {}
 
