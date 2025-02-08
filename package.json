@@ -48,7 +48,7 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "16.0.0",
     "@types/node": "22.13.1",
-    "@vitest/coverage-istanbul": "3.0.4",
+    "@vitest/coverage-istanbul": "3.0.5",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "cross-env": "7.0.3",
     "cz-git": "1.11.0",
