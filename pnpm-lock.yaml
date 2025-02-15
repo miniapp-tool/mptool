@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@codecov/rollup-plugin':
-        specifier: 1.8.0
-        version: 1.8.0(rollup@4.34.7)
+        specifier: 1.9.0
+        version: 1.9.0(rollup@4.34.7)
       '@commitlint/cli':
         specifier: 19.7.1
         version: 19.7.1(@types/node@22.13.4)(typescript@5.7.3)
@@ -368,12 +368,12 @@ packages:
   '@bufbuild/protobuf@2.2.3':
     resolution: {integrity: sha512-tFQoXHJdkEOSwj5tRIZSPNUuXK3RaR7T1nUrPgbYX1pUbvqqaaZAsfo+NXBPsz5rZMSKVFrgK1WL8Q/MSLvprg==}
 
-  '@codecov/bundler-plugin-core@1.8.0':
-    resolution: {integrity: sha512-D1aeA8u3RHOkQVLImLHxW6zFdUrw5wgoeDzYrKZeDExGp5ePs4RpJxKwklg1N0e1JxRcAgKj+zZo/y3Q4nV+sA==}
+  '@codecov/bundler-plugin-core@1.9.0':
+    resolution: {integrity: sha512-UB0I5haL0gnF4ei46wxNo7ptCHqFAh3PnmcLLeXRb2zV7HeobOF8WRjOW/PwrXAphPS/6bL7PDUmh3ruVObGtg==}
     engines: {node: '>=18.0.0'}
 
-  '@codecov/rollup-plugin@1.8.0':
-    resolution: {integrity: sha512-e6vbk7PlEqBbqJwk3cQdqEb2DVnK9tpSyhs1UYLh2kR4ADBLcKEtIq81DeCxANkC9hFRoTsTF/1+6pwdkGe6PA==}
+  '@codecov/rollup-plugin@1.9.0':
+    resolution: {integrity: sha512-3cFPZ2uoAYsxI/RI8KytPk95GgTM3+J8VKbhhrMgwvZbekcSa+8/5nSItmq3g57swEF6MERUm0UXmlLi9THq2g==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       rollup: 3.x || 4.x
@@ -1744,10 +1744,6 @@ packages:
 
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
-
-  '@sentry/core@8.54.0':
-    resolution: {integrity: sha512-03bWf+D1j28unOocY/5FDB6bUHtYlm6m6ollVejhg45ZmK9iPjdtxNWbrLsjT1WRym0Tjzowu+A3p+eebYEv0Q==}
-    engines: {node: '>=14.18'}
 
   '@shikijs/core@2.3.2':
     resolution: {integrity: sha512-s7vyL3LzUKm3Qwf36zRWlavX9BQMZTIq9B1almM63M5xBuSldnsTHCmsXzoF/Kyw4k7Xgas7yAyJz9VR/vcP1A==}
@@ -5443,19 +5439,18 @@ snapshots:
 
   '@bufbuild/protobuf@2.2.3': {}
 
-  '@codecov/bundler-plugin-core@1.8.0':
+  '@codecov/bundler-plugin-core@1.9.0':
     dependencies:
       '@actions/core': 1.11.1
       '@actions/github': 6.0.0
-      '@sentry/core': 8.54.0
       chalk: 4.1.2
       semver: 7.7.1
       unplugin: 1.16.1
       zod: 3.24.1
 
-  '@codecov/rollup-plugin@1.8.0(rollup@4.34.7)':
+  '@codecov/rollup-plugin@1.9.0(rollup@4.34.7)':
     dependencies:
-      '@codecov/bundler-plugin-core': 1.8.0
+      '@codecov/bundler-plugin-core': 1.9.0
       rollup: 4.34.7
       unplugin: 1.16.1
 
@@ -6754,8 +6749,6 @@ snapshots:
     optional: true
 
   '@sec-ant/readable-stream@0.4.1': {}
-
-  '@sentry/core@8.54.0': {}
 
   '@shikijs/core@2.3.2':
     dependencies:
