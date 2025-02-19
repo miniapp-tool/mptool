@@ -168,7 +168,7 @@ it("$Page", () => {
         ).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
-        expectTypeOf(res).toEqualTypeOf<any>;
+        expectTypeOf(res).toEqualTypeOf<any>();
       });
     },
     jumpBack() {

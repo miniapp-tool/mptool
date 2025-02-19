@@ -137,8 +137,8 @@ it("$Component", () => {
     },
     methods: {
       f() {
-        expectTypeOf<number | undefined>(this.data.n);
-        expectTypeOf<any[] | undefined>(this.data.a);
+        expectTypeOf(this.data.n).toEqualTypeOf<number | undefined>();
+        expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
       },
     },
   });
@@ -368,7 +368,7 @@ it("$Component", () => {
     lifetimes: {
       attached() {
         this.setUpdatePerformanceListener({ withDataPaths: true }, (res) => {
-          expectTypeOf<string[]>(res.dataPaths);
+          expectTypeOf(res.dataPaths).toEqualTypeOf<string[]>();
           expectTypeOf(res.updateProcessId).toBeNumber();
         });
         this.setUpdatePerformanceListener({}, (res) => {

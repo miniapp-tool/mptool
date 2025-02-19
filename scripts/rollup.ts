@@ -35,14 +35,14 @@ export const rollupTypescript = (
       input: `./src/${filePath}.ts`,
       output: [
         {
-          file: `./lib/${filePath}.js`,
+          file: `./dist/${filePath}.js`,
           format: "cjs",
           sourcemap: true,
           exports: "named",
           inlineDynamicImports,
         },
         {
-          file: `./lib/${filePath}.mjs`,
+          file: `./dist/${filePath}.mjs`,
           format: "esm",
           sourcemap: true,
           exports: "named",
@@ -68,8 +68,8 @@ export const rollupTypescript = (
     {
       input: `./src/${filePath}.ts`,
       output: [
-        { file: `./lib/${filePath}.d.ts`, format: "esm" },
-        { file: `./lib/${filePath}.d.mts`, format: "esm" },
+        { file: `./dist/${filePath}.d.ts`, format: "esm" },
+        { file: `./dist/${filePath}.d.mts`, format: "esm" },
       ],
       plugins: [
         dts({

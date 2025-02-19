@@ -10,10 +10,10 @@ try {
   // do nothing
 }
 
-copy("./packages/file/lib", `${parentFolderPath}/file/lib`);
+copy("./packages/file/dist", `${parentFolderPath}/file/dist`);
 copy("./packages/file/package.json", `${parentFolderPath}/file/package.json`);
 
-copy("./packages/enhance/lib", `${parentFolderPath}/enhance/lib`);
+copy("./packages/enhance/dist", `${parentFolderPath}/enhance/dist`);
 copy(
   "./packages/enhance/package.json",
   `${parentFolderPath}/enhance/package.json`,

@@ -1,4 +1,3 @@
-// eslint-disable-next-line
 declare namespace WechatMiniprogram {
   interface Wx {
     env: {

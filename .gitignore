@@ -2,7 +2,7 @@
 node_modules/
 
 # Output
-lib/
+dist/
 
 # VuePress
 docs/.vuepress/.cache

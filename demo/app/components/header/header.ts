@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
 import { $Component } from "@mptool/all";
 
 $Component({
@@ -6,7 +5,7 @@ $Component({
   lifetimes: {
     created(): void {
       console.log("[Component/Header] created");
-      console.log("[Component/Header] properties:", this.properties);
+      console.log("[Component/Header] data:", this.data);
       console.log("[Component/Header] is:", this.is);
     },
     attached(): void {
@@ -17,7 +16,7 @@ $Component({
     ready(): void {
       // 调用父组件方法
       this.$call("callFromComponent", "header");
-      console.log("[Component/Header] ready", this.properties, this.is);
+      console.log("[Component/Header] ready", this.data, this.is);
     },
   },
   methods: {

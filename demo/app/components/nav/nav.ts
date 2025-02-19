@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
 import { $Component } from "@mptool/all";
 
 $Component({
@@ -6,7 +5,7 @@ $Component({
   lifetimes: {
     created() {
       console.log("[Component/Nav] created");
-      console.log("[Component/Nav] properties:", this.properties);
+      console.log("[Component/Nav] data:", this.data);
       console.log("[Component/Nav] is:", this.is);
     },
     attached() {

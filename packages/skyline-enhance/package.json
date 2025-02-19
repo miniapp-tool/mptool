@@ -1,7 +1,7 @@
 {
   "name": "@mptool/skyline-enhance",
   "version": "0.10.10",
-  "description": "Lifetime enhance for Wechat lib 3.0 miniapp",
+  "description": "Lifetime enhance for Wechat dist 3.0 miniapp",
   "keywords": [
     "miniprogram",
     "miniapp",
@@ -22,15 +22,15 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mister-hope.com"
   },
-  "main": "./lib/index.js",
-  "module": "./lib/index.mjs",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
-    "lib"
+    "dist"
   ],
   "scripts": {
     "build": "rollup -c rollup.config.mts --configPlugin esbuild",
-    "clean": "rimraf ./lib",
+    "clean": "rimraf ./dist",
     "dev": "rollup -c -w"
   },
   "peerDependencies": {
