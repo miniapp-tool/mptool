@@ -1,6 +1,6 @@
 {
   "name": "@mptool/all",
-  "version": "0.10.10",
+  "version": "0.10.11",
   "description": "Full back for mptool",
   "keywords": [
     "miniprogram",

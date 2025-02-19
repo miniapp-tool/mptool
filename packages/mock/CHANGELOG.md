@@ -1,6 +1,14 @@
-# Changelog
+# Change Log
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## <small>0.10.11 (2025-02-19)</small>
+
+- chore: tweaks ([b49e7a4](https://github.com/miniapp-tool/mptool/commit/b49e7a4))
+- chore: tweaks ([5d6a952](https://github.com/miniapp-tool/mptool/commit/5d6a952))
+- build: bump deps ([83d6a8b](https://github.com/miniapp-tool/mptool/commit/83d6a8b))
+- build: bump deps ([ce3ce42](https://github.com/miniapp-tool/mptool/commit/ce3ce42))
+- feat: update linter ([2d4fefe](https://github.com/miniapp-tool/mptool/commit/2d4fefe))
 
 ## <small>0.10.10 (2024-10-12)</small>
 
