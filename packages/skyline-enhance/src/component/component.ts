@@ -131,7 +131,7 @@ export const $Component: ComponentConstructor = <
       setRef(id, this);
       this.$refID = this.data.ref as string;
 
-      this.triggerEvent("ing", { id: this.$id, event: "_$attached" });
+      this.triggerEvent("ing", { id: this.$id, event: "$attached" });
     },
   );
 
@@ -191,7 +191,7 @@ export const $Component: ComponentConstructor = <
     $getRef: getRef,
 
     // Setting $root and $parent, called by parent
-    _$attached(
+    $attached(
       this: ComponentInstance<
         Data,
         Property,

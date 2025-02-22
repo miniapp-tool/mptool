@@ -141,7 +141,7 @@ export function bind(
 
   switch (event) {
     // run private attach
-    case "_$attached": {
+    case "$attached": {
       const ref = getRef(id) as TrivialComponentInstance | undefined;
 
       if (!ref) break;
@@ -150,7 +150,7 @@ export function bind(
 
       if (refName) this.$refs[refName] = ref;
 
-      ref._$attached(this);
+      ref.$attached(this);
       break;
     }
     default: {

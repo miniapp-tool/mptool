@@ -2,15 +2,17 @@ import { hope } from "eslint-config-mister-hope";
 
 export default hope({
   ignores: ["demo/**/*.js"],
-  ts: {
+
+  languageOptions: {
     parserOptions: {
       projectService: {
         allowDefaultProject: ["eslint.config.js"],
       },
     },
-    rules: {
-      "@typescript-eslint/no-unnecessary-type-parameters": "off",
-      "no-console": "off",
-    },
+  },
+
+  ts: {
+    "@typescript-eslint/no-unnecessary-type-parameters": "off",
+    "no-console": "off",
   },
 });

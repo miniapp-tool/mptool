@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
@@ -43,7 +44,6 @@ it("$Component", () => {
     },
 
     observers: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       "numberA, numberB"(numberA: number, numberB: number) {
         this.setData({
           sum: numberA + numberB,
@@ -86,7 +86,6 @@ it("$Component", () => {
       },
       _myPrivateMethod() {
         this.setData({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "A[0].B": "myPrivateData",
         });
       },

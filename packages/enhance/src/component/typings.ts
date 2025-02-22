@@ -193,7 +193,7 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
   /**
    * @private
    */
-  _$attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
+  $attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
 }
 
 export type ComponentInstance<
