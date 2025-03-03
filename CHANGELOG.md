@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.12 (2025-03-03)</small>
+
+- build: bump deps ([5c12f0e](https://github.com/miniapp-tool/mptool/commit/5c12f0e))
+- feat(net): improve cookieStore ([f0d3e81](https://github.com/miniapp-tool/mptool/commit/f0d3e81))
+- chore: tweaks ([62d3648](https://github.com/miniapp-tool/mptool/commit/62d3648))
+- chore: tweaks ([93557ae](https://github.com/miniapp-tool/mptool/commit/93557ae))
+- chore(deps): update dependency @lerna-lite/publish to v3.12.2 (#969) ([d300005](https://github.com/miniapp-tool/mptool/commit/d300005)), closes [#969](https://github.com/miniapp-tool/mptool/issues/969)
+- chore(deps): update dependency @types/node to v22.13.5 (#960) ([ddcd0ee](https://github.com/miniapp-tool/mptool/commit/ddcd0ee)), closes [#960](https://github.com/miniapp-tool/mptool/issues/960)
+- chore(deps): update dependency @types/node to v22.13.8 (#970) ([7913308](https://github.com/miniapp-tool/mptool/commit/7913308)), closes [#970](https://github.com/miniapp-tool/mptool/issues/970)
+- chore(deps): update dependency @vuepress/bundler-vite to v2.0.0-rc.20 (#966) ([eb00fef](https://github.com/miniapp-tool/mptool/commit/eb00fef)), closes [#966](https://github.com/miniapp-tool/mptool/issues/966)
+- chore(deps): update dependency @vuepress/plugin-slimsearch to v2.0.0-rc.78 (#961) ([5278293](https://github.com/miniapp-tool/mptool/commit/5278293)), closes [#961](https://github.com/miniapp-tool/mptool/issues/961)
+- chore(deps): update dependency @vuepress/plugin-slimsearch to v2.0.0-rc.79 (#965) ([ba15e3c](https://github.com/miniapp-tool/mptool/commit/ba15e3c)), closes [#965](https://github.com/miniapp-tool/mptool/issues/965)
+- chore(deps): update dependency @vuepress/plugin-slimsearch to v2.0.0-rc.80 (#971) ([3ffa76f](https://github.com/miniapp-tool/mptool/commit/3ffa76f)), closes [#971](https://github.com/miniapp-tool/mptool/issues/971)
+- chore(deps): update dependency prettier to v3.5.2 (#964) ([b74f561](https://github.com/miniapp-tool/mptool/commit/b74f561)), closes [#964](https://github.com/miniapp-tool/mptool/issues/964)
+- chore(deps): update dependency rollup to v4.34.9 (#979) ([f843759](https://github.com/miniapp-tool/mptool/commit/f843759)), closes [#979](https://github.com/miniapp-tool/mptool/issues/979)
+- chore(deps): update dependency rollup-plugin-esbuild to v6.2.1 (#972) ([a0d6b17](https://github.com/miniapp-tool/mptool/commit/a0d6b17)), closes [#972](https://github.com/miniapp-tool/mptool/issues/972)
+- chore(deps): update dependency sass-embedded to v1.85.1 (#973) ([b5d70d5](https://github.com/miniapp-tool/mptool/commit/b5d70d5)), closes [#973](https://github.com/miniapp-tool/mptool/issues/973)
+- chore(deps): update dependency sort-package-json to v2.15.0 (#976) ([eda33a1](https://github.com/miniapp-tool/mptool/commit/eda33a1)), closes [#976](https://github.com/miniapp-tool/mptool/issues/976)
+- chore(deps): update dependency typescript to v5.8.2 (#977) ([10fffe2](https://github.com/miniapp-tool/mptool/commit/10fffe2)), closes [#977](https://github.com/miniapp-tool/mptool/issues/977)
+- chore(deps): update dependency vuepress to v2.0.0-rc.20 (#967) ([0b335bf](https://github.com/miniapp-tool/mptool/commit/0b335bf)), closes [#967](https://github.com/miniapp-tool/mptool/issues/967)
+- chore(deps): update dependency vuepress-theme-hope to v2.0.0-rc.72 (#968) ([6d3d93e](https://github.com/miniapp-tool/mptool/commit/6d3d93e)), closes [#968](https://github.com/miniapp-tool/mptool/issues/968)
+- chore(deps): update dependency vuepress-theme-hope to v2.0.0-rc.73 (#974) ([be5c4bd](https://github.com/miniapp-tool/mptool/commit/be5c4bd)), closes [#974](https://github.com/miniapp-tool/mptool/issues/974)
+- chore(deps): update pnpm to v10.5.2 (#978) ([f02762f](https://github.com/miniapp-tool/mptool/commit/f02762f)), closes [#978](https://github.com/miniapp-tool/mptool/issues/978)
+- chore(deps): update vitest monorepo to v3.0.7 (#975) ([c745ede](https://github.com/miniapp-tool/mptool/commit/c745ede)), closes [#975](https://github.com/miniapp-tool/mptool/issues/975)
+- style: update linter ([363173d](https://github.com/miniapp-tool/mptool/commit/363173d))
+
 ## <small>0.10.11 (2025-02-19)</small>
 
 - chore: bump deps ([1824df3](https://github.com/miniapp-tool/mptool/commit/1824df3))

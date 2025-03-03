@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.12 (2025-03-03)</small>
+
+**Note:** Version bump only for package @mptool/all
+
 ## <small>0.10.11 (2025-02-19)</small>
 
 - chore: tweaks ([b49e7a4](https://github.com/miniapp-tool/mptool/commit/b49e7a4))
