@@ -293,10 +293,13 @@ export class CookieStore {
   #init(): void {
     try {
       // 从本地存储读取 cookie 数据数组
-      const cookiesData =
-        env === "js"
-          ? []
-          : (wx.getStorageSync<CookieType[] | undefined>(this.key) ?? []);
+      let cookiesData: CookieType[] = [];
+
+      if (env !== "js") {
+        const data = wx.getStorageSync<CookieType[] | undefined>(this.key);
+
+        if (Array.isArray(data)) cookiesData = data;
+      }
 
       // 转化为 cookie map 对象
       this.apply(cookiesData.map((item) => new Cookie(item)));
