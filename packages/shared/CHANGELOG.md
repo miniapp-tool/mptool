@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.14 (2025-03-10)</small>
+
+- fix(shared): fix logger ([46835db](https://github.com/miniapp-tool/mptool/commit/46835db))
+
 ## <small>0.10.13 (2025-03-10)</small>
 
 - fix: fix logger ([a2a1052](https://github.com/miniapp-tool/mptool/commit/a2a1052))
