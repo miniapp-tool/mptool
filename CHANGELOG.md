@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## <small>0.10.13 (2025-03-10)</small>
+
+- build: bump deps ([6a8cec6](https://github.com/miniapp-tool/mptool/commit/6a8cec6))
+- fix: fix logger ([a2a1052](https://github.com/miniapp-tool/mptool/commit/a2a1052))
+- chore(deps): update commitlint monorepo to v19.8.0 (#987) ([e8f94dd](https://github.com/miniapp-tool/mptool/commit/e8f94dd)), closes [#987](https://github.com/miniapp-tool/mptool/issues/987)
+- chore(deps): update dependency @rollup/plugin-commonjs to v28.0.3 (#981) ([5b75345](https://github.com/miniapp-tool/mptool/commit/5b75345)), closes [#981](https://github.com/miniapp-tool/mptool/issues/981)
+- chore(deps): update dependency @types/node to v22.13.10 (#982) ([b10cb41](https://github.com/miniapp-tool/mptool/commit/b10cb41)), closes [#982](https://github.com/miniapp-tool/mptool/issues/982)
+- chore(deps): update dependency @vuepress/plugin-slimsearch to v2.0.0-rc.82 (#983) ([dedef15](https://github.com/miniapp-tool/mptool/commit/dedef15)), closes [#983](https://github.com/miniapp-tool/mptool/issues/983)
+- chore(deps): update dependency cz-git to v1.11.1 (#984) ([b1a20e8](https://github.com/miniapp-tool/mptool/commit/b1a20e8)), closes [#984](https://github.com/miniapp-tool/mptool/issues/984)
+- chore(deps): update dependency eslint to v9.22.0 (#988) ([e7d5c4d](https://github.com/miniapp-tool/mptool/commit/e7d5c4d)), closes [#988](https://github.com/miniapp-tool/mptool/issues/988)
+- chore(deps): update dependency eslint-config-mister-hope to v0.8.1 (#989) ([9e1352c](https://github.com/miniapp-tool/mptool/commit/9e1352c)), closes [#989](https://github.com/miniapp-tool/mptool/issues/989)
+- chore(deps): update dependency rollup to v4.35.0 (#992) ([0c0b4ef](https://github.com/miniapp-tool/mptool/commit/0c0b4ef)), closes [#992](https://github.com/miniapp-tool/mptool/issues/992)
+- chore(deps): update dependency sort-package-json to v3 (#991) ([9445e0f](https://github.com/miniapp-tool/mptool/commit/9445e0f)), closes [#991](https://github.com/miniapp-tool/mptool/issues/991)
+- chore(deps): update dependency vuepress-theme-hope to v2.0.0-rc.74 (#985) ([a7d9ba4](https://github.com/miniapp-tool/mptool/commit/a7d9ba4)), closes [#985](https://github.com/miniapp-tool/mptool/issues/985)
+- chore(deps): update pnpm to v10.6.1 (#990) ([c8f1495](https://github.com/miniapp-tool/mptool/commit/c8f1495)), closes [#990](https://github.com/miniapp-tool/mptool/issues/990)
+- chore(deps): update vitest monorepo to v3.0.8 (#986) ([575c165](https://github.com/miniapp-tool/mptool/commit/575c165)), closes [#986](https://github.com/miniapp-tool/mptool/issues/986)
+
 ## <small>0.10.12 (2025-03-03)</small>
 
 - build: bump deps ([5c12f0e](https://github.com/miniapp-tool/mptool/commit/5c12f0e))
