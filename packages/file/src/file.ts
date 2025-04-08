@@ -2,17 +2,17 @@ import { MpError, logger } from "@mptool/shared";
 
 /** 文件编码 */
 type FileEncoding =
-  | "utf-8"
   | "ascii"
   | "base64"
   | "binary"
   | "hex"
+  | "latin1"
   | "ucs2"
   | "ucs-2"
-  | "utf16le"
-  | "utf-16le"
   | "utf8"
-  | "latin1";
+  | "utf-8"
+  | "utf16le"
+  | "utf-16le";
 
 /** 文件管理器 */
 const fileManager = wx.getFileSystemManager();
