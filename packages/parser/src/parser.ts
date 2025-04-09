@@ -1,7 +1,10 @@
 import { load } from "cheerio/slim";
 import type { AnyNode } from "domhandler";
 
-export const $ = load("");
+const $ = load("");
+
+export const getHTML = (content: string | AnyNode | AnyNode[]): string =>
+  $.xml(content);
 
 export const parseHTML = (content: string): AnyNode[] =>
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

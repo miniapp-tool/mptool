@@ -4,7 +4,7 @@ import type { AnyNode, Element } from "domhandler";
 import type { AllowTag } from "./allowedTags.js";
 import { ALLOWED_TAGS } from "./allowedTags.js";
 import type { ParserOptions } from "./options.js";
-import { $, parseHTML } from "./parser.js";
+import { getHTML, parseHTML } from "./parser.js";
 import { convertSVGToDataURI } from "./svg.js";
 import type { ElementNode, RichTextNode } from "./typings.js";
 
@@ -30,7 +30,7 @@ const handleSVG = (node: Element): RichTextNode => {
     type: "node",
     name: "img",
     attrs: {
-      src: convertSVGToDataURI($.xml(node)),
+      src: convertSVGToDataURI(getHTML(node)),
       ...(style ? { style } : {}),
     },
   };
