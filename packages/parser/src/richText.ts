@@ -1,11 +1,40 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-import type { AnyNode } from "domhandler";
+import type { AnyNode, Element } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";
 import { ALLOWED_TAGS } from "./allowedTags.js";
 import type { ParserOptions } from "./options.js";
-import { parseHTML } from "./parser.js";
+import { $, parseHTML } from "./parser.js";
+import { convertSVGToDataURI } from "./svg.js";
 import type { ElementNode, RichTextNode } from "./typings.js";
+
+const handleSVG = (node: Element): RichTextNode => {
+  const { width, height, viewbox } = node.attribs;
+
+  let style = "";
+
+  if (width) {
+    style += `width:${width}${/^[\d.]*\d$/.test(width) ? "px" : ""};`;
+  }
+  if (height) {
+    style += `height:${height}${/^[\d.]*\d$/.test(height) ? "px" : ""};`;
+  }
+
+  if (!style && viewbox) {
+    const [, , width, height] = viewbox.split(" ").map(Number);
+
+    style = `width:${width}px;height:${height}px;`;
+  }
+
+  return {
+    type: "node",
+    name: "img",
+    attrs: {
+      src: convertSVGToDataURI($.xml(node)),
+      ...(style ? { style } : {}),
+    },
+  };
+};
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const result: RichTextNode[] = nodes.filter((item): item is RichTextNode =>
@@ -39,6 +68,8 @@ const handleNode = async (
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
 
     if (config) {
+      if (node.name === "svg") return handleSVG(node);
+
       const attrs = Object.fromEntries(
         node.attributes
           .filter(
@@ -57,11 +88,11 @@ const handleNode = async (
       );
 
       if (appendClass)
-        attrs.class = attrs.class ? `${attrs.class} ${node.name}` : node.name;
+        attrs.class = attrs.class ? `${node.name} ${attrs.class}` : node.name;
 
       const convertedNode: ElementNode = {
         type: "node",
-        name: node.name,
+        name: ["html", "body"].includes(node.name) ? "div" : node.name,
         ...(Object.keys(attrs).length ? { attrs } : {}),
         ...(children.length ? { children } : {}),
       };

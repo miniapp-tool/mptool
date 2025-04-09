@@ -10,7 +10,7 @@ it("getRichTextNodes()", async () => {
       [
         {
           attrs: {
-            class: "test div",
+            class: "div test",
           },
           children: [
             {
@@ -28,7 +28,7 @@ it("getRichTextNodes()", async () => {
       [
         {
           attrs: {
-            class: "test div",
+            class: "div test",
           },
           children: [
             {
@@ -55,7 +55,7 @@ it("getRichTextNodes()", async () => {
       [
         {
           attrs: {
-            class: "test div",
+            class: "div test",
           },
           children: [
             {
@@ -177,7 +177,43 @@ it("getRichTextNodes()", async () => {
     ],
     [
       "<!doctype html><html><head><title>hello</title></head><body>world</body></html>",
-      [],
+      [
+        {
+          attrs: {
+            class: "html",
+          },
+          children: [
+            {
+              attrs: {
+                class: "body",
+              },
+              children: [
+                {
+                  text: "world",
+                  type: "text",
+                },
+              ],
+              name: "div",
+              type: "node",
+            },
+          ],
+          name: "div",
+          type: "node",
+        },
+      ],
+    ],
+    [
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='red'/></svg>",
+      [
+        {
+          attrs: {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewbox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='red'/%3E%3C/svg%3E",
+            style: "width:100px;height:100px;",
+          },
+          name: "img",
+          type: "node",
+        },
+      ],
     ],
   ];
 
@@ -209,7 +245,7 @@ it("getRichTextNodes() with transform", async () => {
   ).toEqual([
     {
       attrs: {
-        class: "test p",
+        class: "p test",
       },
       children: [
         {

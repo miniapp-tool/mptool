@@ -62,8 +62,11 @@ export type AllowTag =
   | "u"
   | "ul";
 
+export type DeprecatedTag = "big" | "center" | "font";
+export type ConvertedTag = "html" | "body" | "svg";
+
 export const ALLOWED_TAGS: [
-  tag: AllowTag | "big" | "center" | "font",
+  tag: AllowTag | DeprecatedTag | ConvertedTag,
   allowedAttrs?: string[],
 ][] = [
   ["a"],
@@ -133,4 +136,9 @@ export const ALLOWED_TAGS: [
   ["big"],
   ["center"],
   ["font"],
+
+  // built-in converted tags
+  ["html"],
+  ["body"],
+  ["svg"],
 ];
