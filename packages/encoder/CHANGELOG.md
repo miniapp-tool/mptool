@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.0](https://github.com/miniapp-tool/mptool/compare/v0.10.14...v0.11.0) (2025-04-09)
+
+**Note:** Version bump only for package @mptool/encoder
+
 ## <small>0.10.11 (2025-02-19)</small>
 
 - chore: tweak tests ([1c666df](https://github.com/miniapp-tool/mptool/commit/1c666df))

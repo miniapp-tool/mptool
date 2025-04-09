@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.0](https://github.com/miniapp-tool/mptool/compare/v0.10.14...v0.11.0) (2025-04-09)
+
+### ✨ Features
+
+- **parser:** add support for html ([5698a11](https://github.com/miniapp-tool/mptool/commit/5698a11565dd951163fef5a668be2688eb5dd6cc))
+
 ## <small>0.10.14 (2025-03-10)</small>
 
 - fix(shared): fix logger ([46835db](https://github.com/miniapp-tool/mptool/commit/46835db))
