@@ -110,7 +110,7 @@ const prepareData = <T = unknown>(
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
- *   - `'once'`:默认仅本次启动有效
+ *   - `'once'`: 仅本次启动有效
  */
 export const set = <T = unknown>(
   key: string,
@@ -129,7 +129,7 @@ export const set = <T = unknown>(
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
- *   - `'once'`:默认仅本次启动有效
+ *   - `'once'`: 仅本次启动有效
  * @param [asyncCB] 异步回调方法，不填为同步
  */
 export const setAsync = <T = unknown>(
