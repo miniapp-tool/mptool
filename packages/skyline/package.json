@@ -40,7 +40,7 @@
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
     "@mptool/skyline-enhance": "workspace:*",
-    "miniprogram-api-typings": "4.0.5"
+    "miniprogram-api-typings": "4.0.7"
   },
   "publishConfig": {
     "access": "public"

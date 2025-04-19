@@ -43,7 +43,7 @@
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@types/set-cookie-parser": "2.4.10",
-    "miniprogram-api-typings": "4.0.5",
+    "miniprogram-api-typings": "4.0.7",
     "set-cookie-parser": "2.7.1"
   },
   "publishConfig": {
