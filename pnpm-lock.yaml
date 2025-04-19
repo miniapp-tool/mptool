@@ -61,7 +61,7 @@ importers:
         version: 9.1.7
       miniprogram-api-typings:
         specifier: 4.0.5
-        version: 4.0.5
+        version: 4.0.7
       nano-staged:
         specifier: 0.8.0
         version: 0.8.0
@@ -3462,6 +3462,9 @@ packages:
 
   miniprogram-api-typings@4.0.5:
     resolution: {integrity: sha512-34pYYg4pwjsE752x/zs7QYLL0x0UGBL/IxTuVRRIXbFcv1msDRCWGyZK5KpsDm2P78Fdaw+B80B8R1qbvX6YhQ==}
+
+  miniprogram-api-typings@4.0.7:
+    resolution: {integrity: sha512-sUxqpA1+JxnDWYjO6ihiLWNJl94WzjlhnDpozfBeC+w8Mpejjsc8JuxyC3Xisimj/gp5OYaJ7nd4fM6wepzhEQ==}
 
   minizlib@2.1.2:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
@@ -8540,6 +8543,8 @@ snapshots:
   minipass@7.1.2: {}
 
   miniprogram-api-typings@4.0.5: {}
+
+  miniprogram-api-typings@4.0.7: {}
 
   minizlib@2.1.2:
     dependencies:
