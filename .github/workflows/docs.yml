@@ -36,3 +36,9 @@ jobs:
           folder: docs/.vuepress/dist
           token: ${{ secrets.ACCESS_TOKEN }}
           repository-name: miniapp-tool/miniapp-tool.github.io
+
+  scrape:
+    needs: docs-build
+    uses: ./.github/workflows/scraper.yml
+    secrets:
+      MEILISEARCH_MASTER_KEY: ${{ secrets.MEILISEARCH_MASTER_KEY }}

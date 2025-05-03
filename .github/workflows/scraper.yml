@@ -1,0 +1,31 @@
+name: Generate and deploy docs
+
+on:
+  workflow_call:
+    secrets:
+      MEILISEARCH_MASTER_KEY:
+        required: true
+
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    name: re-scrape documentation for MeiliSearch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run scraper
+        env:
+          # replace with your own MeiliSearch host URL
+          HOST_URL: https://meilisearch.mister-hope.com
+          API_KEY: ${{ secrets.MEILISEARCH_MASTER_KEY }}
+          # replace it with the path to your config file
+          CONFIG_FILE_PATH: ${{ github.workspace }}/docs/scraper.json
+        run: |
+          docker run -t --rm \
+            -e MEILISEARCH_HOST_URL=$HOST_URL \
+            -e MEILISEARCH_API_KEY=$API_KEY \
+            -v $CONFIG_FILE_PATH:/docs-scraper/config.json \
+            getmeili/docs-scraper:latest pipenv run ./docs_scraper config.json

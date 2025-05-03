@@ -1,0 +1,68 @@
+{
+  "index_uid": "miniapp-tool",
+  "start_urls": ["https://miniapp-tool.github.io/"],
+  "sitemap_urls": ["https://miniapp-tool.github.io/sitemap.xml"],
+  "selectors": {
+    "lvl0": {
+      "selector": ".vp-page-title h1",
+      "global": true,
+      "default_value": "文档"
+    },
+    "lvl1": "[vp-content] h1",
+    "lvl2": "[vp-content] h2",
+    "lvl3": "[vp-content] h3",
+    "lvl4": "[vp-content] h4",
+    "lvl5": "[vp-content] h5",
+    "lvl6": "[vp-content] h6",
+    "content": "[vp-content] p, [vp-content] li",
+    "lang": {
+      "selector": "/html/@lang",
+      "global": true,
+      "type": "xpath"
+    }
+  },
+  "custom_settings": {
+    "searchableAttributes": [
+      "hierarchy_radio_lvl0",
+      "hierarchy_radio_lvl1",
+      "hierarchy_radio_lvl2",
+      "hierarchy_radio_lvl3",
+      "hierarchy_radio_lvl4",
+      "hierarchy_radio_lvl5",
+      "hierarchy_lvl0",
+      "hierarchy_lvl1",
+      "hierarchy_lvl2",
+      "hierarchy_lvl3",
+      "hierarchy_lvl4",
+      "hierarchy_lvl5",
+      "hierarchy_lvl6",
+      "content",
+      "lang",
+      "objectID",
+      "page_rank",
+      "level",
+      "position"
+    ],
+    "displayedAttributes": [
+      "hierarchy_radio_lvl0",
+      "hierarchy_radio_lvl1",
+      "hierarchy_radio_lvl2",
+      "hierarchy_radio_lvl3",
+      "hierarchy_radio_lvl4",
+      "hierarchy_radio_lvl5",
+      "hierarchy_lvl0",
+      "hierarchy_lvl1",
+      "hierarchy_lvl2",
+      "hierarchy_lvl3",
+      "hierarchy_lvl4",
+      "hierarchy_lvl5",
+      "hierarchy_lvl6",
+      "anchor",
+      "url",
+      "lang",
+      "content",
+      "objectID"
+    ],
+    "filterableAttributes": ["lang"]
+  }
+}

@@ -35,7 +35,7 @@
     "dev": "rollup -c -w"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^4.0.2"
+    "miniprogram-api-typings": "^4.0.7"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",

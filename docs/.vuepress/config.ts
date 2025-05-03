@@ -35,7 +35,12 @@ export default defineUserConfig({
       icon: {
         assets: "fontawesome",
       },
-      slimsearch: true,
+      meilisearch: {
+        host: "https://meilisearch.mister-hope.com",
+        apiKey:
+          "d5ed77ddb6331bbdc648ff805034bffd6cdf1722b79699e7f178a1d96c5f7e5b",
+        indexUid: "miniapp-tool",
+      },
     },
   }),
 });
