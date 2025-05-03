@@ -9,7 +9,7 @@
     "docs:dev": "vuepress dev ."
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.21",
+    "@vuepress/bundler-vite": "2.0.0-rc.22",
     "@vuepress/plugin-slimsearch": "2.0.0-rc.94",
     "nodejs-jieba": "0.3.0",
     "sass-embedded": "1.87.0",
