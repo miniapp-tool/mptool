@@ -42,7 +42,7 @@
     "@rollup/plugin-commonjs": "28.0.3",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "16.0.1",
-    "@types/node": "22.15.21",
+    "@types/node": "22.15.29",
     "@vitest/coverage-istanbul": "3.1.4",
     "conventional-changelog-conventionalcommits": "9.0.0",
     "cross-env": "7.0.3",
