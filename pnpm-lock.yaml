@@ -54,8 +54,8 @@ importers:
         specifier: 0.9.3
         version: 0.9.3(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)(vitest@3.1.4(@types/debug@4.1.12)(@types/node@22.15.29)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(yaml@2.8.0))
       execa:
-        specifier: 9.5.3
-        version: 9.5.3
+        specifier: 9.6.0
+        version: 9.6.0
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -2792,8 +2792,8 @@ packages:
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
 
-  execa@9.5.3:
-    resolution: {integrity: sha512-QFNnTvU3UjgWFy8Ef9iDHvIdcgZ344ebkwYx4/KLbR+CKQA4xBaHzv+iRpp86QfMHP8faFQLh8iOc57215y4Rg==}
+  execa@9.6.0:
+    resolution: {integrity: sha512-jpWzZ1ZhwUmeWRhS7Qv3mhpOhLfwI+uAX4e5fOcXqwMR7EcJ0pj2kV1CVzHVMX/LphnKWD3LObjZCoJ71lKpHw==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
   expect-type@1.2.1:
@@ -5527,7 +5527,7 @@ snapshots:
       config-chain: 1.1.13
       cosmiconfig: 9.0.0(typescript@5.8.3)
       dedent: 1.6.0
-      execa: 9.5.3
+      execa: 9.6.0
       fs-extra: 11.3.0
       glob-parent: 6.0.2
       is-ci: 4.1.0
@@ -7904,7 +7904,7 @@ snapshots:
 
   eventemitter3@5.0.1: {}
 
-  execa@9.5.3:
+  execa@9.6.0:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       cross-spawn: 7.0.6
