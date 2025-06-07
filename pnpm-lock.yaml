@@ -121,8 +121,8 @@ importers:
         specifier: 2.0.0-rc.22
         version: 2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0)
       '@vuepress/plugin-meilisearch':
-        specifier: 2.0.0-rc.106
-        version: 2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
+        specifier: 2.0.0-rc.108
+        version: 2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
       sass-embedded:
         specifier: 1.89.1
         version: 1.89.1
@@ -134,7 +134,7 @@ importers:
         version: 2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))
       vuepress-theme-hope:
         specifier: 2.0.0-rc.89
-        version: 2.0.0-rc.89(@vuepress/plugin-meilisearch@2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))))(markdown-it@14.1.0)(nodejs-jieba@0.3.0(encoding@0.1.13))(sass-embedded@1.89.1)(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
+        version: 2.0.0-rc.89(@vuepress/plugin-meilisearch@2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))))(markdown-it@14.1.0)(nodejs-jieba@0.3.0(encoding@0.1.13))(sass-embedded@1.89.1)(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
 
   packages/all:
     devDependencies:
@@ -1914,6 +1914,11 @@ packages:
     peerDependencies:
       vuepress: 2.0.0-rc.23
 
+  '@vuepress/helper@2.0.0-rc.108':
+    resolution: {integrity: sha512-x/ygqD++S2CQzTl/+JQ5Og6OJyeURqLvKoE8Dlsmjc7UM/rB+FvnOWMGexOrRjCwtRXncxZRddIg1bcWuREndg==}
+    peerDependencies:
+      vuepress: 2.0.0-rc.23
+
   '@vuepress/highlighter-helper@2.0.0-rc.106':
     resolution: {integrity: sha512-VofZug2B/P+D+SZ29aCfOzIfRrUzusfjq8qE7asZ3S7xGD4VSOCioTaPKV+OftgPnUZV0jPBZsh7E7T8SOYtsg==}
     peerDependencies:
@@ -2028,8 +2033,8 @@ packages:
     peerDependencies:
       vuepress: 2.0.0-rc.23
 
-  '@vuepress/plugin-meilisearch@2.0.0-rc.106':
-    resolution: {integrity: sha512-9h4dWk9pZhNtbvABAw1TVSdzhXVOx8xL09aTSwPYBf2xPx8206XIEATnZMLW5CEBscnF0TJN5I1TJve7mhOkYw==}
+  '@vuepress/plugin-meilisearch@2.0.0-rc.108':
+    resolution: {integrity: sha512-LWiU2CHAB8auREe/jdTasFiPjUQN8j45+82WvBTPSCYr3vkFqSndL+3XbNnlEcpfFyu1E/P9nLVJWP8gesxRJw==}
     hasBin: true
     peerDependencies:
       vuepress: 2.0.0-rc.23
@@ -6865,6 +6870,18 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  '@vuepress/helper@2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))':
+    dependencies:
+      '@vue/shared': 3.5.16
+      '@vueuse/core': 13.3.0(vue@3.5.16(typescript@5.8.3))
+      cheerio: 1.0.0
+      fflate: 0.8.2
+      gray-matter: 4.0.3
+      vue: 3.5.16(typescript@5.8.3)
+      vuepress: 2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))
+    transitivePeerDependencies:
+      - typescript
+
   '@vuepress/highlighter-helper@2.0.0-rc.106(@vueuse/core@13.3.0(vue@3.5.16(typescript@5.8.3)))(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))':
     dependencies:
       vuepress: 2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))
@@ -7074,9 +7091,9 @@ snapshots:
       - markdown-it
       - typescript
 
-  '@vuepress/plugin-meilisearch@2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))':
+  '@vuepress/plugin-meilisearch@2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))':
     dependencies:
-      '@vuepress/helper': 2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
+      '@vuepress/helper': 2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
       commander: 14.0.0
       meilisearch: 0.50.0
       meilisearch-docsearch: 0.8.0
@@ -9915,7 +9932,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  vuepress-theme-hope@2.0.0-rc.89(@vuepress/plugin-meilisearch@2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))))(markdown-it@14.1.0)(nodejs-jieba@0.3.0(encoding@0.1.13))(sass-embedded@1.89.1)(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))):
+  vuepress-theme-hope@2.0.0-rc.89(@vuepress/plugin-meilisearch@2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))))(markdown-it@14.1.0)(nodejs-jieba@0.3.0(encoding@0.1.13))(sass-embedded@1.89.1)(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3))):
     dependencies:
       '@vuepress/helper': 2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
       '@vuepress/plugin-active-header-links': 2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
@@ -9956,7 +9973,7 @@ snapshots:
       vuepress-plugin-md-enhance: 2.0.0-rc.89(markdown-it@14.1.0)(sass-embedded@1.89.1)(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
       vuepress-shared: 2.0.0-rc.89(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
     optionalDependencies:
-      '@vuepress/plugin-meilisearch': 2.0.0-rc.106(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
+      '@vuepress/plugin-meilisearch': 2.0.0-rc.108(typescript@5.8.3)(vuepress@2.0.0-rc.22(@vuepress/bundler-vite@2.0.0-rc.22(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.1)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.8.0))(typescript@5.8.3)(vue@3.5.16(typescript@5.8.3)))
       nodejs-jieba: 0.3.0(encoding@0.1.13)
       sass-embedded: 1.89.1
     transitivePeerDependencies:
