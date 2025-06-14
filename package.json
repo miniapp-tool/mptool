@@ -46,7 +46,7 @@
     "@vitest/coverage-istanbul": "3.2.2",
     "conventional-changelog-conventionalcommits": "9.0.0",
     "cross-env": "7.0.3",
-    "cz-git": "1.11.1",
+    "cz-git": "1.11.2",
     "eslint": "9.28.0",
     "eslint-config-mister-hope": "0.9.5",
     "execa": "9.6.0",
