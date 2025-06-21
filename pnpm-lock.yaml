@@ -224,7 +224,7 @@ importers:
         version: link:../shared
       cheerio:
         specifier: ^1.0.0
-        version: 1.0.0
+        version: 1.1.0
       domhandler:
         specifier: ^5.0.3
         version: 5.0.3
@@ -2637,6 +2637,10 @@ packages:
     resolution: {integrity: sha512-aKstq2TDOndCn4diEyp9Uq/Flu2i1GlLkc6XIDQSDMuaFE3OPW5OphLCyQ5SpSJZTb4reN+kTcYru5yIfXoRPw==}
     engines: {node: '>=0.12'}
 
+  entities@6.0.1:
+    resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
+    engines: {node: '>=0.12'}
+
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -3596,8 +3600,8 @@ packages:
     resolution: {integrity: sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-addon-api@8.3.1:
-    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
+  node-addon-api@8.4.0:
+    resolution: {integrity: sha512-D9DI/gXHvVmjHS08SVch0Em8G5S1P+QWtU31appcKT/8wFSPRcdHadIFSAntdMMVM5zz+/DL+bL/gz3UDppqtg==}
     engines: {node: ^18 || ^20 || >= 21}
 
   node-fetch@2.7.0:
@@ -4523,8 +4527,8 @@ packages:
     resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
 
-  undici@6.21.2:
-    resolution: {integrity: sha512-uROZWze0R0itiAKVPsYhFov9LxrPMHLMEQFszeI2gCN6bnIIZ8twzBCJcN2LJrBBLfrP0t1FW0g+JmKVl8Vk1g==}
+  undici@6.21.3:
+    resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
     engines: {node: '>=18.17'}
 
   undici@7.10.0:
@@ -7497,7 +7501,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 6.21.2
+      undici: 6.21.3
       whatwg-mimetype: 4.0.0
 
   cheerio@1.1.0:
@@ -7822,6 +7826,8 @@ snapshots:
   entities@4.5.0: {}
 
   entities@6.0.0: {}
+
+  entities@6.0.1: {}
 
   env-paths@2.2.1: {}
 
@@ -8328,7 +8334,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
       domutils: 3.2.2
-      entities: 6.0.0
+      entities: 6.0.1
 
   htmlparser2@9.1.0:
     dependencies:
@@ -8848,7 +8854,7 @@ snapshots:
     dependencies:
       type-fest: 2.19.0
 
-  node-addon-api@8.3.1:
+  node-addon-api@8.4.0:
     optional: true
 
   node-fetch@2.7.0(encoding@0.1.13):
@@ -8878,7 +8884,7 @@ snapshots:
   nodejs-jieba@0.3.0(encoding@0.1.13):
     dependencies:
       '@mapbox/node-pre-gyp': 2.0.0-rc.0(encoding@0.1.13)
-      node-addon-api: 8.3.1
+      node-addon-api: 8.4.0
       node-gyp: 11.2.0
     transitivePeerDependencies:
       - encoding
@@ -9769,7 +9775,7 @@ snapshots:
     dependencies:
       '@fastify/busboy': 2.1.1
 
-  undici@6.21.2: {}
+  undici@6.21.3: {}
 
   undici@7.10.0: {}
 
