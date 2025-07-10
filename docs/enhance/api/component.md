@@ -78,7 +78,6 @@ $Component({
   ```
 
 - 参数:
-
   - `method`: 需要调用的方法名称
   - `args`: 为需要传递的参数
 
@@ -113,7 +112,6 @@ $Component({
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
@@ -129,7 +127,6 @@ $Component({
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 导航到指定页面
@@ -155,7 +152,6 @@ this.$go("play?vid=xxx&cid=xxx");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 重定向到指定页面, 即**替换页面，不产生历史**。
@@ -181,7 +177,6 @@ this.$redirect("about?year=2021");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
@@ -213,7 +208,6 @@ this.$switch("main?user=mrhope");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 关闭所有页面，之后打开到应用内的某个页面
@@ -237,7 +231,6 @@ this.$launch("main?user=mrhope");
   ```
 
 - 参数:
-
   - `delta`: 后退的层级数，默认为 `1`
 
 本函数是 `wx.navigateBack` 的简单封装

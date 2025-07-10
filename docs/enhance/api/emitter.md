@@ -63,7 +63,6 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```
 
 - 参数:
-
   - type: `string | symbol` 要侦听的事件类型，或使用 `'*'` 监听所有事件
   - handler: `Function` 响应给定事件时调用的函数
 
@@ -81,7 +80,6 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```
 
 - 参数:
-
   - type: `string | symbol` 要取消监听事件类型，或使用 `'*'` 取消所有事件
   - handler: `Function` 要删除的处理程序函数
 
@@ -102,7 +100,6 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```
 
 - 参数:
-
   - type: `string | symbol` 要取消监听事件类型，或使用 `'*'` 取消所有事件
   - event: `任何值`，推荐传入对象
 
@@ -128,6 +125,5 @@ emitter.on("baz"); // 'baz' should not contain event object
   ```
 
 - 参数:
-
   - type: `string | symbol` 要取消监听事件类型，或使用 `'*'` 取消所有事件
   - event: `任何值`，推荐传入对象

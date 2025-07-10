@@ -3,8 +3,6 @@ import { readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { defineConfig } from "cz-git";
-
 const packages = readdirSync(
   join(dirname(fileURLToPath(import.meta.url)), "./packages/"),
 );
@@ -17,7 +15,7 @@ const scopeComplete = execSync("git status --porcelain || true")
   ?.replace(/\//g, "%%")
   .match(/packages%%((\w|-)*)/)?.[1];
 
-export default defineConfig({
+export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -29,4 +27,4 @@ export default defineConfig({
     allowCustomIssuePrefix: false,
     allowEmptyIssuePrefix: false,
   },
-});
+};

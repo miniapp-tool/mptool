@@ -13,7 +13,6 @@ order: 4
   ```
 
   参数:
-
   - `name`: 页面简称
   - `options`: 页面选项
 
@@ -38,7 +37,6 @@ order: 4
 - 类型: `onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void | Promise<void>`
 
 - 参数:
-
   - `options`: App 启动时的 `onLaunch` 参数
 
 在 `App.onLaunch` 触发时调用
@@ -54,7 +52,6 @@ order: 4
 - 类型: `onAwake(time: number): void | Promise<void>`
 
 - 参数:
-
   - `time`: 为本次休眠时间，单位 ms
 
 在小程序从后台唤醒时调用
@@ -70,7 +67,6 @@ order: 4
 - 类型: `onPreload(options: PageQuery): void | Promise<void>`
 
 - 参数:
-
   - `options`: 为通过触发预加载携带参数生成的参数对象
 
 预加载生命周期，可在其他页面中使用 `this.$preload(pageNameWithArgs | pageUrlWIthArgs)` 触发特定页面的预加载周期。
@@ -88,7 +84,6 @@ order: 4
 - 类型: `onNavigate(options: PageQuery): void | Promise<void>`
 
 - 参数:
-
   - `options`: 为通过触发预加载携带参数生成的参数对象
 
 页面即将被跳转时触发。
@@ -193,7 +188,6 @@ $Component({
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
@@ -209,7 +203,6 @@ $Component({
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 导航到指定页面
@@ -235,7 +228,6 @@ this.$go("play?vid=xxx&cid=xxx");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 重定向到指定页面, 即**替换页面，不产生历史**。
@@ -261,7 +253,6 @@ this.$redirect("about?year=2021");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
@@ -293,7 +284,6 @@ this.$switch("main?user=mrhope");
   ```
 
 - 参数:
-
   - `pageName`: 页面简称，可以带上 `queryString`
 
 关闭所有页面，之后打开到应用内的某个页面
@@ -317,7 +307,6 @@ this.$launch("main?user=mrhope");
   ```
 
 - 参数:
-
   - `delta`: 后退的层级数，默认为 `1`
 
 本函数是 `wx.navigateBack` 的简单封装

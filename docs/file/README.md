@@ -46,7 +46,6 @@ icon: folder
   读取可序列化文件数据并返回解析结果。
 
   当 JSON 文件不存在或解析失败时，返回 `undefined`
-
   - `path`: 读取的文件路径，不应含有 `.json` 后缀
   - `encoding`: 文件的编码格式，可选，默认 `utf-8`
 
@@ -65,7 +64,6 @@ icon: folder
 - `writeFile(path, data, encoding)`
 
   写入文件
-
   - `path`: 待写入的文件路径，若文件或其父文件夹不存在会自动创建
   - `data`: 待写入的数据，可接受任意可序列化的数据或 Buffer
   - `encoding`: 文件编码选项，可选，默认 `utf-8` (数据) 或 `binary` (Buffer)
@@ -73,7 +71,6 @@ icon: folder
 - `writeJSON(path, data, encoding)`
 
   写入可序列化数据为 JSON
-
   - `path`: 写入文件的路径，若父文件夹不存在会自动创建
   - `data`: 写入文件的数据，可接受任意可序列化的数据
   - `encoding`: 文件编码选项，默认 `utf-8`
@@ -81,14 +78,12 @@ icon: folder
 - `saveFile(tempFilePath, path)`
 
   将缓存文件保存到本地文件存储。
-
   - `tempFilePath`: 缓存文件路径
   - `path`: 保存文件路径
 
 - `saveOnlineFile(onlinePath, localPath): Promise<void>`
 
   将在线文件保存到本地指定位置
-
   - `onlinePath`: 在线文件路径
   - `localPath`: 本地文件路径
 
@@ -101,7 +96,6 @@ icon: folder
 - `unzip(zipFilePath, targetPath): Promise<void>`
 
   解压文件
-
   - `zipFilePath`: 待解压的压缩文件路径
   - `targetPath`: 解压到的目录
 
@@ -147,13 +141,11 @@ icon: folder
 - `set(key, value, expire)`
 
   同步设置数据。
-
   - `key`: 设置的键名
 
   - `value`: 存入的值
 
   - `expire`: 过期时间，可选，默认为 `'once'`
-
     - `'once'`: 默认，表示仅本次启动有效
     - `'keep'`: 表示保持上一次有效时间
     - 数字: 已毫秒为单位的有效时间
@@ -174,25 +166,21 @@ icon: folder
   同步读取数据并返回。
 
   当数据已经过期时，返回 `undefined`。
-
   - `key`: 设置的键名
 
 - `getAsync(key)`
 
   `get` 的异步版本，在读取大量数据避免阻塞线程时可考虑使用，返回一个 Promise。
-
   - `key`: 设置的键名
 
 - `remove(key)`
 
   同步删除数据。
-
   - `key`: 删除的键名
 
 - `removeAsync(key)`
 
   异步删除数据，返回一个 Promise。
-
   - `key`: 删除的键名
 
 - `check()`

@@ -92,7 +92,7 @@ export const $Component: ComponentConstructor = <
     extendComponent(options as unknown as TrivialComponentOptions);
 
   // ensure lifetimes
-  if (!options.lifetimes) options.lifetimes = {};
+  options.lifetimes ??= {};
 
   options.lifetimes.created = wrapFunction(
     options.lifetimes.created,

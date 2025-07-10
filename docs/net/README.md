@@ -76,11 +76,9 @@ Cookie 类有如下内容:
 - `isPersistence(): boolean`: 判断 Cookie 是否可持久化
 
 - `isDomainMatched(domain: string): boolean`: 判断 Cookie 是否匹配域名
-
   - `domain`: 域名
 
 - `isPathMatched(path: string): boolean`: 判断 Cookie 是否匹配路径
-
   - `path`: 路径
 
 - `toString(): string`: 将 Cookie 转换为字符串
@@ -134,7 +132,6 @@ const cookieStore = new CookieStore(key);
 其中 `options` 为可选参数，支持以下选项:
 
 - 任意组合以下键值的对象
-
   - `domain`: 指定域名
   - `path`: 指定路径
 

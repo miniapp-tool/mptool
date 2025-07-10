@@ -23,7 +23,6 @@
 构造函数:
 
 - `constructor(cookie: CookieType)`
-
   - `cookie`: Cookie 对象
 
 静态成员:
@@ -42,11 +41,9 @@
 - `isPersistence(): boolean`: 判断 Cookie 是否可持久化
 
 - `isDomainMatched(domain: string): boolean`: 判断 Cookie 是否匹配域名
-
   - `domain`: 域名
 
 - `isPathMatched(path: string): boolean`: 判断 Cookie 是否匹配路径
-
   - `path`: 路径
 
 - `toString(): string`: 将 Cookie 转换为字符串

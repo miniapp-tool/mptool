@@ -106,7 +106,6 @@ order: 2
 - 类型: `(options: TrivialComponentOptions): void`
 
 - 参数:
-
   - `options`: 组件选项
 
 - 必填: 否
@@ -120,7 +119,6 @@ order: 2
 - 类型: `(options: TrivialComponentOptions): void`
 
 - 参数:
-
   - `options`: 组件选项
 
 - 必填: 否
@@ -134,7 +132,6 @@ order: 2
 - 类型: `(name: string, options: TrivialPageOptions): void`
 
 - 参数:
-
   - `name`: 页面名称
   - `options`: 页面选项
 
@@ -147,7 +144,6 @@ order: 2
 - 类型: `(name: string, options: TrivialPageOptions): void`
 
 - 参数:
-
   - `name`: 页面名称
   - `options`: 页面选项
 
