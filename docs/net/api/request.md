@@ -107,7 +107,7 @@ export const request: <
 ) => Promise<RequestResponse<T>>;
 ```
 
-## Fetch
+## createRequest
 
 ```ts
 export interface RequestInitOptions
