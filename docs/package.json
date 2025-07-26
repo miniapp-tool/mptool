@@ -12,7 +12,7 @@
     "@vuepress/bundler-vite": "2.0.0-rc.24",
     "@vuepress/plugin-meilisearch": "2.0.0-rc.112",
     "sass-embedded": "1.89.2",
-    "vue": "3.5.17",
+    "vue": "3.5.18",
     "vuepress": "2.0.0-rc.24",
     "vuepress-theme-hope": "2.0.0-rc.94"
   }
