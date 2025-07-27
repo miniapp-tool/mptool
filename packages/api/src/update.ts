@@ -37,11 +37,11 @@ export const updateApp = (
   });
 
   // 更新下载失败
-  updateManager.onUpdateFailed(({ errMsg }) => {
+  updateManager.onUpdateFailed((res) => {
     // 提示用户网络出现问题
     void showToast("小程序更新下载失败，请检查您的网络!");
 
     // 调试
-    logger.error("更新应用失败", errMsg);
+    logger.error("更新应用失败", res);
   });
 };
