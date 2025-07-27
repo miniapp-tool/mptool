@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.0](https://github.com/miniapp-tool/mptool/compare/v0.11.1...v0.12.0) (2025-07-27)
+
+### ✨ Features
+
+- bump deps ([3636bdc](https://github.com/miniapp-tool/mptool/commit/3636bdcd328ff5453b3b9bfde78a035e3dc6c08a))
+
 ## [0.11.1](https://github.com/miniapp-tool/mptool/compare/v0.11.0...v0.11.1) (2025-04-09)
 
 ### 🐛 Bug Fixes

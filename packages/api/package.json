@@ -1,6 +1,6 @@
 {
   "name": "@mptool/api",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Common api for QQ/Wechat miniapp",
   "keywords": [
     "miniprogram",
