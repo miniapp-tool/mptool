@@ -38,12 +38,12 @@
     "@mptool/shared": "workspace:*"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^4.0.7"
+    "miniprogram-api-typings": "^4.1.0"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@types/set-cookie-parser": "2.4.10",
-    "miniprogram-api-typings": "4.0.7",
+    "miniprogram-api-typings": "4.1.0",
     "set-cookie-parser": "2.7.1"
   },
   "publishConfig": {

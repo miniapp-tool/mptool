@@ -36,7 +36,6 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "target": "ES2015"
+    "strictPropertyInitialization": true
   }
 }

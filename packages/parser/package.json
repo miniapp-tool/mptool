@@ -37,15 +37,15 @@
   },
   "dependencies": {
     "@mptool/shared": "workspace:*",
-    "cheerio": "^1.1.0",
+    "cheerio": "^1.1.2",
     "domhandler": "^5.0.3"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^4.0.7"
+    "miniprogram-api-typings": "^4.1.0"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "4.0.7"
+    "miniprogram-api-typings": "4.1.0"
   },
   "publishConfig": {
     "access": "public"
