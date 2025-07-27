@@ -233,12 +233,14 @@ it("$Page", () => {
     test() {
       const channel = this.getOpenerEventChannel();
 
-      assertType<WechatMiniprogram.EventChannel>(channel);
-      channel.emit("test", {});
-      channel.on("xxx", () => {});
+      assertType<
+        WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
+      >(channel);
+      channel.emit?.("test", {});
+      channel.on?.("xxx", () => {});
 
       // @ts-expect-error: key should not be number
-      assertType(channel.emit(1, 2));
+      assertType(channel.emit?.(1, 2));
     },
   });
 

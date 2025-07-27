@@ -291,11 +291,14 @@ it("$Component", () => {
       test() {
         const channel = this.getOpenerEventChannel();
 
-        expectTypeOf(channel).toEqualTypeOf<WechatMiniprogram.EventChannel>();
-        channel.emit("test", {});
-        channel.on("xxx", () => {});
-        // @ts-expect-error: emit key should be string
-        assertType(channel.emit(1, 2));
+        assertType<
+          WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
+        >(channel);
+        channel.emit?.("test", {});
+        channel.on?.("xxx", () => {});
+
+        // @ts-expect-error: key should not be number
+        assertType(channel.emit?.(1, 2));
       },
     },
   });

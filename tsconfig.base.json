@@ -13,7 +13,7 @@
     "experimentalDecorators": false,
     "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "inlineSourceMap": false,
     "inlineSources": true,
     "lib": ["ESNext"],
@@ -36,6 +36,7 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "target": "ESNext"
   }
 }
