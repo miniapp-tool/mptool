@@ -18,3 +18,5 @@ demo/project.private.config.json
 coverage/
 .npmrc
 tsconfig.vitest-temp.json
+
+.DS_Store
