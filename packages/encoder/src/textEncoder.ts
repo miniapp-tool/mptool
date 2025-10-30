@@ -75,7 +75,7 @@ export class TextEncoder {
     this.doNotFlush = Boolean(options.stream);
 
     // 1. Convert input to a stream.
-    const input = new Stream(stringToCodePoints(String(content)));
+    const input = new Stream(stringToCodePoints(content));
 
     // 2. Let output be a new stream
     const output = [];

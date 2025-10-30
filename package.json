@@ -42,8 +42,8 @@
     "@rollup/plugin-commonjs": "28.0.9",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "16.0.3",
-    "@types/node": "24.9.1",
-    "@vitest/coverage-istanbul": "4.0.3",
+    "@types/node": "24.9.2",
+    "@vitest/coverage-istanbul": "4.0.5",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "cross-env": "10.1.0",
     "eslint": "9.38.0",
@@ -58,8 +58,8 @@
     "rollup-plugin-esbuild": "6.2.1",
     "sort-package-json": "3.4.0",
     "tsx": "4.20.6",
-    "typescript": "5.8.3",
-    "vitest": "4.0.3"
+    "typescript": "5.9.3",
+    "vitest": "4.0.5"
   },
   "packageManager": "pnpm@10.20.0"
 }

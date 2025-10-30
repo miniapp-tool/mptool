@@ -147,6 +147,7 @@ export function Emitter<Events>(
       event?: Events[Key],
     ): Promise<void> => {
       await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)
           .slice()
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -154,6 +155,7 @@ export function Emitter<Events>(
       );
 
       await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         ((all.get("*") ?? []) as WildCardEventHandlerList<Events>)
           .slice()
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

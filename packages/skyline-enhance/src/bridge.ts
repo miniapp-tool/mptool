@@ -87,7 +87,7 @@ const bindBack = function touchHandler(
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
-    { before?: string; after?: string; delta?: number }
+    { before?: string; after?: string; delta?: number | string }
   >,
 ): Promise<void> | void {
   if (event) {

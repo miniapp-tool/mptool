@@ -81,6 +81,7 @@ it("$Page", () => {
     },
     onReady() {
       this.setData({
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         logs: (wx.getStorageSync("logs") || []).map((log: number) => {
           return new Date(log).toString();
         }),

@@ -22,10 +22,11 @@ export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
 
   // 1. Let S be the DOMString value.
-  const s = String(content);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+  const str = String(content);
 
   // 2. Let n be the length of S.
-  const n = s.length;
+  const strLength = str.length;
 
   // 3. Initialize i to 0.
   let i = 0;
@@ -33,40 +34,40 @@ export const stringToCodePoints = (content: string): number[] => {
   // 4. Initialize U to be an empty sequence of Unicode characters.
   const u: number[] = [];
 
-  // 5. While i < n:
-  while (i < n) {
-    // 1. Let c be the code unit in S at index i.
-    const c = s.charCodeAt(i);
+  // 5. While i < strLength:
+  while (i < strLength) {
+    // 1. Let char be the code unit in S at index i.
+    const char = str.charCodeAt(i);
 
     // 2. Depending on the value of c:
 
-    // c < 0xD800 or c > 0xDFFF
-    if (c < 0xd800 || c > 0xdfff)
+    // char < 0xD800 or char > 0xDFFF
+    if (char < 0xd800 || char > 0xdfff)
       // Append to U the Unicode character with code point c.
-      u.push(c);
-    // 0xDC00 ≤ c ≤ 0xDFFF
-    else if (0xdc00 <= c && c <= 0xdfff)
+      u.push(char);
+    // 0xDC00 ≤ char ≤ 0xDFFF
+    else if (0xdc00 <= char && char <= 0xdfff)
       // Append to U a U+FFFD REPLACEMENT CHARACTER.
       u.push(0xfffd);
-    // 0xD800 ≤ c ≤ 0xDBFF
-    else if (0xd800 <= c && c <= 0xdbff)
-      if (i === n - 1) {
-        // 1. If i = n−1, then append to U a U+FFFD REPLACEMENT
+    // 0xD800 ≤ char ≤ 0xDBFF
+    else if (0xd800 <= char && char <= 0xdbff)
+      if (i === strLength - 1) {
+        // 1. i is the last one then append to U a U+FFFD REPLACEMENT
         // CHARACTER.
         u.push(0xfffd);
       }
-      // 2. Otherwise, i < n−1:
+      // 2. Otherwise
       else {
         // 1. Let d be the code unit in S at index i+1.
-        const d = s.charCodeAt(i + 1);
+        const nextChar = str.charCodeAt(i + 1);
 
-        // 2. If 0xDC00 ≤ d ≤ 0xDFFF, then:
-        if (0xdc00 <= d && d <= 0xdfff) {
-          // 1. Let a be c & 0x3FF.
-          const a = c & 0x3ff;
+        // 2. If 0xDC00 ≤ nextChar ≤ 0xDFFF, then:
+        if (0xdc00 <= nextChar && nextChar <= 0xdfff) {
+          // 1. Let a be char & 0x3FF.
+          const a = char & 0x3ff;
 
-          // 2. Let b be d & 0x3FF.
-          const b = d & 0x3ff;
+          // 2. Let b be nextChar & 0x3FF.
+          const b = nextChar & 0x3ff;
 
           // 3. Append to U the Unicode character with code point
           // 2^16+2^10*a+b.
@@ -76,7 +77,7 @@ export const stringToCodePoints = (content: string): number[] => {
           i += 1;
         }
 
-        // 3. Otherwise, d < 0xDC00 or d > 0xDFFF. Append to U a
+        // 3. Otherwise, nextChar < 0xDC00 or nextChar > 0xDFFF. Append to U a
         // U+FFFD REPLACEMENT CHARACTER.
         else {
           u.push(0xfffd);

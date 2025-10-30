@@ -106,6 +106,7 @@ export class URLSearchParams {
    * Append a new name-value pair to the query string.
    */
   append(name: string, value: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
     this.params.set(name, this.getAll(name).concat(String(value)));
   }
 

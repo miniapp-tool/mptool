@@ -18,7 +18,7 @@ export const $Page: PageConstructor = <
   const { extendPage, injectPage } = getConfig();
 
   const callLog = (lifeCycle: string, args?: unknown): void =>
-    logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args || "");
+    logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
   const registerLog = (lifeCycle: string): void =>
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
 
