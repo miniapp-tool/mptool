@@ -46,7 +46,7 @@
     "@vitest/coverage-istanbul": "4.0.5",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "cross-env": "10.1.0",
-    "eslint": "9.38.0",
+    "eslint": "9.39.1",
     "eslint-config-mister-hope": "0.9.6",
     "husky": "9.1.7",
     "miniprogram-api-typings": "4.1.0",
