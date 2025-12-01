@@ -18,9 +18,9 @@ export interface RequestOptions<
     any
   >,
 > extends Omit<
-    WechatMiniprogram.RequestOption<T>,
-    "url" | "method" | "header" | "data"
-  > {
+  WechatMiniprogram.RequestOption<T>,
+  "url" | "method" | "header" | "data"
+> {
   /**
    * 请求方法
    */
@@ -110,19 +110,18 @@ export const request: <
 ## createRequest
 
 ```ts
-export interface RequestInitOptions
-  extends Pick<
-    WechatMiniprogram.RequestOption,
-    | "redirect"
-    | "enableCache"
-    | "enableChunked"
-    | "enableHttp2"
-    | "enableHttpDNS"
-    | "enableQuic"
-    | "httpDNSServiceId"
-    | "forceCellularNetwork"
-    | "timeout"
-  > {
+export interface RequestInitOptions extends Pick<
+  WechatMiniprogram.RequestOption,
+  | "redirect"
+  | "enableCache"
+  | "enableChunked"
+  | "enableHttp2"
+  | "enableHttpDNS"
+  | "enableQuic"
+  | "httpDNSServiceId"
+  | "forceCellularNetwork"
+  | "timeout"
+> {
   /**
    * 访问的默认域名
    */

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { bind } from "../bridge.js";
 import type { RefMap } from "../component/index.js";
 import type { InstanceEmitterMethods } from "../emitter/index.js";
@@ -53,8 +54,8 @@ export interface ExtendedPageProperties {
 export interface ExtendedPageMethods<
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
-> extends InstanceEmitterMethods,
-    NavigatorMethods {
+>
+  extends InstanceEmitterMethods, NavigatorMethods {
   /**
    * 绑定组件函数
    */

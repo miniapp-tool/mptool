@@ -7,8 +7,10 @@ import type {
   RoutePathConfig,
 } from "./typings.js";
 
-export interface Config
-  extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
+export interface Config extends Omit<
+  AppConfigOptions,
+  "defaultPage" | "pages"
+> {
   /**
    * @returns route
    */

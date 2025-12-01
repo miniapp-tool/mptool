@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { MpError, logger } from "@mptool/shared";
 
 import { CookieStore } from "./cookieStore.js";
@@ -20,9 +21,9 @@ export interface RequestOptions<
     any
   >,
 > extends Omit<
-    WechatMiniprogram.RequestOption<T>,
-    "url" | "method" | "header" | "data"
-  > {
+  WechatMiniprogram.RequestOption<T>,
+  "url" | "method" | "header" | "data"
+> {
   /**
    * 请求方法
    */
@@ -188,19 +189,18 @@ Options:
     });
   });
 
-export interface RequestInitOptions
-  extends Pick<
-    WechatMiniprogram.RequestOption,
-    | "redirect"
-    | "enableCache"
-    | "enableChunked"
-    | "enableHttp2"
-    | "enableHttpDNS"
-    | "enableQuic"
-    | "httpDNSServiceId"
-    | "forceCellularNetwork"
-    | "timeout"
-  > {
+export interface RequestInitOptions extends Pick<
+  WechatMiniprogram.RequestOption,
+  | "redirect"
+  | "enableCache"
+  | "enableChunked"
+  | "enableHttp2"
+  | "enableHttpDNS"
+  | "enableQuic"
+  | "httpDNSServiceId"
+  | "forceCellularNetwork"
+  | "timeout"
+> {
   /**
    * 访问的默认域名
    */

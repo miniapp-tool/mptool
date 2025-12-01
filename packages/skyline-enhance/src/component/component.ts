@@ -39,17 +39,15 @@ export const handleProperties = (
       // array type, should push rest into `optionalTypes`
       else if (Array.isArray(type))
         // array type syntax
+        // @ts-expect-error: Force set prop config
         props[propertyName] = {
-          // @ts-expect-error: Force set prop config
           type: type[0],
           value: advancedValue.default,
-
-          // @ts-expect-error: Force set prop config
           optionalTypes: type.slice(1),
         };
       else
+        // @ts-expect-error: Force set prop config
         props[propertyName] = {
-          // @ts-expect-error: Force set prop config
           type,
           value: advancedValue.default,
         };
