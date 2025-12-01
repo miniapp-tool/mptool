@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   linter-and-unit:
     name: Linter and Unit test
@@ -49,13 +52,13 @@ jobs:
         run: pnpm test
 
       - name: Upload coverage
-        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '22' }}
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '24' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results
-        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '22' }}
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '24' }}
         uses: codecov/test-results-action@v1
         with:
           file: ./coverage/test-report.junit.xml

@@ -5,6 +5,9 @@ on:
     tags:
       - v**
 
+permissions:
+  contents: read
+
 jobs:
   publish:
     name: Publish packages
@@ -19,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Install deps
@@ -27,10 +30,6 @@ jobs:
 
       - name: Build project
         run: pnpm build
-
-      - name: Update npmrc
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
 
       - name: Publish packages
         run: pnpm publish -r --no-git-checks
