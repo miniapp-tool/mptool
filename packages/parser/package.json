@@ -41,11 +41,11 @@
     "domhandler": "^5.0.3"
   },
   "peerDependencies": {
-    "miniprogram-api-typings": "^4.1.0"
+    "miniprogram-api-typings": "^4.1.0 || ^5.0.0"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "4.1.0"
+    "miniprogram-api-typings": "5.0.0"
   },
   "publishConfig": {
     "access": "public"
