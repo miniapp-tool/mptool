@@ -51,7 +51,7 @@
     "husky": "9.1.7",
     "miniprogram-api-typings": "4.1.0",
     "nano-staged": "0.9.0",
-    "prettier": "3.8.0",
+    "prettier": "3.8.1",
     "rimraf": "6.1.2",
     "rollup": "4.55.1",
     "rollup-plugin-dts": "6.3.0",
