@@ -1,3 +1,4 @@
+// oxlint-disable max-classes-per-file
 import { decoderError, encoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import { encodingIndex } from "../indexes.js";
@@ -123,6 +124,7 @@ class GB18030Decoder implements Decoder {
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
+  // oxlint-disable-next-line complexity, max-statements
   handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and gb18030 first, gb18030
     // second, and gb18030 third are 0x00, return finished.

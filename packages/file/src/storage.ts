@@ -84,6 +84,7 @@ const prepareData = <T = unknown>(
 
     // 使用上次过期时间
     data.expired = oldData.expired || 0;
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
   } else if (expire) {
     data.expired =
       expire === "once"

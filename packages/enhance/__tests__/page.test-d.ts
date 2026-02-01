@@ -3,8 +3,10 @@ import { assertType, expectTypeOf, it } from "vitest";
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
+  // oxlint-disable-next-line typescript/no-confusing-void-expression
   expectTypeOf($Page("example", {})).toEqualTypeOf<void>();
 
+  // oxlint-disable-next-line typescript/no-explicit-any
   expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
 
   const app = getApp<{
@@ -51,11 +53,14 @@ it("$Page", () => {
         });
     },
 
-    getUserInfo(e: any) {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    getUserInfo(event: any) {
       this.selectComponent("test");
-      app.globalData.userInfo = e.detail.userInfo;
+      // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
+      app.globalData.userInfo = event.detail.userInfo;
       this.setData({
-        userInfo: e.detail.userInfo,
+        // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
+        userInfo: event.detail.userInfo,
         hasUserInfo: true,
       });
     },
@@ -79,7 +84,7 @@ it("$Page", () => {
     },
     onReady() {
       this.setData({
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing, typescript/strict-boolean-expressions, typescript/no-unsafe-assignment, typescript/no-unsafe-member-access, typescript/no-unsafe-call
         logs: (wx.getStorageSync("logs") || []).map((log: number) => new Date(log).toString()),
       });
     },
@@ -154,6 +159,7 @@ it("$Page", () => {
         expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
+        // oxlint-disable-next-line typescript/no-explicit-any
         expectTypeOf(res).toEqualTypeOf<any>();
       });
     },
@@ -164,6 +170,7 @@ it("$Page", () => {
 
   $Page("example", {
     f() {
+      // oxlint-disable-next-line typescript/no-explicit-any
       expectTypeOf(this.data).toEqualTypeOf<Record<string, any>>();
     },
   });
@@ -177,8 +184,8 @@ it("$Page", () => {
   });
 
   $Page("example", {
-    onLoad(q) {
-      q;
+    onLoad(query) {
+      console.log(query);
     },
     f() {
       void this.onLoad();
@@ -242,6 +249,7 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
+      // oxlint-disable-next-line typescript/unbound-method
       expectTypeOf(this.fn).toEqualTypeOf<() => number>();
     },
     fn() {

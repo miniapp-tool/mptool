@@ -231,7 +231,9 @@ export class CookieStore {
     }
 
     const setCookieHeader =
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["Set-Cookie"] ||
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["set-cookie"] ||
       "";
     const realHeader = Array.isArray(setCookieHeader)

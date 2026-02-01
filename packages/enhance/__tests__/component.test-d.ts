@@ -1,3 +1,4 @@
+/* eslint-disable typescript/consistent-type-definitions */
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
@@ -95,6 +96,7 @@ it("$Component", () => {
     },
     export() {
       expectTypeOf(this.is).toEqualTypeOf<string>();
+      // oxlint-disable-next-line typescript/no-confusing-void-expression
       expectTypeOf(this.onMyButtonTap()).toEqualTypeOf<void>();
 
       return {};
@@ -121,7 +123,7 @@ it("$Component", () => {
       custom: 1,
       methods: {
         f() {
-          this.custom;
+          console.log(this.custom);
         },
       },
     }),
@@ -135,6 +137,7 @@ it("$Component", () => {
     methods: {
       f() {
         expectTypeOf(this.data.n).toEqualTypeOf<number | undefined>();
+        // oxlint-disable-next-line typescript/no-explicit-any
         expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
       },
     },
@@ -166,7 +169,7 @@ it("$Component", () => {
     },
     methods: {
       myMethod() {
-        this.data._b; // 纯数据字段可以在 this.data 中获取
+        console.log(this.data._b); // 纯数据字段可以在 this.data 中获取
         this.setData({
           c: true, // 普通数据字段
           _d: true, // 纯数据字段
@@ -290,7 +293,7 @@ it("$Component", () => {
         channel.emit?.("test", {});
         channel.on?.("xxx", () => {});
 
-        // @ts-expect-error: key should not be number
+        // @ts-expect-error: emit key should be string
         assertType(channel.emit?.(1, 2));
       },
     },
@@ -300,6 +303,7 @@ it("$Component", () => {
     methods: {
       fn() {
         // @ts-expect-error: notExists
+        // oxlint-disable-next-line typescript/no-unsafe-call
         assertType(this.notExists());
       },
     },
@@ -333,6 +337,7 @@ it("$Component", () => {
           expectTypeOf(q).toEqualTypeOf<Record<string, string | undefined>>();
         },
         fn() {
+          // oxlint-disable-next-line typescript/unbound-method
           expectTypeOf(this.onShow).toEqualTypeOf<() => void | Promise<void>>();
 
           // @ts-expect-error: notExists
@@ -374,9 +379,9 @@ it("$Component", () => {
     },
   });
 
-  interface CustomProperties {
+  type CustomProperties = {
     customProp: string;
-  }
+  };
 
   $Component<
     Record<never, never>,

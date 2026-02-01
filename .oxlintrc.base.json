@@ -231,7 +231,7 @@
       }
     },
     {
-      "files": ["*.bench.{js,ts}", "*.test.{js,ts}"],
+      "files": ["*.bench.{js,ts}", "*.test.{js,ts}", "*.test-d.ts"],
       "plugins": ["vitest"],
       "rules": {
         "id-length": "off",
