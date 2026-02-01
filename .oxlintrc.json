@@ -5,6 +5,7 @@
   "plugins": ["typescript", "oxc", "jsdoc", "import", "promise", "unicorn", "node"],
   "rules": {
     "no-console": "off",
+    "new-cap": ["warn", { "capIsNewExceptions": ["App", "Component", "Emitter", "Page"] }],
     "typescript/no-unnecessary-type-parameters": "off",
     "unicorn/prefer-code-point": "off",
     "unicorn/prefer-global-this": "off",

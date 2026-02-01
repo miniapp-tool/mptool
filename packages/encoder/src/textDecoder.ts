@@ -18,14 +18,13 @@ export interface Decoder {
 export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 /**
- * @constructor
  * A TextDecoder object has an associated encoding, decoder,
  * stream, ignore BOM flag (initially unset), BOM seen flag
  * (initially unset), error mode (initially replacement), and do
  * not flush flag (initially unset).
- * @param label The label of the encoding;
- *     defaults to 'utf-8'.
- * @param options
+ *
+ * @param label The label of the encoding; defaults to 'utf-8'.
+ * @param options Decoder options.
  */
 export class TextDecoder {
   _encoding: Encoding;
@@ -76,7 +75,7 @@ export class TextDecoder {
 
   /**
    * @param input The buffer of bytes to decode.
-   * @param options
+   * @param options decode options
    * @returns The decoded string.
    */
   decode(input: ArrayBuffer | ArrayBufferView, options: { stream?: boolean } = {}): string {
@@ -159,7 +158,8 @@ export class TextDecoder {
   // A TextDecoder object also has an associated serialize stream
   // algorithm...
   /**
-   * @param stream
+   * @param stream The stream of code points to serialize.
+   * @returns The result of serializing stream.
    */
   private serializeStream(stream: number[]): string {
     // 1. Let token be the result of reading from stream.

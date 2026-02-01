@@ -78,6 +78,9 @@ export class CookieStore {
 
   /**
    * 设置 cookie
+   *
+   * @param cookieOptions Cookie 选项
+   * @returns Cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
     const { name, domain } = cookieOptions;
@@ -117,6 +120,8 @@ export class CookieStore {
 
   /**
    * 获取所有域名和 cookies 结构
+   *
+   * @returns 域名和 cookies 结构对象
    */
   list(): Record<string, Record<string, string>> {
     const dirObj: Record<string, Record<string, string>> = {};
@@ -164,6 +169,7 @@ export class CookieStore {
   /**
    * 获取 cookies key/value 对象
    *
+   * @param options Cookie 选项
    * @returns 键值 Map
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
@@ -196,6 +202,7 @@ export class CookieStore {
    * 清除 cookies
    *
    * @param domain 指定域名
+   * @param exact 是否仅清除精确域名
    */
   clear(domain = "", exact = false): void {
     if (domain) {
@@ -294,8 +301,6 @@ export class CookieStore {
       this.apply(cookiesData.map((item) => new Cookie(item)));
     } catch (err) {
       console.warn("Error applying cookie storage", err);
-
-      return;
     }
   }
 

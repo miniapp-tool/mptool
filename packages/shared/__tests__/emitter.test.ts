@@ -189,8 +189,8 @@ describe("mitt#", () => {
     });
 
     it("should NOT ignore case", () => {
-      const onFoo = vi.fn(),
-        onFOO = vi.fn();
+      const onFoo = vi.fn();
+      const onFOO = vi.fn();
 
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
@@ -205,9 +205,9 @@ describe("mitt#", () => {
     });
 
     it("should invoke * handlers", () => {
-      const star = vi.fn(),
-        ea = { a: "a" },
-        eb = { b: "b" };
+      const star = vi.fn();
+      const ea = { a: "a" };
+      const eb = { b: "b" };
 
       events.set("*", [star]);
 
