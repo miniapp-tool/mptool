@@ -14,10 +14,7 @@ export interface Encoder {
 }
 
 // Registry of of encoder/decoder factories, by encoding name.
-export const encoders: Record<
-  string,
-  (options: { fatal: boolean }) => Encoder
-> = {};
+export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> = {};
 
 /**
  * @constructor
@@ -49,10 +46,7 @@ export class TextEncoder {
     this._encoding = getEncoding("utf-8")!;
 
     if (label !== DEFAULT_ENCODING && "console" in global)
-      console.warn(
-        "TextEncoder constructor called with encoding label, " +
-          "which is ignored.",
-      );
+      console.warn("TextEncoder constructor called with encoding label, " + "which is ignored.");
   }
 
   get encoding(): string {

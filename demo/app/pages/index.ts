@@ -5,9 +5,7 @@ const date = new Date().getTime();
 $Page("index", {
   data: {},
   onRegister() {
-    console.log(
-      `from [pages/index] Page register：${new Date().getTime() - date}ms`,
-    );
+    console.log(`from [pages/index] Page register：${new Date().getTime() - date}ms`);
   },
   onAppLaunch(opts) {
     console.log("from [pages/index] APP Launch:", opts);

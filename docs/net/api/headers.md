@@ -40,12 +40,7 @@ export class Headers {
    * calling the given callback for each header.
    */
   forEach<ThisArg = this>(
-    callback: (
-      this: ThisArg,
-      value: string,
-      name: string,
-      parent: this,
-    ) => void,
+    callback: (this: ThisArg, value: string, name: string, parent: this) => void,
     thisArg?: ThisArg,
   ): void;
   keys(): IterableIterator<string>;

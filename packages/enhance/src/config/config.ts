@@ -7,10 +7,7 @@ import type {
   RoutePathConfig,
 } from "./typings.js";
 
-export interface Config extends Omit<
-  AppConfigOptions,
-  "defaultPage" | "pages"
-> {
+export interface Config extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
   /**
    * 获得页面路径
    *
@@ -28,9 +25,7 @@ export const $Config = (config: AppConfigOptions): void => {
     pages: pages,
     getPath,
     ...options
-  } = config as Required<
-    AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
-  >;
+  } = config as Required<AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig>;
 
   if (isFunction(getPath)) {
     appConfig = {
@@ -58,16 +53,13 @@ export const $Config = (config: AppConfigOptions): void => {
     });
   } else if (typeof pages === "object") {
     nameToRouteMap = pages;
-    routeToNameMap = Object.fromEntries(
-      Object.keys(pages).map((route) => [pages[route], route]),
-    );
+    routeToNameMap = Object.fromEntries(Object.keys(pages).map((route) => [pages[route], route]));
   }
 
   appConfig = {
     ...options,
 
-    getPath: (name: string): string =>
-      nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
+    getPath: (name: string): string => nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
   };
 };
 

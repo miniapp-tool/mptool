@@ -47,9 +47,7 @@ export const $Page: PageConstructor = <
 
       callLog("onAppLaunch");
 
-      void options.onAppLaunch(
-        onLaunchOptions as WechatMiniprogram.App.LaunchShowOption,
-      );
+      void options.onAppLaunch(onLaunchOptions as WechatMiniprogram.App.LaunchShowOption);
     } else {
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
         callLog("onAppLaunch");
@@ -63,29 +61,23 @@ export const $Page: PageConstructor = <
   }
 
   if (options.onNavigate) {
-    routeEmitter.on(
-      `${ON_PAGE_NAVIGATE}:${route}`,
-      (query: PageQuery): Promise<void> | void => {
-        callLog("onNavigate", query);
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:${route}`, (query: PageQuery): Promise<void> | void => {
+      callLog("onNavigate", query);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return options.onNavigate!(query);
-      },
-    );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return options.onNavigate!(query);
+    });
 
     registerLog("onNavigate");
   }
 
   if (options.onPreload) {
-    routeEmitter.on(
-      `${ON_PAGE_PRELOAD}:${route}`,
-      (query: PageQuery): void | Promise<void> => {
-        callLog("onPreload", query);
+    routeEmitter.on(`${ON_PAGE_PRELOAD}:${route}`, (query: PageQuery): void | Promise<void> => {
+      callLog("onPreload", query);
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return options.onPreload!(query);
-      },
-    );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return options.onPreload!(query);
+    });
 
     registerLog("onPreload");
   }
@@ -110,13 +102,9 @@ export const $Page: PageConstructor = <
     }
   });
 
-  options.onReady = wrapFunction(options.onReady, () =>
-    appEmitter.emit(ON_PAGE_READY),
-  );
+  options.onReady = wrapFunction(options.onReady, () => appEmitter.emit(ON_PAGE_READY));
 
-  options.onUnload = wrapFunction(options.onUnload, () =>
-    appEmitter.emit(ON_PAGE_UNLOAD),
-  );
+  options.onUnload = wrapFunction(options.onUnload, () => appEmitter.emit(ON_PAGE_UNLOAD));
 
   mount(options);
 

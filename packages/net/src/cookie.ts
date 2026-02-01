@@ -34,8 +34,7 @@ export class Cookie {
    */
   isExpired(): boolean {
     return (
-      this.expires === "outdate" ||
-      (this.expires instanceof Date && new Date() > this.expires)
+      this.expires === "outdate" || (this.expires instanceof Date && new Date() > this.expires)
     );
   }
 

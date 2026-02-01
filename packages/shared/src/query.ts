@@ -6,10 +6,7 @@
  *
  * @returns 参数对象
  */
-export const parse = (
-  queryString = "",
-  splitter = "&",
-): Record<string, string> => {
+export const parse = (queryString = "", splitter = "&"): Record<string, string> => {
   /** 参数对象 */
   const queries: Record<string, string> = {};
   const splits = queryString ? queryString.split(splitter) : undefined;
@@ -55,16 +52,10 @@ export const stringify = (
  *
  * @returns 处理过的 url
  */
-export const join = (
-  path: string,
-  queries: Record<string, string>,
-  unencoded = false,
-): string => {
+export const join = (path: string, queries: Record<string, string>, unencoded = false): string => {
   const queryString = stringify(queries, "&", unencoded);
 
   return queryString
-    ? `${path}${
-        /[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"
-      }${queryString}`
+    ? `${path}${/[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"}${queryString}`
     : path;
 };

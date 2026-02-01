@@ -51,10 +51,7 @@ export const take = <T = unknown>(key: string): T | undefined => {
  *
  * @returns 返回值
  */
-const getData = <T = unknown>(
-  key: string,
-  value: StorageData<T> | null,
-): T | undefined =>
+const getData = <T = unknown>(key: string, value: StorageData<T> | null): T | undefined =>
   value
     ? value.expired
       ? value.expired === sessionId || new Date().getTime() < value.expired
@@ -80,9 +77,7 @@ const prepareData = <T = unknown>(
 
   // 保持上一次的缓存时间
   if (expire === "keep") {
-    const oldData = wx.getStorageSync<StorageData<T> | undefined>(
-      `${CACHE_PREFIX}${key}`,
-    );
+    const oldData = wx.getStorageSync<StorageData<T> | undefined>(`${CACHE_PREFIX}${key}`);
 
     // 上次没有缓存，本次也不更新
     if (!oldData) return undefined;
@@ -191,9 +186,7 @@ export const remove = (key: string): void => {
  * @param key key
  * @param option 回调函数
  */
-export const removeAsync = (
-  key: string,
-): Promise<WechatMiniprogram.GeneralCallbackResult> =>
+export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallbackResult> =>
   wx.removeStorage({
     key: `${CACHE_PREFIX}${key}`,
   });
@@ -208,10 +201,7 @@ export const check = (): void => {
     if (key.startsWith(CACHE_PREFIX)) {
       const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
-      if (
-        !value ||
-        (value.expired !== sessionId && new Date().getTime() >= value.expired)
-      )
+      if (!value || (value.expired !== sessionId && new Date().getTime() >= value.expired))
         wx.removeStorageSync(key);
     }
   });
@@ -228,20 +218,14 @@ export const checkAsync = (): Promise<void[]> =>
       keys
         .filter((key) => key.startsWith(CACHE_PREFIX))
         .map((key) =>
-          wx
-            .getStorage<StorageData<unknown> | undefined>({ key })
-            .then(({ data }) => {
-              if (
-                !data ||
-                (data.expired !== sessionId &&
-                  new Date().getTime() >= data.expired)
-              )
-                return wx.removeStorage({ key }).then(() => {
-                  // return void
-                });
+          wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
+            if (!data || (data.expired !== sessionId && new Date().getTime() >= data.expired))
+              return wx.removeStorage({ key }).then(() => {
+                // return void
+              });
 
-              return;
-            }),
+            return;
+          }),
         ),
     ),
   );

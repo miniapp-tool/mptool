@@ -1,7 +1,4 @@
-export {
-  encode as encodeBase64,
-  decode as decodeBase64,
-} from "base64-arraybuffer";
+export { encode as encodeBase64, decode as decodeBase64 } from "base64-arraybuffer";
 export * from "./env.js";
 export * from "./emitter.js";
 export * from "./error.js";

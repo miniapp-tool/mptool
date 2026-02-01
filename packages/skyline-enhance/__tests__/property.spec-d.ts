@@ -53,9 +53,7 @@ it("$Component property", () => {
         expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
         expectTypeOf(this.data.a2).toEqualTypeOf<any[]>();
         expectTypeOf(this.data.b).toEqualTypeOf<boolean | undefined>();
-        expectTypeOf(this.data.o).toEqualTypeOf<
-          Record<string, any> | undefined
-        >();
+        expectTypeOf(this.data.o).toEqualTypeOf<Record<string, any> | undefined>();
       },
     },
   });
@@ -94,9 +92,7 @@ it("$Component property", () => {
         expectTypeOf(this.data.a).toEqualTypeOf<any[] | undefined>();
         expectTypeOf(this.data.a2).toEqualTypeOf<any[]>();
         expectTypeOf(this.data.b).toEqualTypeOf<boolean | undefined>();
-        expectTypeOf(this.data.o).toEqualTypeOf<
-          Record<string, any> | undefined
-        >();
+        expectTypeOf(this.data.o).toEqualTypeOf<Record<string, any> | undefined>();
         expectTypeOf(this.data.o2).toEqualTypeOf<Record<string, any>>();
         expectTypeOf(this.data.o2.city).toEqualTypeOf<any>();
       },

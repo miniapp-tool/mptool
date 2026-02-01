@@ -4,8 +4,7 @@ import { URLSearchParams } from "../src/urlSearchParams.js";
 
 const getSimpleObj = (): URLSearchParams => new URLSearchParams("a=1&b=2&c=3");
 
-const getKeyRepeatObj = (): URLSearchParams =>
-  new URLSearchParams("id=xx&id=yy&id=zz&test=true");
+const getKeyRepeatObj = (): URLSearchParams => new URLSearchParams("id=xx&id=yy&id=zz&test=true");
 
 describe("Constructor", () => {
   it("Construct with a search string", () => {

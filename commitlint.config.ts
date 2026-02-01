@@ -3,9 +3,7 @@ import { readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const packages = readdirSync(
-  join(dirname(fileURLToPath(import.meta.url)), "./packages/"),
-);
+const packages = readdirSync(join(dirname(fileURLToPath(import.meta.url)), "./packages/"));
 
 const scopeComplete = execSync("git status --porcelain || true")
   .toString()

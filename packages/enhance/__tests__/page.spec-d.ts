@@ -74,9 +74,7 @@ it("$Page", () => {
         globalData: { userInfo: WechatMiniprogram.UserInfo };
       }>();
 
-      expectTypeOf(
-        app.globalData.userInfo,
-      ).toEqualTypeOf<WechatMiniprogram.UserInfo>();
+      expectTypeOf(app.globalData.userInfo).toEqualTypeOf<WechatMiniprogram.UserInfo>();
       expectTypeOf(app.globalData.userInfo.nickName).toEqualTypeOf<string>();
     },
     onReady() {
@@ -91,9 +89,7 @@ it("$Page", () => {
     onUnload() {},
     onPullDownRefresh() {},
     onShareAppMessage(res) {
-      expectTypeOf(
-        res,
-      ).toEqualTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
+      expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
       expectTypeOf(res.from).toEqualTypeOf<"button" | "menu">();
 
       if (res.from === "button") {
@@ -108,9 +104,7 @@ it("$Page", () => {
     onPageScroll() {},
     onResize() {},
     onTabItemTap(item) {
-      expectTypeOf(
-        item,
-      ).toEqualTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
+      expectTypeOf(item).toEqualTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
       expectTypeOf(item.index).toEqualTypeOf<string>();
       expectTypeOf(item.pagePath).toEqualTypeOf<string>();
       expectTypeOf(item.text).toEqualTypeOf<string>();
@@ -159,14 +153,10 @@ it("$Page", () => {
       const query = wx.createSelectorQuery();
 
       query.select("#a").boundingClientRect((res) => {
-        expectTypeOf(
-          res,
-        ).toEqualTypeOf<WechatMiniprogram.BoundingClientRectCallbackResult>();
+        expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.BoundingClientRectCallbackResult>();
       });
       query.selectViewport().scrollOffset((res) => {
-        expectTypeOf(
-          res,
-        ).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
+        expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
         expectTypeOf(res).toEqualTypeOf<any>();
@@ -212,11 +202,9 @@ it("$Page", () => {
       logs: [],
     },
     getLogs() {
-      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map(
-        (log: number) => {
-          return new Date(log).toString();
-        },
-      );
+      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) => {
+        return new Date(log).toString();
+      });
     },
     onLoad() {
       const logs = this.getLogs();
@@ -234,9 +222,7 @@ it("$Page", () => {
     test() {
       const channel = this.getOpenerEventChannel();
 
-      assertType<
-        WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
-      >(channel);
+      assertType<WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel>(channel);
       channel.emit?.("test", {});
       channel.on?.("xxx", () => {});
 

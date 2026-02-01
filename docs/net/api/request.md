@@ -13,14 +13,8 @@ export type RequestBody =
   | null;
 
 export interface RequestOptions<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    any
-  >,
-> extends Omit<
-  WechatMiniprogram.RequestOption<T>,
-  "url" | "method" | "header" | "data"
-> {
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
+> extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
   /**
    * 请求方法
    */
@@ -61,10 +55,7 @@ export interface RequestOptions<
 }
 
 export interface RequestResponse<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    any
-  >,
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
 > {
   /** Status Code */
   status: number;
@@ -80,30 +71,17 @@ export interface MpError extends Error {
 }
 
 export type RequestType = <
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    any
-  >,
+  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
 >(
   url: string,
   options?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 
 export const request: <
-  T extends string | ArrayBuffer | Record<never, never> | unknown[] = Record<
-    string,
-    any
-  >,
+  T extends string | ArrayBuffer | Record<never, never> | unknown[] = Record<string, any>,
 >(
   url: string,
-  {
-    method,
-    headers,
-    body,
-    cookieScope,
-    cookieStore,
-    ...options
-  }?: RequestOptions<T>,
+  { method, headers, body, cookieScope, cookieStore, ...options }?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 ```
 
@@ -151,10 +129,7 @@ export interface RequestInitOptions extends Pick<
    * @throws {MpError} 自定义的错误数据
    */
   responseHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      any
-    >,
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
   >(
     /** 响应数据 */
     response: RequestResponse<T>,
@@ -169,10 +144,7 @@ export interface RequestInitOptions extends Pick<
    * @throws {MpError} 自定义的错误数据
    */
   errorHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      any
-    >,
+    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
   >(
     /** 错误信息 */
     error: MpError,

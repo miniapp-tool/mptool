@@ -17,8 +17,7 @@ it("$Component prop infer", () => {
   const objectConstructor = Object;
   const arrayConstructor = Array;
 
-  const convertType = <T>(_type: T): InferFromType<T> =>
-    null as unknown as InferFromType<T>;
+  const convertType = <T>(_type: T): InferFromType<T> => null as unknown as InferFromType<T>;
 
   expectTypeOf(convertType(numberConstructor)).toBeNumber();
   expectTypeOf(convertType(stringConstructor)).toBeString();
@@ -50,8 +49,7 @@ it("$Component prop infer", () => {
     type: null,
   };
 
-  const convertOptions = <T>(_type: T): InferPropType<T> =>
-    null as unknown as InferPropType<T>;
+  const convertOptions = <T>(_type: T): InferPropType<T> => null as unknown as InferPropType<T>;
 
   expectTypeOf(convertOptions(numberOptions)).toBeNumber();
   expectTypeOf(convertOptions(stringOptions)).toBeString();
@@ -93,24 +91,15 @@ it("$Component prop infer", () => {
   const convertOptionsWithDefault = <T>(_type: T): InferPropType<T> =>
     null as unknown as InferPropType<T>;
 
-  expectTypeOf(
-    convertOptionsWithDefault(numberOptionsWithDefault),
-  ).toBeNumber();
-  expectTypeOf(
-    convertOptionsWithDefault(stringOptionsWithDefault),
-  ).toBeString();
-  expectTypeOf(
-    convertOptionsWithDefault(booleanOptionsWithDefault),
-  ).toBeBoolean();
-  expectTypeOf(
-    convertOptionsWithDefault(objectOptionsWithDefault),
-  ).toBeObject();
+  expectTypeOf(convertOptionsWithDefault(numberOptionsWithDefault)).toBeNumber();
+  expectTypeOf(convertOptionsWithDefault(stringOptionsWithDefault)).toBeString();
+  expectTypeOf(convertOptionsWithDefault(booleanOptionsWithDefault)).toBeBoolean();
+  expectTypeOf(convertOptionsWithDefault(objectOptionsWithDefault)).toBeObject();
   expectTypeOf(convertOptionsWithDefault(arrayOptionsWithDefault)).toBeArray();
   expectTypeOf(convertOptionsWithDefault(nullOptionsWithDefault)).toBeAny();
 
-  const convertProps = <Props extends PropsOptions>(
-    _props: Props,
-  ): InferPropTypes<Props> => null as unknown as InferPropTypes<Props>;
+  const convertProps = <Props extends PropsOptions>(_props: Props): InferPropTypes<Props> =>
+    null as unknown as InferPropTypes<Props>;
 
   interface Config {
     a: number;

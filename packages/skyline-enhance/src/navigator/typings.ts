@@ -13,9 +13,7 @@ export interface NavigatorMethods {
    * this.$go('play?vid=xxx&cid=xxx');
    * ```
    */
-  $go(
-    pageName: string,
-  ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+  $go(pageName: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 
   /**
    * 跳转到指定页面, **替换页面，不产生历史**

@@ -20,9 +20,7 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   // 获取 cookie 作用域范围列表
   domain = normalizeDomain(domain).replace(/^\.+/gi, "");
 
-  const scopes = domain
-    .split(".")
-    .map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+  const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
 
   return [domain].concat(scopes);
 };
@@ -34,8 +32,7 @@ export interface UrlInfo {
 
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
-  const path =
-    removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/, "") || "/";
+  const path = removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/, "") || "/";
 
   return {
     domain,
@@ -48,11 +45,7 @@ export type CookieOptions = Url | { domain?: string; path?: string };
 
 export const getUrlInfo = (options: CookieOptions): UrlInfo => {
   const { domain = "", path = "/" } =
-    typeof options === "object"
-      ? options
-      : typeof options === "string"
-        ? parseUrl(options)
-        : {};
+    typeof options === "object" ? options : typeof options === "string" ? parseUrl(options) : {};
 
   return { domain: normalizeDomain(domain), path };
 };

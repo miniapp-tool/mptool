@@ -14,10 +14,7 @@ import { inRange, isASCIIByte } from "../utils.js";
  * @return The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in |index|.
  */
-const indexCodePointFor = (
-  pointer: number,
-  index: number[] | undefined,
-): number | null => {
+const indexCodePointFor = (pointer: number, index: number[] | undefined): number | null => {
   if (!index) return null;
 
   return index[pointer] || null;
@@ -142,9 +139,7 @@ class GB18030Decoder implements Decoder {
     // gb18030 second, and gb18030 third to 0x00, and return error.
     if (
       bite === END_OF_STREAM &&
-      (this.gb18030First !== 0x00 ||
-        this.gb18030Second !== 0x00 ||
-        this.gb18030Third !== 0x00)
+      (this.gb18030First !== 0x00 || this.gb18030Second !== 0x00 || this.gb18030Third !== 0x00)
     ) {
       this.gb18030First = 0x00;
       this.gb18030Second = 0x00;
@@ -241,10 +236,7 @@ class GB18030Decoder implements Decoder {
 
       // 5. Let code point be null if pointer is null and the index
       // code point for pointer in index gb18030 otherwise.
-      codePoint =
-        pointer === null
-          ? null
-          : indexCodePointFor(pointer, encodingIndex.gb18030);
+      codePoint = pointer === null ? null : indexCodePointFor(pointer, encodingIndex.gb18030);
 
       // 6. If code point is null and byte is an ASCII byte, prepend
       // byte to stream.

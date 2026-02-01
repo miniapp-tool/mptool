@@ -1,11 +1,7 @@
 import { query } from "@mptool/shared";
 
 import { getConfig } from "../config/index.js";
-import {
-  ON_PAGE_NAVIGATE,
-  ON_PAGE_READY,
-  ON_PAGE_UNLOAD,
-} from "../constant.js";
+import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
 import type { PageQuery } from "../page/index.js";
 
@@ -18,11 +14,7 @@ export interface NavigatorTriggerOptions {
 
 let canNavigate = true;
 
-export type NavigatorType =
-  | "navigateTo"
-  | "redirectTo"
-  | "switchTab"
-  | "reLaunch";
+export type NavigatorType = "navigateTo" | "redirectTo" | "switchTab" | "reLaunch";
 
 export interface PathDetails {
   path: string;
@@ -44,9 +36,7 @@ export const getPathDetail = (pageNameWithArg: string): PathDetails => {
 
 export function getTrigger(
   type: "navigateTo",
-): (
-  pageName: string,
-) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+): (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 export function getTrigger(
   type: "redirectTo" | "switchTab" | "reLaunch",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;

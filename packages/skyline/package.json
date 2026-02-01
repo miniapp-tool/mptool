@@ -3,17 +3,12 @@
   "version": "0.12.0",
   "description": "Full back for mptool",
   "keywords": [
-    "miniprogram",
-    "miniapp"
+    "miniapp",
+    "miniprogram"
   ],
   "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/all"
   },
   "license": "MIT",
   "author": {
@@ -21,19 +16,24 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mister-hope.com"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/all"
+  },
   "files": [
     "dist"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.mts --configPlugin esbuild",
     "clean": "rimraf ./dist",
     "dev": "rollup -c -w"
-  },
-  "peerDependencies": {
-    "miniprogram-api-typings": "^5.0.0"
   },
   "devDependencies": {
     "@mptool/file": "workspace:*",
@@ -42,7 +42,7 @@
     "@mptool/skyline-enhance": "workspace:*",
     "miniprogram-api-typings": "5.0.0"
   },
-  "publishConfig": {
-    "access": "public"
+  "peerDependencies": {
+    "miniprogram-api-typings": "^5.0.0"
   }
 }

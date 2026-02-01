@@ -27,9 +27,7 @@ export interface TextNode {
 
 export type RichTextNode = ElementNode | TextNode;
 
-export type NodeHandler = (
-  node: ElementNode,
-) => ElementNode | null | Promise<ElementNode | null>;
+export type NodeHandler = (node: ElementNode) => ElementNode | null | Promise<ElementNode | null>;
 
 export interface ParserOptions {
   /**

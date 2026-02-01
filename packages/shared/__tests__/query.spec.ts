@@ -61,9 +61,7 @@ describe("queryJoin", () => {
       mrhope: "handsome",
     };
 
-    expect(join(path, query)).toEqual(
-      "/page/main/main?mrhope=handsome&a=1&mrhope=handsome",
-    );
+    expect(join(path, query)).toEqual("/page/main/main?mrhope=handsome&a=1&mrhope=handsome");
   });
 
   it("join without query", () => {

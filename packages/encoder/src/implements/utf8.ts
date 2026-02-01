@@ -202,8 +202,6 @@ class UTF8Encoder implements Encoder {
   }
 }
 
-encoders["UTF-8"] = (options: { fatal: boolean }): Encoder =>
-  new UTF8Encoder(options);
+encoders["UTF-8"] = (options: { fatal: boolean }): Encoder => new UTF8Encoder(options);
 
-decoders["UTF-8"] = (options: { fatal: boolean }): Decoder =>
-  new UTF8Decoder(options);
+decoders["UTF-8"] = (options: { fatal: boolean }): Decoder => new UTF8Decoder(options);

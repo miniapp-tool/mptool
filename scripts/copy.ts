@@ -23,10 +23,8 @@ export const copyDir = (srcDir: string, targetDir: string): void => {
   const files = readdirSync(srcDir, { withFileTypes: true });
 
   files.forEach((file) => {
-    if (file.isFile())
-      copyFile(`${srcDir}/${file.name}`, `${targetDir}/${file.name}`);
-    else if (file.isDirectory())
-      copyDir(`${srcDir}/${file.name}`, `${targetDir}/${file.name}`);
+    if (file.isFile()) copyFile(`${srcDir}/${file.name}`, `${targetDir}/${file.name}`);
+    else if (file.isDirectory()) copyDir(`${srcDir}/${file.name}`, `${targetDir}/${file.name}`);
   });
 };
 

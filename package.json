@@ -2,13 +2,13 @@
   "name": "mptool-root",
   "private": true,
   "description": "Miniapp is a lightweight framework for QQ/Wechat miniapp.",
-  "repository": "https://github.com/miniapp-tool/mptool",
   "license": "MIT",
   "author": {
     "name": "Mr.Hope",
     "email": "mister-hope@outlook.com",
     "url": "https://mister-hope.com"
   },
+  "repository": "https://github.com/miniapp-tool/mptool",
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_ENV=production pnpm --stream -r run build",
@@ -18,20 +18,15 @@
     "dev": "cross-env NODE_ENV=production pnpm --stream -r run dev",
     "docs:build": "pnpm --dir=docs run docs:build",
     "docs:dev": "pnpm --dir=docs run docs:dev",
-    "postinstall": "husky",
-    "lint": "pnpm lint:eslint && pnpm lint:prettier",
-    "lint:eslint": "eslint . --fix",
-    "lint:prettier": "prettier --check --write .",
+    "lint": "eslint . --fix && oxfmt",
+    "lint:check": "eslint . && oxfmt --check",
     "packages:update": "pnpm dlx npm-check-updates -u --deep",
+    "postinstall": "husky",
     "release": "pnpm clean && pnpm build && pnpm release:version && pnpm release:publish && pnpm release:sync",
     "release:publish": "lerna publish from-package --yes",
     "release:sync": " tsx scripts/sync.ts",
     "release:version": "lerna version",
     "test": "vitest run --coverage"
-  },
-  "nano-staged": {
-    "**/*": "prettier --write --ignore-unknown",
-    "*.{js,ts}": "eslint --fix"
   },
   "devDependencies": {
     "@codecov/rollup-plugin": "1.9.1",
@@ -51,7 +46,7 @@
     "husky": "9.1.7",
     "miniprogram-api-typings": "5.0.0",
     "nano-staged": "0.9.0",
-    "prettier": "3.8.1",
+    "oxfmt": "0.27.0",
     "rimraf": "6.1.2",
     "rollup": "4.57.1",
     "rollup-plugin-dts": "6.3.0",
@@ -60,6 +55,10 @@
     "tsx": "4.21.0",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
+  },
+  "nano-staged": {
+    "**/*": "oxfmt --no-error-on-unmatched-pattern",
+    "*.{js,ts}": "eslint --fix"
   },
   "packageManager": "pnpm@10.28.2"
 }

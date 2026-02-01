@@ -37,9 +37,7 @@ const handleSVG = (node: Element): RichTextNode => {
 };
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode =>
-    Boolean(item),
-  );
+  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => Boolean(item));
 
   const first = result[0];
 
@@ -61,8 +59,7 @@ const handleNode = async (
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
-  if (node.type === "text")
-    return { type: "text", text: node.data.replace(/\r/g, "") };
+  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/g, "") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
@@ -72,23 +69,17 @@ const handleNode = async (
 
       const attrs = Object.fromEntries(
         node.attributes
-          .filter(
-            ({ name }) =>
-              ["class", "style"].includes(name) || config[1]?.includes(name),
-          )
+          .filter(({ name }) => ["class", "style"].includes(name) || config[1]?.includes(name))
           .map<[string, string]>(({ name, value }) => [name, value]),
       );
 
       const children = handleNodes(
         await Promise.all(
-          node.children.map((node) =>
-            handleNode(node, { appendClass, transform }),
-          ),
+          node.children.map((node) => handleNode(node, { appendClass, transform })),
         ),
       );
 
-      if (appendClass)
-        attrs.class = attrs.class ? `${node.name} ${attrs.class}` : node.name;
+      if (appendClass) attrs.class = attrs.class ? `${node.name} ${attrs.class}` : node.name;
 
       const convertedNode: ElementNode = {
         type: "node",

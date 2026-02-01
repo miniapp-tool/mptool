@@ -8,10 +8,7 @@ import { showModal } from "./ui/index.js";
  * @param config 联系人信息
  */
 export const addContact = (
-  config: Omit<
-    WechatMiniprogram.AddPhoneContactOption,
-    "success" | "fail" | "complete"
-  >,
+  config: Omit<WechatMiniprogram.AddPhoneContactOption, "success" | "fail" | "complete">,
 ): Promise<void> =>
   new Promise((resolve, reject) => {
     if (env === "donut") {

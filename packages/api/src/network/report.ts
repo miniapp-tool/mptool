@@ -13,8 +13,7 @@ export const reportNetworkStatus = (): void => {
             success: () => {
               wx.getConnectedWifi({
                 success: ({ wifi }) => {
-                  if (wifi.signalStrength < 0.5)
-                    void showToast("Wifi 信号不佳");
+                  if (wifi.signalStrength < 0.5) void showToast("Wifi 信号不佳");
                 },
                 fail: () => {
                   void showToast("无法连接网络");

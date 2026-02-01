@@ -57,9 +57,7 @@ describe("constructor()", () => {
       "Accept-Encoding": "gzip, deflate, br",
     });
 
-    expect(headers.get("accept-encoding")).toEqual(
-      "gzip, deflate, br, gzip, deflate, br",
-    );
+    expect(headers.get("accept-encoding")).toEqual("gzip, deflate, br, gzip, deflate, br");
   });
 });
 
@@ -446,22 +444,14 @@ describe(".getSetCookie()", () => {
       "Set-Cookie": "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
     });
 
-    expect(headers.getSetCookie()).toEqual([
-      "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
-    ]);
+    expect(headers.getSetCookie()).toEqual(["name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT"]);
   });
 
   it("returns a list of all existing Set-Cookie headers", () => {
     const headers = new Headers();
 
-    headers.append(
-      "Set-Cookie",
-      "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
-    );
-    headers.append(
-      "Set-Cookie",
-      "name=session; Expires=Wed, 21 Oct 2015 07:28:00 GMT",
-    );
+    headers.append("Set-Cookie", "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT");
+    headers.append("Set-Cookie", "name=session; Expires=Wed, 21 Oct 2015 07:28:00 GMT");
 
     expect(headers.getSetCookie()).toEqual([
       "name=cookie; Expires=Wed, 21 Oct 2015 07:28:00 GMT",

@@ -15,11 +15,7 @@ import type {
   TrivialPageInstance,
 } from "./page/index.js";
 
-export type NavigatorType =
-  | "navigateTo"
-  | "reLaunch"
-  | "switchTab"
-  | "redirectTo";
+export type NavigatorType = "navigateTo" | "reLaunch" | "switchTab" | "redirectTo";
 
 export type NavigatorOptionsType =
   | WechatMiniprogram.NavigateToOption
@@ -77,9 +73,7 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
 
-  return getCurrentPages().length <= delta && home
-    ? reLaunch(home)
-    : wx.navigateBack({ delta });
+  return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
 };
 
 const bindBack = function touchHandler(
@@ -113,8 +107,7 @@ const bindBack = function touchHandler(
 const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
->(): PageInstance<Data, Custom> =>
-  getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
+>(): PageInstance<Data, Custom> => getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
 
 export function bind(
   this: TrivialComponentInstance,
@@ -141,9 +134,7 @@ export function bind(
       break;
     }
     default: {
-      const method = this[event] as
-        | ((...args: unknown[]) => unknown)
-        | undefined;
+      const method = this[event] as ((...args: unknown[]) => unknown) | undefined;
 
       if (method) method.apply(this, args);
     }
@@ -158,9 +149,7 @@ export function bind(
 export function mount<
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
->(
-  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>,
-): void;
+>(ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>): void;
 
 /**
  * 挂载组件方法
@@ -175,33 +164,19 @@ export function mount<
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
-  ctx: ComponentOptions<
-    Data,
-    Property,
-    Method,
-    Behavior,
-    InstanceProps,
-    IsPage
-  > &
+  ctx: ComponentOptions<Data, Property, Method, Behavior, InstanceProps, IsPage> &
     Partial<
       ExtendedPageMethods<
         Data & InferPropTypes<Property>,
         InstanceProps &
           Method &
-          (IsPage extends true
-            ? WechatMiniprogram.Page.ILifetime
-            : Record<never, never>)
+          (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>)
       >
     >,
 ): void;
 
 export function mount(
-  ctx: Partial<
-    ExtendedPageMethods<
-      WechatMiniprogram.IAnyObject,
-      WechatMiniprogram.IAnyObject
-    >
-  > &
+  ctx: Partial<ExtendedPageMethods<WechatMiniprogram.IAnyObject, WechatMiniprogram.IAnyObject>> &
     WechatMiniprogram.IAnyObject,
 ): void {
   const config = getConfig();

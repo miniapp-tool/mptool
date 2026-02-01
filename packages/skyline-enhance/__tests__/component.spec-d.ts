@@ -201,13 +201,9 @@ it("$Component", () => {
           ],
           5000,
           () => {
-            this.clearAnimation(
-              "#container",
-              { opacity: true, rotate: true },
-              function () {
-                console.log("清除了#container上的opacity和rotate属性");
-              },
-            );
+            this.clearAnimation("#container", { opacity: true, rotate: true }, function () {
+              console.log("清除了#container上的opacity和rotate属性");
+            });
           },
         );
 
@@ -292,9 +288,7 @@ it("$Component", () => {
       test() {
         const channel = this.getOpenerEventChannel();
 
-        assertType<
-          WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
-        >(channel);
+        assertType<WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel>(channel);
         channel.emit?.("test", {});
         channel.on?.("xxx", () => {});
 

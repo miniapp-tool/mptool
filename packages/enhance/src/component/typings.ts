@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { InstanceEmitterMethods } from "../emitter/index.js";
-import type {
-  ExtendedPageMethods,
-  TrivialPageInstance,
-} from "../page/index.js";
+import type { ExtendedPageMethods, TrivialPageInstance } from "../page/index.js";
 
 export type Props = Record<string, unknown>;
 
@@ -11,9 +8,7 @@ export type PropsOptions<Property = Props> = {
   [K in keyof Property]: PropItem<Property[K]> | null;
 };
 
-export type PropItem<Type, Default = Type> =
-  | PropOption<Type, Default>
-  | PropConstructor<Type>;
+export type PropItem<Type, Default = Type> = PropOption<Type, Default> | PropConstructor<Type>;
 
 export interface PropOption<Type = any, Default = Type> {
   /** 属性类型 */
@@ -28,9 +23,7 @@ export interface PropOption<Type = any, Default = Type> {
   default?: Default | null | undefined | object;
 }
 
-type PropMethod<Type, TypeConstructor = any> = Type extends (
-  ...args: any
-) => any
+type PropMethod<Type, TypeConstructor = any> = Type extends (...args: any) => any
   ? // if is function with args
     { new (): TypeConstructor; (): Type; readonly prototype: TypeConstructor } // Create Function like constructor
   : never;
@@ -207,9 +200,7 @@ export type ComponentInstance<
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
   Method &
-  (IsPage extends true
-    ? WechatMiniprogram.Page.ILifetime
-    : Record<never, never>) &
+  (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>) &
   InstanceProps &
   ExtendedComponentProperty &
   ExtendedPageMethods<
@@ -217,9 +208,7 @@ export type ComponentInstance<
     InstanceProps &
       Method &
       WechatMiniprogram.Component.MixinMethods<Behavior> &
-      (IsPage extends true
-        ? WechatMiniprogram.Page.ILifetime
-        : Record<never, never>)
+      (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>)
   > & {
     /** 组件数据，**包括内部数据和属性值** */
     data: Data & InferPropTypes<Props>;
@@ -247,9 +236,7 @@ export type ComponentOptions<
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
   Partial<ComponentLifetimes> &
-  ThisType<
-    ComponentInstance<Data, Props, Method, Behavior, InstanceProps, IsPage>
-  >;
+  ThisType<ComponentInstance<Data, Props, Method, Behavior, InstanceProps, IsPage>>;
 
 export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -259,14 +246,7 @@ export type ComponentConstructor = <
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
-  options: ComponentOptions<
-    Data,
-    Props,
-    Method,
-    Behavior,
-    InstanceProps,
-    IsPage
-  >,
+  options: ComponentOptions<Data, Props, Method, Behavior, InstanceProps, IsPage>,
 ) => string;
 
 export type TrivialComponentInstance = ComponentInstance<

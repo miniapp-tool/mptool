@@ -41,14 +41,10 @@ export const savePhoto = (imgPath: string): Promise<void> =>
 
                 // 用户拒绝权限，提示用户开启权限
                 fail: () => {
-                  showModal(
-                    "权限被拒",
-                    "如果想要保存图片，请在“权限设置”允许保存图片权限",
-                    () => {
-                      reject(new MpError({ message: "用户拒绝权限" }));
-                      void wx.openSetting();
-                    },
-                  );
+                  showModal("权限被拒", "如果想要保存图片，请在“权限设置”允许保存图片权限", () => {
+                    reject(new MpError({ message: "用户拒绝权限" }));
+                    void wx.openSetting();
+                  });
                 },
               });
           },

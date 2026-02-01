@@ -12,10 +12,7 @@ export const sync = (): Promise<void[]> => {
     }).then(
       (content: Record<string, unknown>) =>
         new Promise<void>((resolve) => {
-          get(`https://npmmirror.com/sync/${content.name as string}`).on(
-            "finish",
-            () => resolve(),
-          );
+          get(`https://npmmirror.com/sync/${content.name as string}`).on("finish", () => resolve());
         }),
     );
   });

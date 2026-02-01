@@ -19,8 +19,7 @@ const fileManager = wx.getFileSystemManager();
 /** 用户文件夹路径 */
 const userPath = wx.env.USER_DATA_PATH;
 
-export const dirname = (path: string): string =>
-  path.split("/").slice(0, -1).join("/");
+export const dirname = (path: string): string => path.split("/").slice(0, -1).join("/");
 
 /** 判断文件或文件夹是否存在 */
 export const exists = (path: string): boolean => {
@@ -35,17 +34,12 @@ export const exists = (path: string): boolean => {
 
 /** 是否是文件 */
 export const isFile = (path: string): boolean =>
-  exists(path) &&
-  (
-    fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats
-  ).isFile();
+  exists(path) && (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isFile();
 
 /** 是否是文件夹 */
 export const isDir = (path: string): boolean =>
   exists(path) &&
-  (
-    fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats
-  ).isDirectory();
+  (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isDirectory();
 
 /**
  * 删除文件或文件夹
@@ -55,13 +49,9 @@ export const isDir = (path: string): boolean =>
  * @param path 要删除的文件或文件夹路径
  * @param type 要删除的类型
  */
-export const rm = (
-  path: string,
-  type: "dir" | "file" = isDir(path) ? "dir" : "file",
-): void => {
+export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "file"): void => {
   const deleteLog = (): void => logger.debug(`Deleted ${path}`);
-  const errorLog = (err: unknown): void =>
-    logger.error(`Error deleting ${path}:`, err);
+  const errorLog = (err: unknown): void => logger.error(`Error deleting ${path}:`, err);
 
   if (type === "dir")
     try {
@@ -138,10 +128,7 @@ export const readJSON = <T = unknown>(
   let data;
 
   try {
-    const fileContent = fileManager.readFileSync(
-      `${userPath}/${path}.json`,
-      encoding,
-    );
+    const fileContent = fileManager.readFileSync(`${userPath}/${path}.json`, encoding);
 
     try {
       data = JSON.parse(fileContent as string) as T;
@@ -198,10 +185,7 @@ export const saveFile = (tempFilePath: string, path: string): void => {
  * @param onlinePath 在线文件路径
  * @param localPath 本地保存路径
  */
-export const saveOnlineFile = (
-  onlinePath: string,
-  localPath: string,
-): Promise<string> => {
+export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<string> => {
   mkdir(dirname(localPath));
 
   return new Promise((resolve, reject) => {
@@ -215,9 +199,7 @@ export const saveOnlineFile = (
           return resolve(tempFilePath);
         }
 
-        logger.error(
-          `Download ${onlinePath} failed with statusCode ${statusCode}`,
-        );
+        logger.error(`Download ${onlinePath} failed with statusCode ${statusCode}`);
 
         reject(new MpError({ code: statusCode }));
       },

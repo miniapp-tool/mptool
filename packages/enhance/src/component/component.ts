@@ -25,8 +25,7 @@ export const handleProperties = (
 
     // Constructor or null
     if (advancedValue === null || typeof advancedValue === "function") {
-      props[propertyName] =
-        advancedValue as WechatMiniprogram.Component.ShortProperty;
+      props[propertyName] = advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = advancedValue;
 
@@ -75,20 +74,12 @@ export const $Component: ComponentConstructor = <
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
-  options: ComponentOptions<
-    Data,
-    Property,
-    Method,
-    Behavior,
-    InstanceProps,
-    IsPage
-  >,
+  options: ComponentOptions<Data, Property, Method, Behavior, InstanceProps, IsPage>,
 ): string => {
   // extend page config
   const { extendComponent, injectComponent } = getConfig();
 
-  if (extendComponent)
-    extendComponent(options as unknown as TrivialComponentOptions);
+  if (extendComponent) extendComponent(options as unknown as TrivialComponentOptions);
 
   // ensure lifetimes
   options.lifetimes ??= {};
@@ -96,34 +87,17 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.created = wrapFunction(
     options.lifetimes.created,
     function init(
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
     ) {
       mount(this);
-      if (injectComponent)
-        injectComponent(options as unknown as TrivialComponentOptions);
+      if (injectComponent) injectComponent(options as unknown as TrivialComponentOptions);
     },
   );
 
   options.lifetimes.attached = wrapFunction(
     options.lifetimes.attached,
     // set id and save ref
-    function (
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
-    ) {
+    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
       const id = (componentIndex += 1);
 
       this.$id = id;
@@ -137,16 +111,7 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.detached = wrapFunction(
     options.lifetimes.detached,
     // remove saved ref
-    function (
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
-    ) {
+    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
       removeRef(this.$id);
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -168,14 +133,7 @@ export const $Component: ComponentConstructor = <
     // inject methods
 
     $call(
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
       ...args: any[]
     ): void {
@@ -191,14 +149,7 @@ export const $Component: ComponentConstructor = <
 
     // Setting $root and $parent, called by parent
     $attached(
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -213,14 +164,7 @@ export const $Component: ComponentConstructor = <
     ...options.observers,
     // add ref observer to support dynamic ref
     ref(
-      this: ComponentInstance<
-        Data,
-        Property,
-        Method,
-        Behavior,
-        InstanceProps,
-        IsPage
-      >,
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {

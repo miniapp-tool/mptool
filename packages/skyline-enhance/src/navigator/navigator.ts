@@ -1,10 +1,6 @@
 import { getConfig } from "../config/index.js";
 
-export type NavigatorType =
-  | "navigateTo"
-  | "redirectTo"
-  | "switchTab"
-  | "reLaunch";
+export type NavigatorType = "navigateTo" | "redirectTo" | "switchTab" | "reLaunch";
 
 export const getFullPath = (pageNameWithArg: string): string => {
   const config = getConfig();
@@ -16,9 +12,7 @@ export const getFullPath = (pageNameWithArg: string): string => {
 
 export function getTrigger(
   type: "navigateTo",
-): (
-  pageName: string,
-) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+): (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
 export function getTrigger(
   type: "redirectTo" | "switchTab" | "reLaunch",
 ): (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;

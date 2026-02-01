@@ -48,9 +48,7 @@ describe("cookies", () => {
   });
 
   it("getValue", () => {
-    expect(cookieStore.getValue(TEST_NAME, { domain: "baidu.com" })).toBe(
-      TEST_VALUE,
-    );
+    expect(cookieStore.getValue(TEST_NAME, { domain: "baidu.com" })).toBe(TEST_VALUE);
   });
 
   it("getCookies", () => {

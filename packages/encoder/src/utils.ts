@@ -4,8 +4,7 @@
  * @param max The maximum value in the range, inclusive.
  * @return True if a >= min and a <= max.
  */
-export const inRange = (a: number, min: number, max: number): boolean =>
-  min <= a && a <= max;
+export const inRange = (a: number, min: number, max: number): boolean => min <= a && a <= max;
 
 /**
  * An ASCII byte is a byte in the range 0x00 to 0x7F, inclusive.
@@ -104,10 +103,7 @@ export const codePointsToString = (codePoints: number[]): string => {
       s += String.fromCharCode(codePoint);
     } else {
       codePoint -= 0x10000;
-      s += String.fromCharCode(
-        (codePoint >> 10) + 0xd800,
-        (codePoint & 0x3ff) + 0xdc00,
-      );
+      s += String.fromCharCode((codePoint >> 10) + 0xd800, (codePoint & 0x3ff) + 0xdc00);
     }
   }
 

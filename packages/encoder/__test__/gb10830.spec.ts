@@ -8,8 +8,6 @@ it("gb18030", () => {
   ];
 
   cases.forEach((c) => {
-    expect(new TextDecoder("gb18030").decode(new Uint8Array(c.bytes))).toEqual(
-      c.string,
-    );
+    expect(new TextDecoder("gb18030").decode(new Uint8Array(c.bytes))).toEqual(c.string);
   });
 });

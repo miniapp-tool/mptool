@@ -168,11 +168,7 @@ export class Queue {
    * @param args 函数参数
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  add<A extends any[], T>(
-    func: (next: () => void, ...args: A) => void,
-    ctx?: T,
-    ...args: A
-  ): void {
+  add<A extends any[], T>(func: (next: () => void, ...args: A) => void, ctx?: T, ...args: A): void {
     this.funcQueue.push({
       // @ts-expect-error: func is not typed
       func,

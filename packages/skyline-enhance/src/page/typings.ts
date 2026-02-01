@@ -75,9 +75,7 @@ export interface ExtendedPageMethods<
 export type PageInstance<
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
-> = WechatMiniprogram.OptionalInterface<
-  WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles
-> &
+> = WechatMiniprogram.OptionalInterface<WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles> &
   WechatMiniprogram.Page.InstanceProperties &
   WechatMiniprogram.Page.InstanceMethods<Data> &
   ExtendedPageMethods<Data, Custom> &

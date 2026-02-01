@@ -19,10 +19,7 @@ export interface RequestOptions<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   >,
-> extends Omit<
-  WechatMiniprogram.RequestOption<T>,
-  "url" | "method" | "header" | "data"
-> {
+> extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
   /**
    * 请求方法
    */
@@ -116,21 +113,14 @@ export const request = <
 
     if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
 
-    const data =
-      body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
+    const data = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
     if (!requestHeaders.has("Content-Type"))
       if (body instanceof URLSearchParams)
-        requestHeaders.set(
-          "Content-Type",
-          "application/x-www-form-urlencoded; charset=UTF-8",
-        );
+        requestHeaders.set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
       else if (body instanceof ArrayBuffer)
-        requestHeaders.set(
-          "Content-Type",
-          "application/octet-stream; charset=UTF-8",
-        );
+        requestHeaders.set("Content-Type", "application/octet-stream; charset=UTF-8");
       else if (
         // is plain object
         Object.prototype.toString.call(body) === "[object Object]"
@@ -324,8 +314,7 @@ export const createRequest = ({
     return request(link, options)
       .then((response) => responseHandler(response, url, options))
       .catch((err: unknown) => {
-        if (errorHandler && err instanceof MpError)
-          return errorHandler(err, url, options);
+        if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
 
         throw err;
       });

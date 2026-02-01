@@ -4,12 +4,7 @@ import { Cookie } from "./cookie.js";
 import { parseCookieHeader } from "./headers.js";
 import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
-import {
-  getCookieScopeDomain,
-  getDomain,
-  getUrlInfo,
-  normalizeDomain,
-} from "./utils.js";
+import { getCookieScopeDomain, getDomain, getUrlInfo, normalizeDomain } from "./utils.js";
 
 export type CookieMap = Map<string, Cookie>;
 export type CookieStoreType = Map<string, CookieMap>;
@@ -52,8 +47,7 @@ export class CookieStore {
       if (domain && !scopeDomains.includes(key)) continue;
       const cookie = cookies.get(name);
 
-      if (cookie && cookie.isPathMatched(path) && !cookie.isExpired())
-        return cookie;
+      if (cookie && cookie.isPathMatched(path) && !cookie.isExpired()) return cookie;
     }
 
     return null;
@@ -127,8 +121,7 @@ export class CookieStore {
   list(): Record<string, Record<string, string>> {
     const dirObj: Record<string, Record<string, string>> = {};
 
-    for (const domain of this.store.keys())
-      dirObj[domain] = this.getCookiesMap(domain);
+    for (const domain of this.store.keys()) dirObj[domain] = this.getCookiesMap(domain);
 
     return dirObj;
   }
@@ -148,8 +141,7 @@ export class CookieStore {
       if (domain && !scopeDomains.includes(key)) continue;
 
       for (const cookie of cookieMap.values())
-        if (cookie.isPathMatched(path) && !cookie.isExpired())
-          cookies.push(cookie);
+        if (cookie.isPathMatched(path) && !cookie.isExpired()) cookies.push(cookie);
     }
 
     return cookies;
@@ -164,8 +156,7 @@ export class CookieStore {
     const cookies = [];
 
     for (const cookieMap of this.store.values())
-      for (const cookie of cookieMap.values())
-        if (!cookie.isExpired()) cookies.push(cookie);
+      for (const cookie of cookieMap.values()) if (!cookie.isExpired()) cookies.push(cookie);
 
     return cookies;
   }
@@ -177,9 +168,7 @@ export class CookieStore {
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
-    return Object.fromEntries(
-      this.getCookies(options).map(({ name, value }) => [name, value]),
-    );
+    return Object.fromEntries(this.getCookies(options).map(({ name, value }) => [name, value]));
   }
 
   /**
@@ -236,10 +225,7 @@ export class CookieStore {
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
       return this.apply(
-        parseCookieHeader(
-          (header as Headers).getSetCookie().join(","),
-          getDomain(domainOrURL),
-        ),
+        parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
       );
     }
 

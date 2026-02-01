@@ -12,8 +12,7 @@ export const retry = (
     theme: "day",
     success: ({ confirm }) => {
       if (confirm) void retryAction();
-      else if (navigateBack && getCurrentPages().length > 1)
-        void wx.navigateBack();
+      else if (navigateBack && getCurrentPages().length > 1) void wx.navigateBack();
     },
   });
 };

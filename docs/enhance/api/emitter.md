@@ -56,10 +56,7 @@ emitter.on("baz"); // 'baz' should not contain event object
 - 类型:
 
   ```ts
-  function on<Key extends keyof Events>(
-    type: Key,
-    handler: GenericEventHandler,
-  ): void;
+  function on<Key extends keyof Events>(type: Key, handler: GenericEventHandler): void;
   ```
 
 - 参数:
@@ -73,10 +70,7 @@ emitter.on("baz"); // 'baz' should not contain event object
 - 类型:
 
   ```ts
-  function off<Key extends keyof Events>(
-    type: Key,
-    handler?: GenericEventHandler,
-  ): void;
+  function off<Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void;
   ```
 
 - 参数:
@@ -118,10 +112,7 @@ emitter.on("baz"); // 'baz' should not contain event object
 - 类型:
 
   ```ts
-  function emitAsync<Key extends keyof Events>(
-    type: Key,
-    event?: Events[Key],
-  ): Promise<void>;
+  function emitAsync<Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void>;
   ```
 
 - 参数:

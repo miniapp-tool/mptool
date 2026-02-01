@@ -45,16 +45,13 @@ it("UTF-8 - Encode/Decode - reference sample", () => {
     {
       encoding: "utf-8",
       expected: [
-        0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f,
-        0xbf, 0xbd,
+        0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f, 0xbf, 0xbd,
       ],
     },
   ];
 
   cases.forEach((t) => {
-    const decoded = new TextDecoder(t.encoding).decode(
-      new Uint8Array(t.expected),
-    );
+    const decoded = new TextDecoder(t.encoding).decode(new Uint8Array(t.expected));
 
     expect(decoded).toEqual(sample);
   });

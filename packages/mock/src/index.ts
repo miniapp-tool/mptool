@@ -25,9 +25,7 @@ interface GetStorageSuccessCallbackResult<T = any> {
 }
 
 /** 接口调用成功的回调函数 */
-type GetStorageSuccessCallback<T = any> = (
-  result: GetStorageSuccessCallbackResult<T>,
-) => void;
+type GetStorageSuccessCallback<T = any> = (result: GetStorageSuccessCallbackResult<T>) => void;
 
 /** 接口调用结束的回调函数（调用成功、失败都会执行） */
 type GetStorageCompleteCallback = (res: GeneralCallbackResult) => void;

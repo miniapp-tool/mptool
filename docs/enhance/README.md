@@ -216,11 +216,7 @@ this.$launch("main?user=mrhope");
 ::: tip 例子
 
 ```html
-<button
-  catch:tap="$bindRedirect"
-  data-url="/pages/play"
-  data-after="onClickAfter"
->
+<button catch:tap="$bindRedirect" data-url="/pages/play" data-after="onClickAfter">
   click redirect
 </button>
 ```

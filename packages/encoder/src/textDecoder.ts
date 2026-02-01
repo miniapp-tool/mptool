@@ -15,10 +15,7 @@ export interface Decoder {
   handler: (stream: Stream, bite: number) => number | number[] | null;
 }
 
-export const decoders: Record<
-  string,
-  (options: { fatal: boolean }) => Decoder
-> = {};
+export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 /**
  * @constructor
@@ -38,10 +35,7 @@ export class TextDecoder {
   _fatal = false;
   doNotFlush = false;
 
-  constructor(
-    label = DEFAULT_ENCODING,
-    options: { fatal?: boolean; ignoreBOM?: boolean } = {},
-  ) {
+  constructor(label = DEFAULT_ENCODING, options: { fatal?: boolean; ignoreBOM?: boolean } = {}) {
     // 1. Let encoding be the result of getting an encoding from
     // label.
     const encoding = getEncoding(label);
@@ -85,19 +79,11 @@ export class TextDecoder {
    * @param options
    * @return The decoded string.
    */
-  decode(
-    input: ArrayBuffer | ArrayBufferView,
-    options: { stream?: boolean } = {},
-  ): string {
+  decode(input: ArrayBuffer | ArrayBufferView, options: { stream?: boolean } = {}): string {
     let bytes;
 
-    if (typeof input === "object" && input instanceof ArrayBuffer)
-      bytes = new Uint8Array(input);
-    else if (
-      typeof input === "object" &&
-      "buffer" in input &&
-      input.buffer instanceof ArrayBuffer
-    )
+    if (typeof input === "object" && input instanceof ArrayBuffer) bytes = new Uint8Array(input);
+    else if (typeof input === "object" && "buffer" in input && input.buffer instanceof ArrayBuffer)
       bytes = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
     else bytes = new Uint8Array(0);
 

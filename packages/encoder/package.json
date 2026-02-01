@@ -3,18 +3,13 @@
   "version": "0.12.0",
   "description": "encoder handler for QQ/Wechat miniapp",
   "keywords": [
-    "miniprogram",
+    "encoder",
     "miniapp",
-    "encoder"
+    "miniprogram"
   ],
   "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/encoder#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/encoder"
   },
   "license": "MIT",
   "author": {
@@ -22,18 +17,23 @@
     "email": "mister-hope@outlook.com",
     "url": "https://mister-hope.com"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/encoder"
+  },
   "files": [
     "dist"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.mts --configPlugin esbuild",
     "clean": "rimraf ./dist",
     "dev": "rollup -c -w"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

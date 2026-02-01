@@ -17,9 +17,7 @@ export type AppOptions<Custom> = ExtendsAppOptions &
   Partial<ExtendedAppMethods> &
   ThisType<AppInstance<Custom>>;
 
-export type AppInstance<Custom> = AppOptions<Custom> &
-  Custom &
-  ExtendedAppMethods;
+export type AppInstance<Custom> = AppOptions<Custom> & Custom & ExtendedAppMethods;
 
 export type AppConstructor = <Custom extends WechatMiniprogram.IAnyObject>(
   appOptions: AppOptions<Custom>,

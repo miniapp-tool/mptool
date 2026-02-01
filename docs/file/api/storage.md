@@ -50,11 +50,7 @@
 - 类型:
 
   ```ts
-  function set<T = unknown>(
-    key: string,
-    value: T,
-    expire: number | "keep" | "once" = 0,
-  ): void;
+  function set<T = unknown>(key: string, value: T, expire: number | "keep" | "once" = 0): void;
   ```
 
 - 参数:
@@ -136,9 +132,7 @@
 - 类型:
 
   ```ts
-  function removeAsync(
-    key: string,
-  ): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function removeAsync(key: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:

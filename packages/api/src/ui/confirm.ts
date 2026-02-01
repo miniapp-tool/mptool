@@ -13,10 +13,5 @@ export const confirm = (
   confirmAction: () => Promise<void> | void,
   cancelAction: () => void | Promise<void> = (): void => void 0,
 ): void => {
-  showModal(
-    "操作确认",
-    `您确定要${text}么?${warning}`,
-    confirmAction,
-    cancelAction,
-  );
+  showModal("操作确认", `您确定要${text}么?${warning}`, confirmAction, cancelAction);
 };

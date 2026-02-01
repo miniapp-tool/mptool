@@ -42,6 +42,5 @@ export const error = (...args: any[]): void => {
  * @param filterMsg 过滤信息
  */
 export const filter = (filterMsg: string): void => {
-  if (isRealtime)
-    (log as WechatMiniprogram.RealtimeLogManager).setFilterMsg(filterMsg);
+  if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).setFilterMsg(filterMsg);
 };

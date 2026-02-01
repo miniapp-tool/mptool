@@ -6,18 +6,14 @@ import { normalizeDomain } from "./utils.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
-const HEADER_VALUE_REMOVE_REGEXP = new RegExp(
-  `(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`,
-  "g",
-);
+const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`, "g");
 
 /**
  * Validate the given header name.
  * @see https://fetch.spec.whatwg.org/#header-name
  */
 const isValidHeaderName = (value: unknown): boolean => {
-  if (typeof value !== "string" || value.length === 0 || value.length > 128)
-    return false;
+  if (typeof value !== "string" || value.length === 0 || value.length > 128) return false;
 
   for (let i = 0; i < value.length; i++) {
     const character = value.charCodeAt(i);
@@ -65,10 +61,7 @@ const isValidHeaderValue = (value: unknown): boolean => {
 const normalizeHeaderValue = (value: string): string =>
   value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
 
-export const parseCookieHeader = (
-  setCookieHeader: string,
-  domain: string,
-): Cookie[] =>
+export const parseCookieHeader = (setCookieHeader: string, domain: string): Cookie[] =>
   parse(splitCookiesString(setCookieHeader)).map(
     (item) =>
       new Cookie({
@@ -139,8 +132,7 @@ export class Headers {
    * Returns a `ByteString` sequence of all the values of a header with a given name.
    */
   get(name: string): string | null {
-    if (!isValidHeaderName(name))
-      throw TypeError(`Invalid header name "${name}"`);
+    if (!isValidHeaderName(name)) throw TypeError(`Invalid header name "${name}"`);
 
     return this.headers[normalizeHeaderName(name)] ?? null;
   }
@@ -163,8 +155,7 @@ export class Headers {
    * Returns a boolean stating whether a `Headers` object contains a certain header.
    */
   has(name: string): boolean {
-    if (!isValidHeaderName(name))
-      throw new TypeError(`Invalid header name "${name}"`);
+    if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
 
     // eslint-disable-next-line no-prototype-builtins
     return this.headers.hasOwnProperty(normalizeHeaderName(name));
@@ -188,12 +179,7 @@ export class Headers {
    * calling the given callback for each header.
    */
   forEach<ThisArg = this>(
-    callback: (
-      this: ThisArg,
-      value: string,
-      name: string,
-      parent: this,
-    ) => void,
+    callback: (this: ThisArg, value: string, name: string, parent: this) => void,
     thisArg?: ThisArg,
   ): void {
     for (const [name, value] of this.entries()) {
@@ -212,13 +198,10 @@ export class Headers {
 
   *entries(): IterableIterator<[string, string]> {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
-    const sortedKeys = Object.keys(this.headers).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    const sortedKeys = Object.keys(this.headers).sort((a, b) => a.localeCompare(b));
 
     for (const name of sortedKeys)
-      if (name === "set-cookie")
-        for (const value of this.getSetCookie()) yield [name, value];
+      if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       else yield [name, this.get(name)!];
   }

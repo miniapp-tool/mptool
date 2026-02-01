@@ -7,10 +7,7 @@ import type {
   RoutePathConfig,
 } from "./typings.js";
 
-export interface Config extends Omit<
-  AppConfigOptions,
-  "defaultPage" | "pages"
-> {
+export interface Config extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
   /**
    * @returns route
    */
@@ -53,8 +50,7 @@ export const $Config = (config: AppConfigOptions): void => {
   appConfig = {
     ...options,
 
-    getPath: (name: string): string =>
-      nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
+    getPath: (name: string): string => nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
   };
 };
 

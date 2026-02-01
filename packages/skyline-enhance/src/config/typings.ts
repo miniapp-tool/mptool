@@ -130,5 +130,4 @@ export interface RouteCustomConfig {
   getPath: (pageName: string) => string;
 }
 
-export type AppConfigOptions = AppConfigCommonOptions &
-  (RoutePathConfig | RouteCustomConfig);
+export type AppConfigOptions = AppConfigCommonOptions & (RoutePathConfig | RouteCustomConfig);

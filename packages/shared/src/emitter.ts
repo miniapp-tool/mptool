@@ -8,8 +8,7 @@ export type WildcardHandler<T = Record<string, unknown>> = (
 
 // An array of all currently registered event handlers for a type
 export type EventHandlerList<T = unknown> = Handler<T>[];
-export type WildCardEventHandlerList<T = Record<string, unknown>> =
-  WildcardHandler<T>[];
+export type WildCardEventHandlerList<T = Record<string, unknown>> = WildcardHandler<T>[];
 
 // A map of event types and their corresponding event handlers.
 export type EventHandlerMap<Events> = Map<
@@ -23,21 +22,13 @@ export interface EmitterInstance<Events> {
   on<Key extends keyof Events>(type: Key, handler: Handler<Events[Key]>): void;
   on(type: "*", handler: WildcardHandler<Events>): void;
 
-  off<Key extends keyof Events>(
-    type: Key,
-    handler?: Handler<Events[Key]>,
-  ): void;
+  off<Key extends keyof Events>(type: Key, handler?: Handler<Events[Key]>): void;
   off(type: "*", handler: WildcardHandler<Events>): void;
 
   emit<Key extends keyof Events>(type: Key, event: Events[Key]): void;
-  emit<Key extends keyof Events>(
-    type: undefined extends Events[Key] ? Key : never,
-  ): void;
+  emit<Key extends keyof Events>(type: undefined extends Events[Key] ? Key : never): void;
 
-  emitAsync<Key extends keyof Events>(
-    type: Key,
-    event: Events[Key],
-  ): Promise<void>;
+  emitAsync<Key extends keyof Events>(type: Key, event: Events[Key]): Promise<void>;
   emitAsync<Key extends keyof Events>(
     type: undefined extends Events[Key] ? Key : never,
   ): Promise<void>;
@@ -49,12 +40,8 @@ export interface EmitterInstance<Events> {
  * @returns Emitter
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Emitter<Events>(
-  all: EventHandlerMap<Events> = new Map(),
-): EmitterInstance<Events> {
-  type GenericEventHandler =
-    | Handler<Events[keyof Events]>
-    | WildcardHandler<Events>;
+export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
+  type GenericEventHandler = Handler<Events[keyof Events]> | WildcardHandler<Events>;
 
   return {
     /**
@@ -70,10 +57,7 @@ export function Emitter<Events>(
      * @param handler 待添加的响应函数
      * @memberOf emitter
      */
-    on: <Key extends keyof Events>(
-      type: Key,
-      handler: GenericEventHandler,
-    ): void => {
+    on: <Key extends keyof Events>(type: Key, handler: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers) handlers.push(handler);
@@ -89,10 +73,7 @@ export function Emitter<Events>(
      * @param {Function} [handler] 待移除的响应函数
      * @memberOf emitter
      */
-    off: <Key extends keyof Events>(
-      type: Key,
-      handler?: GenericEventHandler,
-    ): void => {
+    off: <Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers)
@@ -142,10 +123,7 @@ export function Emitter<Events>(
      * @param event 传递给所有响应函数的事件
      * @memberOf emitter
      */
-    emitAsync: async <Key extends keyof Events>(
-      type: Key,
-      event?: Events[Key],
-    ): Promise<void> => {
+    emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
         // eslint-disable-next-line @typescript-eslint/await-thenable
         ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)

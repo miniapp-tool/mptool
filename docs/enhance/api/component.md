@@ -121,9 +121,7 @@ $Component({
 - 类型:
 
   ```ts
-  function $go(
-    pageName: string,
-  ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+  function $go(pageName: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
   ```
 
 - 参数:
@@ -146,9 +144,7 @@ this.$go("play?vid=xxx&cid=xxx");
 - 类型:
 
   ```ts
-  function $redirect(
-    pageName: string,
-  ): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $redirect(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
@@ -171,9 +167,7 @@ this.$redirect("about?year=2021");
 - 类型:
 
   ```ts
-  function $switch(
-    pageName: string,
-  ): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $switch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
@@ -202,9 +196,7 @@ this.$switch("main?user=mrhope");
 - 类型:
 
   ```ts
-  function $reLaunch(
-    pageName: string,
-  ): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $reLaunch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
   ```
 
 - 参数:
@@ -246,9 +238,7 @@ this.$launch("main?user=mrhope");
 ::: tip
 
 ```html
-<button catch:tap="$bindGo" data-url="play" data-before="onClickBefore">
-  click go
-</button>
+<button catch:tap="$bindGo" data-url="play" data-before="onClickBefore">click go</button>
 ```
 
 :::
@@ -264,11 +254,7 @@ this.$launch("main?user=mrhope");
 ::: tip
 
 ```html
-<button
-  catch:tap="$bindRedirect"
-  data-url="/pages/play"
-  data-after="onClickAfter"
->
+<button catch:tap="$bindRedirect" data-url="/pages/play" data-after="onClickAfter">
   click redirect
 </button>
 ```

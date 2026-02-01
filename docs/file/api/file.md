@@ -76,10 +76,7 @@
 - 类型:
 
   ```ts
-  function readFile<T = unknown>(
-    path: string,
-    encoding = "utf-8",
-  ): T | undefined;
+  function readFile<T = unknown>(path: string, encoding = "utf-8"): T | undefined;
   ```
 
 - 参数:
@@ -97,10 +94,7 @@
 - 类型:
 
   ```ts
-  function readJSON<T = unknown>(
-    path: string,
-    encoding = "utf-8",
-  ): T | undefined;
+  function readJSON<T = unknown>(path: string, encoding = "utf-8"): T | undefined;
   ```
 
 - 参数:
@@ -193,10 +187,7 @@
 - 类型:
 
   ```ts
-  function saveOnlineFile(
-    onlinePath: string,
-    targetPath: string,
-  ): Promise<void>;
+  function saveOnlineFile(onlinePath: string, targetPath: string): Promise<void>;
   ```
 
 - 参数:

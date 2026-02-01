@@ -23,9 +23,7 @@ export interface ExtendedPageLifeCycles {
    *
    * @param App.onLaunch 参数
    */
-  onAppLaunch(
-    options: WechatMiniprogram.App.LaunchShowOption,
-  ): void | Promise<void>;
+  onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void | Promise<void>;
 
   /**
    * 小程序在切入后台后被唤醒
@@ -106,9 +104,7 @@ export interface ExtendedPageMethods<
 export type PageInstance<
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
-> = WechatMiniprogram.OptionalInterface<
-  WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles
-> &
+> = WechatMiniprogram.OptionalInterface<WechatMiniprogram.Page.ILifetime & ExtendedPageLifeCycles> &
   WechatMiniprogram.Page.InstanceProperties &
   WechatMiniprogram.Page.InstanceMethods<Data> &
   ExtendedPageMethods<Data, Custom> &

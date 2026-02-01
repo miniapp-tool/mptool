@@ -1,9 +1,7 @@
 import type { AllowTag } from "./allowedTags.js";
 import type { ElementNode } from "./typings.js";
 
-export type NodeHandler = (
-  node: ElementNode,
-) => ElementNode | null | Promise<ElementNode | null>;
+export type NodeHandler = (node: ElementNode) => ElementNode | null | Promise<ElementNode | null>;
 
 export interface ParserOptions {
   /**
