@@ -5,8 +5,12 @@ export const writeClipboard = (data = ""): Promise<void> =>
     ? new Promise<void>((resolve, reject) => {
         wx.setClipboardData({
           data,
-          success: () => resolve(),
-          fail: ({ errMsg }) => reject(new MpError({ message: errMsg })),
+          success: () => {
+            resolve();
+          },
+          fail: ({ errMsg }) => {
+            reject(new MpError({ message: errMsg }));
+          },
         });
       })
     : Promise.reject(new Error("data is empty"));

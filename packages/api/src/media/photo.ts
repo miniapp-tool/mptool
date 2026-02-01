@@ -7,16 +7,22 @@ import { showModal } from "../ui/index.js";
  * 保存图片到相册
  *
  * @param imgPath 图片地址
+ *
+ * @returns Promise<void>
  */
 export const savePhoto = (imgPath: string): Promise<void> =>
   download(imgPath).then(
     (path) =>
       new Promise<void>((resolve, reject) => {
         if (env === "donut") {
-          return wx.saveImageToPhotosAlbum({
+          wx.saveImageToPhotosAlbum({
             filePath: path,
-            success: () => resolve(),
+            success: () => {
+              resolve();
+            },
           });
+
+          return;
         }
 
         // 获取用户设置
@@ -26,7 +32,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
             if (authSetting["scope.writePhotosAlbum"])
               wx.saveImageToPhotosAlbum({
                 filePath: path,
-                success: () => resolve(),
+                success: () => {
+                  resolve();
+                },
               });
             // 没有授权 —> 提示用户授权
             else
@@ -35,7 +43,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
                 success: () => {
                   wx.saveImageToPhotosAlbum({
                     filePath: path,
-                    success: () => resolve(),
+                    success: () => {
+                      resolve();
+                    },
                   });
                 },
 

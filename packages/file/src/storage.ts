@@ -1,3 +1,4 @@
+// oxlint-disable no-undefined
 import { logger } from "@mptool/shared";
 
 export interface StorageData<T> {
@@ -44,8 +45,6 @@ export const take = <T = unknown>(key: string): T | undefined => {
 /**
  * 处理并返回值
  *
- * @private
- *
  * @param key 键
  * @param value 值
  *
@@ -80,6 +79,7 @@ const prepareData = <T = unknown>(
     const oldData = wx.getStorageSync<StorageData<T> | undefined>(`${CACHE_PREFIX}${key}`);
 
     // 上次没有缓存，本次也不更新
+    // oxlint-disable-next-line no-undefined
     if (!oldData) return undefined;
 
     // 使用上次过期时间
@@ -101,7 +101,7 @@ const prepareData = <T = unknown>(
  *
  * @param key key
  * @param value value
- * @param [expire='once'] 过期时间
+ * @param expire 过期时间
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
@@ -120,7 +120,7 @@ export const set = <T = unknown>(
  *
  * @param key key
  * @param value value
- * @param [expire='once'] 过期时间
+ * @param expire 过期时间
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
@@ -212,21 +212,23 @@ export const check = (): void => {
  * 异步清除失效数据
  *
  * @param key key
+ *
+ * @returns 清除完成的 Promise
  */
-export const checkAsync = (): Promise<void[]> =>
-  wx.getStorageInfo().then(({ keys }) =>
-    Promise.all<void>(
-      keys
-        .filter((key) => key.startsWith(CACHE_PREFIX))
-        .map((key) =>
-          wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
-            if (!data || (data.expired !== sessionId && Date.now() >= data.expired))
-              return wx.removeStorage({ key }).then(() => {
-                // return void
-              });
+export const checkAsync = async (): Promise<void> => {
+  const { keys } = await wx.getStorageInfo();
 
-            return;
-          }),
-        ),
-    ),
+  await Promise.all(
+    keys
+      .filter((key) => key.startsWith(CACHE_PREFIX))
+      .map((key) =>
+        wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
+          if (!data || (data.expired !== sessionId && Date.now() >= data.expired))
+            return wx.removeStorage({ key });
+
+          // oxlint-disable-next-line no-useless-return
+          return;
+        }),
+      ),
   );
+};

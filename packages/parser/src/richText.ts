@@ -37,18 +37,16 @@ const handleSVG = (node: Element): RichTextNode => {
 };
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => Boolean(item));
+  const result: RichTextNode[] = nodes.filter(Boolean) as RichTextNode[];
 
   const first = result[0];
 
   // remove first text node if it's empty
-  // oxlint-disable-next-line typescript/no-unnecessary-condition
   if (first?.type === "text" && !first.text.trim()) result.shift();
 
   const last = result[result.length - 1];
 
   // remove last text node if it's empty
-  // oxlint-disable-next-line typescript/no-unnecessary-condition
   if (last?.type === "text" && !last.text.trim()) result.pop();
 
   return result;
@@ -59,7 +57,7 @@ const handleNode = async (
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
-  if (node.type === "text") return { type: "text", text: node.data.replaceAll(/\r/g, "") };
+  if (node.type === "text") return { type: "text", text: node.data.replaceAll("\r", "") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
@@ -90,7 +88,7 @@ const handleNode = async (
 
       const converter = transform[node.name as AllowTag];
 
-      return await (converter ? converter(convertedNode) : convertedNode);
+      return converter ? converter(convertedNode) : convertedNode;
     }
   }
 

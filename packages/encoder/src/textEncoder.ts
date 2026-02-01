@@ -8,7 +8,7 @@ export interface Encoder {
   /**
    * @param stream The stream of code points being encoded.
    * @param code_point Next code point read from the stream.
-   * @return Byte(s) to emit, or |finished|.
+   * @returns Byte(s) to emit, or |finished|.
    */
   handler: (stream: Stream, codePoint: number) => number | number[];
 }
@@ -55,7 +55,7 @@ export class TextEncoder {
   /**
    * @param content The string to encode.
    * @param options
-   * @return Encoded bytes, as a Uint8Array.
+   * @returns Encoded bytes, as a Uint8Array.
    */
   encode(content = "", options: { stream?: boolean } = {}): Uint8Array {
     // NOTE: This option is nonstandard. None of the encodings

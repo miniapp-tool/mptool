@@ -91,9 +91,9 @@ describe("mitt#", () => {
       inst.on("baz:baT!", foo);
 
       expect(events.get("FOO")).toEqual([foo]);
-      expect(events.has("foo")).toEqual(false);
+      expect(events.has("foo")).toBeFalsy();
       expect(events.get("Bar")).toEqual([foo]);
-      expect(events.has("bar")).toEqual(false);
+      expect(events.has("bar")).toBeFalsy();
       expect(events.get("baz:baT!")).toEqual([foo]);
     });
 
@@ -142,9 +142,9 @@ describe("mitt#", () => {
       inst.off("baz:baT!", foo);
 
       expect(events.get("FOO")).toEqual([]);
-      expect(events.has("foo")).toEqual(false);
+      expect(events.has("foo")).toBeFalsy();
       expect(events.get("Bar")).toEqual([]);
-      expect(events.has("bar")).toEqual(false);
+      expect(events.has("bar")).toBeFalsy();
       expect(events.get("baz:bat!")).toHaveLength(1);
     });
 

@@ -11,7 +11,7 @@ import { inRange, isASCIIByte } from "../utils.js";
 /**
  * @param pointer The |pointer| to search for.
  * @param index The |index| to search within.
- * @return The code point corresponding to |pointer| in |index|,
+ * @returns The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in |index|.
  */
 const indexCodePointFor = (pointer: number, index: number[] | undefined): number | null => {
@@ -23,7 +23,7 @@ const indexCodePointFor = (pointer: number, index: number[] | undefined): number
 /**
  * @param codePoint The |code point| to search for.
  * @param index The |index| to search within.
- * @return The first pointer corresponding to |code point| in
+ * @returns The first pointer corresponding to |code point| in
  *     |index|, or null if |code point| is not in |index|.
  */
 const indexPointerFor = (codePoint: number, index: number[]): number | null => {
@@ -34,7 +34,7 @@ const indexPointerFor = (codePoint: number, index: number[]): number | null => {
 
 /**
  * @param pointer The |pointer| to search for in the gb18030 index.
- * @return The code point corresponding to |pointer| in |index|,
+ * @returns The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in the gb18030 index.
  */
 const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
@@ -72,7 +72,7 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
 
 /**
  * @param codePoint The |code point| to locate in the gb18030 index.
- * @return The first pointer corresponding to |code point| in the
+ * @returns The first pointer corresponding to |code point| in the
  *     gb18030 index.
  */
 const indexGB18030RangesPointerFor = (codePoint: number): number => {
@@ -119,7 +119,7 @@ class GB18030Decoder implements Decoder {
   /**
    * @param {Stream} stream The stream of bytes being decoded.
    * @param {number} bite The next byte read from the stream.
-   * @return {?(number|!Array.<number>)} The next code point(s)
+   * @returns {?(number|!Array.<number>)} The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
@@ -279,7 +279,7 @@ class GB18030Encoder implements Encoder {
   /**
    * @param stream Input stream.
    * @param codePoint Next code point read from the stream.
-   * @return Byte(s) to emit.
+   * @returns Byte(s) to emit.
    */
   handler(_stream: Stream, codePoint: number): number | number[] {
     // 1. If code point is end-of-stream, return finished.

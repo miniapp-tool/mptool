@@ -29,6 +29,7 @@ export const redirect = getTrigger("redirectTo");
 export const switchTab = getTrigger("switchTab");
 export const reLaunch = getTrigger("reLaunch");
 
+// oxlint-disable-next-line func-style
 function clickHandlerFactory(
   action: (pageName: string) => Promise<unknown>,
 ): (event: WechatMiniprogram.Touch) => Promise<void> | void {
@@ -47,13 +48,13 @@ function clickHandlerFactory(
         url?: string;
       };
 
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (this && before && typeof this[before] === "function")
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
       if (url)
         return action(url).then(() => {
-          // oxlint-disable-next-line typescript/no-unnecessary-condition
+          // oxlint-disable-next-line typescript/strict-boolean-expressions
           if (this && after && typeof this[after] === "function")
             (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
         });
@@ -69,7 +70,9 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 /**
  * 返回，默认返回上一页
  *
- * @param [delta=1] 后退层数
+ * @param delta 后退层数
+ *
+ * @returns 如果错误，则返回错误信息
  */
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
@@ -88,12 +91,12 @@ const bindBack = function touchHandler(
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
-    // oxlint-disable-next-line typescript/no-unnecessary-condition
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
     return Promise.resolve(back(Number(delta))).then(() => {
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (this && after && typeof this[after] === "function")
         (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
     });
@@ -122,6 +125,7 @@ const preload = (pageNameWithArg: string): void => {
   routeEmitter.emit(`${ON_PAGE_PRELOAD}:${path}`, query);
 };
 
+// oxlint-disable-next-line func-style
 export function bind(
   this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
@@ -141,14 +145,18 @@ export function bind(
 
       const refName = ref.$refID;
 
+      // oxlint-disable-next-line oxc/no-this-in-exported-function
       if (refName) this.$refs[refName] = ref;
 
+      // oxlint-disable-next-line oxc/no-this-in-exported-function
       ref.$attached(this);
       break;
     }
     default: {
+      // oxlint-disable-next-line oxc/no-this-in-exported-function
       const method = this[event] as ((...args: unknown[]) => unknown) | undefined;
 
+      // oxlint-disable-next-line oxc/no-this-in-exported-function
       if (method) method.apply(this, args);
     }
   }

@@ -36,16 +36,19 @@ export interface EmitterInstance<Events> {
 
 /**
  * Tiny (~300b) functional event emitter / pubsub.
- * @name emitter
+ *
+ * @param all 事件名到处理函数的映射
+ *
  * @returns Emitter
  */
-export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
+export const Emitter = <Events>(
+  all: EventHandlerMap<Events> = new Map(),
+): EmitterInstance<Events> => {
   type GenericEventHandler = Handler<Events[keyof Events]> | WildcardHandler<Events>;
 
   return {
     /**
      * 事件名到处理函数的映射
-     * @memberOf emitter
      */
     all,
 
@@ -54,7 +57,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 监听的事件类型，使用 `'*'` 监听所有事件
      * @param handler 待添加的响应函数
-     * @memberOf emitter
      */
     on: <Key extends keyof Events>(type: Key, handler: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
@@ -70,7 +72,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
      * @param {Function} [handler] 待移除的响应函数
-     * @memberOf emitter
      */
     off: <Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
@@ -89,7 +90,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       let handlers = all.get(type);
@@ -118,22 +118,19 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
-        // oxlint-disable-next-line typescript/await-thenable
         [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)]
           // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!)),
       );
 
       await Promise.all(
-        // oxlint-disable-next-line typescript/await-thenable
         [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)]
           // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!)),
       );
     },
   };
-}
+};

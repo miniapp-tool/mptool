@@ -9,7 +9,7 @@ const scopeComplete = execSync("git status --porcelain || true")
   .toString()
   .trim()
   .split("\n")
-  .find((r) => ~r.indexOf("M  packages"))
+  .find((line) => line.includes("M  packages"))
   ?.replaceAll("/", "%%")
   .match(/packages%%((\w|-)*)/)?.[1];
 
@@ -20,7 +20,7 @@ export default {
   },
   prompt: {
     defaultScope: scopeComplete ?? "",
-    customScopesAlign: !scopeComplete ? "top" : "bottom",
+    customScopesAlign: scopeComplete ? "bottom" : "top",
     allowCustomIssuePrefix: false,
     allowEmptyIssuePrefix: false,
   },

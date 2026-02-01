@@ -7,6 +7,7 @@
     "no-console": "off",
     "typescript/no-unnecessary-type-parameters": "off",
     "unicorn/prefer-code-point": "off",
+    "unicorn/prefer-global-this": "off",
     "unicorn/text-encoding-identifier-case": "off"
   }
 }

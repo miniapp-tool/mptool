@@ -8,7 +8,7 @@ export interface Decoder {
   /**
    * @param stream The stream of bytes being decoded.
    * @param bite The next byte read from the stream.
-   * @return The next code point(s)
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point, or |finished|.
    */
@@ -77,7 +77,7 @@ export class TextDecoder {
   /**
    * @param input The buffer of bytes to decode.
    * @param options
-   * @return The decoded string.
+   * @returns The decoded string.
    */
   decode(input: ArrayBuffer | ArrayBufferView, options: { stream?: boolean } = {}): string {
     let bytes;

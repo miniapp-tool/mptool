@@ -36,7 +36,7 @@ describe("cookies", () => {
   });
 
   it("has", () => {
-    expect(cookieStore.has(TEST_NAME, { domain: "baidu.com" })).toBe(true);
+    expect(cookieStore.has(TEST_NAME, { domain: "baidu.com" })).toBeTruthy();
   });
 
   it("get", () => {
@@ -65,7 +65,7 @@ describe("cookies", () => {
   it("delete", () => {
     cookieStore.delete("EGG_SESSION", "baidu.com");
 
-    expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBe(false);
+    expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBeFalsy();
   });
 
   it("list()", () => {

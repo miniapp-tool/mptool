@@ -1,4 +1,3 @@
-/* eslint-disable typescript/ban-ts-comment */
 import { describe, expect, it } from "vitest";
 
 import { Headers } from "../src/headers.js";
@@ -238,15 +237,15 @@ describe(".has()", () => {
   it("returns true given an existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
 
-    expect(headers.has("accept")).toBe(true);
-    expect(headers.has("AcCePt")).toBe(true);
+    expect(headers.has("accept")).toBeTruthy();
+    expect(headers.has("AcCePt")).toBeTruthy();
   });
 
   it("returns false given a non-existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
 
-    expect(headers.has("content-type")).toBe(false);
-    expect(headers.has("CoNtEnT-TyPe")).toBe(false);
+    expect(headers.has("content-type")).toBeFalsy();
+    expect(headers.has("CoNtEnT-TyPe")).toBeFalsy();
   });
 });
 
@@ -381,8 +380,8 @@ describe(".delete()", () => {
     const headers = new Headers({ accept: "*/*" });
 
     headers.delete("accept");
-    expect(headers.has("accept")).toBe(false);
-    expect(headers.has("AcCePt")).toBe(false);
+    expect(headers.has("accept")).toBeFalsy();
+    expect(headers.has("AcCePt")).toBeFalsy();
     expect(headers.get("accept")).toBeNull();
     expect(headers.get("AcCePt")).toBeNull();
   });
@@ -403,7 +402,7 @@ describe(".forEach()", () => {
 
     headers.forEach((value, name, headers) => {
       expect(value).toBe(headers.get(name));
-      expect(headerSet.has(name)).toBe(false);
+      expect(headerSet.has(name)).toBeFalsy();
       headerSet.add(name);
     });
 
@@ -417,7 +416,7 @@ describe(".forEach()", () => {
 
     headers.forEach(function (value, name, headers) {
       expect(value).toBe(headers.get(name));
-      expect(this.has(name)).toBe(false);
+      expect(this.has(name)).toBeFalsy();
       this.add(name);
     }, headerSet);
 

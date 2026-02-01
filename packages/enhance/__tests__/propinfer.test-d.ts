@@ -1,5 +1,3 @@
-/* eslint-disable typescript/no-unused-vars */
-
 import { expectTypeOf, it } from "vitest";
 
 import type {

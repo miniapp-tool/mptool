@@ -64,6 +64,8 @@ export const handleProperties = (
  * 组件注册器
  *
  * @param options 注册选项
+ *
+ * @returns 组件 ID
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -117,11 +119,10 @@ export const $Component: ComponentConstructor = <
     ) {
       removeRef(this.$id);
 
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/no-dynamic-delete, typescript/strict-boolean-expressions
       if (refName && $refs) delete $refs[refName];
 
       // @ts-expect-error: $parent is not optional
@@ -155,7 +156,7 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
@@ -171,7 +172,7 @@ export const $Component: ComponentConstructor = <
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
-        // oxlint-disable-next-line typescript/no-unnecessary-condition
+        // oxlint-disable-next-line typescript/no-dynamic-delete, typescript/strict-boolean-expressions
         if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
 
         this.$refID = value;

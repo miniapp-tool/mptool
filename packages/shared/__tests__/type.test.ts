@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { type } from "../src";
 
-describe("type", () => {
+describe(type, () => {
   it("function", () => {
     expect(type(() => "")).toEqual("function");
   });

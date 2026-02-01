@@ -2,26 +2,25 @@
  * @param  a The number to test.
  * @param min The minimum value in the range, inclusive.
  * @param max The maximum value in the range, inclusive.
- * @return True if a >= min and a <= max.
+ * @returns True if a >= min and a <= max.
  */
 export const inRange = (a: number, min: number, max: number): boolean => min <= a && a <= max;
 
 /**
  * An ASCII byte is a byte in the range 0x00 to 0x7F, inclusive.
  * @param a The number to test.
- * @return True if a is in the range 0x00 to 0x7F, inclusive.
+ * @returns True if a is in the range 0x00 to 0x7F, inclusive.
  */
 export const isASCIIByte = (a: number): boolean => a >= 0x00 && a <= 0x7f;
 
 /**
  * @param content Input string of UTF-16 code units.
- * @return code points.
+ * @returns code points.
  */
 export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
 
   // 1. Let S be the DOMString value.
-  // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
   const str = String(content);
 
   // 2. Let n be the length of S.
@@ -93,7 +92,7 @@ export const stringToCodePoints = (content: string): number[] => {
 
 /**
  * @param {!Array.<number>} codePoints Array of code points.
- * @return {string} string String of UTF-16 code units.
+ * @returns {string} string String of UTF-16 code units.
  */
 export const codePointsToString = (codePoints: number[]): string => {
   let s = "";

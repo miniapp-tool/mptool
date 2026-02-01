@@ -162,7 +162,7 @@ Options:
 
         cookieStore.applyHeader(header, cookieScope);
 
-        return resolve({
+        resolve({
           data,
           headers: new Headers(header),
           status: statusCode,

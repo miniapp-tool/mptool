@@ -2,11 +2,8 @@
 import { env } from "./env.js";
 
 /** 实时日志管理器 */
-const log =
-  env === "js"
-    ? console
-    : // oxlint-disable-next-line typescript/no-unnecessary-condition
-      wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
+// oxlint-disable-next-line typescript/strict-boolean-expressions
+const log = env === "js" ? console : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */

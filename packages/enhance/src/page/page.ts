@@ -26,10 +26,12 @@ export const $Page: PageConstructor = <
   const { getPath: getRoute, extendPage, injectPage } = getConfig();
   const route = getRoute(name);
 
-  const callLog = (lifeCycle: string, args?: unknown): void =>
+  const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
-  const registerLog = (lifeCycle: string): void =>
+  };
+  const registerLog = (lifeCycle: string): void => {
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
+  };
 
   // extend page config
   if (extendPage) extendPage(name, options);
@@ -102,9 +104,13 @@ export const $Page: PageConstructor = <
     }
   });
 
-  options.onReady = wrapFunction(options.onReady, () => appEmitter.emit(ON_PAGE_READY));
+  options.onReady = wrapFunction(options.onReady, () => {
+    appEmitter.emit(ON_PAGE_READY);
+  });
 
-  options.onUnload = wrapFunction(options.onUnload, () => appEmitter.emit(ON_PAGE_UNLOAD));
+  options.onUnload = wrapFunction(options.onUnload, () => {
+    appEmitter.emit(ON_PAGE_UNLOAD);
+  });
 
   mount(options);
 

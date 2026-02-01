@@ -37,7 +37,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return cookie 对象
+   * @returns cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
     const { domain, path } = getUrlInfo(options);
@@ -58,7 +58,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return Cookie 值
+   * @returns Cookie 值
    */
   getValue(name: string, options: CookieOptions): string | undefined {
     return this.get(name, options)?.value;
@@ -69,7 +69,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return 是否存在
+   * @returns 是否存在
    */
   has(name: string, options: CookieOptions): boolean {
     // 返回是否存在 cookie 值
@@ -130,7 +130,7 @@ export class CookieStore {
    * 获取 cookies 对象数组
    *
    * @param options Cookie 选项
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getCookies(options: CookieOptions): Cookie[] {
     const { domain, path } = getUrlInfo(options);
@@ -150,7 +150,7 @@ export class CookieStore {
   /**
    * 获取所有 cookies 对象
    *
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getAllCookies(): Cookie[] {
     const cookies = [];
@@ -164,7 +164,7 @@ export class CookieStore {
   /**
    * 获取 cookies key/value 对象
    *
-   * @return 键值 Map
+   * @returns 键值 Map
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
@@ -224,9 +224,10 @@ export class CookieStore {
    */
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
-      return this.apply(
+      this.apply(
         parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
       );
+      return;
     }
 
     const setCookieHeader =
@@ -242,7 +243,7 @@ export class CookieStore {
           )
         : setCookieHeader;
 
-    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
   /**
@@ -252,7 +253,7 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(response: unknown, domainOrURL: string): void {
-    return this.applyHeader(
+    this.applyHeader(
       env === "js"
         ? (response as Response).headers
         : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
@@ -264,7 +265,7 @@ export class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @return request cookie header
+   * @returns request cookie header
    */
   getHeader(options: CookieOptions): string {
     // 转化为 request cookies 字符串

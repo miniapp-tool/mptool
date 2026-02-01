@@ -19,12 +19,15 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ *
+ * @param type Navigator type
+ *
+ * @returns Trigger function
  */
 export function getTrigger(
   type: NavigatorType,
   // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
-  // oxlint-disable-next-line typescript/no-explicit-any
   // oxlint-disable-next-line arrow-body-style
   return (pageNameWithArg: string): any => {
     // @ts-expect-error: argument can not union

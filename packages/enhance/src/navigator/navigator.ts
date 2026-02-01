@@ -60,7 +60,9 @@ export function getTrigger(
         routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, query),
         // 等待最小延迟
         new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), getConfig().maxDelay ?? 200);
+          setTimeout(() => {
+            resolve();
+          }, getConfig().maxDelay ?? 200);
         }),
       ]).then(() => {
         // release navigate lock

@@ -36,7 +36,7 @@ const ENCODE_MAP: Record<string, string> = {
 const encode = (str: string): string =>
   encodeURIComponent(str).replaceAll(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
 
-const decode = (str: string): string => decodeURIComponent(str.replaceAll(/\+/g, " "));
+const decode = (str: string): string => decodeURIComponent(str.replaceAll("+", " "));
 
 export class URLSearchParams {
   private params: Map<string, string[]>;
@@ -48,6 +48,7 @@ export class URLSearchParams {
       | Record<string, string | string[]>
       | Iterable<[string, string]>,
   ) {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (!init) {
       this.params = new Map();
     } else if (init instanceof URLSearchParams) {
@@ -69,7 +70,6 @@ export class URLSearchParams {
           });
       else if (Symbol.iterator in init)
         for (const item of init) {
-          // oxlint-disable-next-line typescript/no-unnecessary-condition
           if (item.length !== 2)
             throw new TypeError(
               "Failed to construct 'URLSearchParams': Sequence initializer must only contain pair elements",
@@ -93,10 +93,12 @@ export class URLSearchParams {
 
   /**
    * Append a new name-value pair to the query string.
+   *
+   * @param name The name of the parameter to append
+   * @param value The value of the parameter to append
    */
   append(name: string, value: string): void {
-    // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
-    this.params.set(name, this.getAll(name).concat(String(value)));
+    this.params.set(name, [...this.getAll(name), String(value)]);
   }
 
   /**
@@ -104,6 +106,8 @@ export class URLSearchParams {
    * where name is `name` and value is `value`..
    *
    * If `value` is not provided, removes all name-value pairs whose name is `name`.
+   *
+   * @param name The name of the parameter to delete
    */
   delete(name: string): void {
     this.params.delete(name);
@@ -114,6 +118,8 @@ export class URLSearchParams {
    * Each item of the iterator is a JavaScript `Array`. The first item of the `Array`is the `name`, the second item of the `Array` is the `value`.
    *
    * Alias for `urlSearchParams[@@iterator]()`.
+   *
+   * @returns An ES6 `Iterator` over the name-value pairs
    */
   entries(): IterableIterator<[string, string]> {
     const items = new Set<[name: string, value: string]>();
@@ -137,30 +143,37 @@ export class URLSearchParams {
    * //   a b true
    * //   c d true
    * ```
-   * @param fn Invoked for each name-value pair in the query
+   * @param callbackfn Invoked for each name-value pair in the query
    * @param thisArg To be used as `this` value for when `fn` is called
    */
   forEach(
     callbackfn: (value: string, key: string, iterable: URLSearchParams) => void,
     thisArg?: unknown,
   ): void {
-    this.params.forEach((value, key) =>
-      value.forEach((item) => callbackfn.bind(thisArg)(item, key, this)),
-    );
+    this.params.forEach((value, key) => {
+      value.forEach((item) => {
+        callbackfn.bind(thisArg)(item, key, this);
+      });
+    });
   }
 
   /**
    * Returns the value of the first name-value pair whose name is `name`. If there
    * are no such pairs, `null` is returned.
-   * @return or `null` if there is no name-value pair with the given `name`.
+   *
+   * @param name The name of the parameter to retrieve
+   * @returns or `null` if there is no name-value pair with the given `name`.
    */
   get(name: string): string | null {
     return this.getAll(name)[0] ?? null;
   }
 
   /**
-   * Returns the values of all name-value pairs whose name is `name`. If there are
-   * no such pairs, an empty array is returned.
+   * Returns the values of all name-value pairs whose name is `name`.
+   *
+   * @param name The name of the parameter to retrieve
+   *
+   * @returns An array of values. If there is no name-value pair with the given `name`, an empty array is returned.
    */
   getAll(name: string): string[] {
     return [...(this.params.get(name) ?? [])];
@@ -174,6 +187,10 @@ export class URLSearchParams {
    *
    * If `value` is not provided, returns `true` if there is at least one name-value
    * pair whose name is `name`.
+   *
+   * @param name The name of the parameter to check for
+   *
+   * @returns A boolean indicating whether such a name-value pair exists
    */
   has(name: string): boolean {
     return this.params.has(name);
@@ -191,6 +208,8 @@ export class URLSearchParams {
    * //   foo
    * //   foo
    * ```
+   *
+   * @returns An ES6 `Iterator` over the names
    */
   keys(): IterableIterator<string> {
     return this.params.keys();
@@ -214,6 +233,9 @@ export class URLSearchParams {
    * console.log(params.toString());
    * // Prints foo=def&#x26;abc=def&#x26;xyz=opq
    * ```
+   *
+   * @param name The name of the parameter to set
+   * @param value The value of the parameter to set
    */
   set(name: string, value: string): void {
     this.params.set(name, [value || ""]);
@@ -240,6 +262,8 @@ export class URLSearchParams {
   /**
    * Returns the search parameters serialized as a string, with characters
    * percent-encoded where necessary.
+   *
+   * @returns The serialized query string
    */
   toString(): string {
     const query: string[] = [];
@@ -255,6 +279,8 @@ export class URLSearchParams {
 
   /**
    * Returns an ES6 `Iterator` over the values of each name-value pair.
+   *
+   * @returns An ES6 `Iterator` over the values
    */
   values(): IterableIterator<string> {
     const items = new Set<string>();

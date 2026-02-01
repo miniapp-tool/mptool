@@ -3,13 +3,16 @@ interface AsyncMethodOptionLike {
   success?: (...args: any[]) => void;
 }
 
-type PromisifySuccessResult<P, T extends AsyncMethodOptionLike> = P extends {
+type PromisifySuccessResult<
+  PromiseReturn,
+  T extends AsyncMethodOptionLike,
+> = PromiseReturn extends {
   success: any;
 }
   ? void
-  : P extends { fail: any }
+  : PromiseReturn extends { fail: any }
     ? void
-    : P extends { complete: any }
+    : PromiseReturn extends { complete: any }
       ? void
       : Promise<Parameters<Exclude<T["success"], undefined>>[0]>;
 
@@ -90,38 +93,44 @@ const wxMock = {
   },
 
   /** [wx.getStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorage.html)
-*
-* 从本地缓存中异步获取指定 key 的内容。缓存相关策略请查看 [存储](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/storage.html)。
-*
-* **示例代码**
-*
-*
-* ```js
-wx.getStorage({
-  key: 'key',
-  success (res) {
-    console.log(res.data)
-  }
-})
-```
-*
-* ```js
-try {
-  var value = wx.getStorageSync('key')
-  if (value) {
-    // Do something with return value
-  }
-} catch (e) {
-  // Do something when catch error
-}
-``` */
-  getStorage<T = any, U extends GetStorageOption<T> = GetStorageOption<T>>(
-    option: U,
+   *
+   * 从本地缓存中异步获取指定 key 的内容。缓存相关策略请查看 [存储](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/storage.html)。
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.getStorage({
+   *   key: 'key',
+   *   success (res) {
+   *     console.log(res.data)
+   *   }
+   * })
+   * ```
+   *
+   * ```js
+   * try {
+   *   var value = wx.getStorageSync('key')
+   *   if (value) {
+   *     // Do something with return value
+   *   }
+   * } catch (e) {
+   *   // Do something when catch error
+   * }
+   * ```
+   *
+   * @param option 参数
+   *
+   * @returns void | Promise<{ data: any; errMsg: string }>
+   */
+  getStorage<Value = any, Options extends GetStorageOption<Value> = GetStorageOption<Value>>(
+    option: Options,
     // @ts-expect-error: api return void in some cases
-  ): PromisifySuccessResult<U, GetStorageOption<T>> {
-    const value: T = Object.hasOwn(storage, option.key)
-      ? (storage[option.key] as T)
-      : (undefined as unknown as T);
+  ): PromisifySuccessResult<Options, GetStorageOption<Value>> {
+    const value: Value = Object.hasOwn(storage, option.key)
+      ? (storage[option.key] as Value)
+      : // oxlint-disable-next-line no-undefined
+        (undefined as unknown as Value);
 
     if (!option.success && !option.fail && !option.complete)
       // @ts-expect-error: api return a promise
@@ -136,60 +145,68 @@ try {
     }, 0);
   },
   /** [any wx.getStorageSync(string key)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageSync.html)
-*
-* [wx.getStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorage.html) 的同步版本
-*
-* **示例代码**
-*
-*
-* ```js
-wx.getStorage({
-  key: 'key',
-  success (res) {
-    console.log(res.data)
-  }
-})
-```
-*
-* ```js
-try {
-  var value = wx.getStorageSync('key')
-  if (value) {
-    // Do something with return value
-  }
-} catch (e) {
-  // Do something when catch error
-}
-``` */
-  getStorageSync<T = any>(
-    /** 本地缓存中指定的 key */
-    key: string,
-  ): T {
-    return Object.hasOwn(storage, key) ? (storage[key] as T) : (undefined as unknown as T);
+   *
+   * [wx.getStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorage.html) 的同步版本
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.getStorage({
+   *   key: 'key',
+   *   success (res) {
+   *     console.log(res.data)
+   *   }
+   * })
+   * ```
+   *
+   * ```js
+   * try {
+   *   var value = wx.getStorageSync('key')
+   *   if (value) {
+   *     // Do something with return value
+   *   }
+   * } catch (e) {
+   *   // Do something when catch error
+   * }
+   * ```
+   *
+   * @param key 本地缓存中指定的 key
+   * @returns key对应的内容
+   */
+  getStorageSync<Value = any>(key: string): Value {
+    // oxlint-disable-next-line no-undefined
+    return Object.hasOwn(storage, key) ? (storage[key] as Value) : (undefined as unknown as Value);
   },
 
   /** [wx.setStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)
-*
-* 将数据存储在本地缓存中指定的 key 中。会覆盖掉原来该 key 对应的内容。除非用户主动删除或因存储空间原因被系统清理，否则数据都一直可用。单个 key 允许存储的最大数据长度为 1MB，所有数据存储上限为 10MB。
-*
-* **示例代码**
-*
-*
-* ```js
-wx.setStorage({
-  key:"key",
-  data:"value"
-})
-```
-* ```js
-try {
-  wx.setStorageSync('key', 'value')
-} catch (e) { }
-``` */
-  setStorage<T = any, U extends SetStorageOption<T> = SetStorageOption<T>>(
-    option: U,
+   *
+   * 将数据存储在本地缓存中指定的 key 中。会覆盖掉原来该 key 对应的内容。除非用户主动删除或因存储空间原因被系统清理，否则数据都一直可用。单个 key 允许存储的最大数据长度为 1MB，所有数据存储上限为 10MB。
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.setStorage({
+   *   key:"key",
+   *   data:"value"
+   * })
+   * ```
+   *
+   * ```js
+   * try {
+   *   wx.setStorageSync('key', 'value')
+   * } catch (e) { }
+   * ```
+   *
+   * @param option 参数
+   *
+   * @returns void | Promise<void>
+   */
+  setStorage<Value = any, Options extends SetStorageOption<Value> = SetStorageOption<Value>>(
+    option: Options,
     // @ts-expect-error: api return void in some cases
-  ): PromisifySuccessResult<U, SetStorageOption<T>> {
+  ): PromisifySuccessResult<Options, SetStorageOption<Value>> {
     if (!option.success && !option.fail && !option.complete)
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
@@ -206,36 +223,56 @@ try {
   },
 
   /** [wx.setStorageSync(string key, any data)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorageSync.html)
-*
-* [wx.setStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html) 的同步版本
-*
-* **示例代码**
-*
-*
-* ```js
-wx.setStorage({
-  key:"key",
-  data:"value"
-})
-```
-* ```js
-try {
-  wx.setStorageSync('key', 'value')
-} catch (e) { }
-``` */
-  setStorageSync<T = any>(
-    /** 本地缓存中指定的 key */
-    key: string,
-    /** 需要存储的内容。只支持原生类型、Date、及能够通过`JSON.stringify`序列化的对象。 */
-    data: T,
-  ): void {
+   *
+   * [wx.setStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html) 的同步版本
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.setStorage({
+   *   key:"key",
+   *   data:"value"
+   * })
+   * ```
+   * ```js
+   * try {
+   *   wx.setStorageSync('key', 'value')
+   * } catch (e) { }
+   * ```
+   *
+   * @param key 本地缓存中指定的 key
+   * @param data 需要存储的内容。只支持原生类型、Date、及能够通过 `JSON.stringify` 序列化的对象。
+   */
+  setStorageSync<T = any>(key: string, data: T): void {
     storage[key] = data;
   },
 
-  removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
-    option: T,
+  /**
+   * [wx.removeStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorage.html)
+   *
+   * 从本地缓存中异步移除指定 key 。
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.removeStorage({
+   *   key: 'key',
+   *   success (res) {
+   *     console.log(res)
+   *   }
+   * })
+   * ```
+   *
+   * @param option 参数
+   *
+   * @returns void | Promise<void>
+   */
+  removeStorage<Options extends RemoveStorageOption = RemoveStorageOption>(
+    option: Options,
     // @ts-expect-error: api return void in some cases
-  ): PromisifySuccessResult<T, RemoveStorageOption> {
+  ): PromisifySuccessResult<Options, RemoveStorageOption> {
     if (!option.success && !option.fail && !option.complete)
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
@@ -245,64 +282,72 @@ try {
       });
 
     setTimeout(() => {
+      // oxlint-disable-next-line typescript/no-dynamic-delete
       delete storage[option.key];
       if (option.success) option.success({ errMsg: "" });
     }, 0);
   },
 
   /** [wx.removeStorageSync(string key)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorageSync.html)
-*
-* [wx.removeStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorage.html) 的同步版本
-*
-* **示例代码**
-*
-*
-* ```js
-wx.removeStorage({
-  key: 'key',
-  success (res) {
-    console.log(res)
-  }
-})
-```
-*
-* ```js
-try {
-  wx.removeStorageSync('key')
-} catch (e) {
-  // Do something when catch error
-}
-``` */
+   *
+   * [wx.removeStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorage.html) 的同步版本
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * wx.removeStorage({
+   *   key: 'key',
+   *   success (res) {
+   *     console.log(res)
+   *   }
+   * })
+   * ```
+   *
+   * ```js
+   * try {
+   *   wx.removeStorageSync('key')
+   * } catch (e) {
+   *   // Do something when catch error
+   * }
+   * ```
+   *
+   * @param key 本地缓存中指定的 key
+   */
   removeStorageSync(
     /** 本地缓存中指定的 key */
     key: string,
   ): void {
+    // oxlint-disable-next-line typescript/no-dynamic-delete
     delete storage[key];
   },
-  /** [[RealtimeLogManager](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/RealtimeLogManager.html) wx.getRealtimeLogManager()](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/wx.getRealtimeLogManager.html)
-*
-* 获取实时日志管理器对象。
-*
-* **示例代码**
-*
-*
-* ```js
-// 小程序端
-const logger = wx.getRealtimeLogManager()
-logger.info({str: 'hello world'}, 'info log', 100, [1, 2, 3])
-logger.error({str: 'hello world'}, 'error log', 100, [1, 2, 3])
-logger.warn({str: 'hello world'}, 'warn log', 100, [1, 2, 3])
 
-// 插件端，基础库 2.16.0 版本后支持，只允许采用 key-value 的新格式上报
-const logManager = wx.getRealtimeLogManager()
-const logger = logManager.tag('plugin-log1')
-logger.info('key1', 'value1')
-logger.error('key2', {str: 'value2'})
-logger.warn('key3', 'value3')
-```
-*
-* 最低基础库： `2.7.1` */
-  // TODO: Finish
+  /** [[RealtimeLogManager](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/RealtimeLogManager.html) wx.getRealtimeLogManager()](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/wx.getRealtimeLogManager.html)
+   *
+   * 获取实时日志管理器对象。
+   *
+   * **示例代码**
+   *
+   *
+   * ```js
+   * // 小程序端
+   * const logger = wx.getRealtimeLogManager()
+   * logger.info({str: 'hello world'}, 'info log', 100, [1, 2, 3])
+   * logger.error({str: 'hello world'}, 'error log', 100, [1, 2, 3])
+   * logger.warn({str: 'hello world'}, 'warn log', 100, [1, 2, 3])
+   *
+   * // 插件端，基础库 2.16.0 版本后支持，只允许采用 key-value 的新格式上报
+   * const logManager = wx.getRealtimeLogManager()
+   * const logger = logManager.tag('plugin-log1')
+   * logger.info('key1', 'value1')
+   * logger.error('key2', {str: 'value2'})
+   * logger.warn('key3', 'value3')
+   * ```
+   *
+   * 最低基础库： `2.7.1`
+   *
+   * @returns 实时日志管理器对象
+   */
   getRealtimeLogManager(): Pick<
     Console,
     "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
