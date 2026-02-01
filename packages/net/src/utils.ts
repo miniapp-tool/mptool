@@ -1,5 +1,7 @@
 /**
  * @see RFC 6265
+ * @param domain Domain string
+ * @returns 标准化后的 domain 字符串
  */
 export const normalizeDomain = (domain = ""): string =>
   domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
@@ -18,11 +20,14 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
+  // oxlint-disable-next-line no-param-reassign
   domain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
-  const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+  const scopes = domain
+    .split(".")
+    .map((part) => [".", domain.slice(domain.indexOf(part))].join(""));
 
-  return [domain].concat(scopes);
+  return [domain, ...scopes];
 };
 
 export interface UrlInfo {

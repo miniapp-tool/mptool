@@ -21,9 +21,9 @@ const handleSVG = (node: Element): RichTextNode => {
   }
 
   if (!style && viewbox) {
-    const [, , width, height] = viewbox.split(" ").map(Number);
+    const [widthStart, heightStart, widthEnd, heightEnd] = viewbox.split(" ").map(Number);
 
-    style = `width:${width}px;height:${height}px;`;
+    style = `width:${widthEnd - widthStart}px;height:${heightEnd - heightStart}px;`;
   }
 
   return {
@@ -39,6 +39,7 @@ const handleSVG = (node: Element): RichTextNode => {
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const result: RichTextNode[] = nodes.filter(Boolean) as RichTextNode[];
 
+  // oxlint-disable-next-line prefer-destructuring
   const first = result[0];
 
   // remove first text node if it's empty

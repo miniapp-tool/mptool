@@ -28,7 +28,7 @@ export function getTrigger(
   type: NavigatorType,
   // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
-  // oxlint-disable-next-line arrow-body-style
+  // oxlint-disable-next-line arrow-body-style, typescript/no-explicit-any
   return (pageNameWithArg: string): any => {
     // @ts-expect-error: argument can not union
     return wx[type]({ url: getFullPath(pageNameWithArg) });

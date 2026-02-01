@@ -45,7 +45,7 @@ export class TextEncoder {
     this._encoding = getEncoding("utf-8")!;
 
     if (label !== DEFAULT_ENCODING && "console" in global)
-      console.warn("TextEncoder constructor called with encoding label, " + "which is ignored.");
+      console.warn("TextEncoder constructor called with encoding label, which is ignored.");
   }
 
   get encoding(): string {
@@ -54,7 +54,7 @@ export class TextEncoder {
 
   /**
    * @param content The string to encode.
-   * @param options
+   * @param options Encoding options.
    * @returns Encoded bytes, as a Uint8Array.
    */
   encode(content = "", options: { stream?: boolean } = {}): Uint8Array {

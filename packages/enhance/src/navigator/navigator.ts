@@ -43,6 +43,8 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ * @param type Navigator type
+ * @returns Navigator trigger function
  */
 export function getTrigger(
   type: NavigatorType,

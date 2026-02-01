@@ -5,7 +5,7 @@ import type { ExtendedPageMethods, TrivialPageInstance } from "../page/index.js"
 export type Props = Record<string, unknown>;
 
 export type PropsOptions<Property = Props> = {
-  [K in keyof Property]: PropItem<Property[K]> | null;
+  [Key in keyof Property]: PropItem<Property[Key]> | null;
 };
 
 export type PropItem<Type, Default = Type> = PropOption<Type, Default> | PropConstructor<Type>;
@@ -29,9 +29,8 @@ type PropMethod<Type, TypeConstructor = any> = Type extends (...args: any) => an
   : never;
 
 type PropConstructor<Type = any> =
-  | (new (...args: any[]) => Type & {})
-  | (() => Type)
-  | PropMethod<Type>;
+  // oxlint-disable-next-line typescript/ban-types
+  (new (...args: any[]) => Type & {}) | (() => Type) | PropMethod<Type>;
 
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
 
@@ -43,20 +42,20 @@ export type InferFromType<Type> = [Type] extends [null]
       ? WechatMiniprogram.IAnyObject
       : [Type] extends [BooleanConstructor]
         ? boolean
-        : [Type] extends [PropConstructor<infer V>]
-          ? unknown extends V
+        : [Type] extends [PropConstructor<infer Value>]
+          ? unknown extends Value
             ? // fail to infer
               any
-            : V
+            : Value
           : Type;
 
-type RequiredKeys<T> = {
-  [K in keyof T]: T[K] extends { required: true } | { default: any }
-    ? T[K] extends { default: undefined | (() => undefined) }
+type RequiredKeys<Type> = {
+  [Key in keyof Type]: Type[Key] extends { required: true } | { default: any }
+    ? Type[Key] extends { default: undefined | (() => undefined) }
       ? never
-      : K
+      : Key
     : never;
-}[keyof T];
+}[keyof Type];
 
 type OptionalKeys<Type> = Exclude<keyof Type, RequiredKeys<Type>>;
 
@@ -76,13 +75,13 @@ export type InferPropType<Type> = [Type] extends [null]
               : Value
             : Type;
 
-export type InferPropTypes<O> = O extends object
+export type InferPropTypes<Option> = Option extends object
   ? {
-      [K in keyof O]?: unknown;
+      [Key in keyof Option]?: unknown;
     } & {
       // This is needed to keep the relation between the option prop and the props, allowing to use ctrl+click to navigate to the prop options. see: #3656
-      [K in RequiredKeys<O>]: InferPropType<O[K]>;
-    } & { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
+      [Key in RequiredKeys<Option>]: InferPropType<Option[Key]>;
+    } & { [Key in OptionalKeys<Option>]?: InferPropType<Option[Key]> }
   : Record<string, any>;
 
 export interface ComponentLifetimes {
@@ -175,6 +174,8 @@ export interface ExtendedComponentProperty {
 
 /** 组件实例 */
 export interface ExtendedComponentMethods extends InstanceEmitterMethods {
+  $attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
+
   /**
    * 通过消息的方式调用父组件方法，方法不存在也不会报错
    *
@@ -182,11 +183,6 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
    * @param args 传递的参数
    */
   $call(method: string, ...args: unknown[]): void;
-
-  /**
-   * @private
-   */
-  $attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
 }
 
 export type ComponentInstance<

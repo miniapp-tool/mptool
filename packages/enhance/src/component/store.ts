@@ -9,5 +9,6 @@ export const setRef = (id: number, value: TrivialComponentInstance): void => {
 };
 
 export const removeRef = (id: number): void => {
+  // oxlint-disable-next-line typescript/no-dynamic-delete
   delete componentRefs[id];
 };

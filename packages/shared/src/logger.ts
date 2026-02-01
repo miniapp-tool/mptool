@@ -7,6 +7,7 @@ const log = env === "js" ? console : wx.getRealtimeLogManager?.() || wx.getLogMa
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
+// oxlint-disable-next-line typescript/no-explicit-any
 export const debug = (...args: any[]): void => {
   if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined)
     if (isRealtime) log.info("debug", ...args);
@@ -15,18 +16,21 @@ export const debug = (...args: any[]): void => {
 };
 
 /** 写入信息日志 */
+// oxlint-disable-next-line typescript/no-explicit-any
 export const info = (...args: any[]): void => {
   log.info(...args);
   if (log !== console) console.info(...args);
 };
 
 /** 写入警告日志 */
+// oxlint-disable-next-line typescript/no-explicit-any
 export const warn = (...args: any[]): void => {
   log.warn(...args);
   if (log !== console) console.warn(...args);
 };
 
 /** 写入错误日志 */
+// oxlint-disable-next-line typescript/no-explicit-any
 export const error = (...args: any[]): void => {
   if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
   else log.warn("error", ...args);

@@ -26,9 +26,9 @@ class UTF8Decoder implements Decoder {
   }
 
   /**
-   * @param {Stream} stream The stream of bytes being decoded.
-   * @param {number} bite The next byte read from the stream.
-   * @returns {?(number|!Array.<number>)} The next code point(s)
+   * @param stream The stream of bytes being decoded.
+   * @param bite The next byte read from the stream.
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */

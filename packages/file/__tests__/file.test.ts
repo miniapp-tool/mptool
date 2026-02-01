@@ -26,6 +26,7 @@ describe(set, () => {
     new Promise<void>((resolve) => {
       void setAsync("data-expire", { title: 123 }, 100).then(() => {
         setTimeout(() => {
+          // oxlint-disable-next-line promise/no-nesting
           void getAsync("data-expire").then((data) => {
             expect(data).toEqual(undefined);
             resolve();

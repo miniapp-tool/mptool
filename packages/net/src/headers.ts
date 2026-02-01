@@ -11,6 +11,9 @@ const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_
 /**
  * Validate the given header name.
  * @see https://fetch.spec.whatwg.org/#header-name
+ *
+ * @param value The header name to validate.
+ * @returns Whether the header name is valid.
  */
 const isValidHeaderName = (value: unknown): boolean => {
   if (typeof value !== "string" || value.length === 0 || value.length > 128) return false;
@@ -34,6 +37,9 @@ const normalizeHeaderName = (name: string): string => {
 /**
  * Validate the given header value.
  * @see https://fetch.spec.whatwg.org/#header-value
+ *
+ * @param value The header value to validate.
+ * @returns Whether the header value is valid.
  */
 const isValidHeaderValue = (value: unknown): boolean => {
   if (typeof value !== "string" || value.trim() !== value) return false;
@@ -57,6 +63,9 @@ const isValidHeaderValue = (value: unknown): boolean => {
 /**
  * Normalize the given header value.
  * @see https://fetch.spec.whatwg.org/#concept-header-value-normalize
+ *
+ * @param value The header value to normalize.
+ * @returns The normalized header value.
  */
 const normalizeHeaderValue = (value: string): string =>
   value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
@@ -164,6 +173,9 @@ export class Headers {
 
   /**
    * Returns a boolean stating whether a `Headers` object contains a certain header.
+   *
+   * @param name The name of the header.
+   * @returns `true` if the header exists, `false` otherwise.
    */
   has(name: string): boolean {
     if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
@@ -174,6 +186,9 @@ export class Headers {
 
   /**
    * Sets a new value for an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   *
+   * @param name The name of the header.
+   * @param value The value of the header.
    */
   set(name: string, value: string): void {
     if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;
@@ -188,6 +203,9 @@ export class Headers {
   /**
    * Traverses the `Headers` object,
    * calling the given callback for each header.
+   *
+   * @param callback A callback function that will be called for each header.
+   * @param thisArg Value to use as `this` when executing `callback`.
    */
   forEach<ThisArg = this>(
     callback: (this: ThisArg, value: string, name: string, parent: this) => void,

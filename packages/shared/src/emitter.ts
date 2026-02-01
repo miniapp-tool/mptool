@@ -70,13 +70,15 @@ export const Emitter = <Events>(
      *
      * 如果省略 `handler`，给定类型的所有事件均被忽略
      *
-     * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
-     * @param {Function} [handler] 待移除的响应函数
+     * @param type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
+     * @param handler 待移除的响应函数
      */
     off: <Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers)
+        // if handler not found, >>> 0 ensures no removal occurs by converting -1 to large index
+        // oxlint-disable-next-line no-bitwise, unicorn/prefer-math-trunc
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
         else all.set(type, []);
     },

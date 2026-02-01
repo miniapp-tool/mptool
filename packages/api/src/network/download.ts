@@ -6,8 +6,10 @@ import { showToast } from "../ui/index.js";
 /**
  * 下载文件
  *
- * @param path 下载路径
+ * @param url 下载路径
  * @param mask 遮罩层
+ *
+ * @returns 下载后的临时文件路径
  */
 export const download = (url: string, mask = false): Promise<string> =>
   new Promise((resolve, reject) => {

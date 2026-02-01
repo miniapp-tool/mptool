@@ -147,7 +147,7 @@ export class TextDecoder {
         result = this._decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;
-        if (result === null) continue;
+        if (result == null) continue;
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       } while (!inputStream.endOfStream());

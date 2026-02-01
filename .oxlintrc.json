@@ -30,6 +30,8 @@
     "typescript/no-unnecessary-type-parameters": "off",
     "unicorn/prefer-code-point": "off",
     "unicorn/prefer-global-this": "off",
+
+    "no-warning-comments": "off",
     "unicorn/text-encoding-identifier-case": "off"
   }
 }

@@ -16,20 +16,29 @@
  * c(); // expect to output 'a', and then output 'b'
  * ```
  */
-export function wrapFunction<T>(
-  original: ((this: T, ...args: any[]) => void) | undefined,
-  pre: (this: T, ...args: any[]) => void,
-): (this: T, ...args: any[]) => void;
-export function wrapFunction<T>(
-  original: ((this: T, ...args: any[]) => Promise<void>) | undefined,
-  pre: (this: T, ...args: any[]) => void,
-): (this: T, ...args: any[]) => Promise<void>;
+export function wrapFunction<This>(
+  // oxlint-disable-next-line typescript/no-explicit-any
+  original: ((this: This, ...args: any[]) => void) | undefined,
+  // oxlint-disable-next-line typescript/no-explicit-any
+  pre: (this: This, ...args: any[]) => void,
+  // oxlint-disable-next-line typescript/no-explicit-any
+): (this: This, ...args: any[]) => void;
+export function wrapFunction<This>(
+  // oxlint-disable-next-line typescript/no-explicit-any
+  original: ((this: This, ...args: any[]) => Promise<void>) | undefined,
+  // oxlint-disable-next-line typescript/no-explicit-any
+  pre: (this: This, ...args: any[]) => void,
+  // oxlint-disable-next-line typescript/no-explicit-any
+): (this: This, ...args: any[]) => Promise<void>;
 
-export function wrapFunction<T, R extends void | Promise<void>>(
-  original: ((this: T, ...args: any[]) => R) | undefined,
-  pre: (this: T, ...args: any[]) => void,
+export function wrapFunction<This, Return extends void | Promise<void>>(
+  // oxlint-disable-next-line typescript/no-explicit-any
+  original: ((this: This, ...args: any[]) => Return) | undefined,
+  // oxlint-disable-next-line typescript/no-explicit-any
+  pre: (this: This, ...args: any[]) => void,
 ) {
-  return function wrapper(this: T, ...args: any[]): Promise<void> | void {
+  // oxlint-disable-next-line typescript/no-explicit-any
+  return function wrapper(this: This, ...args: any[]): Promise<void> | void {
     pre.apply(this, args);
 
     if (original) return original.apply(this, args);
@@ -63,13 +72,14 @@ export function wrapFunction<T, R extends void | Promise<void>>(
  * }, 15);
  * ```
  */
-export const lock = <T, A extends unknown[], R>(
-  fn: (this: T, release: () => void, ...args: A) => R,
-  ctx?: T,
-): ((this: T, ...args: A) => R | undefined) => {
+export const lock = <This, Args extends unknown[], Return>(
+  fn: (this: This, release: () => void, ...args: Args) => Return,
+  ctx?: This,
+): ((this: This, ...args: Args) => Return | undefined) => {
   let pending: boolean;
 
-  return function lockFun(this: T, ...args: A): R | undefined {
+  return function lockFun(this: This, ...args: Args): Return | undefined {
+    // oxlint-disable-next-line no-undefined
     if (pending) return undefined;
 
     pending = true;
@@ -100,13 +110,14 @@ export const lock = <T, A extends unknown[], R>(
  * counter(); // count is still 1
  * ```
  */
-export const once = <T, A extends unknown[], R>(
-  func: (...args: A) => R,
-  ctx?: T,
-): ((this: T, ...args: A) => R | undefined) => {
+export const once = <This, Args extends unknown[], Return>(
+  func: (...args: Args) => Return,
+  ctx?: This,
+): ((this: This, ...args: Args) => Return | undefined) => {
   let called: boolean;
 
-  return function onceFunc(this: T, ...args: A): R | undefined {
+  return function onceFunc(this: This, ...args: Args): Return | undefined {
+    // oxlint-disable-next-line no-undefined
     if (called) return undefined;
     called = true;
 
@@ -168,7 +179,11 @@ export class Queue {
    * @param args 函数参数
    */
   // oxlint-disable-next-line typescript/no-explicit-any
-  add<A extends any[], T>(func: (next: () => void, ...args: A) => void, ctx?: T, ...args: A): void {
+  add<Args extends any[], This>(
+    func: (next: () => void, ...args: Args) => void,
+    ctx?: This,
+    ...args: Args
+  ): void {
     this.funcQueue.push({
       // @ts-expect-error: func is not typed
       func,
@@ -195,13 +210,13 @@ export class Queue {
  * @returns 包装过的函数
  * @async
  */
-export const funcQueue = <A extends unknown[], T = unknown>(
-  fn: (next: () => void, ...args: A) => void,
+export const funcQueue = <Args extends unknown[], This = unknown>(
+  fn: (next: () => void, ...args: Args) => void,
   capacity = 1,
-): ((this: T, ...args: A) => void) => {
+): ((this: This, ...args: Args) => void) => {
   const queue = new Queue(capacity);
 
-  return function queueFunc(this: T, ...args: A): void {
+  return function queueFunc(this: This, ...args: Args): void {
     queue.add(fn, this, ...args);
   };
 };

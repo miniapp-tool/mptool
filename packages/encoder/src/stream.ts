@@ -3,13 +3,13 @@ import { END_OF_STREAM } from "./constant.js";
 /**
  * A stream represents an ordered sequence of tokens.
  *
- * @constructor
- * @param tokens Array of tokens that provide
- * the stream.
  */
 export class Stream {
   tokens: number[];
 
+  /**
+   * @param tokens Array of tokens that provide the stream.
+   */
   constructor(tokens: number[] | Uint8Array) {
     this.tokens = [...tokens];
     // Reversed as push/pop is more efficient than shift/unshift.

@@ -414,11 +414,11 @@ describe(".forEach()", () => {
     const headers = new Headers({ accept: "*/*", "User-Agent": "agent" });
     const headerSet = new Set();
 
-    headers.forEach(function (value, name, headers) {
+    headers.forEach((value, name, headers) => {
       expect(value).toBe(headers.get(name));
-      expect(this.has(name)).toBeFalsy();
-      this.add(name);
-    }, headerSet);
+      expect(headerSet.has(name)).toBeFalsy();
+      headerSet.add(name);
+    });
 
     expect(headerSet).toEqual(new Set(["accept", "user-agent"]));
   });
