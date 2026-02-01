@@ -126,7 +126,8 @@ export const set = <T = unknown>(
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
  *   - `'once'`: 仅本次启动有效
- * @param [asyncCB] 异步回调方法，不填为同步
+ *
+ * @returns 设置结果 Promise
  */
 export const setAsync = <T = unknown>(
   key: string,
@@ -187,6 +188,8 @@ export const remove = (key: string): void => {
  *
  * @param key key
  * @param option 回调函数
+ *
+ * @returns 移除结果 Promise
  */
 export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallbackResult> =>
   wx.removeStorage({
@@ -195,8 +198,6 @@ export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallb
 
 /**
  * 清除失效数据
- *
- * @param key key
  */
 export const check = (): void => {
   wx.getStorageInfoSync().keys.forEach((key) => {
@@ -211,8 +212,6 @@ export const check = (): void => {
 
 /**
  * 异步清除失效数据
- *
- * @param key key
  *
  * @returns 清除完成的 Promise
  */

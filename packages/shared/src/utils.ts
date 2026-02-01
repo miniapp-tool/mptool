@@ -152,7 +152,7 @@ export class Queue {
             this.running -= 1;
             this.next();
           },
-          ...Array.prototype.slice.call(args, 0),
+          ...args,
         ]);
       };
 

@@ -144,6 +144,9 @@ importers:
 
   packages/api:
     devDependencies:
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
       '@mptool/shared':
         specifier: workspace:*
         version: link:../shared

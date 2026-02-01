@@ -139,9 +139,16 @@ export const $Component: ComponentConstructor = <
 
     // inject methods
 
+    /**
+     * Call a method on the component.
+     *
+     * @param method The method name.
+     * @param args The method arguments.
+     */
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
+      // oxlint-disable-next-line typescript/no-explicit-any
       ...args: any[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
@@ -155,6 +162,9 @@ export const $Component: ComponentConstructor = <
     $getRef: getRef,
 
     // Setting $root and $parent, called by parent
+    /**
+     * @param parent The parent component instance.
+     */
     $attached(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
@@ -170,6 +180,9 @@ export const $Component: ComponentConstructor = <
   options.observers = {
     ...options.observers,
     // add ref observer to support dynamic ref
+    /**
+     * @param value The component ref.
+     */
     ref(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       value: string,

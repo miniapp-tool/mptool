@@ -5,11 +5,13 @@
  * @returns 对象的类型
  */
 export const type = (obj: unknown): string => {
+  // oxlint-disable-next-line no-undefined
   if (obj === undefined) return "undefined";
 
   const objType = typeof obj;
 
   if (objType === "object") {
+    // oxlint-disable-next-line eqeqeq
     if (obj === null) return "null";
 
     const objType = /\[object (\w+)\]/u.exec(Object.prototype.toString.call(obj));
@@ -20,5 +22,5 @@ export const type = (obj: unknown): string => {
   return objType;
 };
 
-// oxlint-disable-next-line typescript/no-unsafe-function-type
+// oxlint-disable-next-line typescript/ban-types, typescript/no-unsafe-function-type
 export const isFunction = <T extends Function>(obj: unknown): obj is T => type(obj) === "function";

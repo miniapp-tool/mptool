@@ -57,6 +57,6 @@ export const join = (path: string, queries: Record<string, string>, unencoded = 
   const queryString = stringify(queries, "&", unencoded);
 
   return queryString
-    ? `${path}${/[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"}${queryString}`
+    ? `${path}${/[?&]$/u.test(path) ? "" : path.includes("?") ? "&" : "?"}${queryString}`
     : path;
 };

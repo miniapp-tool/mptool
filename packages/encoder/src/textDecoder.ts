@@ -40,8 +40,9 @@ export class TextDecoder {
     const encoding = getEncoding(label);
 
     // 2. If encoding is failure or replacement, throw a RangeError.
+    // oxlint-disable-next-line eqeqeq
     if (encoding === null || encoding.name === "replacement")
-      throw new RangeError("Unknown encoding: " + label);
+      throw new RangeError(`Unknown encoding: ${label}`);
     if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
@@ -129,6 +130,7 @@ export class TextDecoder {
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
 
+      // oxlint-disable-next-line eqeqeq
       if (result !== null)
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);

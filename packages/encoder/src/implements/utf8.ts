@@ -1,3 +1,5 @@
+// oxlint-disable max-classes-per-file
+// oxlint-disable no-bitwise
 import { decoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import type { Stream } from "../stream.js";
@@ -30,6 +32,7 @@ class UTF8Decoder implements Decoder {
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
+  // oxlint-disable-next-line max-statements
   handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and utf-8 bytes needed is not 0,
     // set utf-8 bytes needed to 0 and return error.
@@ -99,6 +102,7 @@ class UTF8Decoder implements Decoder {
       // 1. Set utf-8 code point, utf-8 bytes needed, and utf-8
       // bytes seen to 0, set utf-8 lower boundary to 0x80, and set
       // utf-8 upper boundary to 0xBF.
+      // oxlint-disable-next-line no-multi-assign
       this.utf8CodePoint = this.utf8BytesNeeded = this.utf8BytesSeen = 0;
       this.utf8LowerBoundary = 0x80;
       this.utf8UpperBoundary = 0xbf;
@@ -131,6 +135,7 @@ class UTF8Decoder implements Decoder {
 
     // 10. Set utf-8 code point, utf-8 bytes needed, and utf-8 bytes
     // seen to 0.
+    // oxlint-disable-next-line no-multi-assign
     this.utf8CodePoint = this.utf8BytesNeeded = this.utf8BytesSeen = 0;
 
     // 11. Return a code point whose value is code point.
@@ -146,10 +151,11 @@ class UTF8Encoder implements Encoder {
   }
 
   /**
-   * @param {Stream} stream Input stream.
-   * @param {number} codePoint Next code point read from the stream.
-   * @returns {(number|!Array.<number>)} Byte(s) to emit.
+   * @param _stream Input stream.
+   * @param codePoint Next code point read from the stream.
+   * @returns Byte(s) to emit.
    */
+  // oxlint-disable-next-line class-methods-use-this
   handler(_stream: Stream, codePoint: number): number | number[] {
     // 1. If code point is end-of-stream, return finished.
     if (codePoint === END_OF_STREAM) return FINISHED;

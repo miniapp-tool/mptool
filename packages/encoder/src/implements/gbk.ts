@@ -51,16 +51,11 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
   // its corresponding code point.
   let offset = 0;
   let codePointOffset = 0;
-  const idx = encodingIndex["gb18030-ranges"];
-  let i;
+  const index = encodingIndex["gb18030-ranges"];
 
-  for (i = 0; i < idx.length; ++i) {
-    /** @type {!Array.<number>} */
-    const entry = idx[i];
-
+  for (const entry of index) {
     if (entry[0] <= pointer) {
-      offset = entry[0];
-      codePointOffset = entry[1];
+      [offset, codePointOffset] = entry;
     } else {
       break;
     }
@@ -85,16 +80,11 @@ const indexGB18030RangesPointerFor = (codePoint: number): number => {
   // be its corresponding pointer.
   let offset = 0;
   let pointerOffset = 0;
-  const idx = encodingIndex["gb18030-ranges"];
-  let i;
+  const index = encodingIndex["gb18030-ranges"];
 
-  for (i = 0; i < idx.length; ++i) {
-    /** @type {!Array.<number>} */
-    const entry = idx[i];
-
+  for (const entry of index) {
     if (entry[1] <= codePoint) {
-      offset = entry[1];
-      pointerOffset = entry[0];
+      [pointerOffset, offset] = entry;
     } else {
       break;
     }
@@ -118,9 +108,9 @@ class GB18030Decoder implements Decoder {
   }
 
   /**
-   * @param {Stream} stream The stream of bytes being decoded.
-   * @param {number} bite The next byte read from the stream.
-   * @returns {?(number|!Array.<number>)} The next code point(s)
+   * @param stream The stream of bytes being decoded.
+   * @param bite The next byte read from the stream.
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
@@ -148,7 +138,7 @@ class GB18030Decoder implements Decoder {
       this.gb18030Third = 0x00;
       decoderError(this.fatal);
     }
-    let codePoint;
+    let codePoint: number | null;
 
     // 3. If gb18030 third is not 0x00, run these substeps:
     if (this.gb18030Third !== 0x00) {
@@ -180,7 +170,7 @@ class GB18030Decoder implements Decoder {
 
       // 5. If code point is null, prepend buffer to stream and
       // return error.
-      if (codePoint === null) {
+      if (codePoint == null) {
         stream.prepend(buffer);
 
         return decoderError(this.fatal);
@@ -238,14 +228,15 @@ class GB18030Decoder implements Decoder {
 
       // 5. Let code point be null if pointer is null and the index
       // code point for pointer in index gb18030 otherwise.
+      // oxlint-disable-next-line eqeqeq
       codePoint = pointer === null ? null : indexCodePointFor(pointer, encodingIndex.gb18030);
 
       // 6. If code point is null and byte is an ASCII byte, prepend
       // byte to stream.
-      if (codePoint === null && isASCIIByte(bite)) stream.prepend(bite);
+      if (codePoint == null && isASCIIByte(bite)) stream.prepend(bite);
 
       // 7. If code point is null, return error.
-      if (codePoint === null) return decoderError(this.fatal);
+      if (codePoint == null) return decoderError(this.fatal);
 
       // 8. Return a code point whose value is code point.
       return codePoint;
@@ -279,7 +270,7 @@ class GB18030Encoder implements Encoder {
   }
 
   /**
-   * @param stream Input stream.
+   * @param _stream Input stream.
    * @param codePoint Next code point read from the stream.
    * @returns Byte(s) to emit.
    */
@@ -303,6 +294,7 @@ class GB18030Encoder implements Encoder {
     let pointer = indexPointerFor(codePoint, encodingIndex.gb18030);
 
     // 6. If pointer is not null, run these substeps:
+    // oxlint-disable-next-line eqeqeq
     if (pointer !== null) {
       // 1. Let lead be floor(pointer / 190) + 0x81.
       const lead = Math.floor(pointer / 190) + 0x81;

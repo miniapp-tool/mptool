@@ -84,6 +84,13 @@ interface RemoveStorageOption {
   success?: RemoveStorageSuccessCallback;
 }
 
+interface SetClipboardDataOption {
+  data: string;
+  success?: () => void;
+  fail?: (err: { errMsg: string }) => void;
+  complete?: () => void;
+}
+
 const storage: Record<string, any> = {};
 
 const wxMock = {
@@ -144,6 +151,22 @@ const wxMock = {
       if (option.success) option.success({ data: value, errMsg: "" });
     }, 0);
   },
+
+  /** [wx.setClipboardData(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/device/clipboard/wx.setClipboardData.html)
+   *
+   * 设置系统剪贴板的内容
+   *
+   * @param option 参数
+   */
+  setClipboardData(option: SetClipboardDataOption): Promise<void> {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        if (option.success) option.success();
+        resolve();
+      }, 0);
+    });
+  },
+
   /** [any wx.getStorageSync(string key)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageSync.html)
    *
    * [wx.getStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorage.html) 的同步版本
@@ -360,5 +383,9 @@ const wxMock = {
 };
 
 (global as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
+
+(global as typeof globalThis & { getCurrentPages: () => any[] }).getCurrentPages = (): any[] => [];
+
+// TODO: By importing the module, global should have global.wx and global.getCurrentPages correctly typed
 
 export const wx = wxMock;

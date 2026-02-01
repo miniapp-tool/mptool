@@ -1,3 +1,4 @@
+// oxlint-disable no-bitwise
 /**
  * @param  a The number to test.
  * @param min The minimum value in the range, inclusive.

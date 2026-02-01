@@ -24,12 +24,14 @@ export const handleProperties = (
     const advancedValue = oldProps[propertyName];
 
     // Constructor or null
+    // oxlint-disable-next-line eqeqeq
     if (advancedValue === null || typeof advancedValue === "function") {
       props[propertyName] = advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = advancedValue;
 
       // null type
+      // oxlint-disable-next-line eqeqeq
       if (type === null)
         props[propertyName] = {
           type: null,
@@ -42,6 +44,7 @@ export const handleProperties = (
         props[propertyName] = {
           type: type[0],
           value: advancedValue.default,
+
           optionalTypes: type.slice(1),
         };
       else
@@ -65,7 +68,7 @@ export const handleProperties = (
  *
  * @param options 注册选项
  *
- * @returns 组件 ID
+ * @returns 组件实例 ID
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -136,9 +139,16 @@ export const $Component: ComponentConstructor = <
 
     // inject methods
 
+    /**
+     * Call a method on the component.
+     *
+     * @param method The method name.
+     * @param args The method arguments.
+     */
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
+      // oxlint-disable-next-line typescript/no-explicit-any
       ...args: any[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
@@ -152,6 +162,9 @@ export const $Component: ComponentConstructor = <
     $getRef: getRef,
 
     // Setting $root and $parent, called by parent
+    /**
+     * @param parent The parent component instance.
+     */
     $attached(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
@@ -167,6 +180,9 @@ export const $Component: ComponentConstructor = <
   options.observers = {
     ...options.observers,
     // add ref observer to support dynamic ref
+    /**
+     * @param value The component ref.
+     */
     ref(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       value: string,

@@ -86,7 +86,7 @@ export class Headers {
 
       initialHeaders.forEach((value, name) => {
         this.append(name, value);
-      }, this);
+      });
     } else if (Array.isArray(init)) {
       init.forEach(([name, value]) => {
         this.append(name, Array.isArray(value) ? value.join(", ") : value);
@@ -102,6 +102,9 @@ export class Headers {
 
   /**
    * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   *
+   * @param name The name of the header.
+   * @param value The value of the header.
    */
   append(name: string, value: string): void {
     if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;
@@ -118,18 +121,24 @@ export class Headers {
 
   /**
    * Deletes a header from the `Headers` object.
+   *
+   * @param name The name of the header to delete.
    */
   delete(name: string): void {
     if (!isValidHeaderName(name) || !this.has(name)) return;
 
     const normalizedName = normalizeHeaderName(name);
 
+    // oxlint-disable-next-line typescript/no-dynamic-delete
     delete this.headers[normalizedName];
     this.headerNames.delete(normalizedName);
   }
 
   /**
    * Returns a `ByteString` sequence of all the values of a header with a given name.
+   *
+   * @param name The name of the header.
+   * @returns The value of the header. If the header does not exist, null is returned.
    */
   get(name: string): string | null {
     if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
@@ -141,11 +150,13 @@ export class Headers {
    * Returns an array containing the values
    * of all Set-Cookie headers associated
    * with a response
+   *
+   * @returns An array of Set-Cookie header values.
    */
   getSetCookie(): string[] {
     const setCookieHeader = this.get("set-cookie");
 
-    if (setCookieHeader === null) return [];
+    if (setCookieHeader == null) return [];
     if (setCookieHeader === "") return [""];
 
     return splitCookiesString(setCookieHeader);

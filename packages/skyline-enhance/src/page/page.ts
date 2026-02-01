@@ -34,6 +34,7 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
