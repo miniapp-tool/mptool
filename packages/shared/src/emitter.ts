@@ -39,7 +39,6 @@ export interface EmitterInstance<Events> {
  * @name emitter
  * @returns Emitter
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
   type GenericEventHandler = Handler<Events[keyof Events]> | WildcardHandler<Events>;
 
@@ -96,17 +95,15 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
       let handlers = all.get(type);
 
       if (handlers)
-        void (handlers as EventHandlerList<Events[keyof Events]>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void [...(handlers as EventHandlerList<Events[keyof Events]>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!));
 
       handlers = all.get("*");
 
       if (handlers)
-        void (handlers as WildCardEventHandlerList<Events>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void [...(handlers as WildCardEventHandlerList<Events>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!));
     },
 
@@ -125,18 +122,16 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      */
     emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/await-thenable
+        [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!)),
       );
 
       await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        ((all.get("*") ?? []) as WildCardEventHandlerList<Events>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/await-thenable
+        [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!)),
       );
     },

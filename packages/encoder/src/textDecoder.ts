@@ -42,8 +42,8 @@ export class TextDecoder {
 
     // 2. If encoding is failure or replacement, throw a RangeError.
     if (encoding === null || encoding.name === "replacement")
-      throw RangeError("Unknown encoding: " + label);
-    if (!(encoding.name in decoders)) throw Error("Decoder not present.");
+      throw new RangeError("Unknown encoding: " + label);
+    if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
     this._encoding = encoding;
@@ -124,7 +124,7 @@ export class TextDecoder {
 
       // 1. Let result be the result of processing token for decoder,
       // stream, output, and error mode.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       result = this._decoder!.handler(inputStream, token);
 
       // 2. If result is finished, return output, serialized.
@@ -142,7 +142,7 @@ export class TextDecoder {
     // TODO: Align with spec algorithm.
     if (!this.doNotFlush) {
       do {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         result = this._decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;

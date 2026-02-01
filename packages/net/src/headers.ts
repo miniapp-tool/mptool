@@ -132,7 +132,7 @@ export class Headers {
    * Returns a `ByteString` sequence of all the values of a header with a given name.
    */
   get(name: string): string | null {
-    if (!isValidHeaderName(name)) throw TypeError(`Invalid header name "${name}"`);
+    if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
 
     return this.headers[normalizeHeaderName(name)] ?? null;
   }
@@ -157,7 +157,7 @@ export class Headers {
   has(name: string): boolean {
     if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
 
-    // eslint-disable-next-line no-prototype-builtins
+    // oxlint-disable-next-line no-prototype-builtins
     return this.headers.hasOwnProperty(normalizeHeaderName(name));
   }
 
@@ -183,7 +183,7 @@ export class Headers {
     thisArg?: ThisArg,
   ): void {
     for (const [name, value] of this.entries()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       callback.call(thisArg!, value, name, this);
     }
   }
@@ -202,7 +202,7 @@ export class Headers {
 
     for (const name of sortedKeys)
       if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       else yield [name, this.get(name)!];
   }
 

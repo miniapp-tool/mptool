@@ -38,7 +38,7 @@ export const $Page: PageConstructor = <
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -47,7 +47,7 @@ export const $Page: PageConstructor = <
     if (shouldBeFirstPage) {
       shouldBeFirstPage = false;
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       options.$state!.firstOpen = true;
     }
   });

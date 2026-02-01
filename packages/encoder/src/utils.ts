@@ -11,7 +11,7 @@ export const inRange = (a: number, min: number, max: number): boolean => min <= 
  * @param a The number to test.
  * @return True if a is in the range 0x00 to 0x7F, inclusive.
  */
-export const isASCIIByte = (a: number): boolean => 0x00 <= a && a <= 0x7f;
+export const isASCIIByte = (a: number): boolean => a >= 0x00 && a <= 0x7f;
 
 /**
  * @param content Input string of UTF-16 code units.
@@ -21,7 +21,7 @@ export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
 
   // 1. Let S be the DOMString value.
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+  // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
   const str = String(content);
 
   // 2. Let n be the length of S.
@@ -45,11 +45,11 @@ export const stringToCodePoints = (content: string): number[] => {
       // Append to U the Unicode character with code point c.
       u.push(char);
     // 0xDC00 ≤ char ≤ 0xDFFF
-    else if (0xdc00 <= char && char <= 0xdfff)
+    else if (char >= 0xdc00 && char <= 0xdfff)
       // Append to U a U+FFFD REPLACEMENT CHARACTER.
       u.push(0xfffd);
     // 0xD800 ≤ char ≤ 0xDBFF
-    else if (0xd800 <= char && char <= 0xdbff)
+    else if (char >= 0xd800 && char <= 0xdbff)
       if (i === strLength - 1) {
         // 1. i is the last one then append to U a U+FFFD REPLACEMENT
         // CHARACTER.
@@ -61,7 +61,7 @@ export const stringToCodePoints = (content: string): number[] => {
         const nextChar = str.charCodeAt(i + 1);
 
         // 2. If 0xDC00 ≤ nextChar ≤ 0xDFFF, then:
-        if (0xdc00 <= nextChar && nextChar <= 0xdfff) {
+        if (nextChar >= 0xdc00 && nextChar <= 0xdfff) {
           // 1. Let a be char & 0x3FF.
           const a = char & 0x3ff;
 

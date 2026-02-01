@@ -32,9 +32,7 @@ describe("mitt#", () => {
     FOO: unknown;
     bar: unknown;
     Bar: unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:bat!": unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:baT!": unknown;
     Foo: unknown;
     [eventType]: unknown;

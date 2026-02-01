@@ -152,7 +152,7 @@ export class Queue {
             this.running -= 1;
             this.next();
           },
-          ...[].slice.call(args, 0),
+          ...Array.prototype.slice.call(args, 0),
         ]);
       };
 
@@ -167,13 +167,13 @@ export class Queue {
    * @param ctx 函数运行上下文
    * @param args 函数参数
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   add<A extends any[], T>(func: (next: () => void, ...args: A) => void, ctx?: T, ...args: A): void {
     this.funcQueue.push({
       // @ts-expect-error: func is not typed
       func,
       ctx,
-      args: [].slice.call(args, 0),
+      args: Array.prototype.slice.call(args, 0),
     });
 
     // 开始第一个队列

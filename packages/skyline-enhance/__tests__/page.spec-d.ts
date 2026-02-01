@@ -79,10 +79,8 @@ it("$Page", () => {
     },
     onReady() {
       this.setData({
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        logs: (wx.getStorageSync("logs") || []).map((log: number) => {
-          return new Date(log).toString();
-        }),
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
+        logs: (wx.getStorageSync("logs") || []).map((log: number) => new Date(log).toString()),
       });
     },
     onShow() {},
@@ -113,14 +111,11 @@ it("$Page", () => {
       this.setData(
         {
           text: "Set some data for updating view.",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "array[0].text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "object.text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "newField.text": "new data",
         },
-        function () {},
+        function viewTap() {},
       );
       expectTypeOf(this.data.text).toEqualTypeOf<string>();
       expectTypeOf(this.route).toEqualTypeOf<string>();
@@ -202,9 +197,9 @@ it("$Page", () => {
       logs: [],
     },
     getLogs() {
-      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) => {
-        return new Date(log).toString();
-      });
+      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) =>
+        new Date(log).toString(),
+      );
     },
     onLoad() {
       const logs = this.getLogs();
@@ -234,7 +229,7 @@ it("$Page", () => {
   $Page("example", {
     onAddToFavorites(res) {
       // webview 页面返回 webviewUrl
-      if (res.webviewUrl) console.log("WebviewUrl: ", res.webviewUrl);
+      if (res.webviewUrl) console.log("WebviewUrl:", res.webviewUrl);
 
       return {
         title: "自定义标题",

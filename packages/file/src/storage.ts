@@ -6,7 +6,7 @@ export interface StorageData<T> {
 }
 
 /** 本次小程序启动的会话 ID */
-const sessionId = new Date().getTime();
+const sessionId = Date.now();
 
 logger.debug(`Current sessionId is ${sessionId}`);
 
@@ -54,7 +54,7 @@ export const take = <T = unknown>(key: string): T | undefined => {
 const getData = <T = unknown>(key: string, value: StorageData<T> | null): T | undefined =>
   value
     ? value.expired
-      ? value.expired === sessionId || new Date().getTime() < value.expired
+      ? value.expired === sessionId || Date.now() < value.expired
         ? // not expired
           value.data
         : // expired
@@ -90,7 +90,7 @@ const prepareData = <T = unknown>(
         ? // 仅本次会话有效
           sessionId
         : // 计算过期时间
-          expire + new Date().getTime();
+          expire + Date.now();
   }
 
   return data;
@@ -167,6 +167,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
     .catch(() => {
       logger.error(`set "${key}" fail`);
 
+      // oxlint-disable-next-line unicorn/no-useless-undefined
       return undefined;
     });
 
@@ -201,7 +202,7 @@ export const check = (): void => {
     if (key.startsWith(CACHE_PREFIX)) {
       const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
-      if (!value || (value.expired !== sessionId && new Date().getTime() >= value.expired))
+      if (!value || (value.expired !== sessionId && Date.now() >= value.expired))
         wx.removeStorageSync(key);
     }
   });
@@ -219,7 +220,7 @@ export const checkAsync = (): Promise<void[]> =>
         .filter((key) => key.startsWith(CACHE_PREFIX))
         .map((key) =>
           wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
-            if (!data || (data.expired !== sessionId && new Date().getTime() >= data.expired))
+            if (!data || (data.expired !== sessionId && Date.now() >= data.expired))
               return wx.removeStorage({ key }).then(() => {
                 // return void
               });

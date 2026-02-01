@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable typescript/no-unsafe-argument */
 import { env } from "./env.js";
 
 /** 实时日志管理器 */
 const log =
   env === "js"
     ? console
-    : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    : // oxlint-disable-next-line typescript/no-unnecessary-condition
       wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 

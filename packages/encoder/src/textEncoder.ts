@@ -17,7 +17,6 @@ export interface Encoder {
 export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> = {};
 
 /**
- * @constructor
  *  A TextEncoder object has an associated encoding and encoder.
  * @param label The label of the encoding. NONSTANDARD.
  * @param options NONSTANDARD.
@@ -36,13 +35,13 @@ export class TextEncoder {
   ) {
     // Web IDL conventions
     if (!(this instanceof TextEncoder))
-      throw TypeError("Called as a function. Did you forget 'new'?");
+      throw new TypeError("Called as a function. Did you forget 'new'?");
 
     // Non-standard
     this.doNotFlush = false;
     if (options.fatal) this._fatal = true;
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // oxlint-disable-next-line typescript/no-non-null-assertion
     this._encoding = getEncoding("utf-8")!;
 
     if (label !== DEFAULT_ENCODING && "console" in global)
@@ -85,7 +84,7 @@ export class TextEncoder {
       if (token === END_OF_STREAM) break;
       // 2. Let result be the result of processing token for encoder,
       // input, output.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       result = this._encoder!.handler(input, token);
       if (result === FINISHED) break;
       if (Array.isArray(result)) output.push(...result);
@@ -94,7 +93,7 @@ export class TextEncoder {
     // TODO: Align with spec algorithm.
     if (!this.doNotFlush) {
       while (true) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         result = this._encoder!.handler(input, input.read());
         if (result === FINISHED) break;
         if (Array.isArray(result)) output.push(...result);

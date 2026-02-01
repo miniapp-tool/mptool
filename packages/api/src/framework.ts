@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export const getCurrentPage = <T extends Record<string, any>>():
   | (T & WechatMiniprogram.Page.TrivialInstance)
   | null => {

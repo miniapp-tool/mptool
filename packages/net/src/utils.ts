@@ -2,12 +2,12 @@
  * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
+  domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
 export const getDomain = (domainOrURL: string): string =>
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // oxlint-disable-next-line typescript/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
     .replace(/^https?:\/\//, "")
     .split("/")
@@ -18,7 +18,7 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  domain = normalizeDomain(domain).replace(/^\.+/gi, "");
+  domain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
   const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
 

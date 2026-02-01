@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// oxlint-disable typescript/no-explicit-any
 interface AsyncMethodOptionLike {
   success?: (...args: any[]) => void;
 }
@@ -119,7 +119,7 @@ try {
     option: U,
     // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
-    const value: T = Object.prototype.hasOwnProperty.call(storage, option.key)
+    const value: T = Object.hasOwn(storage, option.key)
       ? (storage[option.key] as T)
       : (undefined as unknown as T);
 
@@ -165,9 +165,7 @@ try {
     /** 本地缓存中指定的 key */
     key: string,
   ): T {
-    return Object.prototype.hasOwnProperty.call(storage, key)
-      ? (storage[key] as T)
-      : (undefined as unknown as T);
+    return Object.hasOwn(storage, key) ? (storage[key] as T) : (undefined as unknown as T);
   },
 
   /** [wx.setStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)

@@ -97,7 +97,9 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.attached = wrapFunction(
     options.lifetimes.attached,
     // set id and save ref
-    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
+    function attached(
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
+    ) {
       const id = (componentIndex += 1);
 
       this.$id = id;
@@ -111,14 +113,16 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.detached = wrapFunction(
     options.lifetimes.detached,
     // remove saved ref
-    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
+    function detached(
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
+    ) {
       removeRef(this.$id);
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
       if (refName && $refs) delete $refs[refName];
 
       // @ts-expect-error: $parent is not optional
@@ -152,7 +156,7 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
@@ -168,7 +172,7 @@ export const $Component: ComponentConstructor = <
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        // oxlint-disable-next-line typescript/no-unnecessary-condition
         if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
 
         this.$refID = value;

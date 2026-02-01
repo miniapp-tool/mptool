@@ -6,5 +6,5 @@ const $ = load("");
 export const getHTML = (content: string | AnyNode | AnyNode[]): string => $.xml(content);
 
 export const parseHTML = (content: string): AnyNode[] =>
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // oxlint-disable-next-line typescript/no-unnecessary-condition
   $.parseHTML(content) ?? [];

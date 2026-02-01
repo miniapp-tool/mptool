@@ -20,7 +20,7 @@ export class Stream {
    * @return True if end-of-stream has been hit.
    */
   endOfStream(): boolean {
-    return !this.tokens.length;
+    return this.tokens.length === 0;
   }
 
   /**
@@ -45,8 +45,8 @@ export class Stream {
    */
   prepend(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      while (token.length) this.tokens.push(token.pop()!);
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      while (token.length > 0) this.tokens.push(token.pop()!);
     else this.tokens.push(token);
   }
 
@@ -60,8 +60,8 @@ export class Stream {
    */
   push(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      while (token.length) this.tokens.unshift(token.shift()!);
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      while (token.length > 0) this.tokens.unshift(token.shift()!);
     else this.tokens.unshift(token);
   }
 }

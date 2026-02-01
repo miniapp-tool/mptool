@@ -25,6 +25,7 @@ describe("type", () => {
   });
 
   it("undefined", () => {
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     expect(type(undefined)).toEqual("undefined");
   });
 

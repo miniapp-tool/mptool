@@ -326,13 +326,13 @@ class GB18030Encoder implements Encoder {
     const byte1 = Math.floor(pointer / 10 / 126 / 10);
 
     // 10. Set pointer to pointer − byte1 × 10 × 126 × 10.
-    pointer = pointer - byte1 * 10 * 126 * 10;
+    pointer -= byte1 * 10 * 126 * 10;
 
     // 11. Let byte2 be floor(pointer / 10 / 126).
     const byte2 = Math.floor(pointer / 10 / 126);
 
     // 12. Set pointer to pointer − byte2 × 10 × 126.
-    pointer = pointer - byte2 * 10 * 126;
+    pointer -= byte2 * 10 * 126;
 
     // 13. Let byte3 be floor(pointer / 10).
     const byte3 = Math.floor(pointer / 10);

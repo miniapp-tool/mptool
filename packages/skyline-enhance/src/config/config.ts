@@ -33,7 +33,7 @@ export const $Config = (config: AppConfigOptions): void => {
   let nameToRouteMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
-    const actualRoute = route.replace(/\$name/g, name);
+    const actualRoute = route.replaceAll(/\$name/g, name);
 
     nameToRouteMap[name] = actualRoute;
   };
@@ -50,7 +50,8 @@ export const $Config = (config: AppConfigOptions): void => {
   appConfig = {
     ...options,
 
-    getPath: (name: string): string => nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
+    getPath: (name: string): string =>
+      nameToRouteMap[name] || defaultPage.replaceAll(/\$name/g, name),
   };
 };
 

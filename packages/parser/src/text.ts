@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
+/* eslint-disable typescript/no-unsafe-enum-comparison */
 import type { AnyNode } from "domhandler";
 
 import { parseHTML } from "./parser.js";

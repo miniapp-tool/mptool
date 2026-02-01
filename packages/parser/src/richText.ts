@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
+/* eslint-disable typescript/no-unsafe-enum-comparison */
 import type { AnyNode, Element } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";
@@ -42,13 +42,13 @@ const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
   const first = result[0];
 
   // remove first text node if it's empty
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // oxlint-disable-next-line typescript/no-unnecessary-condition
   if (first?.type === "text" && !first.text.trim()) result.shift();
 
   const last = result[result.length - 1];
 
   // remove last text node if it's empty
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // oxlint-disable-next-line typescript/no-unnecessary-condition
   if (last?.type === "text" && !last.text.trim()) result.pop();
 
   return result;
@@ -59,7 +59,7 @@ const handleNode = async (
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
-  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/g, "") };
+  if (node.type === "text") return { type: "text", text: node.data.replaceAll(/\r/g, "") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
@@ -84,8 +84,8 @@ const handleNode = async (
       const convertedNode: ElementNode = {
         type: "node",
         name: ["html", "body"].includes(node.name) ? "div" : node.name,
-        ...(Object.keys(attrs).length ? { attrs } : {}),
-        ...(children.length ? { children } : {}),
+        ...(Object.keys(attrs).length > 0 ? { attrs } : {}),
+        ...(children.length > 0 ? { children } : {}),
       };
 
       const converter = transform[node.name as AllowTag];

@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./.oxlintrc.base.json"],
+  "ignorePatterns": ["coverage/", "dist/"],
+  "plugins": ["typescript", "oxc", "jsdoc", "import", "promise", "unicorn", "node"],
+  "rules": {
+    "no-console": "off",
+    "typescript/no-unnecessary-type-parameters": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/text-encoding-identifier-case": "off"
+  }
+}

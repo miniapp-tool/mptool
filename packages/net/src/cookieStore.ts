@@ -236,7 +236,7 @@ export class CookieStore {
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
       : env === "qq"
-        ? setCookieHeader.replace(
+        ? setCookieHeader.replaceAll(
             /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
             ",$1=",
           )
