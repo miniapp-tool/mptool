@@ -8,7 +8,6 @@ const cookieStore = new CookieStore();
 
 const mockedResponse = {
   header: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "Set-Cookie":
       "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; domain=baidu.com; path=/; expires=Fri, 27 Jul 9999 04:02:51 GMT; httponly, dwf_sg_task_completion=False; expires=Sat, 25-Aug-2020 04:04:04 GMT; Max-Age=2592000; Path=/; secure;, PSINO=7; domain=.baidu.com; path=/,prod_crm_session=gBz4cg45F7A5TwRuSNgOw5xSRilpiec9Mht7bS9a; expires=Thu, 26-Jul-2020 06:14:05 GMT; Max-Age=2592000; path=/; domain=.taobao.com; httponly",
   },
@@ -37,7 +36,7 @@ describe("cookies", () => {
   });
 
   it("has", () => {
-    expect(cookieStore.has(TEST_NAME, { domain: "baidu.com" })).toBe(true);
+    expect(cookieStore.has(TEST_NAME, { domain: "baidu.com" })).toBeTruthy();
   });
 
   it("get", () => {
@@ -66,7 +65,7 @@ describe("cookies", () => {
   it("delete", () => {
     cookieStore.delete("EGG_SESSION", "baidu.com");
 
-    expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBe(false);
+    expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBeFalsy();
   });
 
   it("list()", () => {

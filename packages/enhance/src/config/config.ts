@@ -20,12 +20,9 @@ export interface Config extends Omit<AppConfigOptions, "defaultPage" | "pages"> 
 let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
-  const {
-    defaultPage: defaultPage,
-    pages: pages,
-    getPath,
-    ...options
-  } = config as Required<AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig>;
+  const { defaultPage, pages, getPath, ...options } = config as Required<
+    AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
+  >;
 
   if (isFunction(getPath)) {
     appConfig = {
@@ -40,7 +37,7 @@ export const $Config = (config: AppConfigOptions): void => {
   let routeToNameMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
-    const actualRoute = route.replace(/\$name/g, name);
+    const actualRoute = route.replaceAll("$name", name);
 
     nameToRouteMap[name] = actualRoute;
     routeToNameMap[actualRoute] = name;
@@ -49,7 +46,10 @@ export const $Config = (config: AppConfigOptions): void => {
   if (Array.isArray(pages)) {
     pages.forEach(([name, route]) => {
       if (typeof name === "string") addRoute(name, route);
-      else name.forEach((item) => addRoute(item, route));
+      else
+        name.forEach((item) => {
+          addRoute(item, route);
+        });
     });
   } else if (typeof pages === "object") {
     nameToRouteMap = pages;
@@ -59,7 +59,8 @@ export const $Config = (config: AppConfigOptions): void => {
   appConfig = {
     ...options,
 
-    getPath: (name: string): string => nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
+    getPath: (name: string): string =>
+      nameToRouteMap[name] || defaultPage.replaceAll("$name", name),
   };
 };
 

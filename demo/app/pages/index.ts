@@ -1,11 +1,11 @@
 import { $Page, put } from "@mptool/all";
 
-const date = new Date().getTime();
+const date = Date.now();
 
 $Page("index", {
   data: {},
   onRegister() {
-    console.log(`from [pages/index] Page register：${new Date().getTime() - date}ms`);
+    console.log(`from [pages/index] Page register：${Date.now() - date}ms`);
   },
   onAppLaunch(opts) {
     console.log("from [pages/index] APP Launch:", opts);

@@ -26,10 +26,12 @@ export const $Page: PageConstructor = <
   const { getPath: getRoute, extendPage, injectPage } = getConfig();
   const route = getRoute(name);
 
-  const callLog = (lifeCycle: string, args?: unknown): void =>
+  const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
-  const registerLog = (lifeCycle: string): void =>
+  };
+  const registerLog = (lifeCycle: string): void => {
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
+  };
 
   // extend page config
   if (extendPage) extendPage(name, options);
@@ -52,7 +54,7 @@ export const $Page: PageConstructor = <
       appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
         callLog("onAppLaunch");
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         void options.onAppLaunch!(onLaunchOptions);
       });
     }
@@ -64,7 +66,7 @@ export const $Page: PageConstructor = <
     routeEmitter.on(`${ON_PAGE_NAVIGATE}:${route}`, (query: PageQuery): Promise<void> | void => {
       callLog("onNavigate", query);
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       return options.onNavigate!(query);
     });
 
@@ -75,20 +77,21 @@ export const $Page: PageConstructor = <
     routeEmitter.on(`${ON_PAGE_PRELOAD}:${route}`, (query: PageQuery): void | Promise<void> => {
       callLog("onPreload", query);
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       return options.onPreload!(query);
     });
 
     registerLog("onPreload");
   }
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -97,14 +100,20 @@ export const $Page: PageConstructor = <
     if (shouldBeFirstPage) {
       shouldBeFirstPage = false;
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       options.$state!.firstOpen = true;
     }
   });
 
-  options.onReady = wrapFunction(options.onReady, () => appEmitter.emit(ON_PAGE_READY));
+  // oxlint-disable-next-line typescript/no-misused-promises
+  options.onReady = wrapFunction(options.onReady, () => {
+    appEmitter.emit(ON_PAGE_READY);
+  });
 
-  options.onUnload = wrapFunction(options.onUnload, () => appEmitter.emit(ON_PAGE_UNLOAD));
+  // oxlint-disable-next-line typescript/no-misused-promises
+  options.onUnload = wrapFunction(options.onUnload, () => {
+    appEmitter.emit(ON_PAGE_UNLOAD);
+  });
 
   mount(options);
 

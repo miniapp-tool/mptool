@@ -3,24 +3,24 @@ import { END_OF_STREAM } from "./constant.js";
 /**
  * A stream represents an ordered sequence of tokens.
  *
- * @constructor
- * @param tokens Array of tokens that provide
- * the stream.
  */
 export class Stream {
   tokens: number[];
 
+  /**
+   * @param tokens Array of tokens that provide the stream.
+   */
   constructor(tokens: number[] | Uint8Array) {
-    this.tokens = [].slice.call(tokens);
+    this.tokens = [...tokens];
     // Reversed as push/pop is more efficient than shift/unshift.
     this.tokens.reverse();
   }
 
   /**
-   * @return True if end-of-stream has been hit.
+   * @returns True if end-of-stream has been hit.
    */
   endOfStream(): boolean {
-    return !this.tokens.length;
+    return this.tokens.length === 0;
   }
 
   /**
@@ -28,7 +28,7 @@ export class Stream {
    * stream must be returned and subsequently removed, and
    * end-of-stream must be returned otherwise.
    *
-   * @return Get the next token from the stream, or
+   * @returns Get the next token from the stream, or
    * end_of_stream.
    */
   read(): number {
@@ -45,8 +45,8 @@ export class Stream {
    */
   prepend(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      while (token.length) this.tokens.push(token.pop()!);
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      while (token.length > 0) this.tokens.push(token.pop()!);
     else this.tokens.push(token);
   }
 
@@ -60,8 +60,8 @@ export class Stream {
    */
   push(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      while (token.length) this.tokens.unshift(token.shift()!);
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      while (token.length > 0) this.tokens.unshift(token.shift()!);
     else this.tokens.unshift(token);
   }
 }

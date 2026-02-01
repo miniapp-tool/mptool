@@ -2,13 +2,14 @@
  * 字符串参数解析
  *
  * @param queryString 需要解析的字符串
- * @param [splitter='&'] 分隔符
+ * @param splitter 分隔符
  *
  * @returns 参数对象
  */
 export const parse = (queryString = "", splitter = "&"): Record<string, string> => {
   /** 参数对象 */
   const queries: Record<string, string> = {};
+  // oxlint-disable-next-line no-undefined
   const splits = queryString ? queryString.split(splitter) : undefined;
 
   if (splits && splits.length > 0)
@@ -25,8 +26,8 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
  * query 对象转换字符串
  *
  * @param params query 对象
- * @param [splitter='&] 分隔符
- * @param [unencoded=false] 是否已经解码
+ * @param splitter 分隔符
+ * @param unencoded 是否已经解码
  *
  * @returns 解析的字符串
  */
@@ -56,6 +57,6 @@ export const join = (path: string, queries: Record<string, string>, unencoded = 
   const queryString = stringify(queries, "&", unencoded);
 
   return queryString
-    ? `${path}${/[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"}${queryString}`
+    ? `${path}${/[?&]$/u.test(path) ? "" : path.includes("?") ? "&" : "?"}${queryString}`
     : path;
 };

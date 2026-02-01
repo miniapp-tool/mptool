@@ -3,8 +3,10 @@ import { assertType, expectTypeOf, it } from "vitest";
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
+  // oxlint-disable-next-line typescript/no-confusing-void-expression
   expectTypeOf($Page("example", {})).toEqualTypeOf<void>();
 
+  // oxlint-disable-next-line typescript/no-explicit-any
   expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
 
   const app = getApp<{
@@ -51,11 +53,14 @@ it("$Page", () => {
         });
     },
 
-    getUserInfo(e: any) {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    getUserInfo(event: any) {
       this.selectComponent("test");
-      app.globalData.userInfo = e.detail.userInfo;
+      // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
+      app.globalData.userInfo = event.detail.userInfo;
       this.setData({
-        userInfo: e.detail.userInfo,
+        // oxlint-disable-next-line typescript/no-unsafe-assignment, typescript/no-unsafe-member-access
+        userInfo: event.detail.userInfo,
         hasUserInfo: true,
       });
     },
@@ -79,10 +84,8 @@ it("$Page", () => {
     },
     onReady() {
       this.setData({
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        logs: (wx.getStorageSync("logs") || []).map((log: number) => {
-          return new Date(log).toString();
-        }),
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing, typescript/strict-boolean-expressions, typescript/no-unsafe-assignment, typescript/no-unsafe-member-access, typescript/no-unsafe-call
+        logs: (wx.getStorageSync("logs") || []).map((log: number) => new Date(log).toString()),
       });
     },
     onShow() {},
@@ -113,14 +116,11 @@ it("$Page", () => {
       this.setData(
         {
           text: "Set some data for updating view.",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "array[0].text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "object.text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "newField.text": "new data",
         },
-        function () {},
+        function viewTap() {},
       );
       expectTypeOf(this.data.text).toEqualTypeOf<string>();
       expectTypeOf(this.route).toEqualTypeOf<string>();
@@ -159,6 +159,7 @@ it("$Page", () => {
         expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.ScrollOffsetCallbackResult>();
       });
       query.exec((res) => {
+        // oxlint-disable-next-line typescript/no-explicit-any
         expectTypeOf(res).toEqualTypeOf<any>();
       });
     },
@@ -169,6 +170,7 @@ it("$Page", () => {
 
   $Page("example", {
     f() {
+      // oxlint-disable-next-line typescript/no-explicit-any
       expectTypeOf(this.data).toEqualTypeOf<Record<string, any>>();
     },
   });
@@ -182,8 +184,8 @@ it("$Page", () => {
   });
 
   $Page("example", {
-    onLoad(q) {
-      q;
+    onLoad(query) {
+      console.log(query);
     },
     f() {
       void this.onLoad();
@@ -202,9 +204,9 @@ it("$Page", () => {
       logs: [],
     },
     getLogs() {
-      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) => {
-        return new Date(log).toString();
-      });
+      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) =>
+        new Date(log).toString(),
+      );
     },
     onLoad() {
       const logs = this.getLogs();
@@ -234,7 +236,7 @@ it("$Page", () => {
   $Page("example", {
     onAddToFavorites(res) {
       // webview 页面返回 webviewUrl
-      if (res.webviewUrl) console.log("WebviewUrl: ", res.webviewUrl);
+      if (res.webviewUrl) console.log("WebviewUrl:", res.webviewUrl);
 
       return {
         title: "自定义标题",
@@ -247,6 +249,7 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
+      // oxlint-disable-next-line typescript/unbound-method
       expectTypeOf(this.fn).toEqualTypeOf<() => number>();
     },
     fn() {

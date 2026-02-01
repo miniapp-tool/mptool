@@ -54,12 +54,16 @@ export const labelToEncoding = Object.fromEntries(
         encoding.labels.map<[string, Encoding]>((label) => [label, encoding]),
       ),
     )
-    .flat(2),
+    .flat(
+      // encoding is at depth 2
+      2,
+    ),
 );
 
 /**
  * @param label The encoding label.
+ *
+ * @returns The encoding corresponding to the given label, or `null` if not found.
  */
-export const getEncoding = (label: string): Encoding | null => {
-  return labelToEncoding[label.trim().toLowerCase()] ?? null;
-};
+export const getEncoding = (label: string): Encoding | null =>
+  labelToEncoding[label.trim().toLowerCase()] ?? null;

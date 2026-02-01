@@ -37,7 +37,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return cookie 对象
+   * @returns cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
     const { domain, path } = getUrlInfo(options);
@@ -58,7 +58,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return Cookie 值
+   * @returns Cookie 值
    */
   getValue(name: string, options: CookieOptions): string | undefined {
     return this.get(name, options)?.value;
@@ -69,7 +69,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return 是否存在
+   * @returns 是否存在
    */
   has(name: string, options: CookieOptions): boolean {
     // 返回是否存在 cookie 值
@@ -78,6 +78,9 @@ export class CookieStore {
 
   /**
    * 设置 cookie
+   *
+   * @param cookieOptions Cookie 选项
+   * @returns Cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
     const { name, domain } = cookieOptions;
@@ -117,6 +120,8 @@ export class CookieStore {
 
   /**
    * 获取所有域名和 cookies 结构
+   *
+   * @returns 域名和 cookies 结构对象
    */
   list(): Record<string, Record<string, string>> {
     const dirObj: Record<string, Record<string, string>> = {};
@@ -130,7 +135,7 @@ export class CookieStore {
    * 获取 cookies 对象数组
    *
    * @param options Cookie 选项
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getCookies(options: CookieOptions): Cookie[] {
     const { domain, path } = getUrlInfo(options);
@@ -150,7 +155,7 @@ export class CookieStore {
   /**
    * 获取所有 cookies 对象
    *
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getAllCookies(): Cookie[] {
     const cookies = [];
@@ -164,7 +169,8 @@ export class CookieStore {
   /**
    * 获取 cookies key/value 对象
    *
-   * @return 键值 Map
+   * @param options Cookie 选项
+   * @returns 键值 Map
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
@@ -196,6 +202,7 @@ export class CookieStore {
    * 清除 cookies
    *
    * @param domain 指定域名
+   * @param exact 是否仅清除精确域名
    */
   clear(domain = "", exact = false): void {
     if (domain) {
@@ -224,25 +231,28 @@ export class CookieStore {
    */
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
-      return this.apply(
+      this.apply(
         parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
       );
+      return;
     }
 
     const setCookieHeader =
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["Set-Cookie"] ||
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["set-cookie"] ||
       "";
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
       : env === "qq"
-        ? setCookieHeader.replace(
+        ? setCookieHeader.replaceAll(
             /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
             ",$1=",
           )
         : setCookieHeader;
 
-    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
   /**
@@ -252,7 +262,7 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(response: unknown, domainOrURL: string): void {
-    return this.applyHeader(
+    this.applyHeader(
       env === "js"
         ? (response as Response).headers
         : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
@@ -264,7 +274,7 @@ export class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @return request cookie header
+   * @returns request cookie header
    */
   getHeader(options: CookieOptions): string {
     // 转化为 request cookies 字符串
@@ -291,8 +301,6 @@ export class CookieStore {
       this.apply(cookiesData.map((item) => new Cookie(item)));
     } catch (err) {
       console.warn("Error applying cookie storage", err);
-
-      return;
     }
   }
 

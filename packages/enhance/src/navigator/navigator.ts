@@ -43,12 +43,14 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ * @param type Navigator type
+ * @returns Navigator trigger function
  */
 export function getTrigger(
   type: NavigatorType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
@@ -60,14 +62,16 @@ export function getTrigger(
         routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, query),
         // 等待最小延迟
         new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), getConfig().maxDelay ?? 200);
+          setTimeout(() => {
+            resolve();
+          }, getConfig().maxDelay ?? 200);
         }),
       ]).then(() => {
         // release navigate lock
         canNavigate = true;
 
         // @ts-expect-error: argument can not union
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // oxlint-disable-next-line typescript/no-unsafe-return
         return wx[type]({ url });
       });
     }

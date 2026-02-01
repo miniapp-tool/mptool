@@ -19,15 +19,18 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ *
+ * @param type Navigator type
+ *
+ * @returns Trigger function
  */
 export function getTrigger(
   type: NavigatorType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line arrow-body-style, typescript/no-explicit-any
   return (pageNameWithArg: string): any => {
     // @ts-expect-error: argument can not union
-
     return wx[type]({ url: getFullPath(pageNameWithArg) });
   };
 }

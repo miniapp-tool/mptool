@@ -53,7 +53,7 @@ export class URLSearchParams {
   /**
    * Returns the value of the first name-value pair whose name is `name`. If there
    * are no such pairs, `null` is returned.
-   * @return or `null` if there is no name-value pair with the given `name`.
+   * @returns or `null` if there is no name-value pair with the given `name`.
    */
   get(name: string): string | null;
   /**

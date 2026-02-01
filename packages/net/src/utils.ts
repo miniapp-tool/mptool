@@ -1,13 +1,15 @@
 /**
  * @see RFC 6265
+ * @param domain Domain string
+ * @returns 标准化后的 domain 字符串
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
+  domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
 export const getDomain = (domainOrURL: string): string =>
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // oxlint-disable-next-line typescript/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
     .replace(/^https?:\/\//, "")
     .split("/")
@@ -18,11 +20,14 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  domain = normalizeDomain(domain).replace(/^\.+/gi, "");
+  // oxlint-disable-next-line no-param-reassign
+  domain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
-  const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+  const scopes = domain
+    .split(".")
+    .map((part) => [".", domain.slice(domain.indexOf(part))].join(""));
 
-  return [domain].concat(scopes);
+  return [domain, ...scopes];
 };
 
 export interface UrlInfo {

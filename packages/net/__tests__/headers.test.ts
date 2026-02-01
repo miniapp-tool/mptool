@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { describe, expect, it } from "vitest";
 
 import { Headers } from "../src/headers.js";
@@ -119,7 +117,7 @@ describe(".keys()", () => {
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
-    expect(Array.from(headers.keys())).toEqual(["x-a", "x-b", "x-c"]);
+    expect([...headers.keys()]).toEqual(["x-a", "x-b", "x-c"]);
   });
 
   it("does not combine set-cookie headers", () => {
@@ -127,7 +125,7 @@ describe(".keys()", () => {
 
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
-    expect(Array.from(headers.keys())).toEqual(["set-cookie", "set-cookie"]);
+    expect([...headers.keys()]).toEqual(["set-cookie", "set-cookie"]);
   });
 });
 
@@ -160,7 +158,7 @@ describe(".values()", () => {
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
-    expect(Array.from(headers.values())).toEqual(["2", "1", "3"]);
+    expect([...headers.values()]).toEqual(["2", "1", "3"]);
   });
 
   it("does not combine set-cookie headers", () => {
@@ -168,7 +166,7 @@ describe(".values()", () => {
 
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
-    expect(Array.from(headers.values())).toEqual(["a=1", "b=2"]);
+    expect([...headers.values()]).toEqual(["a=1", "b=2"]);
   });
 });
 
@@ -205,7 +203,7 @@ describe(".entries()", () => {
     headers.set("X-B", "1");
     headers.set("X-A", "2");
     headers.set("X-C", "3");
-    expect(Array.from(headers.entries())).toEqual([
+    expect([...headers.entries()]).toEqual([
       ["x-a", "2"],
       ["x-b", "1"],
       ["x-c", "3"],
@@ -217,7 +215,7 @@ describe(".entries()", () => {
 
     headers.append("Set-Cookie", "a=1");
     headers.append("Set-Cookie", "b=2");
-    expect(Array.from(headers.entries())).toEqual([
+    expect([...headers.entries()]).toEqual([
       ["set-cookie", "a=1"],
       ["set-cookie", "b=2"],
     ]);
@@ -239,15 +237,15 @@ describe(".has()", () => {
   it("returns true given an existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
 
-    expect(headers.has("accept")).toBe(true);
-    expect(headers.has("AcCePt")).toBe(true);
+    expect(headers.has("accept")).toBeTruthy();
+    expect(headers.has("AcCePt")).toBeTruthy();
   });
 
   it("returns false given a non-existing header name", () => {
     const headers = new Headers({ accept: "*/*" });
 
-    expect(headers.has("content-type")).toBe(false);
-    expect(headers.has("CoNtEnT-TyPe")).toBe(false);
+    expect(headers.has("content-type")).toBeFalsy();
+    expect(headers.has("CoNtEnT-TyPe")).toBeFalsy();
   });
 });
 
@@ -291,7 +289,7 @@ describe(".set()", () => {
     const headers = new Headers();
 
     expect(
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      // oxlint-disable-next-line typescript/no-confusing-void-expression
       headers.set(
         // @ts-expect-error
         123,
@@ -305,7 +303,7 @@ describe(".set()", () => {
     const headers = new Headers();
 
     expect(
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      // oxlint-disable-next-line typescript/no-confusing-void-expression
       headers.set(
         "foo",
         // @ts-expect-error
@@ -313,7 +311,7 @@ describe(".set()", () => {
       ),
     ).toBeUndefined();
     expect(
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      // oxlint-disable-next-line typescript/no-confusing-void-expression
       headers.set("foo", "  value  "),
     ).toBeUndefined();
     expect(Object.fromEntries(headers.entries())).toEqual({});
@@ -367,7 +365,7 @@ describe(".delete()", () => {
     const headers = new Headers({ accept: "*/*" });
 
     expect(
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      // oxlint-disable-next-line typescript/no-confusing-void-expression
       headers.delete(
         // @ts-expect-error
         123,
@@ -382,8 +380,8 @@ describe(".delete()", () => {
     const headers = new Headers({ accept: "*/*" });
 
     headers.delete("accept");
-    expect(headers.has("accept")).toBe(false);
-    expect(headers.has("AcCePt")).toBe(false);
+    expect(headers.has("accept")).toBeFalsy();
+    expect(headers.has("AcCePt")).toBeFalsy();
     expect(headers.get("accept")).toBeNull();
     expect(headers.get("AcCePt")).toBeNull();
   });
@@ -404,7 +402,7 @@ describe(".forEach()", () => {
 
     headers.forEach((value, name, headers) => {
       expect(value).toBe(headers.get(name));
-      expect(headerSet.has(name)).toBe(false);
+      expect(headerSet.has(name)).toBeFalsy();
       headerSet.add(name);
     });
 
@@ -416,11 +414,11 @@ describe(".forEach()", () => {
     const headers = new Headers({ accept: "*/*", "User-Agent": "agent" });
     const headerSet = new Set();
 
-    headers.forEach(function (value, name, headers) {
+    headers.forEach((value, name, headers) => {
       expect(value).toBe(headers.get(name));
-      expect(this.has(name)).toBe(false);
-      this.add(name);
-    }, headerSet);
+      expect(headerSet.has(name)).toBeFalsy();
+      headerSet.add(name);
+    });
 
     expect(headerSet).toEqual(new Set(["accept", "user-agent"]));
   });

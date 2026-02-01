@@ -199,9 +199,9 @@ describe("Has check key exists", () => {
   it("Check the key exists", () => {
     const a = getSimpleObj();
 
-    expect(a.has("a")).toEqual(true);
-    expect(a.has("notExists")).toEqual(false);
-    expect(a.has("hasOwnProperty")).toEqual(false);
+    expect(a.has("a")).toBeTruthy();
+    expect(a.has("notExists")).toBeFalsy();
+    expect(a.has("hasOwnProperty")).toBeFalsy();
   });
 });
 
@@ -265,7 +265,7 @@ describe("Iterator", () => {
 
     expect(ret.join(";")).toEqual("a;b;c");
 
-    expect(Array.from(obj.keys())).toEqual(["a", "b", "c"]);
+    expect([...obj.keys()]).toEqual(["a", "b", "c"]);
   });
 
   it("values", () => {
@@ -276,7 +276,7 @@ describe("Iterator", () => {
 
     expect(ret.join(";")).toEqual("1;2;3");
 
-    expect(Array.from(obj.values())).toEqual(["1", "2", "3"]);
+    expect([...obj.values()]).toEqual(["1", "2", "3"]);
   });
 });
 

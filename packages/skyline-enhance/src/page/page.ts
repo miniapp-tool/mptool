@@ -17,10 +17,12 @@ export const $Page: PageConstructor = <
 ): void => {
   const { extendPage, injectPage } = getConfig();
 
-  const callLog = (lifeCycle: string, args?: unknown): void =>
+  const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
-  const registerLog = (lifeCycle: string): void =>
+  };
+  const registerLog = (lifeCycle: string): void => {
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
+  };
 
   // extend page config
   if (extendPage) extendPage(name, options);
@@ -32,13 +34,14 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
       appEmitter.on(ON_APP_AWAKE, (time: number) => {
         callLog("onAwake");
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         void options.onAwake!(time);
       });
       registerLog("onAwake");
@@ -47,7 +50,7 @@ export const $Page: PageConstructor = <
     if (shouldBeFirstPage) {
       shouldBeFirstPage = false;
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       options.$state!.firstOpen = true;
     }
   });

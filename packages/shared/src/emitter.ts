@@ -36,17 +36,19 @@ export interface EmitterInstance<Events> {
 
 /**
  * Tiny (~300b) functional event emitter / pubsub.
- * @name emitter
+ *
+ * @param all 事件名到处理函数的映射
+ *
  * @returns Emitter
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
+export const Emitter = <Events>(
+  all: EventHandlerMap<Events> = new Map(),
+): EmitterInstance<Events> => {
   type GenericEventHandler = Handler<Events[keyof Events]> | WildcardHandler<Events>;
 
   return {
     /**
      * 事件名到处理函数的映射
-     * @memberOf emitter
      */
     all,
 
@@ -55,7 +57,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 监听的事件类型，使用 `'*'` 监听所有事件
      * @param handler 待添加的响应函数
-     * @memberOf emitter
      */
     on: <Key extends keyof Events>(type: Key, handler: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
@@ -69,14 +70,15 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * 如果省略 `handler`，给定类型的所有事件均被忽略
      *
-     * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
-     * @param {Function} [handler] 待移除的响应函数
-     * @memberOf emitter
+     * @param type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
+     * @param handler 待移除的响应函数
      */
     off: <Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers)
+        // if handler not found, >>> 0 ensures no removal occurs by converting -1 to large index
+        // oxlint-disable-next-line no-bitwise, unicorn/prefer-math-trunc
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
         else all.set(type, []);
     },
@@ -90,23 +92,20 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       let handlers = all.get(type);
 
       if (handlers)
-        void (handlers as EventHandlerList<Events[keyof Events]>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void [...(handlers as EventHandlerList<Events[keyof Events]>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!));
 
       handlers = all.get("*");
 
       if (handlers)
-        void (handlers as WildCardEventHandlerList<Events>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void [...(handlers as WildCardEventHandlerList<Events>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!));
     },
 
@@ -121,24 +120,19 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        ((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!)),
       );
 
       await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        ((all.get("*") ?? []) as WildCardEventHandlerList<Events>)
-          .slice()
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)]
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!)),
       );
     },
   };
-}
+};

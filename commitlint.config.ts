@@ -9,19 +9,18 @@ const scopeComplete = execSync("git status --porcelain || true")
   .toString()
   .trim()
   .split("\n")
-  .find((r) => ~r.indexOf("M  packages"))
-  ?.replace(/\//g, "%%")
+  .find((line) => line.includes("M  packages"))
+  ?.replaceAll("/", "%%")
   .match(/packages%%((\w|-)*)/)?.[1];
 
 export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "scope-enum": [2, "always", ["demo", "release", ...packages]],
   },
   prompt: {
     defaultScope: scopeComplete ?? "",
-    customScopesAlign: !scopeComplete ? "top" : "bottom",
+    customScopesAlign: scopeComplete ? "bottom" : "top",
     allowCustomIssuePrefix: false,
     allowEmptyIssuePrefix: false,
   },

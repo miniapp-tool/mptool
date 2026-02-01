@@ -1,7 +1,12 @@
-/** SVG 转换 */
+/**
+ * SVG 转换到 Data URI
+ *
+ * @param content SVG 内容
+ * @returns Data URI 字符串
+ */
 export const convertSVGToDataURI = (content: string): string =>
   `data:image/svg+xml,${content
-    .replace(/"/gu, "'")
-    .replace(/</gu, "%3C")
-    .replace(/>/gu, "%3E")
-    .replace(/#/gu, "%23")}`;
+    .replaceAll('"', "'")
+    .replaceAll("<", "%3C")
+    .replaceAll(">", "%3E")
+    .replaceAll("#", "%23")}`;

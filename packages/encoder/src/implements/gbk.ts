@@ -1,3 +1,4 @@
+// oxlint-disable max-classes-per-file
 import { decoderError, encoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import { encodingIndex } from "../indexes.js";
@@ -11,7 +12,7 @@ import { inRange, isASCIIByte } from "../utils.js";
 /**
  * @param pointer The |pointer| to search for.
  * @param index The |index| to search within.
- * @return The code point corresponding to |pointer| in |index|,
+ * @returns The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in |index|.
  */
 const indexCodePointFor = (pointer: number, index: number[] | undefined): number | null => {
@@ -23,7 +24,7 @@ const indexCodePointFor = (pointer: number, index: number[] | undefined): number
 /**
  * @param codePoint The |code point| to search for.
  * @param index The |index| to search within.
- * @return The first pointer corresponding to |code point| in
+ * @returns The first pointer corresponding to |code point| in
  *     |index|, or null if |code point| is not in |index|.
  */
 const indexPointerFor = (codePoint: number, index: number[]): number | null => {
@@ -34,7 +35,7 @@ const indexPointerFor = (codePoint: number, index: number[]): number | null => {
 
 /**
  * @param pointer The |pointer| to search for in the gb18030 index.
- * @return The code point corresponding to |pointer| in |index|,
+ * @returns The code point corresponding to |pointer| in |index|,
  *     or null if |code point| is not in the gb18030 index.
  */
 const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
@@ -50,16 +51,11 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
   // its corresponding code point.
   let offset = 0;
   let codePointOffset = 0;
-  const idx = encodingIndex["gb18030-ranges"];
-  let i;
+  const index = encodingIndex["gb18030-ranges"];
 
-  for (i = 0; i < idx.length; ++i) {
-    /** @type {!Array.<number>} */
-    const entry = idx[i];
-
+  for (const entry of index) {
     if (entry[0] <= pointer) {
-      offset = entry[0];
-      codePointOffset = entry[1];
+      [offset, codePointOffset] = entry;
     } else {
       break;
     }
@@ -72,7 +68,7 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
 
 /**
  * @param codePoint The |code point| to locate in the gb18030 index.
- * @return The first pointer corresponding to |code point| in the
+ * @returns The first pointer corresponding to |code point| in the
  *     gb18030 index.
  */
 const indexGB18030RangesPointerFor = (codePoint: number): number => {
@@ -84,16 +80,11 @@ const indexGB18030RangesPointerFor = (codePoint: number): number => {
   // be its corresponding pointer.
   let offset = 0;
   let pointerOffset = 0;
-  const idx = encodingIndex["gb18030-ranges"];
-  let i;
+  const index = encodingIndex["gb18030-ranges"];
 
-  for (i = 0; i < idx.length; ++i) {
-    /** @type {!Array.<number>} */
-    const entry = idx[i];
-
+  for (const entry of index) {
     if (entry[1] <= codePoint) {
-      offset = entry[1];
-      pointerOffset = entry[0];
+      [pointerOffset, offset] = entry;
     } else {
       break;
     }
@@ -117,12 +108,13 @@ class GB18030Decoder implements Decoder {
   }
 
   /**
-   * @param {Stream} stream The stream of bytes being decoded.
-   * @param {number} bite The next byte read from the stream.
-   * @return {?(number|!Array.<number>)} The next code point(s)
+   * @param stream The stream of bytes being decoded.
+   * @param bite The next byte read from the stream.
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
+  // oxlint-disable-next-line complexity, max-statements
   handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and gb18030 first, gb18030
     // second, and gb18030 third are 0x00, return finished.
@@ -146,7 +138,7 @@ class GB18030Decoder implements Decoder {
       this.gb18030Third = 0x00;
       decoderError(this.fatal);
     }
-    let codePoint;
+    let codePoint: number | null;
 
     // 3. If gb18030 third is not 0x00, run these substeps:
     if (this.gb18030Third !== 0x00) {
@@ -178,7 +170,7 @@ class GB18030Decoder implements Decoder {
 
       // 5. If code point is null, prepend buffer to stream and
       // return error.
-      if (codePoint === null) {
+      if (codePoint == null) {
         stream.prepend(buffer);
 
         return decoderError(this.fatal);
@@ -236,14 +228,15 @@ class GB18030Decoder implements Decoder {
 
       // 5. Let code point be null if pointer is null and the index
       // code point for pointer in index gb18030 otherwise.
+      // oxlint-disable-next-line eqeqeq
       codePoint = pointer === null ? null : indexCodePointFor(pointer, encodingIndex.gb18030);
 
       // 6. If code point is null and byte is an ASCII byte, prepend
       // byte to stream.
-      if (codePoint === null && isASCIIByte(bite)) stream.prepend(bite);
+      if (codePoint == null && isASCIIByte(bite)) stream.prepend(bite);
 
       // 7. If code point is null, return error.
-      if (codePoint === null) return decoderError(this.fatal);
+      if (codePoint == null) return decoderError(this.fatal);
 
       // 8. Return a code point whose value is code point.
       return codePoint;
@@ -277,9 +270,9 @@ class GB18030Encoder implements Encoder {
   }
 
   /**
-   * @param stream Input stream.
+   * @param _stream Input stream.
    * @param codePoint Next code point read from the stream.
-   * @return Byte(s) to emit.
+   * @returns Byte(s) to emit.
    */
   handler(_stream: Stream, codePoint: number): number | number[] {
     // 1. If code point is end-of-stream, return finished.
@@ -301,6 +294,7 @@ class GB18030Encoder implements Encoder {
     let pointer = indexPointerFor(codePoint, encodingIndex.gb18030);
 
     // 6. If pointer is not null, run these substeps:
+    // oxlint-disable-next-line eqeqeq
     if (pointer !== null) {
       // 1. Let lead be floor(pointer / 190) + 0x81.
       const lead = Math.floor(pointer / 190) + 0x81;
@@ -326,13 +320,13 @@ class GB18030Encoder implements Encoder {
     const byte1 = Math.floor(pointer / 10 / 126 / 10);
 
     // 10. Set pointer to pointer − byte1 × 10 × 126 × 10.
-    pointer = pointer - byte1 * 10 * 126 * 10;
+    pointer -= byte1 * 10 * 126 * 10;
 
     // 11. Let byte2 be floor(pointer / 10 / 126).
     const byte2 = Math.floor(pointer / 10 / 126);
 
     // 12. Set pointer to pointer − byte2 × 10 × 126.
-    pointer = pointer - byte2 * 10 * 126;
+    pointer -= byte2 * 10 * 126;
 
     // 13. Let byte3 be floor(pointer / 10).
     const byte3 = Math.floor(pointer / 10);

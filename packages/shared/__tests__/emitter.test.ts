@@ -32,9 +32,7 @@ describe("mitt#", () => {
     FOO: unknown;
     bar: unknown;
     Bar: unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:bat!": unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:baT!": unknown;
     Foo: unknown;
     [eventType]: unknown;
@@ -93,9 +91,9 @@ describe("mitt#", () => {
       inst.on("baz:baT!", foo);
 
       expect(events.get("FOO")).toEqual([foo]);
-      expect(events.has("foo")).toEqual(false);
+      expect(events.has("foo")).toBeFalsy();
       expect(events.get("Bar")).toEqual([foo]);
-      expect(events.has("bar")).toEqual(false);
+      expect(events.has("bar")).toBeFalsy();
       expect(events.get("baz:baT!")).toEqual([foo]);
     });
 
@@ -144,9 +142,9 @@ describe("mitt#", () => {
       inst.off("baz:baT!", foo);
 
       expect(events.get("FOO")).toEqual([]);
-      expect(events.has("foo")).toEqual(false);
+      expect(events.has("foo")).toBeFalsy();
       expect(events.get("Bar")).toEqual([]);
-      expect(events.has("bar")).toEqual(false);
+      expect(events.has("bar")).toBeFalsy();
       expect(events.get("baz:bat!")).toHaveLength(1);
     });
 
@@ -191,8 +189,8 @@ describe("mitt#", () => {
     });
 
     it("should NOT ignore case", () => {
-      const onFoo = vi.fn(),
-        onFOO = vi.fn();
+      const onFoo = vi.fn();
+      const onFOO = vi.fn();
 
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
@@ -207,9 +205,9 @@ describe("mitt#", () => {
     });
 
     it("should invoke * handlers", () => {
-      const star = vi.fn(),
-        ea = { a: "a" },
-        eb = { b: "b" };
+      const star = vi.fn();
+      const ea = { a: "a" };
+      const eb = { b: "b" };
 
       events.set("*", [star]);
 

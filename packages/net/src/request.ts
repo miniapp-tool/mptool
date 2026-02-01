@@ -16,7 +16,7 @@ export type RequestBody =
 export interface RequestOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
@@ -66,7 +66,7 @@ export interface RequestOptions<
 export interface RequestResponse<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > {
@@ -81,7 +81,7 @@ export interface RequestResponse<
 export type RequestType = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -92,7 +92,7 @@ export type RequestType = <
 export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -113,6 +113,7 @@ export const request = <
 
     if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
 
+    // oxlint-disable-next-line no-undefined
     const data = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
@@ -162,7 +163,7 @@ Options:
 
         cookieStore.applyHeader(header, cookieScope);
 
-        return resolve({
+        resolve({
           data,
           headers: new Headers(header),
           status: statusCode,
@@ -206,7 +207,7 @@ export interface RequestInitOptions extends Pick<
   requestHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -224,7 +225,7 @@ export interface RequestInitOptions extends Pick<
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -244,7 +245,7 @@ export interface RequestInitOptions extends Pick<
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -270,24 +271,27 @@ export interface RequestFactory {
 
 /**
  * @param options request 配置选项
+ *
+ * @returns 请求工厂
  */
-export const createRequest = ({
-  cookieStore,
-  server,
-  requestHandler,
-  responseHandler = <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any
-    >,
-  >(
-    response: RequestResponse<T>,
-  ): RequestResponse<T> => response,
-  errorHandler,
-  ...defaultOptions
-}: RequestInitOptions = {}): RequestFactory => {
-  const domain = server?.replace(/\/$/g, "");
+export const createRequest = (options: RequestInitOptions = {}): RequestFactory => {
+  const {
+    cookieStore,
+    server,
+    requestHandler,
+    responseHandler = <
+      Data extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
+        string,
+        // oxlint-disable-next-line typescript/no-explicit-any
+        any
+      >,
+    >(
+      response: RequestResponse<Data>,
+    ): RequestResponse<Data> => response,
+    errorHandler,
+    ...defaultOptions
+  } = options;
+  const domain = server?.replaceAll(/\/$/g, "");
   const defaultCookieStore =
     cookieStore instanceof CookieStore
       ? cookieStore
@@ -295,7 +299,7 @@ export const createRequest = ({
         ? new CookieStore(cookieStore)
         : requestCookieStore;
 
-  const newRequest: RequestType = (url: string, requestOptions = {}) => {
+  const newRequest: RequestType = async (url: string, requestOptions = {}) => {
     if (url.startsWith("/") && !domain) throw new Error("No server provided");
 
     const link = url.startsWith("/")
@@ -311,13 +315,15 @@ export const createRequest = ({
     };
     const options = requestHandler?.(link, mergedOptions) ?? mergedOptions;
 
-    return request(link, options)
-      .then((response) => responseHandler(response, url, options))
-      .catch((err: unknown) => {
-        if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
+    try {
+      const response = await request(link, options);
 
-        throw err;
-      });
+      return responseHandler(response, url, options);
+    } catch (err: unknown) {
+      if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
+
+      throw err;
+    }
   };
 
   return { cookieStore: defaultCookieStore, request: newRequest };

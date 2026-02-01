@@ -7,8 +7,9 @@ export const reportNetworkStatus = (): void => {
   // 获取网络信息
   wx.getNetworkType({
     success: ({ networkType }) => {
+      // oxlint-disable-next-line typescript/switch-exhaustiveness-check
       switch (networkType) {
-        case "wifi":
+        case "wifi": {
           wx.startWifi({
             success: () => {
               wx.getConnectedWifi({
@@ -25,16 +26,21 @@ export const reportNetworkStatus = (): void => {
             },
           });
           break;
+        }
         case "2g":
-        case "3g":
+        case "3g": {
           void showToast("您的网络状态不佳");
           break;
+        }
 
-        case "none":
+        case "none": {
           void showToast("您没有连接到网络");
           break;
-        default:
+        }
+
+        default: {
           void showToast("网络连接出现问题，请稍后重试");
+        }
       }
 
       logger.error("Request fail with", networkType);

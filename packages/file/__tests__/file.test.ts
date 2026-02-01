@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { get, getAsync, set, setAsync } from "../src/index.js";
 
-describe("set", () => {
+describe(set, () => {
   it("set sync simple", () => {
     set("simple-sync", "zhangbowang");
     expect(get("simple-sync")).toEqual("zhangbowang");
@@ -26,6 +26,7 @@ describe("set", () => {
     new Promise<void>((resolve) => {
       void setAsync("data-expire", { title: 123 }, 100).then(() => {
         setTimeout(() => {
+          // oxlint-disable-next-line promise/no-nesting
           void getAsync("data-expire").then((data) => {
             expect(data).toEqual(undefined);
             resolve();

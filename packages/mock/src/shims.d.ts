@@ -4,7 +4,7 @@ declare namespace WechatMiniprogram {
       USER_DATA_PATH: string;
       /** 是否输出 Debug 日志 */
       DEBUG?: boolean;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       [props: string]: any;
     };
   }

@@ -1,3 +1,4 @@
+// oxlint-disable no-undefined
 import { logger } from "@mptool/shared";
 
 export interface StorageData<T> {
@@ -6,7 +7,7 @@ export interface StorageData<T> {
 }
 
 /** 本次小程序启动的会话 ID */
-const sessionId = new Date().getTime();
+const sessionId = Date.now();
 
 logger.debug(`Current sessionId is ${sessionId}`);
 
@@ -44,8 +45,6 @@ export const take = <T = unknown>(key: string): T | undefined => {
 /**
  * 处理并返回值
  *
- * @private
- *
  * @param key 键
  * @param value 值
  *
@@ -54,7 +53,7 @@ export const take = <T = unknown>(key: string): T | undefined => {
 const getData = <T = unknown>(key: string, value: StorageData<T> | null): T | undefined =>
   value
     ? value.expired
-      ? value.expired === sessionId || new Date().getTime() < value.expired
+      ? value.expired === sessionId || Date.now() < value.expired
         ? // not expired
           value.data
         : // expired
@@ -80,17 +79,19 @@ const prepareData = <T = unknown>(
     const oldData = wx.getStorageSync<StorageData<T> | undefined>(`${CACHE_PREFIX}${key}`);
 
     // 上次没有缓存，本次也不更新
+    // oxlint-disable-next-line no-undefined
     if (!oldData) return undefined;
 
     // 使用上次过期时间
     data.expired = oldData.expired || 0;
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
   } else if (expire) {
     data.expired =
       expire === "once"
         ? // 仅本次会话有效
           sessionId
         : // 计算过期时间
-          expire + new Date().getTime();
+          expire + Date.now();
   }
 
   return data;
@@ -101,7 +102,7 @@ const prepareData = <T = unknown>(
  *
  * @param key key
  * @param value value
- * @param [expire='once'] 过期时间
+ * @param expire 过期时间
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
@@ -120,12 +121,13 @@ export const set = <T = unknown>(
  *
  * @param key key
  * @param value value
- * @param [expire='once'] 过期时间
+ * @param expire 过期时间
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
  *   - `'once'`: 仅本次启动有效
- * @param [asyncCB] 异步回调方法，不填为同步
+ *
+ * @returns 设置结果 Promise
  */
 export const setAsync = <T = unknown>(
   key: string,
@@ -167,6 +169,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
     .catch(() => {
       logger.error(`set "${key}" fail`);
 
+      // oxlint-disable-next-line unicorn/no-useless-undefined
       return undefined;
     });
 
@@ -185,6 +188,8 @@ export const remove = (key: string): void => {
  *
  * @param key key
  * @param option 回调函数
+ *
+ * @returns 移除结果 Promise
  */
 export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallbackResult> =>
   wx.removeStorage({
@@ -193,15 +198,13 @@ export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallb
 
 /**
  * 清除失效数据
- *
- * @param key key
  */
 export const check = (): void => {
   wx.getStorageInfoSync().keys.forEach((key) => {
     if (key.startsWith(CACHE_PREFIX)) {
       const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
-      if (!value || (value.expired !== sessionId && new Date().getTime() >= value.expired))
+      if (!value || (value.expired !== sessionId && Date.now() >= value.expired))
         wx.removeStorageSync(key);
     }
   });
@@ -210,22 +213,22 @@ export const check = (): void => {
 /**
  * 异步清除失效数据
  *
- * @param key key
+ * @returns 清除完成的 Promise
  */
-export const checkAsync = (): Promise<void[]> =>
-  wx.getStorageInfo().then(({ keys }) =>
-    Promise.all<void>(
-      keys
-        .filter((key) => key.startsWith(CACHE_PREFIX))
-        .map((key) =>
-          wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
-            if (!data || (data.expired !== sessionId && new Date().getTime() >= data.expired))
-              return wx.removeStorage({ key }).then(() => {
-                // return void
-              });
+export const checkAsync = async (): Promise<void> => {
+  const { keys } = await wx.getStorageInfo();
 
-            return;
-          }),
-        ),
-    ),
+  await Promise.all(
+    keys
+      .filter((key) => key.startsWith(CACHE_PREFIX))
+      .map((key) =>
+        wx.getStorage<StorageData<unknown> | undefined>({ key }).then(({ data }) => {
+          if (!data || (data.expired !== sessionId && Date.now() >= data.expired))
+            return wx.removeStorage({ key });
+
+          // oxlint-disable-next-line no-useless-return
+          return;
+        }),
+      ),
   );
+};

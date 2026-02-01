@@ -3,7 +3,6 @@ import type { UserEmitter } from "./emitter.js";
 export interface InstanceEmitterMethods {
   /**
    * 事件名到处理函数的映射
-   * @memberOf [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
    */
   $all: UserEmitter["all"];
   /**
@@ -11,7 +10,6 @@ export interface InstanceEmitterMethods {
    *
    * @param type 监听的事件类型，使用 `'*'` 监听所有事件
    * @param handler 待添加的响应函数
-   * @memberOf [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
    */
   $on: UserEmitter["on"];
   /**
@@ -19,9 +17,8 @@ export interface InstanceEmitterMethods {
    *
    * 如果省略 `handler`，给定类型的所有事件均被忽略
    *
-   * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
-   * @param {Function} [handler] 待移除的响应函数
-   * @memberOf [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
+   * @param type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
+   * @param handler 待移除的响应函数
    */
   $off: UserEmitter["off"];
   /**
@@ -33,7 +30,6 @@ export interface InstanceEmitterMethods {
    *
    * @param type 待触发的事件类型
    * @param event 传递给所有响应函数的事件
-   * @memberOf [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
    */
   $emit: UserEmitter["emit"];
   /**
@@ -47,7 +43,6 @@ export interface InstanceEmitterMethods {
    *
    * @param type 待触发的事件类型
    * @param event 传递给所有响应函数的事件
-   * @memberOf [Emitter](https://miniapp-tool.github.io/api/enhance/emitter.html) 实例
    */
   $emitAsync: UserEmitter["emitAsync"];
 }

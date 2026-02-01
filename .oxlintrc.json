@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./.oxlintrc.base.json"],
+  "ignorePatterns": ["coverage/", "dist/"],
+  "plugins": ["typescript", "oxc", "jsdoc", "import", "promise", "unicorn", "node"],
+  "rules": {
+    "id-length": [
+      "warn",
+      {
+        "min": 2,
+        "exceptions": [
+          // sorting
+          "a",
+          "b",
+          // loops
+          "i",
+          "j",
+          // type generics
+          "T",
+          // parameter name for unused variables
+          "_",
+          // enhance package
+          "$"
+        ]
+      }
+    ],
+    "no-console": "off",
+    "new-cap": ["warn", { "capIsNewExceptions": ["App", "Component", "Emitter", "Page"] }],
+    "import/no-unassigned-import": ["error", { "allow": ["@mptool/mock"] }],
+    "typescript/no-unnecessary-type-parameters": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/prefer-global-this": "off",
+
+    "no-warning-comments": "off",
+    "unicorn/text-encoding-identifier-case": "off"
+  }
+}

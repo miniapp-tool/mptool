@@ -42,9 +42,13 @@ describe("queue", () => {
       setTimeout(() => {
         expect(count).toEqual(3);
       }, 60);
+
+      // oxlint-disable-next-line promise/no-multiple-resolved
       setTimeout(() => {
         expect(count).toEqual(4);
       }, 120);
+
+      // oxlint-disable-next-line promise/no-multiple-resolved
       setTimeout(() => {
         expect(count).toEqual(5);
         resolve();
