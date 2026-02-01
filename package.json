@@ -42,14 +42,14 @@
     "@rollup/plugin-commonjs": "29.0.0",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "16.0.3",
-    "@types/node": "24.10.9",
+    "@types/node": "25.1.0",
     "@vitest/coverage-istanbul": "4.0.18",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "cross-env": "10.1.0",
     "eslint": "9.39.2",
     "eslint-config-mister-hope": "0.9.6",
     "husky": "9.1.7",
-    "miniprogram-api-typings": "4.1.0",
+    "miniprogram-api-typings": "5.0.0",
     "nano-staged": "0.9.0",
     "prettier": "3.8.1",
     "rimraf": "6.1.2",
@@ -61,5 +61,5 @@
     "typescript": "5.9.3",
     "vitest": "4.0.18"
   },
-  "packageManager": "pnpm@10.24.0"
+  "packageManager": "pnpm@10.28.2"
 }

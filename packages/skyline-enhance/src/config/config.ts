@@ -20,12 +20,7 @@ export interface Config extends Omit<
 let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
-  const {
-    defaultPage,
-    getPath,
-    pages = [],
-    ...options
-  } = config as Required<
+  const { defaultPage, getPath, pages, ...options } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
   >;
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { MpError, logger } from "@mptool/shared";
 
 import { CookieStore } from "./cookieStore.js";

@@ -25,7 +25,7 @@ let appConfig: Config | null;
 export const $Config = (config: AppConfigOptions): void => {
   const {
     defaultPage: defaultPage,
-    pages: pages = [],
+    pages: pages,
     getPath,
     ...options
   } = config as Required<

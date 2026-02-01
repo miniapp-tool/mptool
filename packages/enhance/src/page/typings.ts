@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { bind } from "../bridge.js";
 import type { RefMap } from "../component/index.js";
 import type { InstanceEmitterMethods } from "../emitter/index.js";
