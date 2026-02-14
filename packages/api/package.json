@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "5.0.0"
+    "miniprogram-api-typings": "5.0.1"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
