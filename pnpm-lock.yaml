@@ -55,7 +55,7 @@ importers:
         version: 9.1.7
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
       nano-staged:
         specifier: 0.9.0
         version: 0.9.0
@@ -95,7 +95,7 @@ importers:
     devDependencies:
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -140,7 +140,7 @@ importers:
         version: link:../parser
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/api:
     devDependencies:
@@ -149,7 +149,7 @@ importers:
         version: link:../shared
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/encoder: {}
 
@@ -163,7 +163,7 @@ importers:
         version: link:../shared
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/file:
     devDependencies:
@@ -175,13 +175,13 @@ importers:
         version: link:../shared
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/mock:
     dependencies:
       miniprogram-api-typings:
         specifier: ^5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/net:
     dependencies:
@@ -197,7 +197,7 @@ importers:
         version: 2.4.10
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
       set-cookie-parser:
         specifier: 3.0.1
         version: 3.0.1
@@ -219,7 +219,7 @@ importers:
         version: link:../mock
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/shared:
     devDependencies:
@@ -231,7 +231,7 @@ importers:
         version: 1.0.2
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/skyline:
     devDependencies:
@@ -249,7 +249,7 @@ importers:
         version: link:../skyline-enhance
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
   packages/skyline-enhance:
     devDependencies:
@@ -261,7 +261,7 @@ importers:
         version: link:../shared
       miniprogram-api-typings:
         specifier: 5.0.0
-        version: 5.0.0
+        version: 5.0.1
 
 packages:
 
@@ -3627,8 +3627,8 @@ packages:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
     engines: {node: '>=16 || 14 >=14.17'}
 
-  miniprogram-api-typings@5.0.0:
-    resolution: {integrity: sha512-KQ1ZDk0cK3JrAaZtlFNlC/De/HwqhtToPZTzIYvFzi4FaW0Z8raIBN/qpjZ5QMiBaBNl/hJwTWwD+tfp8BwCZw==}
+  miniprogram-api-typings@5.0.1:
+    resolution: {integrity: sha512-saVtqMRpi5IcuJigswo1fGFlMKwGr5ixvI3wu8AM+4hQrH4v2Hov3YbZRlcvfIATObWt+HhLcmcSXzO52NGG+A==}
 
   minizlib@3.1.0:
     resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
@@ -4421,6 +4421,7 @@ packages:
   tar@7.5.7:
     resolution: {integrity: sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -8662,7 +8663,7 @@ snapshots:
 
   minipass@7.1.2: {}
 
-  miniprogram-api-typings@5.0.0: {}
+  miniprogram-api-typings@5.0.1: {}
 
   minizlib@3.1.0:
     dependencies:
