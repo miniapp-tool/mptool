@@ -21,7 +21,12 @@ const userPath = wx.env.USER_DATA_PATH;
 
 export const dirname = (path: string): string => path.split("/").slice(0, -1).join("/");
 
-/** 判断文件或文件夹是否存在 */
+/**
+ * 判断文件或文件夹是否存在
+ *
+ * @param path 文件或文件夹路径
+ * @returns 是否存在
+ */
 export const exists = (path: string): boolean => {
   try {
     fileManager.statSync(`${userPath}/${path}`, false);
@@ -32,11 +37,21 @@ export const exists = (path: string): boolean => {
   }
 };
 
-/** 是否是文件 */
+/**
+ * 是否是文件
+ *
+ * @param path 文件路径
+ * @returns 是否是文件
+ */
 export const isFile = (path: string): boolean =>
   exists(path) && (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isFile();
 
-/** 是否是文件夹 */
+/**
+ * 是否是文件夹
+ *
+ * @param path 文件夹路径
+ * @returns 是否是文件夹
+ */
 export const isDir = (path: string): boolean =>
   exists(path) &&
   (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isDirectory();
@@ -74,7 +89,12 @@ export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "f
   }
 };
 
-/** 列出目录下内容 */
+/**
+ * 列出目录下内容
+ *
+ * @param path 目录路径
+ * @returns 目录下的文件和文件夹列表，若目录不存在则返回空数组
+ */
 export const ls = (path: string): string[] => {
   try {
     const fileList = fileManager.readdirSync(`${userPath}/${path}`);
@@ -114,8 +134,6 @@ export const readFile = (<T extends FileEncoding>(
       | undefined;
   } catch {
     logger.warn(`${path} don't exist`);
-
-    return undefined;
   }
 }) as ReadFile;
 
@@ -130,24 +148,20 @@ export const readJSON = <T = unknown>(
   path: string,
   encoding: FileEncoding = "utf-8",
 ): T | undefined => {
-  let data;
+  // oxlint-disable-next-line no-undefined
+  let data = undefined;
 
   try {
     const fileContent = fileManager.readFileSync(`${userPath}/${path}.json`, encoding);
 
     try {
       data = JSON.parse(fileContent as string) as T;
-
       logger.debug(`Read ${path}.json success:`, data);
     } catch {
-      data = undefined;
-
       // 调试
       logger.warn(`Parse ${path}.json failed`);
     }
   } catch {
-    data = undefined;
-
     // 调试
     logger.warn(`${path}.json doesn't exist`);
   }
@@ -189,6 +203,7 @@ export const saveFile = (tempFilePath: string, path: string): void => {
  *
  * @param onlinePath 在线文件路径
  * @param localPath 本地保存路径
+ * @returns 本地文件路径
  */
 export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<string> => {
   mkdir(dirname(localPath));

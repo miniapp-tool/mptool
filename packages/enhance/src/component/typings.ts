@@ -260,4 +260,4 @@ export type TrivialComponentOptions = ComponentOptions<
   []
 >;
 
-export type RefMap = Record<string, TrivialComponentInstance>;
+export type RefMap = Map<string, TrivialComponentInstance>;

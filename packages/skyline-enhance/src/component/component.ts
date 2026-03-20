@@ -125,7 +125,8 @@ export const $Component: ComponentConstructor = <
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
-      if (refName && $refs) delete $refs[refName];
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
+      if (refName && $refs) $refs.delete(refName);
 
       // @ts-expect-error: $parent is not optional
       delete this.$parent;
@@ -159,6 +160,7 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
@@ -175,7 +177,7 @@ export const $Component: ComponentConstructor = <
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
-        if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
+        this.$parent?.$refs.delete(this.$refID);
 
         this.$refID = value;
         logger.debug(`Component ${this.$id} ref: ${value}`);

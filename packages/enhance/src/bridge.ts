@@ -139,7 +139,7 @@ export const bind = function (
 
       const refName = ref.$refID;
 
-      if (refName) this.$refs[refName] = ref;
+      if (refName) this.$refs.set(refName, ref);
 
       ref.$attached(this);
       break;
@@ -196,7 +196,7 @@ export function mount(
   ctx.$ = bind;
 
   // 实例引用集合
-  ctx.$refs = {};
+  ctx.$refs = new Map();
 
   // oxlint-disable-next-line typescript/unbound-method
   ctx.$on = userEmitter.on;
