@@ -4,7 +4,7 @@
  * @return The code point to insert on a decoding error.
  */
 export const decoderError = (fatal: boolean, codePoint?: number): number => {
-  if (fatal) throw TypeError("Decoder error");
+  if (fatal) throw new TypeError("Decoder error");
 
   return codePoint ?? 0xfffd;
 };
@@ -14,5 +14,5 @@ export const decoderError = (fatal: boolean, codePoint?: number): number => {
  * @return {number} Always throws, no value is actually returned.
  */
 export const encoderError = (codePoint: number): number => {
-  throw TypeError(`The code point ${codePoint} could not be encoded.`);
+  throw new TypeError(`The code point ${codePoint} could not be encoded.`);
 };

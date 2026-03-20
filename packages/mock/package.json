@@ -26,18 +26,21 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.mts --configPlugin esbuild",
-    "clean": "rimraf ./dist",
-    "dev": "rollup -c -w"
+    "build": "tsdown --config-loader unrun",
+    "clean": "rimraf ./dist"
   },
   "dependencies": {
-    "miniprogram-api-typings": "^5.0.0"
+    "miniprogram-api-typings": "^5.1.2"
   }
 }

@@ -119,17 +119,18 @@ try {
     option: U,
     // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
-    const value: T = Object.prototype.hasOwnProperty.call(storage, option.key)
+    const value: T = Object.hasOwn(storage, option.key)
       ? (storage[option.key] as T)
       : (undefined as unknown as T);
 
-    if (!option.success && !option.fail && !option.complete)
+    if (!option.success && !option.fail && !option.complete) {
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ data: value, errMsg: "" });
         }, 0);
       });
+    }
 
     setTimeout(() => {
       if (option.success) option.success({ data: value, errMsg: "" });
@@ -165,9 +166,7 @@ try {
     /** 本地缓存中指定的 key */
     key: string,
   ): T {
-    return Object.prototype.hasOwnProperty.call(storage, key)
-      ? (storage[key] as T)
-      : (undefined as unknown as T);
+    return Object.hasOwn(storage, key) ? (storage[key] as T) : (undefined as unknown as T);
   },
 
   /** [wx.setStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)
@@ -192,7 +191,7 @@ try {
     option: U,
     // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, SetStorageOption<T>> {
-    if (!option.success && !option.fail && !option.complete)
+    if (!option.success && !option.fail && !option.complete) {
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -200,6 +199,7 @@ try {
           resolve({ errMsg: "" });
         }, 0);
       });
+    }
 
     setTimeout(() => {
       storage[option.key] = option.data;
@@ -238,13 +238,14 @@ try {
     option: T,
     // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, RemoveStorageOption> {
-    if (!option.success && !option.fail && !option.complete)
+    if (!option.success && !option.fail && !option.complete) {
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ errMsg: "" });
         }, 0);
       });
+    }
 
     setTimeout(() => {
       delete storage[option.key];
@@ -316,6 +317,6 @@ logger.warn('key3', 'value3')
   getFileSystemManager: (): any => ({}),
 };
 
-(global as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
+(globalThis as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
 
 export const wx = wxMock;

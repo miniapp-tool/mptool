@@ -22,7 +22,7 @@ export class Cookie {
       ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         cookie.maxAge! > 0
         ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          new Date(new Date().getTime() + cookie.maxAge! * 1000)
+          new Date(Date.now() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
         ? new Date(cookie.expires)

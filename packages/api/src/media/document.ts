@@ -20,9 +20,7 @@ export const openDocument = (url: string): void => {
     .catch(() => {
       void showToast("下载文档失败");
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       wx.reportEvent?.("resource_load_failed", {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         broken_url: url,
       });
     });
@@ -33,7 +31,7 @@ export const saveDocument = (
   filename = /\/([^/]+)\.[^/]+?$/.exec(url)?.[1] ?? "document",
 ): void => {
   // 首选添加到收藏
-  if (wx.canIUse("addFileToFavorites"))
+  if (wx.canIUse("addFileToFavorites")) {
     download(url)
       .then((filePath) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -54,10 +52,9 @@ export const saveDocument = (
       .catch(() => {
         void showToast("下载文档失败");
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         wx.reportEvent?.("resource_load_failed", {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           broken_url: url,
         });
       });
+  }
 };

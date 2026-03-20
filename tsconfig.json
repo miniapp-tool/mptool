@@ -1,9 +1,6 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "@mr-hope/tsconfig/bundler.json",
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "noEmitHelpers": true,
     "types": ["miniprogram-api-typings"]
   },
   "include": ["**/*.ts", "**/*.mts", "docs/.vuepress/**/*.ts"]

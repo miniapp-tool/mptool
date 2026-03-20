@@ -24,26 +24,19 @@
  * SOFTWARE.
  */
 const ENCODE_MAP: Record<string, string> = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "!": "%21",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "'": "%27",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "(": "%28",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   ")": "%29",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "~": "%7E",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "%20": "+",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  "%00": "\x00",
+  "%00": "\u0000",
 };
 
 const encode = (str: string): string =>
-  encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
+  encodeURIComponent(str).replaceAll(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
 
-const decode = (str: string): string => decodeURIComponent(str.replace(/\+/g, " "));
+const decode = (str: string): string => decodeURIComponent(str.replaceAll("+", " "));
 
 export class URLSearchParams {
   private params: Map<string, string[]>;
@@ -62,7 +55,7 @@ export class URLSearchParams {
     } else {
       this.params = new Map();
 
-      if (typeof init === "string")
+      if (typeof init === "string") {
         (init.startsWith("?")
           ? // remove first '?'
             init.slice(1)
@@ -74,35 +67,35 @@ export class URLSearchParams {
 
             if (key) this.append(decode(key), decode(value));
           });
-      else if (Symbol.iterator in init)
+      } else if (Symbol.iterator in init) {
         for (const item of init) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (item.length !== 2)
+          if (item.length !== 2) {
             throw new TypeError(
               "Failed to construct 'URLSearchParams': Sequence initializer must only contain pair elements",
             );
+          }
           const [key, value] = item;
 
           this.append(key, value);
         }
-      else
+      } else {
         for (const key of Object.keys(init)) {
           const value = init[key];
 
           this.params.set(key, [String(value)]);
         }
+      }
     }
   }
 
   get size(): number {
-    return Array.from(this.params.values()).flat().length;
+    return [...this.params.values()].flat().length;
   }
 
   /**
    * Append a new name-value pair to the query string.
    */
   append(name: string, value: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
     this.params.set(name, this.getAll(name).concat(String(value)));
   }
 
@@ -151,9 +144,11 @@ export class URLSearchParams {
     callbackfn: (value: string, key: string, iterable: URLSearchParams) => void,
     thisArg?: unknown,
   ): void {
-    this.params.forEach((value, key) =>
-      value.forEach((item) => callbackfn.bind(thisArg)(item, key, this)),
-    );
+    this.params.forEach((value, key) => {
+      value.forEach((item) => {
+        callbackfn.bind(thisArg)(item, key, this);
+      });
+    });
   }
 
   /**
@@ -170,7 +165,7 @@ export class URLSearchParams {
    * no such pairs, an empty array is returned.
    */
   getAll(name: string): string[] {
-    return this.params.get(name)?.slice(0) ?? [];
+    return [...(this.params.get(name) ?? [])];
   }
 
   /**
@@ -241,7 +236,7 @@ export class URLSearchParams {
    * ```
    */
   sort(): void {
-    this.params = new Map(Array.from(this.params.entries()).sort(([a], [b]) => a.localeCompare(b)));
+    this.params = new Map([...this.params.entries()].sort(([a], [b]) => a.localeCompare(b)));
   }
 
   /**

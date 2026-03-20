@@ -13,9 +13,8 @@ const encodeUtf8 = (content: string): Uint8Array => {
 };
 
 const decodeUtf8 = (octets: Uint8Array): string => {
-  const utf8 = String.fromCharCode(...octets);
+  const utf8 = String.fromCodePoint(...octets);
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   return decodeURIComponent(escape(utf8));
 };
 
@@ -25,14 +24,16 @@ const generateBlock = (from: number, len: number, skip: number): string => {
   for (let i = 0; i < len; i += skip) {
     let cp = from + i;
 
-    if (0xd800 <= cp && cp <= 0xdfff) continue;
+    if (cp >= 0xd800 && cp <= 0xdfff) continue;
     if (cp < 0x10000) {
-      block.push(String.fromCharCode(cp));
+      block.push(String.fromCodePoint(cp));
       continue;
     }
-    cp = cp - 0x10000;
-    block.push(String.fromCharCode(0xd800 + (cp >> 10)));
-    block.push(String.fromCharCode(0xdc00 + (cp & 0x3ff)));
+    cp -= 0x10000;
+    // oxlint-disable-next-line no-bitwise
+    block.push(String.fromCodePoint(0xd800 + (cp >> 10)));
+    // oxlint-disable-next-line no-bitwise
+    block.push(String.fromCodePoint(0xdc00 + (cp & 0x3ff)));
   }
 
   return block.join("");
@@ -40,7 +41,7 @@ const generateBlock = (from: number, len: number, skip: number): string => {
 
 it("UTF-8 - Encode/Decode - reference sample", () => {
   // z, cent, CJK water, G-Clef, Private-use character
-  const sample = "z\xA2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
+  const sample = "z\u00A2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
   const cases = [
     {
       encoding: "utf-8",

@@ -2,8 +2,5 @@ packages:
   - demo/
   - docs/
   - packages/*
-
-onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - esbuild
-  - unrs-resolver
+allowBuilds:
+  esbuild: true

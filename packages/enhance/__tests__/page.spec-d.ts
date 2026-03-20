@@ -27,19 +27,19 @@ it("$Page", () => {
       });
     },
     onLoad() {
-      if (app.globalData.userInfo)
+      if (app.globalData.userInfo) {
         this.setData({
           userInfo: app.globalData.userInfo,
           hasUserInfo: true,
         });
-      else if (this.data.canIUse)
+      } else if (this.data.canIUse) {
         app.userInfoReadyCallback = (res): void => {
           this.setData({
             userInfo: res,
             hasUserInfo: true,
           });
         };
-      else
+      } else {
         wx.getUserInfo({
           success: (res) => {
             app.globalData.userInfo = res.userInfo;
@@ -49,6 +49,7 @@ it("$Page", () => {
             });
           },
         });
+      }
     },
 
     getUserInfo(e: any) {
@@ -80,9 +81,7 @@ it("$Page", () => {
     onReady() {
       this.setData({
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        logs: (wx.getStorageSync("logs") || []).map((log: number) => {
-          return new Date(log).toString();
-        }),
+        logs: (wx.getStorageSync("logs") || []).map((log: number) => new Date(log).toString()),
       });
     },
     onShow() {},
@@ -92,9 +91,7 @@ it("$Page", () => {
       expectTypeOf(res).toEqualTypeOf<WechatMiniprogram.Page.IShareAppMessageOption>();
       expectTypeOf(res.from).toEqualTypeOf<"button" | "menu">();
 
-      if (res.from === "button") {
-        expectTypeOf(res.webViewUrl).toEqualTypeOf<string | undefined>();
-      }
+      if (res.from === "button") expectTypeOf(res.webViewUrl).toEqualTypeOf<string | undefined>();
 
       return {
         title: "自定义转发标题",
@@ -113,14 +110,11 @@ it("$Page", () => {
       this.setData(
         {
           text: "Set some data for updating view.",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "array[0].text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "object.text": "changed data",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "newField.text": "new data",
         },
-        function () {},
+        function viewTap() {},
       );
       expectTypeOf(this.data.text).toEqualTypeOf<string>();
       expectTypeOf(this.route).toEqualTypeOf<string>();
@@ -202,9 +196,9 @@ it("$Page", () => {
       logs: [],
     },
     getLogs() {
-      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) => {
-        return new Date(log).toString();
-      });
+      return (wx.getStorageSync<number[] | undefined>("logs") ?? []).map((log: number) =>
+        new Date(log).toString(),
+      );
     },
     onLoad() {
       const logs = this.getLogs();
@@ -234,7 +228,7 @@ it("$Page", () => {
   $Page("example", {
     onAddToFavorites(res) {
       // webview 页面返回 webviewUrl
-      if (res.webviewUrl) console.log("WebviewUrl: ", res.webviewUrl);
+      if (res.webviewUrl) console.log("WebviewUrl:", res.webviewUrl);
 
       return {
         title: "自定义标题",

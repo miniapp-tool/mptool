@@ -116,7 +116,7 @@ export const request = <
     const data = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
-    if (!requestHeaders.has("Content-Type"))
+    if (!requestHeaders.has("Content-Type")) {
       if (body instanceof URLSearchParams)
         requestHeaders.set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
       else if (body instanceof ArrayBuffer)
@@ -126,6 +126,7 @@ export const request = <
         Object.prototype.toString.call(body) === "[object Object]"
       )
         requestHeaders.set("Content-Type", "application/json; charset=UTF-8");
+    }
 
     logger.debug(
       `\
@@ -162,7 +163,7 @@ Options:
 
         cookieStore.applyHeader(header, cookieScope);
 
-        return resolve({
+        resolve({
           data,
           headers: new Headers(header),
           status: statusCode,
@@ -287,7 +288,7 @@ export const createRequest = ({
   errorHandler,
   ...defaultOptions
 }: RequestInitOptions = {}): RequestFactory => {
-  const domain = server?.replace(/\/$/g, "");
+  const domain = server?.replaceAll(/\/$/g, "");
   const defaultCookieStore =
     cookieStore instanceof CookieStore
       ? cookieStore

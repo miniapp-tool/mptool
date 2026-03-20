@@ -1,3 +1,5 @@
 {
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "oxc.unusedDisableDirectives": "deny",
   "cSpell.words": ["miniapp", "miniprogram", "mptool", "vuepress", "wechat"]
 }

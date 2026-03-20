@@ -60,6 +60,5 @@ export const labelToEncoding = Object.fromEntries(
 /**
  * @param label The encoding label.
  */
-export const getEncoding = (label: string): Encoding | null => {
-  return labelToEncoding[label.trim().toLowerCase()] ?? null;
-};
+export const getEncoding = (label: string): Encoding | null =>
+  labelToEncoding[label.trim().toLowerCase()] ?? null;

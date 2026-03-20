@@ -156,7 +156,7 @@ class GB18030Decoder implements Decoder {
       // code point to the index gb18030 ranges code point for
       // (((gb18030 first − 0x81) × 10 + gb18030 second − 0x30) ×
       // 126 + gb18030 third − 0x81) × 10 + byte − 0x30.
-      if (inRange(bite, 0x30, 0x39))
+      if (inRange(bite, 0x30, 0x39)) {
         codePoint = indexGB18030RangesCodePointFor(
           (((this.gb18030First - 0x81) * 10 + this.gb18030Second - 0x30) * 126 +
             this.gb18030Third -
@@ -165,6 +165,7 @@ class GB18030Decoder implements Decoder {
             bite -
             0x30,
         );
+      }
 
       // 3. Let buffer be a byte sequence consisting of gb18030
       // second, gb18030 third, and byte, in order.
@@ -326,13 +327,13 @@ class GB18030Encoder implements Encoder {
     const byte1 = Math.floor(pointer / 10 / 126 / 10);
 
     // 10. Set pointer to pointer − byte1 × 10 × 126 × 10.
-    pointer = pointer - byte1 * 10 * 126 * 10;
+    pointer -= byte1 * 10 * 126 * 10;
 
     // 11. Let byte2 be floor(pointer / 10 / 126).
     const byte2 = Math.floor(pointer / 10 / 126);
 
     // 12. Set pointer to pointer − byte2 × 10 × 126.
-    pointer = pointer - byte2 * 10 * 126;
+    pointer -= byte2 * 10 * 126;
 
     // 13. Let byte3 be floor(pointer / 10).
     const byte3 = Math.floor(pointer / 10);

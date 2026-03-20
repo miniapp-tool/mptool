@@ -23,7 +23,7 @@ const appLaunchHandler = (options: WechatMiniprogram.App.LaunchShowOption): void
 const appShowHandler = (): void => {
   // emit onAwake lifeCycle
   if (appState.hide) {
-    appEmitter.emit(ON_APP_AWAKE, new Date().getTime() - appState.hide);
+    appEmitter.emit(ON_APP_AWAKE, Date.now() - appState.hide);
 
     // reset timeStamp
     appState.hide = 0;
@@ -31,7 +31,7 @@ const appShowHandler = (): void => {
 };
 
 const appHideHandler = (): void => {
-  appState.hide = new Date().getTime();
+  appState.hide = Date.now();
 };
 
 /**

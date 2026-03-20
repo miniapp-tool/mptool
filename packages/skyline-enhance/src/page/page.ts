@@ -17,10 +17,12 @@ export const $Page: PageConstructor = <
 ): void => {
   const { extendPage, injectPage } = getConfig();
 
-  const callLog = (lifeCycle: string, args?: unknown): void =>
+  const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
-  const registerLog = (lifeCycle: string): void =>
+  };
+  const registerLog = (lifeCycle: string): void => {
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
+  };
 
   // extend page config
   if (extendPage) extendPage(name, options);

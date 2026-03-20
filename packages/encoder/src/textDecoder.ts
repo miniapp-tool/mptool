@@ -42,8 +42,8 @@ export class TextDecoder {
 
     // 2. If encoding is failure or replacement, throw a RangeError.
     if (encoding === null || encoding.name === "replacement")
-      throw RangeError("Unknown encoding: " + label);
-    if (!(encoding.name in decoders)) throw Error("Decoder not present.");
+      throw new RangeError("Unknown encoding: " + label);
+    if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
     this._encoding = encoding;
@@ -130,9 +130,10 @@ export class TextDecoder {
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
 
-      if (result !== null)
+      if (result !== null) {
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
+      }
 
       // 3. Otherwise, if result is error, throw a TypeError.
       // (Thrown in handler)
@@ -171,7 +172,7 @@ export class TextDecoder {
       ["UTF-8", "UTF-16LE", "UTF-16BE"].includes(this._encoding.name) &&
       !this._ignoreBOM &&
       !this._BOMseen
-    )
+    ) {
       if (stream.length > 0 && stream[0] === 0xfeff) {
         // 1. If token is U+FEFF, set BOM seen flag.
         this._BOMseen = true;
@@ -185,6 +186,7 @@ export class TextDecoder {
         // to output.
         // (no-op)
       }
+    }
 
     // 4. Otherwise, return output.
     return codePointsToString(stream);

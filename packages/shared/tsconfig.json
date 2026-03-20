@@ -1,7 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@mr-hope/tsconfig/bundler.json",
   "compilerOptions": {
-    "types": ["node", "miniprogram-api-typings"]
+    "types": ["node", "miniprogram-api-typings"],
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
 }

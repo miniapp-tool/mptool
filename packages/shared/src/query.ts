@@ -11,12 +11,13 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
   const queries: Record<string, string> = {};
   const splits = queryString ? queryString.split(splitter) : undefined;
 
-  if (splits && splits.length > 0)
+  if (splits && splits.length > 0) {
     splits.forEach((item) => {
       const [key, value] = item.split("=");
 
       queries[key] = value;
     });
+  }
 
   return queries;
 };
@@ -56,6 +57,6 @@ export const join = (path: string, queries: Record<string, string>, unencoded = 
   const queryString = stringify(queries, "&", unencoded);
 
   return queryString
-    ? `${path}${/[?&]$/u.test(path) ? "" : !path.includes("?") ? "?" : "&"}${queryString}`
+    ? `${path}${/[?&]$/u.test(path) ? "" : path.includes("?") ? "&" : "?"}${queryString}`
     : path;
 };

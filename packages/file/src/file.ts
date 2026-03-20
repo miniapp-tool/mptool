@@ -50,23 +50,28 @@ export const isDir = (path: string): boolean =>
  * @param type 要删除的类型
  */
 export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "file"): void => {
-  const deleteLog = (): void => logger.debug(`Deleted ${path}`);
-  const errorLog = (err: unknown): void => logger.error(`Error deleting ${path}:`, err);
+  const deleteLog = (): void => {
+    logger.debug(`Deleted ${path}`);
+  };
+  const errorLog = (err: unknown): void => {
+    logger.error(`Error deleting ${path}:`, err);
+  };
 
-  if (type === "dir")
+  if (type === "dir") {
     try {
       fileManager.rmdirSync(`${userPath}/${path}`, true);
       deleteLog();
     } catch (err) {
       errorLog(err);
     }
-  else
+  } else {
     try {
       fileManager.unlinkSync(`${userPath}/${path}`);
       deleteLog();
     } catch (err) {
       errorLog(err);
     }
+  }
 };
 
 /** 列出目录下内容 */
@@ -196,7 +201,8 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<s
         if (statusCode === 200) {
           logger.debug(`${onlinePath} saved`);
 
-          return resolve(tempFilePath);
+          resolve(tempFilePath);
+          return;
         }
 
         logger.error(`Download ${onlinePath} failed with statusCode ${statusCode}`);

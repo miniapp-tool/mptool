@@ -224,9 +224,10 @@ export class CookieStore {
    */
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
-      return this.apply(
+      this.apply(
         parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
       );
+      return;
     }
 
     const setCookieHeader =
@@ -236,13 +237,13 @@ export class CookieStore {
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
       : env === "qq"
-        ? setCookieHeader.replace(
+        ? setCookieHeader.replaceAll(
             /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
             ",$1=",
           )
         : setCookieHeader;
 
-    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
   /**
@@ -252,7 +253,7 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(response: unknown, domainOrURL: string): void {
-    return this.applyHeader(
+    this.applyHeader(
       env === "js"
         ? (response as Response).headers
         : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
@@ -291,8 +292,6 @@ export class CookieStore {
       this.apply(cookiesData.map((item) => new Cookie(item)));
     } catch (err) {
       console.warn("Error applying cookie storage", err);
-
-      return;
     }
   }
 
@@ -305,11 +304,13 @@ export class CookieStore {
 
       // 获取需要持久化的 cookie
       // 清除无效 cookie
-      for (const cookies of this.store.values())
-        for (const cookie of cookies.values())
+      for (const cookies of this.store.values()) {
+        for (const cookie of cookies.values()) {
           if (cookie.isExpired()) cookies.delete(cookie.name);
           // 只存储可持久化 cookie
           else if (cookie.isPersistence()) saveCookies.push(cookie);
+        }
+      }
 
       // 保存到本地存储
       if (env !== "js") wx.setStorageSync(this.key, saveCookies);

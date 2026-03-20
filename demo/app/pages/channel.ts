@@ -8,7 +8,7 @@ $Page("channel", {
   onAppLaunch(opts) {
     console.log("[pages/channel] appLaunch:", opts);
   },
-  onPreload(res) {
+  async onPreload(res) {
     console.log("[pages/channel] preload:", res, this);
 
     return new Promise((resolve) => {
@@ -18,7 +18,7 @@ $Page("channel", {
       }, 150);
     });
   },
-  onNavigate(res) {
+  async onNavigate(res) {
     console.log("[pages/channel] navigating:", res, this);
 
     return new Promise((resolve) => {

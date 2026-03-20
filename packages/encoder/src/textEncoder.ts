@@ -36,7 +36,7 @@ export class TextEncoder {
   ) {
     // Web IDL conventions
     if (!(this instanceof TextEncoder))
-      throw TypeError("Called as a function. Did you forget 'new'?");
+      throw new TypeError("Called as a function. Did you forget 'new'?");
 
     // Non-standard
     this.doNotFlush = false;
@@ -62,10 +62,11 @@ export class TextEncoder {
     // NOTE: This option is nonstandard. None of the encodings
     // permitted for encoding (i.e. UTF-8, UTF-16) are stateful when
     // the input is a USVString so streaming is not necessary.
-    if (!this.doNotFlush)
+    if (!this.doNotFlush) {
       this._encoder = encoders[this._encoding.name]({
         fatal: this._fatal,
       });
+    }
     this.doNotFlush = Boolean(options.stream);
 
     // 1. Convert input to a stream.

@@ -1835,7 +1835,6 @@ export const encodingIndex = {
     58545, 58546, 58547, 58548, 58549, 58550, 58551, 58552, 58553, 58554, 58555, 58556, 58557,
     58558, 58559, 58560, 58561, 58562, 58563, 58564, 58565,
   ],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "gb18030-ranges": [
     [0, 128],
     [36, 165],

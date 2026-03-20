@@ -132,7 +132,7 @@ export class Headers {
    * Returns a `ByteString` sequence of all the values of a header with a given name.
    */
   get(name: string): string | null {
-    if (!isValidHeaderName(name)) throw TypeError(`Invalid header name "${name}"`);
+    if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
 
     return this.headers[normalizeHeaderName(name)] ?? null;
   }
@@ -200,10 +200,11 @@ export class Headers {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
     const sortedKeys = Object.keys(this.headers).sort((a, b) => a.localeCompare(b));
 
-    for (const name of sortedKeys)
+    for (const name of sortedKeys) {
       if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       else yield [name, this.get(name)!];
+    }
   }
 
   toObject(): Record<string, string> {

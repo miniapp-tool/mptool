@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { get, getAsync, set, setAsync } from "../src/index.js";
 
-describe("set", () => {
+describe(set, () => {
   it("set sync simple", () => {
     set("simple-sync", "zhangbowang");
     expect(get("simple-sync")).toEqual("zhangbowang");

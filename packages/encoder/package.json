@@ -25,15 +25,24 @@
   "files": [
     "dist"
   ],
+  "type": "commonjs",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.mts --configPlugin esbuild",
-    "clean": "rimraf ./dist",
-    "dev": "rollup -c -w"
+    "build": "tsdown --config-loader unrun",
+    "clean": "rimraf ./dist"
   }
 }

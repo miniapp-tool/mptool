@@ -13,29 +13,37 @@ export const savePhoto = (imgPath: string): Promise<void> =>
     (path) =>
       new Promise<void>((resolve, reject) => {
         if (env === "donut") {
-          return wx.saveImageToPhotosAlbum({
+          wx.saveImageToPhotosAlbum({
             filePath: path,
-            success: () => resolve(),
+            success: () => {
+              resolve();
+            },
           });
+          return;
         }
 
         // 获取用户设置
         wx.getSetting({
           success: ({ authSetting }) => {
             // 如果已经授权相册直接写入图片
-            if (authSetting["scope.writePhotosAlbum"])
+            if (authSetting["scope.writePhotosAlbum"]) {
               wx.saveImageToPhotosAlbum({
                 filePath: path,
-                success: () => resolve(),
+                success: () => {
+                  resolve();
+                },
               });
+            }
             // 没有授权 —> 提示用户授权
-            else
+            else {
               wx.authorize({
                 scope: "scope.writePhotosAlbum",
                 success: () => {
                   wx.saveImageToPhotosAlbum({
                     filePath: path,
-                    success: () => resolve(),
+                    success: () => {
+                      resolve();
+                    },
                   });
                 },
 
@@ -47,6 +55,7 @@ export const savePhoto = (imgPath: string): Promise<void> =>
                   });
                 },
               });
+            }
           },
         });
       }),

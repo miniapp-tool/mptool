@@ -123,7 +123,7 @@ export interface ComponentLifetimes {
      *
      * 最低基础库版本：[`2.4.1`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    error(err: WechatMiniprogram.Error): void;
+    error(err: Error): void;
   }>;
 }
 

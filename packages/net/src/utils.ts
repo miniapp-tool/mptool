@@ -2,7 +2,7 @@
  * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
+  domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
@@ -18,7 +18,7 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  domain = normalizeDomain(domain).replace(/^\.+/gi, "");
+  domain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
   const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
 

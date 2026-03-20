@@ -46,16 +46,15 @@ function clickHandlerFactory(
         url?: string;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this && before && typeof this[before] === "function")
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-      if (url)
+      if (url) {
         return action(url).then(() => {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (this && after && typeof this[after] === "function")
             (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
         });
+      }
     }
   };
 }
@@ -87,12 +86,10 @@ const bindBack = function touchHandler(
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
     return Promise.resolve(back(Number(delta))).then(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this && after && typeof this[after] === "function")
         (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
     });
@@ -107,7 +104,7 @@ const bindBack = function touchHandler(
 const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
->(): PageInstance<Data, Custom> => getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
+>(): PageInstance<Data, Custom> => [...getCurrentPages()].pop() as PageInstance<Data, Custom>;
 
 export function bind(
   this: TrivialComponentInstance,

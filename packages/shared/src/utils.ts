@@ -152,7 +152,7 @@ export class Queue {
             this.running -= 1;
             this.next();
           },
-          ...[].slice.call(args, 0),
+          ...Array.prototype.slice.call(args, 0),
         ]);
       };
 
@@ -173,7 +173,7 @@ export class Queue {
       // @ts-expect-error: func is not typed
       func,
       ctx,
-      args: [].slice.call(args, 0),
+      args: Array.prototype.slice.call(args, 0),
     });
 
     // 开始第一个队列

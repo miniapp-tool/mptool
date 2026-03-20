@@ -17,7 +17,11 @@ export const showToast = (
       title,
       icon,
       duration,
-      success: () => resolve(),
-      fail: ({ errMsg }) => reject(new MpError({ message: errMsg })),
+      success: () => {
+        resolve();
+      },
+      fail: ({ errMsg }) => {
+        reject(new MpError({ message: errMsg }));
+      },
     });
   });

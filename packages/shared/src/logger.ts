@@ -2,18 +2,17 @@
 import { env } from "./env.js";
 
 /** 实时日志管理器 */
-const log =
-  env === "js"
-    ? console
-    : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
+// should not throw error when `wx.getRealtimeLogManager` is not supported
+// oxlint-disable-next-line typescript/strict-boolean-expressions
+const log = env === "js" ? console : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
-  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined)
+  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
     if (isRealtime) log.info("debug", ...args);
     else (log as WechatMiniprogram.LogManager).debug(...args);
+  }
   if (log !== console) console.debug(...args);
 };
 

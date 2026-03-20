@@ -27,9 +27,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: true
+        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -37,18 +35,18 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
 
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
       - name: Build project
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=8192
         run: pnpm build
 
       - name: Linter test
         run: pnpm lint
 
       - name: Unit test
-        env:
-          NODE_OPTIONS: --max_old_space_size=8192
         run: pnpm test
 
       - name: Upload coverage
