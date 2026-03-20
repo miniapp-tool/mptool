@@ -1,5 +1,7 @@
 /**
  * @see RFC 6265
+ * @param domain - Domain to normalize
+ * @returns Normalized domain
  */
 export const normalizeDomain = (domain = ""): string =>
   domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
@@ -18,11 +20,11 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  domain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
+  const normalizedDomain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
-  const scopes = domain.split(".").map((k) => [".", domain.slice(domain.indexOf(k))].join(""));
+  const scopes = normalizedDomain.split(".").map((k) => [".", normalizedDomain.slice(normalizedDomain.indexOf(k))].join(""));
 
-  return [domain].concat(scopes);
+  return [normalizedDomain, ...scopes];
 };
 
 export interface UrlInfo {

@@ -15,6 +15,7 @@ const encodeUtf8 = (content: string): Uint8Array => {
 const decodeUtf8 = (octets: Uint8Array): string => {
   const utf8 = String.fromCodePoint(...octets);
 
+  // oxlint-disable-next-line typescript/no-deprecated
   return decodeURIComponent(escape(utf8));
 };
 

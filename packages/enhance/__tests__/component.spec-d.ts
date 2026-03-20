@@ -121,7 +121,7 @@ it("$Component", () => {
       custom: 1,
       methods: {
         f() {
-          this.custom;
+          void this.custom;
         },
       },
     }),
@@ -166,7 +166,7 @@ it("$Component", () => {
     },
     methods: {
       myMethod() {
-        this.data._b; // 纯数据字段可以在 this.data 中获取
+        void this.data._b; // 纯数据字段可以在 this.data 中获取
         this.setData({
           c: true, // 普通数据字段
           _d: true, // 纯数据字段

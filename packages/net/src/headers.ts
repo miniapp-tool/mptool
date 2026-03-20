@@ -10,6 +10,8 @@ const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_
 
 /**
  * Validate the given header name.
+ *
+ * @param value - The value to validate as a header name
  * @see https://fetch.spec.whatwg.org/#header-name
  */
 const isValidHeaderName = (value: unknown): boolean => {
@@ -33,6 +35,8 @@ const normalizeHeaderName = (name: string): string => {
 
 /**
  * Validate the given header value.
+ *
+ * @param value - The value to validate as a header value
  * @see https://fetch.spec.whatwg.org/#header-value
  */
 const isValidHeaderValue = (value: unknown): boolean => {
@@ -56,6 +60,8 @@ const isValidHeaderValue = (value: unknown): boolean => {
 
 /**
  * Normalize the given header value.
+ *
+ * @param value - The header value to normalize
  * @see https://fetch.spec.whatwg.org/#concept-header-value-normalize
  */
 const normalizeHeaderValue = (value: string): string =>
@@ -84,6 +90,7 @@ export class Headers {
     if (init instanceof Headers) {
       const initialHeaders = init;
 
+      // oxlint-disable-next-line unicorn/no-array-method-this-argument
       initialHeaders.forEach((value, name) => {
         this.append(name, value);
       }, this);
@@ -102,6 +109,9 @@ export class Headers {
 
   /**
    * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   *
+   * @param name - The name of the header
+   * @param value - The value to append
    */
   append(name: string, value: string): void {
     if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;

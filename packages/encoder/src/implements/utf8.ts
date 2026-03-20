@@ -26,7 +26,7 @@ class UTF8Decoder implements Decoder {
   /**
    * @param {Stream} stream The stream of bytes being decoded.
    * @param {number} bite The next byte read from the stream.
-   * @return {?(number|!Array.<number>)} The next code point(s)
+   * @returns {?(number|!Array.<number>)} The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point.
    */
@@ -148,7 +148,7 @@ class UTF8Encoder implements Encoder {
   /**
    * @param {Stream} stream Input stream.
    * @param {number} codePoint Next code point read from the stream.
-   * @return {(number|!Array.<number>)} Byte(s) to emit.
+   * @returns {(number|!Array.<number>)} Byte(s) to emit.
    */
   handler(_stream: Stream, codePoint: number): number | number[] {
     // 1. If code point is end-of-stream, return finished.

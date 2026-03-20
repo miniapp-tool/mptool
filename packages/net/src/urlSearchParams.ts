@@ -94,9 +94,12 @@ export class URLSearchParams {
 
   /**
    * Append a new name-value pair to the query string.
+   *
+   * @param name - The name of the parameter
+   * @param value - The value of the parameter
    */
   append(name: string, value: string): void {
-    this.params.set(name, this.getAll(name).concat(String(value)));
+    this.params.set(name, [...this.getAll(name), String(value)]);
   }
 
   /**
@@ -104,6 +107,8 @@ export class URLSearchParams {
    * where name is `name` and value is `value`..
    *
    * If `value` is not provided, removes all name-value pairs whose name is `name`.
+   *
+   * @param name - The name of the parameter to delete
    */
   delete(name: string): void {
     this.params.delete(name);
@@ -137,7 +142,7 @@ export class URLSearchParams {
    * //   a b true
    * //   c d true
    * ```
-   * @param fn Invoked for each name-value pair in the query
+   * @param callbackfn Invoked for each name-value pair in the query
    * @param thisArg To be used as `this` value for when `fn` is called
    */
   forEach(
@@ -154,7 +159,9 @@ export class URLSearchParams {
   /**
    * Returns the value of the first name-value pair whose name is `name`. If there
    * are no such pairs, `null` is returned.
-   * @return or `null` if there is no name-value pair with the given `name`.
+   *
+   * @param name - The name of the parameter
+   * @returns The value of the first matching parameter, or `null` if not found
    */
   get(name: string): string | null {
     return this.getAll(name)[0] ?? null;
@@ -163,6 +170,9 @@ export class URLSearchParams {
   /**
    * Returns the values of all name-value pairs whose name is `name`. If there are
    * no such pairs, an empty array is returned.
+   *
+   * @param name - The name of the parameter
+   * @returns An array of values associated with the given parameter
    */
   getAll(name: string): string[] {
     return [...(this.params.get(name) ?? [])];
@@ -176,6 +186,9 @@ export class URLSearchParams {
    *
    * If `value` is not provided, returns `true` if there is at least one name-value
    * pair whose name is `name`.
+   *
+   * @param name - The name of the parameter to check
+   * @returns `true` if a matching name-value pair exists, `false` otherwise
    */
   has(name: string): boolean {
     return this.params.has(name);
@@ -216,6 +229,9 @@ export class URLSearchParams {
    * console.log(params.toString());
    * // Prints foo=def&#x26;abc=def&#x26;xyz=opq
    * ```
+   *
+   * @param name - The name of the parameter to set
+   * @param value - The value to set
    */
   set(name: string, value: string): void {
     this.params.set(name, [value || ""]);
@@ -257,6 +273,8 @@ export class URLSearchParams {
 
   /**
    * Returns an ES6 `Iterator` over the values of each name-value pair.
+   *
+   * @returns An iterator over the values
    */
   values(): IterableIterator<string> {
     const items = new Set<string>();

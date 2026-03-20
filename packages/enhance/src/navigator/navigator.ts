@@ -43,21 +43,22 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ *
+ * @param type - Navigation type
+ * @returns Navigation trigger function
  */
-export function getTrigger(
-  type: NavigatorType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): (pageNameWithArg: string) => any {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => any {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
       canNavigate = false;
 
-      const { path, url, query } = getPathDetail(pageNameWithArg);
+      const { path, url, query: queries } = getPathDetail(pageNameWithArg);
 
       return Promise.race([
-        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, query),
+        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, queries),
         // 等待最小延迟
         new Promise<void>((resolve) => {
           setTimeout(() => {

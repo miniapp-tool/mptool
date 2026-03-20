@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any
 /**
  * 包装函数，先执行 wrapper ，然后执行原函数
  *
@@ -16,20 +17,19 @@
  * c(); // expect to output 'a', and then output 'b'
  * ```
  */
-export function wrapFunction<T>(
-  original: ((this: T, ...args: any[]) => void) | undefined,
-  pre: (this: T, ...args: any[]) => void,
-): (this: T, ...args: any[]) => void;
-export function wrapFunction<T>(
-  original: ((this: T, ...args: any[]) => Promise<void>) | undefined,
-  pre: (this: T, ...args: any[]) => void,
-): (this: T, ...args: any[]) => Promise<void>;
-
-export function wrapFunction<T, R extends void | Promise<void>>(
-  original: ((this: T, ...args: any[]) => R) | undefined,
-  pre: (this: T, ...args: any[]) => void,
+export function wrapFunction<ThisType>(
+  original: ((this: ThisType, ...args: any[]) => void) | undefined,
+  pre: (this: ThisType, ...args: any[]) => void,
+): (this: ThisType, ...args: any[]) => void;
+export function wrapFunction<ThisType>(
+  original: ((this: ThisType, ...args: any[]) => Promise<void>) | undefined,
+  pre: (this: ThisType, ...args: any[]) => void,
+): (this: ThisType, ...args: any[]) => Promise<void>;
+export function wrapFunction<ThisType, ReturnType extends void | Promise<void>>(
+  original: ((this: ThisType, ...args: any[]) => ReturnType) | undefined,
+  pre: (this: ThisType, ...args: any[]) => void,
 ) {
-  return function wrapper(this: T, ...args: any[]): Promise<void> | void {
+  return function wrapper(this: ThisType, ...args: any[]): Promise<void> | void {
     pre.apply(this, args);
 
     if (original) return original.apply(this, args);
@@ -63,13 +63,14 @@ export function wrapFunction<T, R extends void | Promise<void>>(
  * }, 15);
  * ```
  */
-export const lock = <T, A extends unknown[], R>(
-  fn: (this: T, release: () => void, ...args: A) => R,
-  ctx?: T,
-): ((this: T, ...args: A) => R | undefined) => {
+export const lock = <ThisType, Args extends unknown[], ReturnType>(
+  fn: (this: ThisType, release: () => void, ...args: Args) => ReturnType,
+  ctx?: ThisType,
+): ((this: ThisType, ...args: Args) => ReturnType | undefined) => {
   let pending: boolean;
 
-  return function lockFun(this: T, ...args: A): R | undefined {
+  return function lockFun(this: ThisType, ...args: Args): ReturnType | undefined {
+    // oxlint-disable-next-line no-undefined
     if (pending) return undefined;
 
     pending = true;
@@ -100,13 +101,14 @@ export const lock = <T, A extends unknown[], R>(
  * counter(); // count is still 1
  * ```
  */
-export const once = <T, A extends unknown[], R>(
-  func: (...args: A) => R,
-  ctx?: T,
-): ((this: T, ...args: A) => R | undefined) => {
+export const once = <ThisType, Args extends unknown[], ReturnType>(
+  func: (...args: Args) => ReturnType,
+  ctx?: ThisType,
+): ((this: ThisType, ...args: Args) => ReturnType | undefined) => {
   let called: boolean;
 
-  return function onceFunc(this: T, ...args: A): R | undefined {
+  return function onceFunc(this: ThisType, ...args: Args): ReturnType | undefined {
+    // oxlint-disable-next-line no-undefined
     if (called) return undefined;
     called = true;
 

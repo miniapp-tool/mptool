@@ -28,7 +28,7 @@ export const redirect = getTrigger("redirectTo");
 export const switchTab = getTrigger("switchTab");
 export const reLaunch = getTrigger("reLaunch");
 
-function clickHandlerFactory(
+const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,
 ): (event: WechatMiniprogram.Touch) => Promise<void> | void {
   return function touchHandler(
@@ -53,11 +53,12 @@ function clickHandlerFactory(
         return action(url).then(() => {
           if (this && after && typeof this[after] === "function")
             (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
+          return;
         });
       }
     }
   };
-}
+};
 
 const bindGo = clickHandlerFactory(go);
 const bindRedirect = clickHandlerFactory(redirect);
@@ -67,7 +68,8 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 /**
  * 返回，默认返回上一页
  *
- * @param [delta=1] 后退层数
+ * @param delta - 后退层数
+ * @returns Promise resolving to navigation result
  */
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
@@ -75,24 +77,24 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
 };
 
-const bindBack = function touchHandler(
+const bindBack = async function touchHandler(
   this: TrivialPageInstance,
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
     { before?: string; after?: string; delta?: number | string }
   >,
-): Promise<void> | void {
+): Promise<void> {
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-    return Promise.resolve(back(Number(delta))).then(() => {
-      if (this && after && typeof this[after] === "function")
-        (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-    });
+    await Promise.resolve(back(Number(delta)));
+
+    if (this && after && typeof this[after] === "function")
+      (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
   }
 };
 
@@ -106,7 +108,7 @@ const getPage = <
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
 >(): PageInstance<Data, Custom> => [...getCurrentPages()].pop() as PageInstance<Data, Custom>;
 
-export function bind(
+export const bind = function (
   this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
     id: number;
@@ -119,7 +121,7 @@ export function bind(
   switch (event) {
     // run private attach
     case "$attached": {
-      const ref = getRef(id) as TrivialComponentInstance | undefined;
+      const ref = getRef(id);
 
       if (!ref) break;
 
@@ -136,7 +138,7 @@ export function bind(
       if (method) method.apply(this, args);
     }
   }
-}
+};
 
 /**
  * 挂载页面方法
@@ -178,6 +180,7 @@ export function mount(
 ): void {
   const config = getConfig();
 
+  // eslint-disable-next-line id-length
   ctx.$ = bind;
 
   // 实例引用集合

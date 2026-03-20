@@ -1,4 +1,9 @@
-/** SVG 转换 */
+/**
+ * SVG 转换
+ *
+ * @param content - SVG content to convert
+ * @returns Data URI string
+ */
 export const convertSVGToDataURI = (content: string): string =>
   `data:image/svg+xml,${content
     .replaceAll('"', "'")

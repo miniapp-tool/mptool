@@ -13,10 +13,19 @@ export default defineConfig({
   },
   ignorePatterns: [...defaultIgnorePatterns, "demo/**/*.js"],
   rules: {
+    "new-cap": ["warn", { capIsNewExceptions: ["App", "Component", "Emitter", "Page"] }],
     "no-console": "off",
-    "import/no-assigned-import": ["warn", { allow: ["@mptool/mock"] }],
+    "import/no-unassigned-import": ["warn", { allow: ["@mptool/mock"] }],
     "typescript/no-unnecessary-type-parameters": "off",
     "unicorn/text-encoding-identifier-case": "off",
     "unicorn/prefer-code-point": "off",
   },
+  overrides: [
+    {
+      files: ["*.spec.ts", "*.spec-d.ts"],
+      rules: {
+        "typescript/no-explicit-any": "off",
+      },
+    },
+  ],
 });

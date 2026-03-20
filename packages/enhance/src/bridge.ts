@@ -29,7 +29,7 @@ export const redirect = getTrigger("redirectTo");
 export const switchTab = getTrigger("switchTab");
 export const reLaunch = getTrigger("reLaunch");
 
-function clickHandlerFactory(
+const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,
 ): (event: WechatMiniprogram.Touch) => Promise<void> | void {
   return function touchHandler(
@@ -58,7 +58,7 @@ function clickHandlerFactory(
       }
     }
   };
-}
+};
 
 const bindGo = clickHandlerFactory(go);
 const bindRedirect = clickHandlerFactory(redirect);
@@ -68,7 +68,8 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 /**
  * 返回，默认返回上一页
  *
- * @param [delta=1] 后退层数
+ * @param delta - 后退层数
+ * @returns Promise resolving to navigation result
  */
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
@@ -119,7 +120,7 @@ const preload = (pageNameWithArg: string): void => {
   routeEmitter.emit(`${ON_PAGE_PRELOAD}:${path}`, query);
 };
 
-export function bind(
+export const bind = function (
   this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
     id: number;
@@ -132,7 +133,7 @@ export function bind(
   switch (event) {
     // run private attach
     case "$attached": {
-      const ref = getRef(id) as TrivialComponentInstance | undefined;
+      const ref = getRef(id);
 
       if (!ref) break;
 
@@ -149,7 +150,7 @@ export function bind(
       if (method) method.apply(this, args);
     }
   }
-}
+};
 
 /**
  * 挂载页面方法
@@ -191,6 +192,7 @@ export function mount(
 ): void {
   const config = getConfig();
 
+  // oxlint-disable-next-line id-length
   ctx.$ = bind;
 
   // 实例引用集合

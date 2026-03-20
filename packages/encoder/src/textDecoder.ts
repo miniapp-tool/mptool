@@ -8,7 +8,7 @@ export interface Decoder {
   /**
    * @param stream The stream of bytes being decoded.
    * @param bite The next byte read from the stream.
-   * @return The next code point(s)
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point, or |finished|.
    */
@@ -18,14 +18,13 @@ export interface Decoder {
 export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 /**
- * @constructor
  * A TextDecoder object has an associated encoding, decoder,
  * stream, ignore BOM flag (initially unset), BOM seen flag
  * (initially unset), error mode (initially replacement), and do
  * not flush flag (initially unset).
  * @param label The label of the encoding;
  *     defaults to 'utf-8'.
- * @param options
+ * @param options Decoder options
  */
 export class TextDecoder {
   _encoding: Encoding;
@@ -76,8 +75,8 @@ export class TextDecoder {
 
   /**
    * @param input The buffer of bytes to decode.
-   * @param options
-   * @return The decoded string.
+   * @param options Decoding options
+   * @returns The decoded string.
    */
   decode(input: ArrayBuffer | ArrayBufferView, options: { stream?: boolean } = {}): string {
     let bytes;
@@ -160,7 +159,7 @@ export class TextDecoder {
   // A TextDecoder object also has an associated serialize stream
   // algorithm...
   /**
-   * @param stream
+   * @param stream The stream of code points to serialize
    */
   private serializeStream(stream: number[]): string {
     // 1. Let token be the result of reading from stream.

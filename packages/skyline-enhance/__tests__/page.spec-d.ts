@@ -1,8 +1,11 @@
+// oxlint-disable typescript/no-unsafe-member-access
+// oxlint-disable typescript/no-unsafe-assignment
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
+  // oxlint-disable-next-line typescript/no-confusing-void-expression
   expectTypeOf($Page("example", {})).toEqualTypeOf<void>();
 
   expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
@@ -71,17 +74,17 @@ it("$Page", () => {
     onLoad(options) {
       expectTypeOf(options).toEqualTypeOf<Record<string, string | undefined>>();
       expectTypeOf(options.from).toEqualTypeOf<string | undefined>();
-      const app = getApp<{
+      const appInstance = getApp<{
         globalData: { userInfo: WechatMiniprogram.UserInfo };
       }>();
 
-      expectTypeOf(app.globalData.userInfo).toEqualTypeOf<WechatMiniprogram.UserInfo>();
-      expectTypeOf(app.globalData.userInfo.nickName).toEqualTypeOf<string>();
+      expectTypeOf(appInstance.globalData.userInfo).toEqualTypeOf<WechatMiniprogram.UserInfo>();
+      expectTypeOf(appInstance.globalData.userInfo.nickName).toEqualTypeOf<string>();
     },
     onReady() {
       this.setData({
-        // oxlint-disable-next-line typescript/strict-boolean-expressions
-        logs: (wx.getStorageSync<number[]>("logs") || []).map((log: number) =>
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        logs: (wx.getStorageSync<number[] | undefined>("logs") || []).map((log: number) =>
           new Date(log).toString(),
         ),
       });
@@ -179,7 +182,7 @@ it("$Page", () => {
 
   $Page("example", {
     onLoad(q) {
-      q;
+      void q;
     },
     f() {
       void this.onLoad();
@@ -243,6 +246,7 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
+      // oxlint-disable-next-line typescript/unbound-method
       expectTypeOf(this.fn).toEqualTypeOf<() => number>();
     },
     fn() {

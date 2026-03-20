@@ -3,7 +3,6 @@ import { END_OF_STREAM } from "./constant.js";
 /**
  * A stream represents an ordered sequence of tokens.
  *
- * @constructor
  * @param tokens Array of tokens that provide
  * the stream.
  */
@@ -17,7 +16,7 @@ export class Stream {
   }
 
   /**
-   * @return True if end-of-stream has been hit.
+   * @returns True if end-of-stream has been hit.
    */
   endOfStream(): boolean {
     return !this.tokens.length;
@@ -28,7 +27,7 @@ export class Stream {
    * stream must be returned and subsequently removed, and
    * end-of-stream must be returned otherwise.
    *
-   * @return Get the next token from the stream, or
+   * @returns Get the next token from the stream, or
    * end_of_stream.
    */
   read(): number {

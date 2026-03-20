@@ -7,8 +7,8 @@ import { stringToCodePoints } from "./utils.js";
 export interface Encoder {
   /**
    * @param stream The stream of code points being encoded.
-   * @param code_point Next code point read from the stream.
-   * @return Byte(s) to emit, or |finished|.
+   * @param codePoint Next code point read from the stream.
+   * @returns Byte(s) to emit, or |finished|.
    */
   handler: (stream: Stream, codePoint: number) => number | number[];
 }
@@ -17,7 +17,7 @@ export interface Encoder {
 export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> = {};
 
 /**
- * @constructor
+ * @class
  *  A TextEncoder object has an associated encoding and encoder.
  * @param label The label of the encoding. NONSTANDARD.
  * @param options NONSTANDARD.
@@ -45,8 +45,8 @@ export class TextEncoder {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this._encoding = getEncoding("utf-8")!;
 
-    if (label !== DEFAULT_ENCODING && "console" in global)
-      console.warn("TextEncoder constructor called with encoding label, " + "which is ignored.");
+    if (label !== DEFAULT_ENCODING && "console" in globalThis)
+      console.warn("TextEncoder constructor called with encoding label, which is ignored.");
   }
 
   get encoding(): string {
@@ -55,8 +55,8 @@ export class TextEncoder {
 
   /**
    * @param content The string to encode.
-   * @param options
-   * @return Encoded bytes, as a Uint8Array.
+   * @param options Encoding options
+   * @returns Encoded bytes, as a Uint8Array.
    */
   encode(content = "", options: { stream?: boolean } = {}): Uint8Array {
     // NOTE: This option is nonstandard. None of the encodings

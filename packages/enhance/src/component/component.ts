@@ -24,12 +24,14 @@ export const handleProperties = (
     const advancedValue = oldProps[propertyName];
 
     // Constructor or null
+    // oxlint-disable-next-line eqeqeq
     if (advancedValue === null || typeof advancedValue === "function") {
       props[propertyName] = advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = advancedValue;
 
       // null type
+      // oxlint-disable-next-line eqeqeq
       if (type === null) {
         props[propertyName] = {
           type: null,
@@ -67,6 +69,7 @@ export const handleProperties = (
  * 组件注册器
  *
  * @param options 注册选项
+ * @returns 返回组件实例ID
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -123,6 +126,7 @@ export const $Component: ComponentConstructor = <
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
+      // eslint-disable-next-line typescript-eslint/no-dynamic-delete
       if (refName && $refs) delete $refs[refName];
 
       // @ts-expect-error: $parent is not optional
@@ -139,7 +143,7 @@ export const $Component: ComponentConstructor = <
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
-      ...args: any[]
+      ...args: unknown[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
       this.triggerEvent("ing", {
@@ -160,6 +164,7 @@ export const $Component: ComponentConstructor = <
       this.$parent = parent;
     },
 
+    // oxlint-disable-next-line id-length
     $: bind,
   };
 

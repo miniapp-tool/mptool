@@ -24,12 +24,14 @@ export const handleProperties = (
     const advancedValue = oldProps[propertyName];
 
     // Constructor or null
+    // oxlint-disable-next-line eqeqeq
     if (advancedValue === null || typeof advancedValue === "function") {
       props[propertyName] = advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = advancedValue;
 
       // null type
+      // oxlint-disable-next-line eqeqeq
       if (type === null) {
         props[propertyName] = {
           type: null,
@@ -66,6 +68,7 @@ export const handleProperties = (
  * 组件注册器
  *
  * @param options 注册选项
+ * @returns 返回组件实例ID
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -138,6 +141,7 @@ export const $Component: ComponentConstructor = <
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
+      // oxlint-disable-next-line typescript/no-explicit-any
       ...args: any[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
@@ -159,6 +163,7 @@ export const $Component: ComponentConstructor = <
       this.$parent = parent;
     },
 
+    // oxlint-disable-next-line id-length
     $: bind,
   };
 

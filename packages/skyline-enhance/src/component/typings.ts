@@ -5,7 +5,7 @@ import type { ExtendedPageMethods, TrivialPageInstance } from "../page/index.js"
 export type Props = Record<string, unknown>;
 
 export type PropsOptions<Property = Props> = {
-  [K in keyof Property]: PropItem<Property[K]> | null;
+  [Key in keyof Property]: PropItem<Property[Key]> | null;
 };
 
 export type PropItem<Type, Default = Type> = PropOption<Type, Default> | PropConstructor<Type>;
@@ -29,9 +29,8 @@ type PropMethod<Type, TypeConstructor = any> = Type extends (...args: any) => an
   : never;
 
 type PropConstructor<Type = any> =
-  | (new (...args: any[]) => Type & {})
-  | (() => Type)
-  | PropMethod<Type>;
+  // oxlint-disable-next-line typescript/ban-types
+  (new (...args: any[]) => Type & {}) | (() => Type) | PropMethod<Type>;
 
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
 
@@ -43,18 +42,18 @@ export type InferFromType<Type> = [Type] extends [null]
       ? WechatMiniprogram.IAnyObject
       : [Type] extends [BooleanConstructor]
         ? boolean
-        : [Type] extends [PropConstructor<infer V>]
-          ? unknown extends V
+        : [Type] extends [PropConstructor<infer Value>]
+          ? unknown extends Value
             ? // fail to infer
               any
-            : V
+            : Value
           : Type;
 
 type RequiredKeys<T> = {
-  [K in keyof T]: T[K] extends { required: true } | { default: any }
-    ? T[K] extends { default: undefined | (() => undefined) }
+  [Key in keyof T]: T[Key] extends { required: true } | { default: any }
+    ? T[Key] extends { default: undefined | (() => undefined) }
       ? never
-      : K
+      : Key
     : never;
 }[keyof T];
 
@@ -76,13 +75,13 @@ export type InferPropType<Type> = [Type] extends [null]
               : Value
             : Type;
 
-export type InferPropTypes<O> = O extends object
+export type InferPropTypes<Obj> = Obj extends object
   ? {
-      [K in keyof O]?: unknown;
+      [Key in keyof Obj]?: unknown;
     } & {
       // This is needed to keep the relation between the option prop and the props, allowing to use ctrl+click to navigate to the prop options. see: #3656
-      [K in RequiredKeys<O>]: InferPropType<O[K]>;
-    } & { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
+      [Key in RequiredKeys<Obj>]: InferPropType<Obj[Key]>;
+    } & { [Key in OptionalKeys<Obj>]?: InferPropType<Obj[Key]> }
   : Record<string, any>;
 
 export interface ComponentLifetimes {
@@ -183,15 +182,12 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
    */
   $call(method: string, ...args: unknown[]): void;
 
-  /**
-   * @private
-   */
   $attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
 }
 
 export type ComponentInstance<
   Data extends WechatMiniprogram.Component.DataOption,
-  Props extends PropsOptions,
+  ComponentProps extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
@@ -204,25 +200,25 @@ export type ComponentInstance<
   InstanceProps &
   ExtendedComponentProperty &
   ExtendedPageMethods<
-    Data & InferPropTypes<Props>,
+    Data & InferPropTypes<ComponentProps>,
     InstanceProps &
       Method &
       WechatMiniprogram.Component.MixinMethods<Behavior> &
       (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>)
   > & {
     /** 组件数据，**包括内部数据和属性值** */
-    data: Data & InferPropTypes<Props>;
+    data: Data & InferPropTypes<ComponentProps>;
     /**
      * @deprecated 优先使用 `data`
      *
      * 组件数据，**包括内部数据和属性值**（与 `data` 一致）
      */
-    properties: Data & InferPropTypes<Props>;
+    properties: Data & InferPropTypes<ComponentProps>;
   };
 
 export type ComponentOptions<
   Data extends WechatMiniprogram.Component.DataOption,
-  Props extends PropsOptions,
+  ComponentProps extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
@@ -230,13 +226,13 @@ export type ComponentOptions<
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
   Partial<{
     /** 组件属性 */
-    props: Props;
+    props: ComponentProps;
   }> &
   Partial<WechatMiniprogram.Component.Behavior<Behavior>> &
   Partial<WechatMiniprogram.Component.Method<Method, IsPage>> &
   Partial<WechatMiniprogram.Component.OtherOption> &
   Partial<ComponentLifetimes> &
-  ThisType<ComponentInstance<Data, Props, Method, Behavior, InstanceProps, IsPage>>;
+  ThisType<ComponentInstance<Data, ComponentProps, Method, Behavior, InstanceProps, IsPage>>;
 
 export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,

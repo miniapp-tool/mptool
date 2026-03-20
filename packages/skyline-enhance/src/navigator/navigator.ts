@@ -19,12 +19,15 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ *
+ * @param type - Navigator type
+ * @returns Navigation trigger function
  */
 export function getTrigger(
   type: NavigatorType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return (pageNameWithArg: string): any =>
     // @ts-expect-error: argument can not union
     wx[type]({ url: getFullPath(pageNameWithArg) });

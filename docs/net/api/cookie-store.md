@@ -28,7 +28,7 @@ class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return cookie 对象
+   * @returns cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null;
   /**
@@ -36,7 +36,7 @@ class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return Cookie 值
+   * @returns Cookie 值
    */
   getValue(name: string, options: CookieOptions): string | undefined;
   /**
@@ -44,7 +44,7 @@ class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return 是否存在
+   * @returns 是否存在
    */
   has(name: string, options: CookieOptions): boolean;
   /**
@@ -66,19 +66,19 @@ class CookieStore {
    * 获取 cookies 对象数组
    *
    * @param options Cookie 选项
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getCookies(options?: CookieOptions): Cookie[];
   /**
    * 获取所有 cookies 对象
    *
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getAllCookies(): Cookie[];
   /**
    * 获取 cookies key/value 对象
    *
-   * @return 键值 Map
+   * @returns 键值 Map
    */
   getCookiesMap(options: CookieOptions): Record<string, string>;
   /**
@@ -114,7 +114,7 @@ class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @return request cookie header
+   * @returns request cookie header
    */
   getHeader(options: CookieOptions): string;
 }
