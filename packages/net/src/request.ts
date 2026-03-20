@@ -16,7 +16,7 @@ export type RequestBody =
 export interface RequestOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
@@ -66,7 +66,7 @@ export interface RequestOptions<
 export interface RequestResponse<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > {
@@ -81,7 +81,7 @@ export interface RequestResponse<
 export type RequestType = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -92,7 +92,7 @@ export type RequestType = <
 export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -207,7 +207,7 @@ export interface RequestInitOptions extends Pick<
   requestHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -225,7 +225,7 @@ export interface RequestInitOptions extends Pick<
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -245,7 +245,7 @@ export interface RequestInitOptions extends Pick<
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -279,7 +279,7 @@ export const createRequest = ({
   responseHandler = <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(

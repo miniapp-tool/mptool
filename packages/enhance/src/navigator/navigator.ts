@@ -47,9 +47,9 @@ export function getTrigger(
  * @param type - Navigation type
  * @returns Navigation trigger function
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
@@ -70,7 +70,7 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
         canNavigate = true;
 
         // @ts-expect-error: argument can not union
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // oxlint-disable-next-line typescript/no-unsafe-return
         return wx[type]({ url });
       });
     }

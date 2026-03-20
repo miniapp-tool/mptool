@@ -34,7 +34,7 @@ export const saveDocument = (
   if (wx.canIUse("addFileToFavorites")) {
     download(url)
       .then((filePath) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         const docType = url.split(".").pop()!;
 
         wx.addFileToFavorites({

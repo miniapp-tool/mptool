@@ -114,7 +114,7 @@ export interface RequestInitOptions extends Pick<
   requestHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(

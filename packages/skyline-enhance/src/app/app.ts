@@ -51,19 +51,19 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       appOptions.onAwake!(time);
     });
     logger.debug("App: registered onAwake");
   }
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$on = userEmitter.on;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$off = userEmitter.off;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emit = userEmitter.emit;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emitAsync = userEmitter.emitAsync;
 
   /**

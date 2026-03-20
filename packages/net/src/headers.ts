@@ -12,6 +12,7 @@ const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_
  * Validate the given header name.
  *
  * @param value - The value to validate as a header name
+ * @returns Whether the header name is valid
  * @see https://fetch.spec.whatwg.org/#header-name
  */
 const isValidHeaderName = (value: unknown): boolean => {
@@ -37,6 +38,7 @@ const normalizeHeaderName = (name: string): string => {
  * Validate the given header value.
  *
  * @param value - The value to validate as a header value
+ * @returns Whether the header value is valid
  * @see https://fetch.spec.whatwg.org/#header-value
  */
 const isValidHeaderValue = (value: unknown): boolean => {
@@ -62,6 +64,7 @@ const isValidHeaderValue = (value: unknown): boolean => {
  * Normalize the given header value.
  *
  * @param value - The header value to normalize
+ * @returns The normalized header value
  * @see https://fetch.spec.whatwg.org/#concept-header-value-normalize
  */
 const normalizeHeaderValue = (value: string): string =>
@@ -128,18 +131,24 @@ export class Headers {
 
   /**
    * Deletes a header from the `Headers` object.
+   *
+   * @param name - The name of the header to delete
    */
   delete(name: string): void {
     if (!isValidHeaderName(name) || !this.has(name)) return;
 
     const normalizedName = normalizeHeaderName(name);
 
+    // oxlint-disable-next-line typescript/no-dynamic-delete
     delete this.headers[normalizedName];
     this.headerNames.delete(normalizedName);
   }
 
   /**
    * Returns a `ByteString` sequence of all the values of a header with a given name.
+   *
+   * @param name - The name of the header
+   * @returns The header value or null if not found
    */
   get(name: string): string | null {
     if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
@@ -151,10 +160,13 @@ export class Headers {
    * Returns an array containing the values
    * of all Set-Cookie headers associated
    * with a response
+   *
+   * @returns An array of Set-Cookie header values
    */
   getSetCookie(): string[] {
     const setCookieHeader = this.get("set-cookie");
 
+    // oxlint-disable-next-line eqeqeq
     if (setCookieHeader === null) return [];
     if (setCookieHeader === "") return [""];
 
@@ -163,16 +175,22 @@ export class Headers {
 
   /**
    * Returns a boolean stating whether a `Headers` object contains a certain header.
+   *
+   * @param name - The name of the header to check
+   * @returns Whether the header exists
    */
   has(name: string): boolean {
     if (!isValidHeaderName(name)) throw new TypeError(`Invalid header name "${name}"`);
 
-    // eslint-disable-next-line no-prototype-builtins
+    // oxlint-disable-next-line no-prototype-builtins
     return this.headers.hasOwnProperty(normalizeHeaderName(name));
   }
 
   /**
    * Sets a new value for an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   *
+   * @param name - The name of the header
+   * @param value - The value to set
    */
   set(name: string, value: string): void {
     if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;
@@ -187,13 +205,16 @@ export class Headers {
   /**
    * Traverses the `Headers` object,
    * calling the given callback for each header.
+   *
+   * @param callback - The callback function to call for each header
+   * @param thisArg - The `this` value to use when calling the callback
    */
   forEach<ThisArg = this>(
     callback: (this: ThisArg, value: string, name: string, parent: this) => void,
     thisArg?: ThisArg,
   ): void {
     for (const [name, value] of this.entries()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       callback.call(thisArg!, value, name, this);
     }
   }
@@ -212,7 +233,7 @@ export class Headers {
 
     for (const name of sortedKeys) {
       if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       else yield [name, this.get(name)!];
     }
   }

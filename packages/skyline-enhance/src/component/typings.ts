@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 import type { InstanceEmitterMethods } from "../emitter/index.js";
 import type { ExtendedPageMethods, TrivialPageInstance } from "../page/index.js";
 

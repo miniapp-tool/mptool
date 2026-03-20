@@ -198,13 +198,13 @@ export function mount(
   // 实例引用集合
   ctx.$refs = {};
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$on = userEmitter.on;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$off = userEmitter.off;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emit = userEmitter.emit;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emitAsync = userEmitter.emitAsync;
 
   // 路由方法

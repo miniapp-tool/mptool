@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* oxlint-disable typescript/no-unsafe-argument */
 import { env } from "./env.js";
 
 /** 实时日志管理器 */

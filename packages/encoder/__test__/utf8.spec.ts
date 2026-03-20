@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 import { TextDecoder, TextEncoder } from "../src/index.js";
 
 const encodeUtf8 = (content: string): Uint8Array => {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  // oxlint-disable-next-line typescript/no-deprecated
   const utf8 = unescape(encodeURIComponent(content));
   const octets = new Uint8Array(utf8.length);
 

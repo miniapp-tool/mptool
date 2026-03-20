@@ -2,7 +2,7 @@
  * 字符串参数解析
  *
  * @param queryString 需要解析的字符串
- * @param [splitter='&'] 分隔符
+ * @param splitter 分隔符
  *
  * @returns 参数对象
  */
@@ -26,8 +26,8 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
  * query 对象转换字符串
  *
  * @param params query 对象
- * @param [splitter='&] 分隔符
- * @param [unencoded=false] 是否已经解码
+ * @param splitter 分隔符
+ * @param unencoded 是否已经解码
  *
  * @returns 解析的字符串
  */

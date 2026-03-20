@@ -83,7 +83,7 @@ it("$Page", () => {
     },
     onReady() {
       this.setData({
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         logs: (wx.getStorageSync<number[] | undefined>("logs") || []).map((log: number) =>
           new Date(log).toString(),
         ),

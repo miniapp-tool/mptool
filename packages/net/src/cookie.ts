@@ -19,9 +19,9 @@ export class Cookie {
     this.path = cookie.path ?? "/";
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ? // oxlint-disable-next-line typescript/no-non-null-assertion
         cookie.maxAge! > 0
-        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ? // oxlint-disable-next-line typescript/no-non-null-assertion
           new Date(Date.now() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires

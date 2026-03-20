@@ -36,7 +36,7 @@ export interface EmitterInstance<Events> {
 
 /**
  * Tiny (~300b) functional event emitter / pubsub.
- * @name emitter
+ *
  * @returns Emitter
  */
 export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
@@ -45,7 +45,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
   return {
     /**
      * 事件名到处理函数的映射
-     * @memberOf emitter
      */
     all,
 
@@ -54,7 +53,6 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 监听的事件类型，使用 `'*'` 监听所有事件
      * @param handler 待添加的响应函数
-     * @memberOf emitter
      */
     on: <Key extends keyof Events>(type: Key, handler: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
@@ -68,9 +66,8 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * 如果省略 `handler`，给定类型的所有事件均被忽略
      *
-     * @param {string|symbol} type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
-     * @param {Function} [handler] 待移除的响应函数
-     * @memberOf emitter
+     * @param type 取消监听的事件类型，使用 `'*'` 取消监听所有事件
+     * @param handler 待移除的响应函数
      */
     off: <Key extends keyof Events>(type: Key, handler?: GenericEventHandler): void => {
       const handlers: GenericEventHandler[] | undefined = all.get(type);
@@ -90,14 +87,13 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emit: <Key extends keyof Events>(type: Key, event?: Events[Key]): void => {
       let handlers = all.get(type);
 
       if (handlers) {
         void [...(handlers as EventHandlerList<Events[keyof Events]>)]
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!));
       }
 
@@ -105,7 +101,7 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
 
       if (handlers) {
         void [...(handlers as WildCardEventHandlerList<Events>)]
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!));
       }
     },
@@ -121,18 +117,17 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
      *
      * @param type 待触发的事件类型
      * @param event 传递给所有响应函数的事件
-     * @memberOf emitter
      */
     emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
         [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)]
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(event!)),
       );
 
       await Promise.all(
         [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)]
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          // oxlint-disable-next-line typescript/no-non-null-assertion
           .map((handler) => handler(type, event!)),
       );
     },

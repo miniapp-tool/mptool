@@ -58,7 +58,7 @@ export interface ExtendedPageMethods<
   /**
    * 绑定组件函数
    */
-  // eslint-disable-next-line id-length
+  // oxlint-disable-next-line id-length
   $: typeof bind;
   /**
    * 获取当前页面实例。

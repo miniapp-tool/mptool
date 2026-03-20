@@ -126,7 +126,7 @@ export const $Component: ComponentConstructor = <
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
-      // eslint-disable-next-line typescript-eslint/no-dynamic-delete
+      // oxlint-disable-next-line typescript-eslint/no-dynamic-delete
       if (refName && $refs) delete $refs[refName];
 
       // @ts-expect-error: $parent is not optional

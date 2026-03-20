@@ -9,7 +9,7 @@ export const normalizeDomain = (domain = ""): string =>
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
 export const getDomain = (domainOrURL: string): string =>
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // oxlint-disable-next-line typescript/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
     .replace(/^https?:\/\//, "")
     .split("/")
@@ -22,7 +22,9 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   // 获取 cookie 作用域范围列表
   const normalizedDomain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
 
-  const scopes = normalizedDomain.split(".").map((k) => [".", normalizedDomain.slice(normalizedDomain.indexOf(k))].join(""));
+  const scopes = normalizedDomain
+    .split(".")
+    .map((k) => [".", normalizedDomain.slice(normalizedDomain.indexOf(k))].join(""));
 
   return [normalizedDomain, ...scopes];
 };

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
+/* oxlint-disable typescript/no-unsafe-enum-comparison */
 import type { AnyNode, Element } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";

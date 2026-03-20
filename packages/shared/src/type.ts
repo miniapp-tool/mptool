@@ -20,5 +20,5 @@ export const type = (obj: unknown): string => {
   return objType;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+// oxlint-disable-next-line typescript/no-unsafe-function-type
 export const isFunction = <T extends Function>(obj: unknown): obj is T => type(obj) === "function";

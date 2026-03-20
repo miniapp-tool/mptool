@@ -1,3 +1,3 @@
 export const getWindowInfo = (): WechatMiniprogram.WindowInfo =>
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  // oxlint-disable-next-line typescript/no-deprecated
   (wx.getWindowInfo || wx.getSystemInfoSync)();

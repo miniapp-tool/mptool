@@ -44,7 +44,7 @@ export class Stream {
    */
   prepend(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       while (token.length) this.tokens.push(token.pop()!);
     else this.tokens.push(token);
   }
@@ -59,7 +59,7 @@ export class Stream {
    */
   push(token: number | number[]): void {
     if (Array.isArray(token))
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       while (token.length) this.tokens.unshift(token.shift()!);
     else this.tokens.unshift(token);
   }
