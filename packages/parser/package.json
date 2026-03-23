@@ -50,11 +50,11 @@
   "dependencies": {
     "@mptool/shared": "workspace:*",
     "cheerio": "^1.2.0",
-    "domhandler": "^5.0.3"
+    "domhandler": "^6.0.1"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "5.0.0"
+    "miniprogram-api-typings": "5.1.2"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
