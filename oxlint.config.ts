@@ -46,6 +46,7 @@ export default defineConfig({
     {
       files: ["**/mock/src/**/*.ts"],
       rules: {
+        "id-length": "off",
         "jsdoc/require-param": "off",
         "jsdoc/require-returns": "off",
       },

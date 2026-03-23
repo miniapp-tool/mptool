@@ -1,8 +1,8 @@
 import { readdirSync } from "node:fs";
 import { get } from "node:https";
-import path from "node:path";
+import { resolve as pathResolve } from "node:path";
 
-const packagesDir = path.resolve(process.cwd(), "packages");
+const packagesDir = pathResolve(process.cwd(), "packages");
 const packages = readdirSync(packagesDir);
 
 interface PackageJson {
