@@ -1,7 +1,7 @@
 import { $App, $Config, request } from "@mptool/all";
 
 // oxlint-disable-next-line typescript/ban-ts-comment, typescript/prefer-ts-expect-error
-// @ts-ignore-error: DEBUG is not standard
+// @ts-ignore: DEBUG is not standard
 wx.env.DEBUG = true;
 
 $Config({
