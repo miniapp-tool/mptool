@@ -1,7 +1,7 @@
 {
   "name": "@mptool/skyline",
   "version": "0.12.0",
-  "description": "Full back for mptool",
+  "description": "Full pack for mptool",
   "keywords": [
     "miniapp",
     "miniprogram"

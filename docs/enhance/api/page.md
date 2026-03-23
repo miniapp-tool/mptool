@@ -147,7 +147,7 @@ order: 4
 
 - `$emitAsync(type:string, event?:any): Promise<void>`: 异步触发 `type` 事件并接受回调
 
-- `$off(type:string, handler: (event?:any) => void | Promise<void>): Promise<void>`: 取消监听 `type` 的 `handler` 事件或全部事件 (当未传入 `handler`)
+- `$off(type:string, handler?: (event?:any) => void | Promise<void>): void`: 取消监听 `type` 的 `handler` 事件或全部事件 (当未传入 `handler`)
 
 ### $refs
 

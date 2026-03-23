@@ -22,7 +22,7 @@
 
 - [x] @mptool/file: 文件与存储 API <Badge text="Stable" />
   - 为缓存数据设置有效期
-  - Node.js 风格的创建文件夹、
+  - Node.js 风格的创建文件夹
   - 解压文件接口
   - 保存在线文件
 

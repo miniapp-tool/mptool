@@ -99,17 +99,14 @@ class CookieStore {
    * @param header 小程序 response header
    * @param domainOrURL Url 或域名
    */
-  applyHeader(header: WechatMiniprogram.IAnyObject, domainOrURL: string): void;
+  applyHeader(header: unknown, domainOrURL: string): void;
   /**
    * 应用响应 cookies
    *
    * @param response 小程序 response
    * @param domainOrURL Url 或域名
    */
-  applyResponse(
-    response: WechatMiniprogram.RequestSuccessCallbackResult,
-    domainOrURL: string,
-  ): void;
+  applyResponse(response: unknown, domainOrURL: string): void;
   /**
    * 获取 request cookie header
    *

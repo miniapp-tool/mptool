@@ -7,7 +7,7 @@
     "miniapp",
     "miniprogram"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/enhance#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/skyline-enhance#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
@@ -20,7 +20,7 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/enhance"
+    "directory": "packages/skyline-enhance"
   },
   "files": [
     "dist"
