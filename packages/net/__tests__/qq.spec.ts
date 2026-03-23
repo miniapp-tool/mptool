@@ -10,6 +10,7 @@ it("Should fix qq wrong header", () => {
     ", $1=",
   );
 
+  // oxlint-disable-next-line typescript/no-deprecated
   expect(splitCookiesString(result)).toStrictEqual([
     "_astraeus_session=Sp_QxpO%253D%253D--d;Domain=webvpn.nenu.edu.cn; Path=/;HttpOnly",
     "SERVERID=Server1;Domain=webvpn.nenu.edu.cn;Path=/",

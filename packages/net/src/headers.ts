@@ -1,4 +1,4 @@
-import { parse, splitCookiesString } from "set-cookie-parser";
+import { parseSetCookie, splitCookiesString } from "set-cookie-parser";
 
 import { Cookie } from "./cookie.js";
 import type { CookieType } from "./typings.js";
@@ -71,7 +71,7 @@ const normalizeHeaderValue = (value: string): string =>
   value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
 
 export const parseCookieHeader = (setCookieHeader: string, domain: string): Cookie[] =>
-  parse(splitCookiesString(setCookieHeader)).map(
+  parseSetCookie(setCookieHeader).map(
     (item) =>
       new Cookie({
         ...(item as CookieType),
@@ -170,6 +170,7 @@ export class Headers {
     if (setCookieHeader === null) return [];
     if (setCookieHeader === "") return [""];
 
+    // oxlint-disable-next-line typescript/no-deprecated
     return splitCookiesString(setCookieHeader);
   }
 
