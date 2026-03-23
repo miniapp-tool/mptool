@@ -7,6 +7,7 @@ import { showModal } from "../ui/index.js";
  * 保存图片到相册
  *
  * @param imgPath 图片地址
+ * @returns 保存回调
  */
 export const savePhoto = (imgPath: string): Promise<void> =>
   download(imgPath).then(

@@ -301,6 +301,7 @@ it("$Component", () => {
     methods: {
       fn() {
         // @ts-expect-error: notExists
+        // oxlint-disable-next-line typescript/no-unsafe-call
         assertType(this.notExists());
       },
     },

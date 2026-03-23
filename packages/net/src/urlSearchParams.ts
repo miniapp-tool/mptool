@@ -48,6 +48,7 @@ export class URLSearchParams {
       | Record<string, string | string[]>
       | Iterable<[string, string]>,
   ) {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (!init) {
       this.params = new Map();
     } else if (init instanceof URLSearchParams) {
@@ -119,6 +120,8 @@ export class URLSearchParams {
    * Each item of the iterator is a JavaScript `Array`. The first item of the `Array`is the `name`, the second item of the `Array` is the `value`.
    *
    * Alias for `urlSearchParams[@@iterator]()`.
+   *
+   * @returns An iterator over the name-value pairs in the query
    */
   entries(): IterableIterator<[string, string]> {
     const items = new Set<[name: string, value: string]>();
@@ -206,6 +209,8 @@ export class URLSearchParams {
    * //   foo
    * //   foo
    * ```
+   *
+   * @returns An iterator over the names of each name-value pair
    */
   keys(): IterableIterator<string> {
     return this.params.keys();
@@ -258,6 +263,8 @@ export class URLSearchParams {
   /**
    * Returns the search parameters serialized as a string, with characters
    * percent-encoded where necessary.
+   *
+   * @returns The serialized query string
    */
   toString(): string {
     const query: string[] = [];

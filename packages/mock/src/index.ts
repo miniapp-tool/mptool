@@ -1,3 +1,4 @@
+// oxlint-disable id-length
 // oxlint-disable typescript/no-explicit-any
 interface AsyncMethodOptionLike {
   success?: (...args: any[]) => void;
@@ -81,7 +82,7 @@ interface RemoveStorageOption {
   success?: RemoveStorageSuccessCallback;
 }
 
-const storage: Record<string, any> = {};
+const storage = new Map<string, any>();
 
 const wxMock = {
   version: "test",
@@ -119,9 +120,10 @@ try {
     option: U,
     // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
-    const value: T = Object.hasOwn(storage, option.key)
-      ? (storage[option.key] as T)
-      : (undefined as unknown as T);
+    const value: T = storage.has(option.key)
+      ? (storage.get(option.key) as T)
+      : // oxlint-disable-next-line no-undefined
+        (undefined as unknown as T);
 
     if (!option.success && !option.fail && !option.complete) {
       // @ts-expect-error: api return a promise
@@ -166,7 +168,8 @@ try {
     /** 本地缓存中指定的 key */
     key: string,
   ): T {
-    return Object.hasOwn(storage, key) ? (storage[key] as T) : (undefined as unknown as T);
+    // oxlint-disable-next-line no-undefined
+    return storage.has(key) ? (storage.get(key) as T) : (undefined as unknown as T);
   },
 
   /** [wx.setStorage(Object object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)
@@ -195,14 +198,14 @@ try {
       // @ts-expect-error: api return a promise
       return new Promise((resolve) => {
         setTimeout(() => {
-          storage[option.key] = option.data;
+          storage.set(option.key, option.data);
           resolve({ errMsg: "" });
         }, 0);
       });
     }
 
     setTimeout(() => {
-      storage[option.key] = option.data;
+      storage.set(option.key, option.data);
       if (option.success) option.success({ errMsg: "" });
     }, 0);
   },
@@ -231,7 +234,7 @@ try {
     /** 需要存储的内容。只支持原生类型、Date、及能够通过`JSON.stringify`序列化的对象。 */
     data: T,
   ): void {
-    storage[key] = data;
+    storage.set(key, data);
   },
 
   removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
@@ -248,7 +251,7 @@ try {
     }
 
     setTimeout(() => {
-      delete storage[option.key];
+      storage.delete(option.key);
       if (option.success) option.success({ errMsg: "" });
     }, 0);
   },
@@ -280,7 +283,7 @@ try {
     /** 本地缓存中指定的 key */
     key: string,
   ): void {
-    delete storage[key];
+    storage.delete(key);
   },
   /** [[RealtimeLogManager](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/RealtimeLogManager.html) wx.getRealtimeLogManager()](https://developers.weixin.qq.com/miniprogram/dev/api/base/debug/wx.getRealtimeLogManager.html)
 *

@@ -9,7 +9,7 @@
 export const parse = (queryString = "", splitter = "&"): Record<string, string> => {
   /** 参数对象 */
   const queries: Record<string, string> = {};
-  const splits = queryString ? queryString.split(splitter) : undefined;
+  const splits = queryString ? queryString.split(splitter) : null;
 
   if (splits && splits.length > 0) {
     splits.forEach((item) => {

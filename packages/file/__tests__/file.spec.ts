@@ -5,8 +5,8 @@ import { get, getAsync, set, setAsync } from "../src/index.js";
 
 describe(set, () => {
   it("set sync simple", () => {
-    set("simple-sync", "zhangbowang");
-    expect(get("simple-sync")).toEqual("zhangbowang");
+    set("simple-sync", "mister-hope");
+    expect(get("simple-sync")).toEqual("mister-hope");
   });
 
   it("set sync", () => {
@@ -22,17 +22,19 @@ describe(set, () => {
       });
     }));
 
-  it("set expire", () =>
-    new Promise<void>((resolve) => {
-      void setAsync("data-expire", { title: 123 }, 100).then(() => {
-        setTimeout(() => {
-          void getAsync("data-expire").then((data) => {
-            expect(data).toEqual(undefined);
-            resolve();
-          });
-        }, 150);
-      });
-    }));
+  it("set expire", async () => {
+    await setAsync("data-expire", { title: 123 }, 100);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 150);
+    });
+
+    const data = await getAsync("data-expire");
+
+    expect(data).toEqual(undefined);
+  });
 
   it("set expire x2", () =>
     new Promise<void>((resolve) => {

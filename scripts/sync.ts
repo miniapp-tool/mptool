@@ -1,8 +1,8 @@
 import { readdirSync } from "node:fs";
 import { get } from "node:https";
-import { resolve } from "node:path";
+import path from "node:path";
 
-const packagesDir = resolve(process.cwd(), "packages");
+const packagesDir = path.resolve(process.cwd(), "packages");
 const packages = readdirSync(packagesDir);
 
 export const sync = (): Promise<void[]> => {

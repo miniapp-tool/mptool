@@ -14,7 +14,7 @@ export interface UpdateInfo {
  *
  * 如果检测到小程序更新，获取升级状态 (新版本号，是否立即更新、是否重置小程序) 并做相应处理
  *
- * @param globalData 小程序的全局数据
+ * @param onUpdateReady 获取升级状态的回调函数，参数为一个函数，调用该函数以应用更新
  */
 export const updateApp = (
   onUpdateReady: (applyUpdate: () => void) => Promise<void> | void,

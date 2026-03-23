@@ -18,9 +18,10 @@ const handleSVG = (node: Element): RichTextNode => {
   if (height) style += `height:${height}${/^[\d.]*\d$/.test(height) ? "px" : ""};`;
 
   if (!style && viewbox) {
-    const [, , width, height] = viewbox.split(" ").map(Number);
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
+    const [, , viewboxWidth, viewboxHeight] = viewbox.split(" ").map(Number);
 
-    style = `width:${width}px;height:${height}px;`;
+    style = `width:${viewboxWidth}px;height:${viewboxHeight}px;`;
   }
 
   return {
@@ -34,9 +35,9 @@ const handleSVG = (node: Element): RichTextNode => {
 };
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => Boolean(item));
+  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => item != null);
 
-  const first = result[0];
+  const [first] = result;
 
   // remove first text node if it's empty
   if (first?.type === "text" && !first.text.trim()) result.shift();
@@ -70,7 +71,7 @@ const handleNode = async (
 
       const children = handleNodes(
         await Promise.all(
-          node.children.map((node) => handleNode(node, { appendClass, transform })),
+          node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
         ),
       );
 

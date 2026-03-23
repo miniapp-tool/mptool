@@ -160,6 +160,7 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },

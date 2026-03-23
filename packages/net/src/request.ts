@@ -113,7 +113,8 @@ export const request = <
 
     if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
 
-    const data = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
+    // oxlint-disable-next-line no-undefined
+    const requestData = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
     if (!requestHeaders.has("Content-Type")) {
@@ -150,21 +151,21 @@ Options:
         | "CONNECT",
 
       header: requestHeaders.toObject(),
-      data,
+      data: requestData,
 
       enableHttp2: true,
       useHighPerformanceMode: true,
 
-      success: ({ data, statusCode, header }) => {
+      success: ({ data: responseData, statusCode, header }) => {
         logger.debug(
           `Request ends with ${statusCode}`,
-          typeof data === "string" ? data.trimEnd() : data,
+          typeof responseData === "string" ? responseData.trimEnd() : responseData,
         );
 
         cookieStore.applyHeader(header, cookieScope);
 
         resolve({
-          data,
+          data: responseData,
           headers: new Headers(header),
           status: statusCode,
         });
@@ -271,6 +272,7 @@ export interface RequestFactory {
 
 /**
  * @param options request 配置选项
+ * @returns 请求工厂，包含一个请求方法和一个 Cookie 存储
  */
 export const createRequest = ({
   cookieStore,
@@ -312,13 +314,16 @@ export const createRequest = ({
     };
     const options = requestHandler?.(link, mergedOptions) ?? mergedOptions;
 
-    return request(link, options)
-      .then((response) => responseHandler(response, url, options))
-      .catch((err: unknown) => {
-        if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
+    return (
+      request(link, options)
+        .then((response) => responseHandler(response, url, options))
+        // oxlint-disable-next-line promise/prefer-await-to-callbacks
+        .catch((err: unknown) => {
+          if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
 
-        throw err;
-      });
+          throw err;
+        })
+    );
   };
 
   return { cookieStore: defaultCookieStore, request: newRequest };

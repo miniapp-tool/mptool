@@ -1,3 +1,4 @@
+// oxlint-disable max-lines
 export const encodingIndex = {
   gb18030: [
     19970, 19972, 19973, 19974, 19983, 19986, 19991, 19999, 20000, 20001, 20003, 20006, 20009,

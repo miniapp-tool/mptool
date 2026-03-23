@@ -29,9 +29,8 @@ type PropMethod<Type, TypeConstructor = any> = Type extends (...args: any) => an
   : never;
 
 type PropConstructor<Type = any> =
-  | (new (...args: any[]) => Type & {})
-  | (() => Type)
-  | PropMethod<Type>;
+  // oxlint-disable-next-line typescript/ban-types
+  (new (...args: any[]) => Type & {}) | (() => Type) | PropMethod<Type>;
 
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[];
 

@@ -154,6 +154,7 @@ export class Queue {
             this.running -= 1;
             this.next();
           },
+          // oxlint-disable-next-line typescript/no-unsafe-assignment
           ...Array.prototype.slice.call(args, 0),
         ]);
       };
@@ -170,7 +171,11 @@ export class Queue {
    * @param args 函数参数
    */
   // oxlint-disable-next-line typescript/no-explicit-any
-  add<A extends any[], T>(func: (next: () => void, ...args: A) => void, ctx?: T, ...args: A): void {
+  add<Args extends any[], T>(
+    func: (next: () => void, ...args: Args) => void,
+    ctx?: T,
+    ...args: Args
+  ): void {
     this.funcQueue.push({
       // @ts-expect-error: func is not typed
       func,
@@ -197,13 +202,13 @@ export class Queue {
  * @returns 包装过的函数
  * @async
  */
-export const funcQueue = <A extends unknown[], T = unknown>(
-  fn: (next: () => void, ...args: A) => void,
+export const funcQueue = <Args extends unknown[], T = unknown>(
+  fn: (next: () => void, ...args: Args) => void,
   capacity = 1,
-): ((this: T, ...args: A) => void) => {
+): ((this: T, ...args: Args) => void) => {
   const queue = new Queue(capacity);
 
-  return function queueFunc(this: T, ...args: A): void {
+  return function queueFunc(this: T, ...args: Args): void {
     queue.add(fn, this, ...args);
   };
 };

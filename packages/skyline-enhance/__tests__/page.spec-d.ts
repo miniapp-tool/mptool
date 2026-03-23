@@ -1,11 +1,8 @@
-// oxlint-disable typescript/no-unsafe-member-access
-// oxlint-disable typescript/no-unsafe-assignment
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Page } from "../src/index.js";
 
 it("$Page", () => {
-  // oxlint-disable-next-line typescript/no-confusing-void-expression
   expectTypeOf($Page("example", {})).toEqualTypeOf<void>();
 
   expectTypeOf(getCurrentPages()[0].data).toEqualTypeOf<Record<string, any>>();
@@ -246,7 +243,6 @@ it("$Page", () => {
   $Page("example", {
     data: { a: "123" },
     onShow() {
-      // oxlint-disable-next-line typescript/unbound-method
       expectTypeOf(this.fn).toEqualTypeOf<() => number>();
     },
     fn() {

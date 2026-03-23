@@ -31,15 +31,15 @@ export const reLaunch = getTrigger("reLaunch");
 
 const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,
-): (event: WechatMiniprogram.Touch) => Promise<void> | void {
-  return function touchHandler(
+): (event: WechatMiniprogram.Touch) => Promise<void> {
+  return async function touchHandler(
     this: TrivialPageInstance,
     event?: WechatMiniprogram.TouchEvent<
       WechatMiniprogram.IAnyObject,
       WechatMiniprogram.IAnyObject,
       { before?: string; after?: string; url?: string }
     >,
-  ): Promise<void> | void {
+  ): Promise<void> {
     if (event) {
       const { before, after, url } = event.currentTarget.dataset as {
         before?: string;
@@ -47,14 +47,16 @@ const clickHandlerFactory = function (
         url?: string;
       };
 
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (this && before && typeof this[before] === "function")
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
       if (url) {
-        return action(url).then(() => {
-          if (this && after && typeof this[after] === "function")
-            (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-        });
+        await action(url);
+
+        // oxlint-disable-next-line typescript/strict-boolean-expressions
+        if (this && after && typeof this[after] === "function")
+          (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
       }
     }
   };
@@ -77,24 +79,26 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
 };
 
-const bindBack = function touchHandler(
+const bindBack = async function touchHandler(
   this: TrivialPageInstance,
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
     { before?: string; after?: string; delta?: number | string }
   >,
-): Promise<void> | void {
+): Promise<void> {
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-    return Promise.resolve(back(Number(delta))).then(() => {
-      if (this && after && typeof this[after] === "function")
-        (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-    });
+    await Promise.resolve(back(Number(delta)));
+
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    if (this && after && typeof this[after] === "function")
+      (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
   }
 };
 
@@ -107,7 +111,6 @@ const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
 >(): PageInstance<Data, Custom> => [...getCurrentPages()].pop() as PageInstance<Data, Custom>;
-
 /**
  * 预加载
  *

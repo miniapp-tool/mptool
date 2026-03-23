@@ -10,7 +10,8 @@ export class Stream {
   tokens: number[];
 
   constructor(tokens: number[] | Uint8Array) {
-    this.tokens = Array.prototype.slice.call(tokens);
+    // oxlint-disable-next-line unicorn/prefer-prototype-methods
+    this.tokens = [].slice.call(tokens);
     // Reversed as push/pop is more efficient than shift/unshift.
     this.tokens.reverse();
   }

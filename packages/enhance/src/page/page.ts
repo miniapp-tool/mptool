@@ -84,6 +84,7 @@ export const $Page: PageConstructor = <
     registerLog("onPreload");
   }
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
@@ -104,10 +105,12 @@ export const $Page: PageConstructor = <
     }
   });
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onReady = wrapFunction(options.onReady, () => {
     appEmitter.emit(ON_PAGE_READY);
   });
 
+  // oxlint-disable-next-line typescript/no-misused-promises
   options.onUnload = wrapFunction(options.onUnload, () => {
     appEmitter.emit(ON_PAGE_UNLOAD);
   });

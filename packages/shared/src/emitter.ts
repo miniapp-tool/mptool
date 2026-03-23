@@ -37,9 +37,12 @@ export interface EmitterInstance<Events> {
 /**
  * Tiny (~300b) functional event emitter / pubsub.
  *
+ * @param all An optional event handler map to use as the backing store for the emitter's events. Use
  * @returns Emitter
  */
-export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): EmitterInstance<Events> {
+export const Emitter = <Events>(
+  all: EventHandlerMap<Events> = new Map(),
+): EmitterInstance<Events> => {
   type GenericEventHandler = Handler<Events[keyof Events]> | WildcardHandler<Events>;
 
   return {
@@ -73,6 +76,7 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers) {
+        // oxlint-disable-next-line no-bitwise, unicorn/prefer-math-trunc
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
         else all.set(type, []);
       }
@@ -132,4 +136,4 @@ export function Emitter<Events>(all: EventHandlerMap<Events> = new Map()): Emitt
       );
     },
   };
-}
+};

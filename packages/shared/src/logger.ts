@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any
 /* oxlint-disable typescript/no-unsafe-argument */
 import { env } from "./env.js";
 

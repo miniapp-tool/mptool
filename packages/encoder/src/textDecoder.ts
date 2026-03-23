@@ -40,8 +40,8 @@ export class TextDecoder {
     const encoding = getEncoding(label);
 
     // 2. If encoding is failure or replacement, throw a RangeError.
-    if (encoding === null || encoding.name === "replacement")
-      throw new RangeError("Unknown encoding: " + label);
+    if (encoding == null || encoding.name === "replacement")
+      throw new RangeError(`Unknown encoding: ${label}`);
     if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
@@ -129,7 +129,7 @@ export class TextDecoder {
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
 
-      if (result !== null) {
+      if (result != null) {
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       }
@@ -146,7 +146,7 @@ export class TextDecoder {
         result = this._decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;
-        if (result === null) continue;
+        if (result == null) continue;
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       } while (!inputStream.endOfStream());
@@ -160,6 +160,7 @@ export class TextDecoder {
   // algorithm...
   /**
    * @param stream The stream of code points to serialize
+   * @returns The serialized string
    */
   private serializeStream(stream: number[]): string {
     // 1. Let token be the result of reading from stream.

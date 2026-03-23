@@ -4,6 +4,7 @@ export const getCurrentPage = <T extends Record<string, any>>():
   | null => {
   const pages = getCurrentPages() as (T & WechatMiniprogram.Page.TrivialInstance)[];
 
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
   return pages[pages.length - 1] || null;
 };
 
