@@ -4,7 +4,7 @@
  * @returns Normalized domain
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replaceAll(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
+  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
 
 const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
 
@@ -20,7 +20,7 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  const normalizedDomain = normalizeDomain(domain).replaceAll(/^\.+/gi, "");
+  const normalizedDomain = normalizeDomain(domain).replace(/^\.+/gi, "");
 
   const scopes = normalizedDomain
     .split(".")

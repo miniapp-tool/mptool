@@ -47,15 +47,17 @@ export const encodingTable: EncodingConfig[] = [
 ];
 
 // Label to encoding registry.
-export const labelToEncoding = Object.fromEntries(
-  encodingTable
-    .map((category) =>
-      category.encodings.map((encoding) =>
-        encoding.labels.map<[string, Encoding]>((label) => [label, encoding]),
-      ),
-    )
-    .flat(2 /** 2 depth mappings */),
-);
+export const labelToEncoding = ((): Record<string, Encoding> => {
+  const map: Record<string, Encoding> = {};
+  encodingTable.forEach((category) => {
+    category.encodings.forEach((encoding) => {
+      encoding.labels.forEach((label) => {
+        map[label] = encoding;
+      });
+    });
+  });
+  return map;
+})();
 
 /**
  * @param label The encoding label.

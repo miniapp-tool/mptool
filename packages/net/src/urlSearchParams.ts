@@ -34,9 +34,9 @@ const ENCODE_MAP: Record<string, string> = {
 };
 
 const encode = (str: string): string =>
-  encodeURIComponent(str).replaceAll(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
+  encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
 
-const decode = (str: string): string => decodeURIComponent(str.replaceAll("+", " "));
+const decode = (str: string): string => decodeURIComponent(str.replace(/\+/g, " "));
 
 export class URLSearchParams {
   private params: Map<string, string[]>;
@@ -90,7 +90,8 @@ export class URLSearchParams {
   }
 
   get size(): number {
-    return [...this.params.values()].flat().length;
+    // oxlint-disable-next-line unicorn/prefer-spread
+    return [...this.params.values()].reduce((acc, val) => acc.concat(val), []).length;
   }
 
   /**

@@ -6,7 +6,7 @@
  */
 export const convertSVGToDataURI = (content: string): string =>
   `data:image/svg+xml,${content
-    .replaceAll('"', "'")
-    .replaceAll("<", "%3C")
-    .replaceAll(">", "%3E")
-    .replaceAll("#", "%23")}`;
+    .replace(/"/g, "'")
+    .replace(/</g, "%3C")
+    .replace(/>/g, "%3E")
+    .replace(/#/g, "%23")}`;

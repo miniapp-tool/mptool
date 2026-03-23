@@ -55,7 +55,7 @@ const handleNode = async (
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
-  if (node.type === "text") return { type: "text", text: node.data.replaceAll("\r", "") };
+  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/g, "") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
@@ -63,11 +63,13 @@ const handleNode = async (
     if (config) {
       if (node.name === "svg") return handleSVG(node);
 
-      const attrs = Object.fromEntries(
-        node.attributes
-          .filter(({ name }) => ["class", "style"].includes(name) || config[1]?.includes(name))
-          .map<[string, string]>(({ name, value }) => [name, value]),
-      );
+      const attrs: Record<string, string> = {};
+
+      node.attributes
+        .filter(({ name }) => ["class", "style"].includes(name) || config[1]?.includes(name))
+        .forEach(({ name, value }) => {
+          attrs[name] = value;
+        });
 
       const children = handleNodes(
         await Promise.all(

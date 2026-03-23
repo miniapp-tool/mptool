@@ -174,7 +174,11 @@ export class CookieStore {
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
-    return Object.fromEntries(this.getCookies(options).map(({ name, value }) => [name, value]));
+    const map: Record<string, string> = {};
+    this.getCookies(options).forEach(({ name, value }) => {
+      map[name] = value;
+    });
+    return map;
   }
 
   /**
@@ -246,7 +250,7 @@ export class CookieStore {
     const realHeader = Array.isArray(setCookieHeader)
       ? setCookieHeader.filter(Boolean).join(",")
       : env === "qq"
-        ? setCookieHeader.replaceAll(
+        ? setCookieHeader.replace(
             /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
             ",$1=",
           )

@@ -290,7 +290,7 @@ export const createRequest = ({
   errorHandler,
   ...defaultOptions
 }: RequestInitOptions = {}): RequestFactory => {
-  const domain = server?.replaceAll(/\/$/g, "");
+  const domain = server?.replace(/\/$/g, "");
   const defaultCookieStore =
     cookieStore instanceof CookieStore
       ? cookieStore

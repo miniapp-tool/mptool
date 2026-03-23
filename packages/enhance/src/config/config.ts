@@ -37,7 +37,7 @@ export const $Config = (config: AppConfigOptions): void => {
   let routeToNameMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
-    const actualRoute = route.replaceAll("$name", name);
+    const actualRoute = route.replace(/\$name/g, name);
 
     nameToRouteMap[name] = actualRoute;
     routeToNameMap[actualRoute] = name;
@@ -55,14 +55,16 @@ export const $Config = (config: AppConfigOptions): void => {
     });
   } else if (typeof pages === "object") {
     nameToRouteMap = pages;
-    routeToNameMap = Object.fromEntries(Object.keys(pages).map((route) => [pages[route], route]));
+    routeToNameMap = Object.keys(pages).reduce<Record<string, string>>((acc, route) => {
+      acc[pages[route]] = route;
+      return acc;
+    }, {});
   }
 
   appConfig = {
     ...options,
 
-    getPath: (name: string): string =>
-      nameToRouteMap[name] || defaultPage.replaceAll("$name", name),
+    getPath: (name: string): string => nameToRouteMap[name] || defaultPage.replace(/\$name/g, name),
   };
 };
 

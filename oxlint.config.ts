@@ -20,6 +20,9 @@ export default defineConfig({
     "typescript/no-unnecessary-type-parameters": "off",
     "unicorn/text-encoding-identifier-case": "off",
     "unicorn/prefer-code-point": "off",
+    // we are targeting es6
+    "unicorn/prefer-array-flat": "off",
+    "unicorn/prefer-string-replace-all": "off",
   },
   overrides: [
     {
