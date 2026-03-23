@@ -1,4 +1,5 @@
 import { storageApi } from "./storage.js";
+import { getFileSystemManager } from "./file.js";
 
 const wxMock = {
   version: "test",
@@ -7,6 +8,8 @@ const wxMock = {
   },
 
   ...storageApi,
+
+  getFileSystemManager,
 
   getRealtimeLogManager(): Pick<
     Console,
