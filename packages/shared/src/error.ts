@@ -8,6 +8,7 @@ export class MpError extends Error {
   constructor({ code, message }: MpErrorOptions) {
     super(message);
     this.code = code ?? null;
+    this.name = "MpError";
   }
 
   public override toString(): string {
