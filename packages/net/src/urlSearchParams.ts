@@ -90,8 +90,11 @@ export class URLSearchParams {
   }
 
   get size(): number {
-    // oxlint-disable-next-line unicorn/prefer-spread
-    return [...this.params.values()].reduce((acc, val) => acc.concat(val), []).length;
+    let count = 0;
+
+    for (const val of this.params.values()) count += val.length;
+
+    return count;
   }
 
   /**
