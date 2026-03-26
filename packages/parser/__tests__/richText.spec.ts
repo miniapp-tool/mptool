@@ -229,7 +229,7 @@ it("getRichTextNodes() with transform", async () => {
     await getRichTextNodes('<p class="test">hello<img src="test.jpg"></p>', {
       transform: {
         img: (node) => {
-          if (node.attrs?.src && !node.attrs.src.startsWith("http"))
+          if (node.attrs?.src && !node.attrs.src.startsWith("http")) {
             return {
               ...node,
               attrs: {
@@ -237,6 +237,7 @@ it("getRichTextNodes() with transform", async () => {
                 src: `https://example.com/${node.attrs.src}`,
               },
             };
+          }
 
           return node;
         },

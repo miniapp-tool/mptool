@@ -27,25 +27,34 @@
   "files": [
     "dist"
   ],
+  "type": "commonjs",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.mts --configPlugin esbuild",
-    "clean": "rimraf ./dist",
-    "dev": "rollup -c -w"
+    "build": "tsdown --config-loader unrun",
+    "clean": "rimraf ./dist"
   },
   "dependencies": {
     "@mptool/shared": "workspace:*",
     "cheerio": "^1.2.0",
-    "domhandler": "^5.0.3"
+    "domhandler": "^6.0.1"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "5.0.0"
+    "miniprogram-api-typings": "5.1.2"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"

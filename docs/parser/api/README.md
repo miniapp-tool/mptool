@@ -53,3 +53,21 @@ export const getRichTextNodes: (
 ```ts
 export const getText: (content: string | AnyNode[]) => string;
 ```
+
+提取 HTML 中的文本内容。
+
+## getHTML
+
+```ts
+export const getHTML: (content: string | AnyNode | AnyNode[]) => string;
+```
+
+将节点或节点数组转换为 HTML 字符串。
+
+## convertSVGToDataURI
+
+```ts
+export const convertSVGToDataURI: (content: string) => string;
+```
+
+将 SVG 内容转换为 Data URI 格式。

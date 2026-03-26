@@ -1,4 +1,3 @@
-/* eslint-disable import-x/export */
 export * from "@mptool/shared";
 export { $App } from "./app/index.js";
 export { go, reLaunch, redirect, switchTab } from "./bridge.js";

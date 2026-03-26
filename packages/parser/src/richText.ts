@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
+/* oxlint-disable typescript/no-unsafe-enum-comparison */
 import type { AnyNode, Element } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";
@@ -13,17 +13,15 @@ const handleSVG = (node: Element): RichTextNode => {
 
   let style = "";
 
-  if (width) {
-    style += `width:${width}${/^[\d.]*\d$/.test(width) ? "px" : ""};`;
-  }
-  if (height) {
-    style += `height:${height}${/^[\d.]*\d$/.test(height) ? "px" : ""};`;
-  }
+  if (width) style += `width:${width}${/^[\d.]*\d$/.test(width) ? "px" : ""};`;
+
+  if (height) style += `height:${height}${/^[\d.]*\d$/.test(height) ? "px" : ""};`;
 
   if (!style && viewbox) {
-    const [, , width, height] = viewbox.split(" ").map(Number);
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
+    const [, , viewboxWidth, viewboxHeight] = viewbox.split(" ").map(Number);
 
-    style = `width:${width}px;height:${height}px;`;
+    style = `width:${viewboxWidth}px;height:${viewboxHeight}px;`;
   }
 
   return {
@@ -37,18 +35,16 @@ const handleSVG = (node: Element): RichTextNode => {
 };
 
 const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => Boolean(item));
+  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => item != null);
 
-  const first = result[0];
+  const [first] = result;
 
   // remove first text node if it's empty
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (first?.type === "text" && !first.text.trim()) result.shift();
 
   const last = result[result.length - 1];
 
   // remove last text node if it's empty
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (last?.type === "text" && !last.text.trim()) result.pop();
 
   return result;
@@ -67,15 +63,17 @@ const handleNode = async (
     if (config) {
       if (node.name === "svg") return handleSVG(node);
 
-      const attrs = Object.fromEntries(
-        node.attributes
-          .filter(({ name }) => ["class", "style"].includes(name) || config[1]?.includes(name))
-          .map<[string, string]>(({ name, value }) => [name, value]),
-      );
+      const attrs: Record<string, string> = {};
+
+      node.attributes
+        .filter(({ name }) => ["class", "style"].includes(name) || config[1]?.includes(name))
+        .forEach(({ name, value }) => {
+          attrs[name] = value;
+        });
 
       const children = handleNodes(
         await Promise.all(
-          node.children.map((node) => handleNode(node, { appendClass, transform })),
+          node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
         ),
       );
 
@@ -90,7 +88,7 @@ const handleNode = async (
 
       const converter = transform[node.name as AllowTag];
 
-      return await (converter ? converter(convertedNode) : convertedNode);
+      return converter ? converter(convertedNode) : convertedNode;
     }
   }
 

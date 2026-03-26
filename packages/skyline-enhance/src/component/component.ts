@@ -24,32 +24,36 @@ export const handleProperties = (
     const advancedValue = oldProps[propertyName];
 
     // Constructor or null
+    // oxlint-disable-next-line eqeqeq
     if (advancedValue === null || typeof advancedValue === "function") {
       props[propertyName] = advancedValue as WechatMiniprogram.Component.ShortProperty;
     } else {
       const { type } = advancedValue;
 
       // null type
-      if (type === null)
+      // oxlint-disable-next-line eqeqeq
+      if (type === null) {
         props[propertyName] = {
           type: null,
           value: advancedValue.default,
         };
+      }
       // array type, should push rest into `optionalTypes`
-      else if (Array.isArray(type))
-        // array type syntax
+      else if (Array.isArray(type)) // array type syntax
+      {
         // @ts-expect-error: Force set prop config
         props[propertyName] = {
           type: type[0],
           value: advancedValue.default,
           optionalTypes: type.slice(1),
         };
-      else
+      } else {
         // @ts-expect-error: Force set prop config
         props[propertyName] = {
           type,
           value: advancedValue.default,
         };
+      }
     }
   });
 
@@ -64,6 +68,7 @@ export const handleProperties = (
  * 组件注册器
  *
  * @param options 注册选项
+ * @returns 返回组件实例ID
  */
 export const $Component: ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
@@ -96,7 +101,9 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.attached = wrapFunction(
     options.lifetimes.attached,
     // set id and save ref
-    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
+    function attached(
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
+    ) {
       const id = (componentIndex += 1);
 
       this.$id = id;
@@ -110,15 +117,16 @@ export const $Component: ComponentConstructor = <
   options.lifetimes.detached = wrapFunction(
     options.lifetimes.detached,
     // remove saved ref
-    function (this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>) {
+    function detached(
+      this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
+    ) {
       removeRef(this.$id);
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const $refs = this.$parent?.$refs;
       const refName = this.$refID;
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (refName && $refs) delete $refs[refName];
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
+      if (refName && $refs) $refs.delete(refName);
 
       // @ts-expect-error: $parent is not optional
       delete this.$parent;
@@ -134,6 +142,7 @@ export const $Component: ComponentConstructor = <
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
+      // oxlint-disable-next-line typescript/no-explicit-any
       ...args: any[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
@@ -151,11 +160,12 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       parent: TrivialComponentInstance | TrivialPageInstance,
     ): void {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       this.$root = (parent.$root as TrivialPageInstance) || parent;
       this.$parent = parent;
     },
 
+    // oxlint-disable-next-line id-length
     $: bind,
   };
 
@@ -167,8 +177,7 @@ export const $Component: ComponentConstructor = <
       value: string,
     ): void {
       if (this.$refID && this.$refID !== value) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (this.$parent?.$refs) delete this.$parent.$refs[this.$refID];
+        this.$parent?.$refs.delete(this.$refID);
 
         this.$refID = value;
         logger.debug(`Component ${this.$id} ref: ${value}`);

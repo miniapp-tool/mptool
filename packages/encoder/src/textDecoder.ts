@@ -8,7 +8,7 @@ export interface Decoder {
   /**
    * @param stream The stream of bytes being decoded.
    * @param bite The next byte read from the stream.
-   * @return The next code point(s)
+   * @returns The next code point(s)
    *     decoded, or null if not enough data exists in the input
    *     stream to decode a complete code point, or |finished|.
    */
@@ -18,14 +18,13 @@ export interface Decoder {
 export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 /**
- * @constructor
  * A TextDecoder object has an associated encoding, decoder,
  * stream, ignore BOM flag (initially unset), BOM seen flag
  * (initially unset), error mode (initially replacement), and do
  * not flush flag (initially unset).
  * @param label The label of the encoding;
  *     defaults to 'utf-8'.
- * @param options
+ * @param options Decoder options
  */
 export class TextDecoder {
   _encoding: Encoding;
@@ -41,9 +40,9 @@ export class TextDecoder {
     const encoding = getEncoding(label);
 
     // 2. If encoding is failure or replacement, throw a RangeError.
-    if (encoding === null || encoding.name === "replacement")
-      throw RangeError("Unknown encoding: " + label);
-    if (!(encoding.name in decoders)) throw Error("Decoder not present.");
+    if (encoding == null || encoding.name === "replacement")
+      throw new RangeError(`Unknown encoding: ${label}`);
+    if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
     this._encoding = encoding;
@@ -76,8 +75,8 @@ export class TextDecoder {
 
   /**
    * @param input The buffer of bytes to decode.
-   * @param options
-   * @return The decoded string.
+   * @param options Decoding options
+   * @returns The decoded string.
    */
   decode(input: ArrayBuffer | ArrayBufferView, options: { stream?: boolean } = {}): string {
     let bytes;
@@ -124,15 +123,16 @@ export class TextDecoder {
 
       // 1. Let result be the result of processing token for decoder,
       // stream, output, and error mode.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       result = this._decoder!.handler(inputStream, token);
 
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
 
-      if (result !== null)
+      if (result != null) {
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
+      }
 
       // 3. Otherwise, if result is error, throw a TypeError.
       // (Thrown in handler)
@@ -142,11 +142,11 @@ export class TextDecoder {
     // TODO: Align with spec algorithm.
     if (!this.doNotFlush) {
       do {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        // oxlint-disable-next-line typescript/no-non-null-assertion
         result = this._decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;
-        if (result === null) continue;
+        if (result == null) continue;
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       } while (!inputStream.endOfStream());
@@ -159,7 +159,8 @@ export class TextDecoder {
   // A TextDecoder object also has an associated serialize stream
   // algorithm...
   /**
-   * @param stream
+   * @param stream The stream of code points to serialize
+   * @returns The serialized string
    */
   private serializeStream(stream: number[]): string {
     // 1. Let token be the result of reading from stream.
@@ -171,7 +172,7 @@ export class TextDecoder {
       ["UTF-8", "UTF-16LE", "UTF-16BE"].includes(this._encoding.name) &&
       !this._ignoreBOM &&
       !this._BOMseen
-    )
+    ) {
       if (stream.length > 0 && stream[0] === 0xfeff) {
         // 1. If token is U+FEFF, set BOM seen flag.
         this._BOMseen = true;
@@ -185,6 +186,7 @@ export class TextDecoder {
         // to output.
         // (no-op)
       }
+    }
 
     // 4. Otherwise, return output.
     return codePointsToString(stream);

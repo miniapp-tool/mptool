@@ -16,7 +16,7 @@ export type RequestBody =
 export interface RequestOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
@@ -66,7 +66,7 @@ export interface RequestOptions<
 export interface RequestResponse<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 > {
@@ -81,7 +81,7 @@ export interface RequestResponse<
 export type RequestType = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -92,7 +92,7 @@ export type RequestType = <
 export const request = <
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     any
   >,
 >(
@@ -113,10 +113,11 @@ export const request = <
 
     if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
 
-    const data = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
+    // oxlint-disable-next-line no-undefined
+    const requestData = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
 
     // automatically set content-type header
-    if (!requestHeaders.has("Content-Type"))
+    if (!requestHeaders.has("Content-Type")) {
       if (body instanceof URLSearchParams)
         requestHeaders.set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
       else if (body instanceof ArrayBuffer)
@@ -126,6 +127,7 @@ export const request = <
         Object.prototype.toString.call(body) === "[object Object]"
       )
         requestHeaders.set("Content-Type", "application/json; charset=UTF-8");
+    }
 
     logger.debug(
       `\
@@ -149,21 +151,21 @@ Options:
         | "CONNECT",
 
       header: requestHeaders.toObject(),
-      data,
+      data: requestData,
 
       enableHttp2: true,
       useHighPerformanceMode: true,
 
-      success: ({ data, statusCode, header }) => {
+      success: ({ data: responseData, statusCode, header }) => {
         logger.debug(
           `Request ends with ${statusCode}`,
-          typeof data === "string" ? data.trimEnd() : data,
+          typeof responseData === "string" ? responseData.trimEnd() : responseData,
         );
 
         cookieStore.applyHeader(header, cookieScope);
 
-        return resolve({
-          data,
+        resolve({
+          data: responseData,
           headers: new Headers(header),
           status: statusCode,
         });
@@ -206,7 +208,7 @@ export interface RequestInitOptions extends Pick<
   requestHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -224,7 +226,7 @@ export interface RequestInitOptions extends Pick<
   responseHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -244,7 +246,7 @@ export interface RequestInitOptions extends Pick<
   errorHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -270,6 +272,7 @@ export interface RequestFactory {
 
 /**
  * @param options request 配置选项
+ * @returns 请求工厂，包含一个请求方法和一个 Cookie 存储
  */
 export const createRequest = ({
   cookieStore,
@@ -278,7 +281,7 @@ export const createRequest = ({
   responseHandler = <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       any
     >,
   >(
@@ -311,13 +314,16 @@ export const createRequest = ({
     };
     const options = requestHandler?.(link, mergedOptions) ?? mergedOptions;
 
-    return request(link, options)
-      .then((response) => responseHandler(response, url, options))
-      .catch((err: unknown) => {
-        if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
+    return (
+      request(link, options)
+        .then((response) => responseHandler(response, url, options))
+        // oxlint-disable-next-line promise/prefer-await-to-callbacks
+        .catch((err: unknown) => {
+          if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);
 
-        throw err;
-      });
+          throw err;
+        })
+    );
   };
 
   return { cookieStore: defaultCookieStore, request: newRequest };

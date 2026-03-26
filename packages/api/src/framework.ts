@@ -1,9 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export const getCurrentPage = <T extends Record<string, any>>():
   | (T & WechatMiniprogram.Page.TrivialInstance)
   | null => {
   const pages = getCurrentPages() as (T & WechatMiniprogram.Page.TrivialInstance)[];
 
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
   return pages[pages.length - 1] || null;
 };
 

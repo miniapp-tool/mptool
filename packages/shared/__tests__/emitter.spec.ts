@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import type { EmitterInstance, EventHandlerMap } from "../src/emitter";
 import { Emitter } from "../src/emitter";
 
 describe("mitt", () => {
   it("should default export be a function", () => {
-    expect(typeof Emitter).toEqual("function");
+    expectTypeOf(Emitter).toBeFunction();
   });
 
   it("should accept an optional event handler map", () => {
@@ -18,8 +18,8 @@ describe("mitt", () => {
     const events = Emitter<{ foo: undefined }>(map);
 
     events.emit("foo");
-    expect(a).toBeCalledTimes(1);
-    expect(b).toBeCalledTimes(1);
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(b).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -32,9 +32,7 @@ describe("mitt#", () => {
     FOO: unknown;
     bar: unknown;
     Bar: unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:bat!": unknown;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     "baz:baT!": unknown;
     Foo: unknown;
     [eventType]: unknown;
@@ -56,7 +54,7 @@ describe("mitt#", () => {
   describe("on()", () => {
     it("should be a function", () => {
       expect(inst).toHaveProperty("on");
-      expect(typeof inst.on).toEqual("function");
+      expectTypeOf(inst.on).toBeFunction();
     });
 
     it("should register handler for new type", () => {
@@ -120,7 +118,7 @@ describe("mitt#", () => {
   describe("off()", () => {
     it("should be a function", () => {
       expect(inst).toHaveProperty("off");
-      expect(typeof inst.off).toEqual("function");
+      expectTypeOf(inst.off).toBeFunction();
     });
 
     it("should remove handler for type", () => {
@@ -176,7 +174,7 @@ describe("mitt#", () => {
   describe("emit()", () => {
     it("should be a function", () => {
       expect(inst).toHaveProperty("emit");
-      expect(typeof inst.emit).toEqual("function");
+      expectTypeOf(inst.emit).toBeFunction();
     });
 
     it("should invoke handler for type", () => {
@@ -191,8 +189,8 @@ describe("mitt#", () => {
     });
 
     it("should NOT ignore case", () => {
-      const onFoo = vi.fn(),
-        onFOO = vi.fn();
+      const onFOO = vi.fn();
+      const onFoo = vi.fn();
 
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
@@ -200,25 +198,25 @@ describe("mitt#", () => {
       inst.emit("Foo", "Foo arg");
       inst.emit("FOO", "FOO arg");
 
-      expect(onFoo).toBeCalledTimes(1);
-      expect(onFoo).toBeCalledWith("Foo arg");
-      expect(onFOO).toBeCalledTimes(1);
-      expect(onFOO).toBeCalledWith("FOO arg");
+      expect(onFoo).toHaveBeenCalledTimes(1);
+      expect(onFoo).toHaveBeenCalledWith("Foo arg");
+      expect(onFOO).toHaveBeenCalledTimes(1);
+      expect(onFOO).toHaveBeenCalledWith("FOO arg");
     });
 
     it("should invoke * handlers", () => {
-      const star = vi.fn(),
-        ea = { a: "a" },
-        eb = { b: "b" };
+      const ea = { a: "a" };
+      const eb = { b: "b" };
+      const star = vi.fn();
 
       events.set("*", [star]);
 
       inst.emit("foo", ea);
-      expect(star).toBeCalledTimes(1);
-      expect(star).toBeCalledWith("foo", ea);
+      expect(star).toHaveBeenCalledTimes(1);
+      expect(star).toHaveBeenCalledWith("foo", ea);
 
       inst.emit("bar", eb);
-      expect(star).toBeCalledTimes(2);
+      expect(star).toHaveBeenCalledTimes(2);
       expect(star).lastCalledWith("bar", eb);
     });
   });

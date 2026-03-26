@@ -43,31 +43,34 @@ export function getTrigger(
 
 /**
  * Navigation trigger
+ *
+ * @param type - Navigation type
+ * @returns Navigation trigger function
  */
-export function getTrigger(
-  type: NavigatorType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): (pageNameWithArg: string) => any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
+export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => any {
+  // oxlint-disable-next-line typescript/no-explicit-any
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock
       canNavigate = false;
 
-      const { path, url, query } = getPathDetail(pageNameWithArg);
+      const { path, url, query: queries } = getPathDetail(pageNameWithArg);
 
       return Promise.race([
-        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, query),
+        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, queries),
         // 等待最小延迟
         new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), getConfig().maxDelay ?? 200);
+          setTimeout(() => {
+            resolve();
+          }, getConfig().maxDelay ?? 200);
         }),
       ]).then(() => {
         // release navigate lock
         canNavigate = true;
 
         // @ts-expect-error: argument can not union
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        // oxlint-disable-next-line typescript/no-unsafe-return
         return wx[type]({ url });
       });
     }

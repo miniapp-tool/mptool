@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { once } from "../src";
 
-describe("once", () => {
+describe(once, () => {
   it("run once", () =>
     new Promise<void>((resolve) => {
       let count = 0;

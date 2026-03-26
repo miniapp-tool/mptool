@@ -61,6 +61,9 @@ highlights:
   - header: "@mptool/parser"
     description: HTML 解析器
 
+  - header: "@mptool/api"
+    description: 通用 API 封装
+
   - header: "@mptool/encoder"
     description: 支持 GBK 和 GB2312 的编码器
 

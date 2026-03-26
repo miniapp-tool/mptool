@@ -1,27 +1,28 @@
+// oxlint-disable no-bitwise
 /**
- * @param  a The number to test.
+ * @param a The number to test.
  * @param min The minimum value in the range, inclusive.
  * @param max The maximum value in the range, inclusive.
- * @return True if a >= min and a <= max.
+ * @returns True if a >= min and a <= max.
  */
 export const inRange = (a: number, min: number, max: number): boolean => min <= a && a <= max;
 
 /**
  * An ASCII byte is a byte in the range 0x00 to 0x7F, inclusive.
+ *
  * @param a The number to test.
- * @return True if a is in the range 0x00 to 0x7F, inclusive.
+ * @returns True if a is in the range 0x00 to 0x7F, inclusive.
  */
-export const isASCIIByte = (a: number): boolean => 0x00 <= a && a <= 0x7f;
+export const isASCIIByte = (a: number): boolean => a >= 0x00 && a <= 0x7f;
 
 /**
  * @param content Input string of UTF-16 code units.
- * @return code points.
+ * @returns code points.
  */
 export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
 
   // 1. Let S be the DOMString value.
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
   const str = String(content);
 
   // 2. Let n be the length of S.
@@ -30,8 +31,8 @@ export const stringToCodePoints = (content: string): number[] => {
   // 3. Initialize i to 0.
   let i = 0;
 
-  // 4. Initialize U to be an empty sequence of Unicode characters.
-  const u: number[] = [];
+  // 4. Initialize codePoints to be an empty sequence of Unicode characters.
+  const unicodeCodePoints: number[] = [];
 
   // 5. While i < strLength:
   while (i < strLength) {
@@ -41,19 +42,21 @@ export const stringToCodePoints = (content: string): number[] => {
     // 2. Depending on the value of c:
 
     // char < 0xD800 or char > 0xDFFF
-    if (char < 0xd800 || char > 0xdfff)
-      // Append to U the Unicode character with code point c.
-      u.push(char);
+    if (char < 0xd800 || char > 0xdfff) {
+      // Append to codePoints the Unicode character with code point c.
+      unicodeCodePoints.push(char);
+    }
     // 0xDC00 ≤ char ≤ 0xDFFF
-    else if (0xdc00 <= char && char <= 0xdfff)
-      // Append to U a U+FFFD REPLACEMENT CHARACTER.
-      u.push(0xfffd);
+    else if (char >= 0xdc00 && char <= 0xdfff) {
+      // Append to codePoints a U+FFFD REPLACEMENT CHARACTER.
+      unicodeCodePoints.push(0xfffd);
+    }
     // 0xD800 ≤ char ≤ 0xDBFF
-    else if (0xd800 <= char && char <= 0xdbff)
+    else if (char >= 0xd800 && char <= 0xdbff) {
       if (i === strLength - 1) {
-        // 1. i is the last one then append to U a U+FFFD REPLACEMENT
+        // 1. i is the last one then append to codePoints a U+FFFD REPLACEMENT
         // CHARACTER.
-        u.push(0xfffd);
+        unicodeCodePoints.push(0xfffd);
       }
       // 2. Otherwise
       else {
@@ -61,51 +64,52 @@ export const stringToCodePoints = (content: string): number[] => {
         const nextChar = str.charCodeAt(i + 1);
 
         // 2. If 0xDC00 ≤ nextChar ≤ 0xDFFF, then:
-        if (0xdc00 <= nextChar && nextChar <= 0xdfff) {
-          // 1. Let a be char & 0x3FF.
-          const a = char & 0x3ff;
+        if (nextChar >= 0xdc00 && nextChar <= 0xdfff) {
+          // 1. Let highSurrogate be char & 0x3FF.
+          const highSurrogate = char & 0x3ff;
 
-          // 2. Let b be nextChar & 0x3FF.
-          const b = nextChar & 0x3ff;
+          // 2. Let lowSurrogate be nextChar & 0x3FF.
+          const lowSurrogate = nextChar & 0x3ff;
 
-          // 3. Append to U the Unicode character with code point
-          // 2^16+2^10*a+b.
-          u.push(0x10000 + (a << 10) + b);
+          // 3. Append to codePoints the Unicode character with code point
+          // 2^16+2^10*highSurrogate+lowSurrogate.
+          unicodeCodePoints.push(0x10000 + (highSurrogate << 10) + lowSurrogate);
 
           // 4. Set i to i+1.
           i += 1;
         }
 
-        // 3. Otherwise, nextChar < 0xDC00 or nextChar > 0xDFFF. Append to U a
+        // 3. Otherwise, nextChar < 0xDC00 or nextChar > 0xDFFF. Append to codePoints a
         // U+FFFD REPLACEMENT CHARACTER.
         else {
-          u.push(0xfffd);
+          unicodeCodePoints.push(0xfffd);
         }
       }
+    }
 
     // 3. Set i to i+1.
     i += 1;
   }
 
-  // 6. Return U.
-  return u;
+  // 6. Return codePoints.
+  return unicodeCodePoints;
 };
 
 /**
- * @param {!Array.<number>} codePoints Array of code points.
- * @return {string} string String of UTF-16 code units.
+ * @param codePoints Array of code points.
+ * @returns string String of UTF-16 code units.
  */
 export const codePointsToString = (codePoints: number[]): string => {
-  let s = "";
+  let result = "";
 
   for (let codePoint of codePoints) {
     if (codePoint <= 0xffff) {
-      s += String.fromCharCode(codePoint);
+      result += String.fromCharCode(codePoint);
     } else {
       codePoint -= 0x10000;
-      s += String.fromCharCode((codePoint >> 10) + 0xd800, (codePoint & 0x3ff) + 0xdc00);
+      result += String.fromCharCode((codePoint >> 10) + 0xd800, (codePoint & 0x3ff) + 0xdc00);
     }
   }
 
-  return s;
+  return result;
 };

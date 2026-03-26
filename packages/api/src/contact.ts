@@ -12,28 +12,36 @@ export const addContact = (
 ): Promise<void> =>
   new Promise((resolve, reject) => {
     if (env === "donut") {
-      return wx.addPhoneContact({
+      wx.addPhoneContact({
         ...config,
-        success: () => resolve(),
+        success: () => {
+          resolve();
+        },
       });
+      return;
     }
 
     wx.getSetting({
       success: ({ authSetting }) => {
         // 如果已经授权直接写入联系人
-        if (authSetting["scope.addPhoneContact"])
+        if (authSetting["scope.addPhoneContact"]) {
           wx.addPhoneContact({
             ...config,
-            success: () => resolve(),
+            success: () => {
+              resolve();
+            },
           });
+        }
         // 没有授权 —> 提示用户授权
-        else
+        else {
           wx.authorize({
             scope: "scope.addPhoneContact",
             success: () => {
               wx.addPhoneContact({
                 ...config,
-                success: () => resolve(),
+                success: () => {
+                  resolve();
+                },
               });
             },
 
@@ -49,6 +57,7 @@ export const addContact = (
               );
             },
           });
+        }
       },
     });
   });

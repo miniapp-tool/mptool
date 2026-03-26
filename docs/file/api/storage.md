@@ -23,11 +23,11 @@
 - 类型:
 
   ```ts
-  function take<T = unknown>(key: string): T;
+  function take<T = unknown>(key: string): T | undefined;
   ```
 
 - 参数:
-  - `path`: 传入的路径
+  - `key`: 存入的键值
 
 取出在本次小程序启动后设置的数据。
 
@@ -148,9 +148,6 @@
   function check(): void;
   ```
 
-- 参数:
-  - `key`: 删除的键名
-
 检查所有数据暂存，并清理已过期数据。
 
 ### checkAsync
@@ -158,10 +155,7 @@
 - 类型:
 
   ```ts
-  function checkAsync(): Promise<void[]>;
+  function checkAsync(): Promise<void>;
   ```
-
-- 参数:
-  - `key`: 删除的键名
 
 `check` 的异步版本

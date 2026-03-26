@@ -187,16 +187,15 @@
 - 类型:
 
   ```ts
-  function saveOnlineFile(onlinePath: string, targetPath: string): Promise<void>;
+  function saveOnlineFile(onlinePath: string, localPath: string): Promise<string>;
   ```
 
 - 参数:
   - `onlinePath`: 在线文件路径
-  - `targetPath`: 目标文件路径
+  - `localPath`: 本地保存路径
 
 - 返回值:
-
-  当保存失败时，`err` 为文字格式的失败消息或数字格式的非 `200` 状态码
+  - `Promise<string>`: 返回本地临时文件路径
 
 将在线文件保存到本地指定位置 (会自动创建本地保存文件夹与文件)。
 

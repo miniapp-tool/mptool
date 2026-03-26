@@ -265,7 +265,7 @@ describe("Iterator", () => {
 
     expect(ret.join(";")).toEqual("a;b;c");
 
-    expect(Array.from(obj.keys())).toEqual(["a", "b", "c"]);
+    expect([...obj.keys()]).toEqual(["a", "b", "c"]);
   });
 
   it("values", () => {
@@ -276,7 +276,7 @@ describe("Iterator", () => {
 
     expect(ret.join(";")).toEqual("1;2;3");
 
-    expect(Array.from(obj.values())).toEqual(["1", "2", "3"]);
+    expect([...obj.values()]).toEqual(["1", "2", "3"]);
   });
 });
 

@@ -23,7 +23,7 @@ const appLaunchHandler = (options: WechatMiniprogram.App.LaunchShowOption): void
 const appShowHandler = (): void => {
   // emit onAwake lifeCycle
   if (appState.hide) {
-    appEmitter.emit(ON_APP_AWAKE, new Date().getTime() - appState.hide);
+    appEmitter.emit(ON_APP_AWAKE, Date.now() - appState.hide);
 
     // reset timeStamp
     appState.hide = 0;
@@ -31,7 +31,7 @@ const appShowHandler = (): void => {
 };
 
 const appHideHandler = (): void => {
-  appState.hide = new Date().getTime();
+  appState.hide = Date.now();
 };
 
 /**
@@ -50,19 +50,19 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
   if (appOptions.onAwake) {
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // oxlint-disable-next-line typescript/no-non-null-assertion
       appOptions.onAwake!(time);
     });
     logger.debug("App: registered onAwake");
   }
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$on = userEmitter.on;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$off = userEmitter.off;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emit = userEmitter.emit;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emitAsync = userEmitter.emitAsync;
 
   /**

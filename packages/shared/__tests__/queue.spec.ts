@@ -1,3 +1,4 @@
+// oxlint-disable promise/no-multiple-resolved
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 

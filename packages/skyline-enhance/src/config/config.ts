@@ -40,8 +40,13 @@ export const $Config = (config: AppConfigOptions): void => {
 
   if (Array.isArray(pages)) {
     pages.forEach(([name, route]) => {
-      if (typeof name === "string") addRoute(name, route);
-      else name.forEach((item) => addRoute(item, route));
+      if (typeof name === "string") {
+        addRoute(name, route);
+      } else {
+        name.forEach((item) => {
+          addRoute(item, route);
+        });
+      }
     });
   } else if (typeof pages === "object") {
     nameToRouteMap = pages;

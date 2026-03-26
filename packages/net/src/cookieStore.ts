@@ -37,7 +37,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return cookie 对象
+   * @returns cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
     const { domain, path } = getUrlInfo(options);
@@ -58,7 +58,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return Cookie 值
+   * @returns Cookie 值
    */
   getValue(name: string, options: CookieOptions): string | undefined {
     return this.get(name, options)?.value;
@@ -69,7 +69,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @return 是否存在
+   * @returns 是否存在
    */
   has(name: string, options: CookieOptions): boolean {
     // 返回是否存在 cookie 值
@@ -78,6 +78,9 @@ export class CookieStore {
 
   /**
    * 设置 cookie
+   *
+   * @param cookieOptions cookie 选项
+   * @returns 设置的 cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
     const { name, domain } = cookieOptions;
@@ -117,6 +120,8 @@ export class CookieStore {
 
   /**
    * 获取所有域名和 cookies 结构
+   *
+   * @returns 域名和 cookies 结构对象
    */
   list(): Record<string, Record<string, string>> {
     const dirObj: Record<string, Record<string, string>> = {};
@@ -130,7 +135,7 @@ export class CookieStore {
    * 获取 cookies 对象数组
    *
    * @param options Cookie 选项
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getCookies(options: CookieOptions): Cookie[] {
     const { domain, path } = getUrlInfo(options);
@@ -150,7 +155,7 @@ export class CookieStore {
   /**
    * 获取所有 cookies 对象
    *
-   * @return Cookie 对象数组
+   * @returns Cookie 对象数组
    */
   getAllCookies(): Cookie[] {
     const cookies = [];
@@ -164,11 +169,16 @@ export class CookieStore {
   /**
    * 获取 cookies key/value 对象
    *
-   * @return 键值 Map
+   * @param options Cookie 选项
+   * @returns 键值 Map
    */
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
-    return Object.fromEntries(this.getCookies(options).map(({ name, value }) => [name, value]));
+    const map: Record<string, string> = {};
+    this.getCookies(options).forEach(({ name, value }) => {
+      map[name] = value;
+    });
+    return map;
   }
 
   /**
@@ -196,6 +206,7 @@ export class CookieStore {
    * 清除 cookies
    *
    * @param domain 指定域名
+   * @param exact 是否仅清除指定域名的 cookies，默认为 false，即同时清除指定域名和其子域名的 cookies
    */
   clear(domain = "", exact = false): void {
     if (domain) {
@@ -224,13 +235,16 @@ export class CookieStore {
    */
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
-      return this.apply(
+      this.apply(
         parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
       );
+      return;
     }
 
     const setCookieHeader =
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["Set-Cookie"] ||
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       (header as Record<string, string[] | string>)["set-cookie"] ||
       "";
     const realHeader = Array.isArray(setCookieHeader)
@@ -242,7 +256,7 @@ export class CookieStore {
           )
         : setCookieHeader;
 
-    return this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
   }
 
   /**
@@ -252,7 +266,7 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(response: unknown, domainOrURL: string): void {
-    return this.applyHeader(
+    this.applyHeader(
       env === "js"
         ? (response as Response).headers
         : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
@@ -264,7 +278,7 @@ export class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @return request cookie header
+   * @returns request cookie header
    */
   getHeader(options: CookieOptions): string {
     // 转化为 request cookies 字符串
@@ -291,8 +305,6 @@ export class CookieStore {
       this.apply(cookiesData.map((item) => new Cookie(item)));
     } catch (err) {
       console.warn("Error applying cookie storage", err);
-
-      return;
     }
   }
 
@@ -305,11 +317,13 @@ export class CookieStore {
 
       // 获取需要持久化的 cookie
       // 清除无效 cookie
-      for (const cookies of this.store.values())
-        for (const cookie of cookies.values())
+      for (const cookies of this.store.values()) {
+        for (const cookie of cookies.values()) {
           if (cookie.isExpired()) cookies.delete(cookie.name);
           // 只存储可持久化 cookie
           else if (cookie.isPersistence()) saveCookies.push(cookie);
+        }
+      }
 
       // 保存到本地存储
       if (env !== "js") wx.setStorageSync(this.key, saveCookies);

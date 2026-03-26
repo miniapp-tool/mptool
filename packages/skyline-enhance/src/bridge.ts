@@ -28,17 +28,17 @@ export const redirect = getTrigger("redirectTo");
 export const switchTab = getTrigger("switchTab");
 export const reLaunch = getTrigger("reLaunch");
 
-function clickHandlerFactory(
+const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,
-): (event: WechatMiniprogram.Touch) => Promise<void> | void {
-  return function touchHandler(
+): (event: WechatMiniprogram.Touch) => Promise<void> {
+  return async function touchHandler(
     this: TrivialPageInstance,
     event?: WechatMiniprogram.TouchEvent<
       WechatMiniprogram.IAnyObject,
       WechatMiniprogram.IAnyObject,
       { before?: string; after?: string; url?: string }
     >,
-  ): Promise<void> | void {
+  ): Promise<void> {
     if (event) {
       const { before, after, url } = event.currentTarget.dataset as {
         before?: string;
@@ -46,19 +46,20 @@ function clickHandlerFactory(
         url?: string;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (this && before && typeof this[before] === "function")
         (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-      if (url)
-        return action(url).then(() => {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (this && after && typeof this[after] === "function")
-            (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-        });
+      if (url) {
+        await action(url);
+
+        // oxlint-disable-next-line typescript/strict-boolean-expressions
+        if (this && after && typeof this[after] === "function")
+          (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
+      }
     }
   };
-}
+};
 
 const bindGo = clickHandlerFactory(go);
 const bindRedirect = clickHandlerFactory(redirect);
@@ -68,7 +69,8 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 /**
  * 返回，默认返回上一页
  *
- * @param [delta=1] 后退层数
+ * @param delta - 后退层数
+ * @returns Promise resolving to navigation result
  */
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
@@ -76,26 +78,26 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
 };
 
-const bindBack = function touchHandler(
+const bindBack = async function touchHandler(
   this: TrivialPageInstance,
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
     { before?: string; after?: string; delta?: number | string }
   >,
-): Promise<void> | void {
+): Promise<void> {
   if (event) {
     const { before, after, delta = 1 } = event.currentTarget.dataset;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (this && before && typeof this[before] === "function")
       (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-    return Promise.resolve(back(Number(delta))).then(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (this && after && typeof this[after] === "function")
-        (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-    });
+    await Promise.resolve(back(Number(delta)));
+
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    if (this && after && typeof this[after] === "function")
+      (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
   }
 };
 
@@ -107,9 +109,9 @@ const bindBack = function touchHandler(
 const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
->(): PageInstance<Data, Custom> => getCurrentPages().slice(0).pop() as PageInstance<Data, Custom>;
+>(): PageInstance<Data, Custom> => [...getCurrentPages()].pop() as PageInstance<Data, Custom>;
 
-export function bind(
+export const bind = function (
   this: TrivialComponentInstance,
   touchEvent: WechatMiniprogram.Touch<{
     id: number;
@@ -122,13 +124,13 @@ export function bind(
   switch (event) {
     // run private attach
     case "$attached": {
-      const ref = getRef(id) as TrivialComponentInstance | undefined;
+      const ref = getRef(id);
 
       if (!ref) break;
 
       const refName = ref.$refID;
 
-      if (refName) this.$refs[refName] = ref;
+      if (refName) this.$refs.set(refName, ref);
 
       ref.$attached(this);
       break;
@@ -139,7 +141,7 @@ export function bind(
       if (method) method.apply(this, args);
     }
   }
-}
+};
 
 /**
  * 挂载页面方法
@@ -181,18 +183,19 @@ export function mount(
 ): void {
   const config = getConfig();
 
+  // oxlint-disable-next-line id-length
   ctx.$ = bind;
 
   // 实例引用集合
-  ctx.$refs = {};
+  ctx.$refs = new Map();
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$on = userEmitter.on;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$off = userEmitter.off;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emit = userEmitter.emit;
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emitAsync = userEmitter.emitAsync;
 
   // 路由方法

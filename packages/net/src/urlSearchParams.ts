@@ -24,20 +24,13 @@
  * SOFTWARE.
  */
 const ENCODE_MAP: Record<string, string> = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "!": "%21",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "'": "%27",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "(": "%28",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   ")": "%29",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "~": "%7E",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "%20": "+",
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  "%00": "\x00",
+  "%00": "\u0000",
 };
 
 const encode = (str: string): string =>
@@ -55,6 +48,7 @@ export class URLSearchParams {
       | Record<string, string | string[]>
       | Iterable<[string, string]>,
   ) {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (!init) {
       this.params = new Map();
     } else if (init instanceof URLSearchParams) {
@@ -62,7 +56,7 @@ export class URLSearchParams {
     } else {
       this.params = new Map();
 
-      if (typeof init === "string")
+      if (typeof init === "string") {
         (init.startsWith("?")
           ? // remove first '?'
             init.slice(1)
@@ -74,36 +68,40 @@ export class URLSearchParams {
 
             if (key) this.append(decode(key), decode(value));
           });
-      else if (Symbol.iterator in init)
+      } else if (Symbol.iterator in init) {
         for (const item of init) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (item.length !== 2)
+          if (item.length !== 2) {
             throw new TypeError(
               "Failed to construct 'URLSearchParams': Sequence initializer must only contain pair elements",
             );
+          }
           const [key, value] = item;
 
           this.append(key, value);
         }
-      else
+      } else {
         for (const key of Object.keys(init)) {
           const value = init[key];
 
           this.params.set(key, [String(value)]);
         }
+      }
     }
   }
 
   get size(): number {
-    return Array.from(this.params.values()).flat().length;
+    // oxlint-disable-next-line unicorn/prefer-spread
+    return [...this.params.values()].reduce((acc, val) => acc.concat(val), []).length;
   }
 
   /**
    * Append a new name-value pair to the query string.
+   *
+   * @param name - The name of the parameter
+   * @param value - The value of the parameter
    */
   append(name: string, value: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
-    this.params.set(name, this.getAll(name).concat(String(value)));
+    this.params.set(name, [...this.getAll(name), String(value)]);
   }
 
   /**
@@ -111,6 +109,8 @@ export class URLSearchParams {
    * where name is `name` and value is `value`..
    *
    * If `value` is not provided, removes all name-value pairs whose name is `name`.
+   *
+   * @param name - The name of the parameter to delete
    */
   delete(name: string): void {
     this.params.delete(name);
@@ -121,6 +121,8 @@ export class URLSearchParams {
    * Each item of the iterator is a JavaScript `Array`. The first item of the `Array`is the `name`, the second item of the `Array` is the `value`.
    *
    * Alias for `urlSearchParams[@@iterator]()`.
+   *
+   * @returns An iterator over the name-value pairs in the query
    */
   entries(): IterableIterator<[string, string]> {
     const items = new Set<[name: string, value: string]>();
@@ -144,22 +146,26 @@ export class URLSearchParams {
    * //   a b true
    * //   c d true
    * ```
-   * @param fn Invoked for each name-value pair in the query
+   * @param callbackfn Invoked for each name-value pair in the query
    * @param thisArg To be used as `this` value for when `fn` is called
    */
   forEach(
     callbackfn: (value: string, key: string, iterable: URLSearchParams) => void,
     thisArg?: unknown,
   ): void {
-    this.params.forEach((value, key) =>
-      value.forEach((item) => callbackfn.bind(thisArg)(item, key, this)),
-    );
+    this.params.forEach((value, key) => {
+      value.forEach((item) => {
+        callbackfn.bind(thisArg)(item, key, this);
+      });
+    });
   }
 
   /**
    * Returns the value of the first name-value pair whose name is `name`. If there
    * are no such pairs, `null` is returned.
-   * @return or `null` if there is no name-value pair with the given `name`.
+   *
+   * @param name - The name of the parameter
+   * @returns The value of the first matching parameter, or `null` if not found
    */
   get(name: string): string | null {
     return this.getAll(name)[0] ?? null;
@@ -168,9 +174,12 @@ export class URLSearchParams {
   /**
    * Returns the values of all name-value pairs whose name is `name`. If there are
    * no such pairs, an empty array is returned.
+   *
+   * @param name - The name of the parameter
+   * @returns An array of values associated with the given parameter
    */
   getAll(name: string): string[] {
-    return this.params.get(name)?.slice(0) ?? [];
+    return [...(this.params.get(name) ?? [])];
   }
 
   /**
@@ -181,6 +190,9 @@ export class URLSearchParams {
    *
    * If `value` is not provided, returns `true` if there is at least one name-value
    * pair whose name is `name`.
+   *
+   * @param name - The name of the parameter to check
+   * @returns `true` if a matching name-value pair exists, `false` otherwise
    */
   has(name: string): boolean {
     return this.params.has(name);
@@ -198,6 +210,8 @@ export class URLSearchParams {
    * //   foo
    * //   foo
    * ```
+   *
+   * @returns An iterator over the names of each name-value pair
    */
   keys(): IterableIterator<string> {
     return this.params.keys();
@@ -221,6 +235,9 @@ export class URLSearchParams {
    * console.log(params.toString());
    * // Prints foo=def&#x26;abc=def&#x26;xyz=opq
    * ```
+   *
+   * @param name - The name of the parameter to set
+   * @param value - The value to set
    */
   set(name: string, value: string): void {
     this.params.set(name, [value || ""]);
@@ -241,12 +258,14 @@ export class URLSearchParams {
    * ```
    */
   sort(): void {
-    this.params = new Map(Array.from(this.params.entries()).sort(([a], [b]) => a.localeCompare(b)));
+    this.params = new Map([...this.params.entries()].sort(([a], [b]) => a.localeCompare(b)));
   }
 
   /**
    * Returns the search parameters serialized as a string, with characters
    * percent-encoded where necessary.
+   *
+   * @returns The serialized query string
    */
   toString(): string {
     const query: string[] = [];
@@ -262,6 +281,8 @@ export class URLSearchParams {
 
   /**
    * Returns an ES6 `Iterator` over the values of each name-value pair.
+   *
+   * @returns An iterator over the values
    */
   values(): IterableIterator<string> {
     const items = new Set<string>();

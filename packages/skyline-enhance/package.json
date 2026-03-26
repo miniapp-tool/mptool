@@ -7,7 +7,7 @@
     "miniapp",
     "miniprogram"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/enhance#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/skyline-enhance#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
@@ -20,26 +20,35 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/enhance"
+    "directory": "packages/skyline-enhance"
   },
   "files": [
     "dist"
   ],
+  "type": "commonjs",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "default": "./dist/index.d.ts"
+      },
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.mts --configPlugin esbuild",
-    "clean": "rimraf ./dist",
-    "dev": "rollup -c -w"
+    "build": "tsdown --config-loader unrun",
+    "clean": "rimraf ./dist"
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
     "@mptool/shared": "workspace:*",
-    "miniprogram-api-typings": "5.0.0"
+    "miniprogram-api-typings": "5.1.2"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"

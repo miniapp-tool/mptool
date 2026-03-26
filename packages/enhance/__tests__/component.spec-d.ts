@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { assertType, expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
@@ -57,7 +56,7 @@ it("$Component", () => {
       moved() {},
       detached() {},
       error(err) {
-        expectTypeOf(err).toEqualTypeOf<WechatMiniprogram.Error>();
+        expectTypeOf(err).toEqualTypeOf<Error>();
       },
     },
 
@@ -122,7 +121,7 @@ it("$Component", () => {
       custom: 1,
       methods: {
         f() {
-          this.custom;
+          void this.custom;
         },
       },
     }),
@@ -167,7 +166,7 @@ it("$Component", () => {
     },
     methods: {
       myMethod() {
-        this.data._b; // 纯数据字段可以在 this.data 中获取
+        void this.data._b; // 纯数据字段可以在 this.data 中获取
         this.setData({
           c: true, // 普通数据字段
           _d: true, // 纯数据字段
@@ -194,13 +193,13 @@ it("$Component", () => {
         this.animate(
           "#container",
           [
-            { opacity: 1.0, rotate: 0, backgroundColor: "#FF0000" },
+            { opacity: 1, rotate: 0, backgroundColor: "#FF0000" },
             { opacity: 0.5, rotate: 45, backgroundColor: "#00FF00" },
-            { opacity: 0.0, rotate: 90, backgroundColor: "#FF0000" },
+            { opacity: 0, rotate: 90, backgroundColor: "#FF0000" },
           ],
           5000,
           () => {
-            this.clearAnimation("#container", { opacity: true, rotate: true }, function () {
+            this.clearAnimation("#container", { opacity: true, rotate: true }, function animate() {
               console.log("清除了#container上的opacity和rotate属性");
             });
           },
@@ -215,7 +214,7 @@ it("$Component", () => {
           ],
           5000,
           () => {
-            this.clearAnimation(".block", function () {
+            this.clearAnimation(".block", function animate() {
               console.log("清除了.block上的所有动画属性");
             });
           },
@@ -301,6 +300,7 @@ it("$Component", () => {
     methods: {
       fn() {
         // @ts-expect-error: notExists
+        // oxlint-disable-next-line typescript/no-unsafe-call
         assertType(this.notExists());
       },
     },

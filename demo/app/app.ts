@@ -1,6 +1,6 @@
 import { $App, $Config, request } from "@mptool/all";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// oxlint-disable-next-line typescript/ban-ts-comment, typescript/prefer-ts-expect-error
 // @ts-ignore: DEBUG is not standard
 wx.env.DEBUG = true;
 
@@ -19,7 +19,9 @@ $App({
     });
     void request("https://authserver.nenu.edu.cn/authserver/info", {
       redirect: "manual",
-    }).then((res) => console.log(res));
+    }).then((res) => {
+      console.log(res);
+    });
   },
   onAwake(time) {
     console.log(`App awake after ${time}ms`, this);

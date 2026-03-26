@@ -15,50 +15,39 @@ jobs:
   linter-and-unit:
     name: Linter and Unit test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version:
-          - 20
-          - 22
-          - 24
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: true
+        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
           cache: pnpm
 
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
       - name: Build project
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=8192
         run: pnpm build
 
       - name: Linter test
         run: pnpm lint
 
       - name: Unit test
-        env:
-          NODE_OPTIONS: --max_old_space_size=8192
         run: pnpm test
 
       - name: Upload coverage
-        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '24' }}
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results
-        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && matrix.node-version == '24' }}
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         uses: codecov/test-results-action@v1
         with:
           file: ./coverage/test-report.junit.xml
