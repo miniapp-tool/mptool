@@ -1,7 +1,7 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
-import { get, getAsync, set, setAsync } from "../src/index.js";
+import { get, getAsync, set, setAsync } from "../src/storage.js";
 
 describe(set, () => {
   it("set sync simple", () => {
