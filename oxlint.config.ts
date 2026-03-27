@@ -11,7 +11,7 @@ export default defineConfig({
     typeAware: true,
     typeCheck: true,
   },
-  ignorePatterns: [...defaultIgnorePatterns, "demo/**/*.js"],
+  ignorePatterns: [...defaultIgnorePatterns, "demo/**/*.js", ".ncurc.js"],
   rules: {
     "new-cap": ["warn", { capIsNewExceptions: ["App", "Component", "Emitter", "Page"] }],
     "no-console": "off",
