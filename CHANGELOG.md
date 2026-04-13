@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1](https://github.com/miniapp-tool/mptool/compare/v0.12.0...v0.12.1) (2026-04-13)
+
+### 🚀 Performance Improvements
+
+- improve perf ([30df205](https://github.com/miniapp-tool/mptool/commit/30df205d45bcf921c110bc3baf612d0477096902))
+
 ## [0.12.0](https://github.com/miniapp-tool/mptool/compare/v0.11.1...v0.12.0) (2025-07-27)
 
 ### ✨ Features
