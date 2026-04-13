@@ -49,7 +49,7 @@ export function getTrigger(
  */
 // oxlint-disable-next-line typescript/no-explicit-any
 export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => any {
-  // oxlint-disable-next-line typescript/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any, typescript/consistent-return
   return (pageNameWithArg: string): any => {
     if (canNavigate) {
       // set navigate lock

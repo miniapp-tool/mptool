@@ -87,7 +87,7 @@ export class Headers {
 
   // Keeps the mapping between the raw header name
   // and the normalized header name to ease the lookup.
-  private headerNames = new Map<string, string>();
+  private readonly headerNames = new Map<string, string>();
 
   constructor(init?: HeadersInit) {
     if (init instanceof Headers) {

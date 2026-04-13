@@ -1,3 +1,4 @@
+// oxlint-disable typescript/consistent-return
 // oxlint-disable typescript/no-explicit-any
 
 import type { GeneralCallbackResult, PromisifySuccessResult } from "./utils.js";

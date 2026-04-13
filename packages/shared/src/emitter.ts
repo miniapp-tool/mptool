@@ -124,15 +124,19 @@ export const Emitter = <Events>(
      */
     emitAsync: async <Key extends keyof Events>(type: Key, event?: Events[Key]): Promise<void> => {
       await Promise.all(
-        [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)]
-          // oxlint-disable-next-line typescript/no-non-null-assertion
-          .map((handler) => handler(event!)),
+        [...((all.get(type) ?? []) as EventHandlerList<Events[keyof Events]>)].map(
+          async (handler) => {
+            // oxlint-disable-next-line typescript/no-non-null-assertion
+            await handler(event!);
+          },
+        ),
       );
 
       await Promise.all(
-        [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)]
+        [...((all.get("*") ?? []) as WildCardEventHandlerList<Events>)].map(async (handler) => {
           // oxlint-disable-next-line typescript/no-non-null-assertion
-          .map((handler) => handler(type, event!)),
+          await handler(type, event!);
+        }),
       );
     },
   };

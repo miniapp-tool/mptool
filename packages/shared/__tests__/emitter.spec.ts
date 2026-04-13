@@ -11,8 +11,8 @@ describe("mitt", () => {
   it("should accept an optional event handler map", () => {
     expect(() => Emitter(new Map())).not.toThrow();
     const map: EventHandlerMap<{ foo: undefined }> = new Map();
-    const a = vi.fn();
-    const b = vi.fn();
+    const a = vi.fn<() => void>();
+    const b = vi.fn<() => void>();
 
     map.set("foo", [a, b]);
     const events = Emitter<{ foo: undefined }>(map);
@@ -58,7 +58,7 @@ describe("mitt#", () => {
     });
 
     it("should register handler for new type", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("foo", foo);
 
@@ -66,7 +66,7 @@ describe("mitt#", () => {
     });
 
     it("should register handlers for any type strings", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("constructor", foo);
 
@@ -74,8 +74,8 @@ describe("mitt#", () => {
     });
 
     it("should append handler for existing type", () => {
-      const foo = vi.fn();
-      const bar = vi.fn();
+      const foo = vi.fn<() => void>();
+      const bar = vi.fn<() => void>();
 
       inst.on("foo", foo);
       inst.on("foo", bar);
@@ -84,7 +84,7 @@ describe("mitt#", () => {
     });
 
     it("should NOT normalize case", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("FOO", foo);
       inst.on("Bar", foo);
@@ -98,7 +98,7 @@ describe("mitt#", () => {
     });
 
     it("can take symbols for event types", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on(eventType, foo);
       expect(events.get(eventType)).toEqual([foo]);
@@ -107,7 +107,7 @@ describe("mitt#", () => {
     // Adding the same listener multiple times should register it multiple times.
     // See https://nodejs.org/api/events.html#events_emitter_on_eventname_listener
     it("should add duplicate listeners", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("foo", foo);
       inst.on("foo", foo);
@@ -122,7 +122,7 @@ describe("mitt#", () => {
     });
 
     it("should remove handler for type", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("foo", foo);
       inst.off("foo", foo);
@@ -131,7 +131,7 @@ describe("mitt#", () => {
     });
 
     it("should NOT normalize case", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("FOO", foo);
       inst.on("Bar", foo);
@@ -149,7 +149,7 @@ describe("mitt#", () => {
     });
 
     it("should remove only the first matching listener", () => {
-      const foo = vi.fn();
+      const foo = vi.fn<() => void>();
 
       inst.on("foo", foo);
       inst.on("foo", foo);
@@ -189,8 +189,8 @@ describe("mitt#", () => {
     });
 
     it("should NOT ignore case", () => {
-      const onFOO = vi.fn();
-      const onFoo = vi.fn();
+      const onFOO = vi.fn<() => void>();
+      const onFoo = vi.fn<() => void>();
 
       events.set("Foo", [onFoo]);
       events.set("FOO", [onFOO]);
@@ -207,7 +207,7 @@ describe("mitt#", () => {
     it("should invoke * handlers", () => {
       const ea = { a: "a" };
       const eb = { b: "b" };
-      const star = vi.fn();
+      const star = vi.fn<() => void>();
 
       events.set("*", [star]);
 

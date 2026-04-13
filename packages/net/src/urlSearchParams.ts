@@ -104,6 +104,7 @@ export class URLSearchParams {
    * @param value - The value of the parameter
    */
   append(name: string, value: string): void {
+    // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
     this.params.set(name, [...this.getAll(name), String(value)]);
   }
 

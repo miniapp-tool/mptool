@@ -36,15 +36,12 @@ const clickHandlerFactory = function (
     event?: WechatMiniprogram.TouchEvent<
       WechatMiniprogram.IAnyObject,
       WechatMiniprogram.IAnyObject,
+      // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
       { before?: string; after?: string; url?: string }
     >,
   ): Promise<void> {
     if (event) {
-      const { before, after, url } = event.currentTarget.dataset as {
-        before?: string;
-        after?: string;
-        url?: string;
-      };
+      const { before, after, url } = event.currentTarget.dataset;
 
       // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (this && before && typeof this[before] === "function")
@@ -83,6 +80,7 @@ const bindBack = async function touchHandler(
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
+    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
     { before?: string; after?: string; delta?: number | string }
   >,
 ): Promise<void> {

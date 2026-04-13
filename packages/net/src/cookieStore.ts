@@ -23,11 +23,11 @@ export interface SetCookieOptions {
  * CookieStore 类
  */
 export class CookieStore {
-  private store: CookieStoreType = new Map();
+  private readonly store: CookieStoreType = new Map();
 
   constructor(
     /** 存储键值 */
-    private key = "__cookie_store__",
+    private readonly key = "__cookie_store__",
   ) {
     this.#init();
   }

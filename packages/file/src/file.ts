@@ -134,6 +134,9 @@ export const readFile = (<T extends FileEncoding>(
       | undefined;
   } catch {
     logger.warn(`${path} don't exist`);
+
+    // oxlint-disable-next-line no-undefined
+    return undefined;
   }
 }) as ReadFile;
 

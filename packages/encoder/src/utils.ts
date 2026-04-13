@@ -23,6 +23,7 @@ export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
 
   // 1. Let S be the DOMString value.
+  // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
   const str = String(content);
 
   // 2. Let n be the length of S.

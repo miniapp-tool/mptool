@@ -1,5 +1,4 @@
-/* oxlint-disable typescript/consistent-type-definitions */
-import { assertType, expectTypeOf, it } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import { $Component } from "../src/index.js";
 
@@ -116,7 +115,7 @@ it("$Component", () => {
     },
   });
 
-  assertType(
+  expectTypeOf(
     $Component({
       // @ts-expect-error: custom does not exist on $Component
       custom: 1,
@@ -126,7 +125,7 @@ it("$Component", () => {
         },
       },
     }),
-  );
+  ).toBeString();
 
   $Component({
     props: {
@@ -141,7 +140,7 @@ it("$Component", () => {
     },
   });
 
-  assertType(
+  expectTypeOf(
     $Component({
       data: {
         a: 1,
@@ -155,7 +154,7 @@ it("$Component", () => {
         },
       },
     }),
-  );
+  ).toBeString();
 
   $Component({
     options: {
@@ -287,12 +286,14 @@ it("$Component", () => {
       test() {
         const channel = this.getOpenerEventChannel();
 
-        assertType<WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel>(channel);
+        expectTypeOf(channel).toEqualTypeOf<
+          WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
+        >();
         channel.emit?.("test", {});
         channel.on?.("xxx", () => {});
 
-        // @ts-expect-error: emit key should be string
-        assertType(channel.emit?.(1, 2));
+        // @ts-expect-error: key should not be number
+        expectTypeOf(channel.emit?.(1, 2)).toBeVoid();
       },
     },
   });
@@ -302,7 +303,7 @@ it("$Component", () => {
       fn() {
         // @ts-expect-error: notExists
         // oxlint-disable-next-line typescript/no-unsafe-call
-        assertType(this.notExists());
+        expectTypeOf(this.notExists()).toBeVoid();
       },
     },
   });
@@ -338,7 +339,7 @@ it("$Component", () => {
           expectTypeOf(this.onShow).toEqualTypeOf<() => void | Promise<void>>();
 
           // @ts-expect-error: notExists
-          assertType(this.notExists);
+          expectTypeOf(this.notExists).toBeVoid();
 
           return "test";
         },
@@ -376,9 +377,9 @@ it("$Component", () => {
     },
   });
 
-  type CustomProperties = {
+  interface CustomProperties {
     customProp: string;
-  };
+  }
 
   $Component<
     Record<never, never>,

@@ -1,4 +1,4 @@
-import { assertType, expectTypeOf, it } from "vitest";
+import { expectTypeOf, it } from "vitest";
 
 import { $Page } from "../src/index.js";
 
@@ -143,7 +143,8 @@ it("$Page", () => {
       expectTypeOf(this.data.a).toEqualTypeOf<number>();
 
       // @ts-expect-error: a does not exist
-      assertType(this.a);
+      // oxlint-disable-next-line no-unused-expressions
+      this.a;
     },
     jump() {
       const query = wx.createSelectorQuery();
@@ -205,12 +206,12 @@ it("$Page", () => {
     onLoad() {
       const logs = this.getLogs();
 
-      assertType<string[]>(logs);
+      expectTypeOf(logs).toEqualTypeOf<string[]>();
       this.setData({ logs });
 
       // @ts-expect-error: log doesn't exist
-      assertType(this.logs);
-      assertType<string[]>(this.data.logs);
+      expectTypeOf(this.logs).toBeAny();
+      expectTypeOf(this.data.logs).toEqualTypeOf<string[]>();
     },
   });
 
@@ -218,12 +219,14 @@ it("$Page", () => {
     test() {
       const channel = this.getOpenerEventChannel();
 
-      assertType<WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel>(channel);
+      expectTypeOf(channel).toEqualTypeOf<
+        WechatMiniprogram.EventChannel | WechatMiniprogram.EmptyEventChannel
+      >();
       channel.emit?.("test", {});
       channel.on?.("xxx", () => {});
 
       // @ts-expect-error: key should not be number
-      assertType(channel.emit?.(1, 2));
+      channel.emit?.(1, 2);
     },
   });
 

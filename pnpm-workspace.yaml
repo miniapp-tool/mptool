@@ -2,6 +2,7 @@ packages:
   - demo/
   - docs/
   - packages/*
+
 allowBuilds:
   "@parcel/watcher": true
   esbuild: true
