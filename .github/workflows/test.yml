@@ -32,13 +32,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: pnpm build
+        run: pnpm run build
 
       - name: Linter test
-        run: pnpm lint
+        run: pnpm run lint
 
       - name: Unit test
-        run: pnpm test
+        run: pnpm run test
 
       - name: Upload coverage
         if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}

@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -29,10 +30,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: pnpm build
+        run: pnpm run build
 
       - name: Publish packages
         run: pnpm publish -r --no-git-checks
 
       - name: Sync npmmirror
-        run: pnpm release:sync
+        run: pnpm run release:sync

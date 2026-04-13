@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build docs
-        run: pnpm docs:build
+        run: pnpm run docs:build
 
       - name: Add .nojekyll
         run: echo > docs/.vuepress/dist/.nojekyll

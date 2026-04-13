@@ -80,13 +80,11 @@
 
 ```sh
 pnpm install        # Install dependencies
-pnpm build          # Build all packages
-pnpm build:all      # Build all packages
-pnpm clean          # Clean dist files
-pnpm test           # Run tests
-pnpm test:ci        # Run tests in CI mode
-pnpm lint           # Lint code
-pnpm release        # Release (lerna version)
+pnpm run build          # Build all packages
+pnpm run clean          # Clean dist files
+pnpm run test           # Run tests
+pnpm run lint           # Lint code
+pnpm run release        # Release (lerna version)
 ```
 
 ### Package Structure
