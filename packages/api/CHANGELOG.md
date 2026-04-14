@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.2](/github.com/miniapp-tool/mptool/compare/v0.12.1...v0.12.2) (2026-04-14)
+
+### 🐛 Bug Fixes
+
+- fix confirm api ([688d4e4](/github.com/miniapp-tool/mptool/commit/688d4e404b9e629fc53b91e6f983c7cd45e1e12e))
+
 ## [0.12.1](/github.com/miniapp-tool/mptool/compare/v0.12.0...v0.12.1) (2026-04-13)
 
 **Note:** Version bump only for package @mptool/api
