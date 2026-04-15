@@ -212,3 +212,80 @@ export const funcQueue = <Args extends unknown[], T = unknown>(
     queue.add(fn, this, ...args);
   };
 };
+
+export interface PromiseQueue<StopMessage = void> {
+  /**
+   * 运行队列中的函数，直到所有函数执行完毕或调用 `stop` 方法停止队列。
+   *
+   * @returns 一个 Promise，解析为一个对象，表示队列是否被中断以及中断时的消息（如果有的话）。
+   * - 如果队列正常执行完毕，Promise 解析为 `{ interrupted: false }`。
+   * - 如果队列被 `stop` 方法中断，Promise 解析为 `{ interrupted: true; msg: T }`，其中 `msg` 是通过 `stop` 方法传递的消息。
+   * @async
+   */
+  run: () => Promise<{ interrupted: false } | { interrupted: true; msg: StopMessage }>;
+
+  /**
+   * 停止队列，正在执行的函数会继续执行完毕，但尚未执行的函数将不再执行。
+   */
+  stop: (msg: StopMessage) => void;
+}
+
+/**
+ * 一个队列，支持可控并发和中断
+ *
+ * @param actionList 任务列表，形式为 `(() => Promise<void>)[]`
+ * @param capacity 允许同时并行的任务数
+ *
+ * @returns 拥有 `run` 和 `stop` 方法的对象
+ */
+export const createQueue = <StopMessage>(
+  actionList: (() => Promise<void>)[],
+  capacity = 1,
+): PromiseQueue<StopMessage> => {
+  let shouldCancel = false;
+  let stopMessage: StopMessage | void = void 0;
+
+  return {
+    run: (): Promise<{ interrupted: false } | { interrupted: true; msg: StopMessage }> =>
+      new Promise((resolve) => {
+        /** 回调队列 */
+        const queue: (() => Promise<void>)[] = actionList;
+
+        let running = 0;
+
+        /** 执行下一个函数 */
+        const next = (): void => {
+          if (shouldCancel) {
+            resolve({ interrupted: true, msg: stopMessage as StopMessage });
+
+            return;
+          }
+
+          /** 即将执行的任务 */
+          const task = queue.shift();
+
+          if (task) {
+            running += 1;
+            void task().then(() => {
+              running -= 1;
+              // oxlint-disable-next-line promise/no-callback-in-promise
+              next();
+            });
+          } else if (running === 0) {
+            resolve({ interrupted: false });
+          }
+        };
+
+        let counter = 0;
+
+        while (counter < capacity) {
+          counter += 1;
+          next();
+        }
+      }),
+    stop: (msg: StopMessage): void => {
+      shouldCancel = true;
+      stopMessage = msg;
+    },
+  };
+};
