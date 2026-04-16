@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.0](https://github.com/miniapp-tool/mptool/compare/v0.12.2...v0.13.0) (2026-04-16)
+
+### ✨ Features
+
+- **shared:** add createQueue ([ad2070e](https://github.com/miniapp-tool/mptool/commit/ad2070e1d2d9fdd707aee080ceb00ae0df03e54d))
+
 ## [0.12.2](https://github.com/miniapp-tool/mptool/compare/v0.12.1...v0.12.2) (2026-04-14)
 
 ### 🐛 Bug Fixes
