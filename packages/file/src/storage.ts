@@ -29,7 +29,6 @@ export const put = <T = unknown>(key: string, value: T): void => {
  * 取数据
  *
  * @param key 键
- *
  * @returns 值
  */
 export const take = <T = unknown>(key: string): T | undefined => {
@@ -46,7 +45,6 @@ export const take = <T = unknown>(key: string): T | undefined => {
  *
  * @param key 键
  * @param value 值
- *
  * @returns 返回值
  */
 const getData = <T = unknown>(key: string, value: StorageData<T> | null): T | undefined =>
@@ -101,9 +99,10 @@ const prepareData = <Value = unknown>(
 /**
  * 设置数据
  *
- * @param key key
- * @param value value
+ * @param key Key
+ * @param value Value
  * @param expire 过期时间
+ *
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
@@ -120,9 +119,10 @@ export const set = <Value = unknown>(
 /**
  * 设置数据
  *
- * @param key key
- * @param value value
+ * @param key Key
+ * @param value Value
  * @param expire 过期时间
+ *
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
  *   - `'keep'`: 表示保持上一次缓存时间
@@ -147,8 +147,7 @@ export const setAsync = <Value = unknown>(
 /**
  * 获取
  *
- * @param key key
- *
+ * @param key Key
  * @returns 设置值
  */
 export const get = <T = unknown>(key: string): T | undefined =>
@@ -157,8 +156,7 @@ export const get = <T = unknown>(key: string): T | undefined =>
 /**
  * 异步获取
  *
- * @param key key
- *
+ * @param key Key
  * @returns 设置值
  */
 export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
@@ -177,7 +175,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
 /**
  * 移除
  *
- * @param key key
+ * @param key Key
  */
 export const remove = (key: string): void => {
   wx.removeStorageSync(`${CACHE_PREFIX}${key}`);
@@ -187,7 +185,7 @@ export const remove = (key: string): void => {
 /**
  * 异步移除存储
  *
- * @param key key
+ * @param key Key
  * @param option 回调函数
  * @returns 异步回调结果
  */
@@ -199,7 +197,7 @@ export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallb
 /**
  * 清除失效数据
  *
- * @param key key
+ * @param key Key
  */
 export const check = (): void => {
   wx.getStorageInfoSync().keys.forEach((key) => {
@@ -215,7 +213,7 @@ export const check = (): void => {
 /**
  * 异步清除失效数据
  *
- * @param key key
+ * @param key Key
  * @returns 异步回调结果
  */
 export const checkAsync = async (): Promise<void> => {

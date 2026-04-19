@@ -1,40 +1,24 @@
 export interface CookieType {
-  /**
-   * cookie name
-   */
+  /** Cookie name */
   name: string;
-  /**
-   * cookie value
-   */
+  /** Cookie value */
   value: string;
-  /**
-   * cookie path
-   */
+  /** Cookie path */
   path?: string | undefined;
-  /**
-   * absolute expiration date for the cookie
-   */
+  /** Absolute expiration date for the cookie */
   expires?: Date | undefined;
   /**
-   * relative max age of the cookie in seconds from when the client receives it (integer or undefined)
-   * Note: when using with express's res.cookie() method, multiply maxAge by 1000 to convert to milliseconds
+   * Relative max age of the cookie in seconds from when the client receives it (integer or
+   * undefined) Note: when using with express's res.cookie() method, multiply maxAge by 1000 to
+   * convert to milliseconds
    */
   maxAge?: number | undefined;
-  /**
-   * domain for the cookie,
-   * may begin with "." to indicate the named domain or any subdomain of it
-   */
+  /** Domain for the cookie, may begin with "." to indicate the named domain or any subdomain of it */
   domain?: string | undefined;
-  /**
-   * indicates that this cookie should only be sent over HTTPs
-   */
+  /** Indicates that this cookie should only be sent over HTTPs */
   secure?: boolean | undefined;
-  /**
-   * indicates that this cookie should not be accessible to client-side JavaScript
-   */
+  /** Indicates that this cookie should not be accessible to client-side JavaScript */
   httpOnly?: boolean | undefined;
-  /**
-   * indicates a cookie ought not to be sent along with cross-site requests
-   */
+  /** Indicates a cookie ought not to be sent along with cross-site requests */
   sameSite?: boolean | "lax" | "strict" | "none" | undefined;
 }

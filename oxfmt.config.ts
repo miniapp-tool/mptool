@@ -1,7 +1,5 @@
-import { config } from "oxc-config-hope/oxfmt";
-import { defineConfig } from "oxfmt";
+import { defineHopeConfig } from "oxc-config-hope/oxfmt";
 
-export default defineConfig({
-  extends: config,
+export default defineHopeConfig({
   ignorePatterns: ["demo/**/*.js"],
 });

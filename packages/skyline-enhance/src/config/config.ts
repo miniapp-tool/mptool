@@ -8,9 +8,7 @@ import type {
 } from "./typings.js";
 
 export interface Config extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
-  /**
-   * @returns route
-   */
+  /** @returns Route */
   getPath: (pageName: string) => string;
 }
 

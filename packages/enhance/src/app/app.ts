@@ -1,8 +1,8 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import type { AppConstructor, AppOptions } from "./typings.js";
 import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
 import { appEmitter, userEmitter } from "../emitter/index.js";
+import type { AppConstructor, AppOptions } from "./typings.js";
 
 export const appState = {
   /** 是否已启动 */
@@ -65,8 +65,6 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
   // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emitAsync = userEmitter.emitAsync;
 
-  /**
-   * Use app config
-   */
+  /** Use app config */
   App(appOptions);
 };

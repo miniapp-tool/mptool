@@ -3,8 +3,7 @@ import { END_OF_STREAM } from "./constant.js";
 /**
  * A stream represents an ordered sequence of tokens.
  *
- * @param tokens Array of tokens that provide
- * the stream.
+ * @param tokens Array of tokens that provide the stream.
  */
 export class Stream {
   tokens: number[];
@@ -16,17 +15,14 @@ export class Stream {
     this.tokens.reverse();
   }
 
-  /**
-   * @returns True if end-of-stream has been hit.
-   */
+  /** @returns True if end-of-stream has been hit. */
   endOfStream(): boolean {
     return !this.tokens.length;
   }
 
   /**
-   * When a token is read from a stream, the first token in the
-   * stream must be returned and subsequently removed, and
-   * end-of-stream must be returned otherwise.
+   * When a token is read from a stream, the first token in the stream must be returned and
+   * subsequently removed, and end-of-stream must be returned otherwise.
    *
    * @returns Get the next token from the stream, or
    * end_of_stream.
@@ -36,12 +32,10 @@ export class Stream {
   }
 
   /**
-   * When one or more tokens are prepended to a stream, those tokens
-   * must be inserted, in given order, before the first token in the
-   * stream.
+   * When one or more tokens are prepended to a stream, those tokens must be inserted, in given
+   * order, before the first token in the stream.
    *
-   * @param token The token(s) to prepend to the
-   * stream.
+   * @param token The token(s) to prepend to the stream.
    */
   prepend(token: number | number[]): void {
     if (Array.isArray(token))
@@ -51,12 +45,10 @@ export class Stream {
   }
 
   /**
-   * When one or more tokens are pushed to a stream, those tokens
-   * must be inserted, in given order, after the last token in the
-   * stream.
+   * When one or more tokens are pushed to a stream, those tokens must be inserted, in given order,
+   * after the last token in the stream.
    *
-   * @param token The tokens(s) to push to the
-   * stream.
+   * @param token The tokens(s) to push to the stream.
    */
   push(token: number | number[]): void {
     if (Array.isArray(token))

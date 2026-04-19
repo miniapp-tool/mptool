@@ -5,23 +5,20 @@
  *
  * Copyright (c) 2016 Jerry Bendy
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 const ENCODE_MAP: Record<string, string> = {
   "!": "%21",
@@ -109,8 +106,8 @@ export class URLSearchParams {
   }
 
   /**
-   * If `value` is provided, removes all name-value pairs
-   * where name is `name` and value is `value`..
+   * If `value` is provided, removes all name-value pairs where name is `name` and value is
+   * `value`..
    *
    * If `value` is not provided, removes all name-value pairs whose name is `name`.
    *
@@ -121,8 +118,9 @@ export class URLSearchParams {
   }
 
   /**
-   * Returns an ES6 `Iterator` over each of the name-value pairs in the query.
-   * Each item of the iterator is a JavaScript `Array`. The first item of the `Array`is the `name`, the second item of the `Array` is the `value`.
+   * Returns an ES6 `Iterator` over each of the name-value pairs in the query. Each item of the
+   * iterator is a JavaScript `Array`. The first item of the `Array`is the `name`, the second item
+   * of the `Array` is the `value`.
    *
    * Alias for `urlSearchParams[@@iterator]()`.
    *
@@ -142,7 +140,7 @@ export class URLSearchParams {
    * Iterates over each name-value pair in the query and invokes the given function.
    *
    * ```js
-   * const myURL = new URL('https://example.org/?a=b&#x26;c=d');
+   * const myURL = new URL("https://example.org/?a=b&#x26;c=d");
    * myURL.searchParams.forEach((value, name, searchParams) => {
    *   console.log(name, value, myURL.searchParams === searchParams);
    * });
@@ -150,6 +148,7 @@ export class URLSearchParams {
    * //   a b true
    * //   c d true
    * ```
+   *
    * @param callbackfn Invoked for each name-value pair in the query
    * @param thisArg To be used as `this` value for when `fn` is called
    */
@@ -165,8 +164,8 @@ export class URLSearchParams {
   }
 
   /**
-   * Returns the value of the first name-value pair whose name is `name`. If there
-   * are no such pairs, `null` is returned.
+   * Returns the value of the first name-value pair whose name is `name`. If there are no such
+   * pairs, `null` is returned.
    *
    * @param name - The name of the parameter
    * @returns The value of the first matching parameter, or `null` if not found
@@ -176,8 +175,8 @@ export class URLSearchParams {
   }
 
   /**
-   * Returns the values of all name-value pairs whose name is `name`. If there are
-   * no such pairs, an empty array is returned.
+   * Returns the values of all name-value pairs whose name is `name`. If there are no such pairs, an
+   * empty array is returned.
    *
    * @param name - The name of the parameter
    * @returns An array of values associated with the given parameter
@@ -187,13 +186,14 @@ export class URLSearchParams {
   }
 
   /**
-   * Checks if the `URLSearchParams` object contains key-value pair(s) based on`name` and an optional `value` argument.
+   * Checks if the `URLSearchParams` object contains key-value pair(s) based on`name` and an
+   * optional `value` argument.
    *
-   * If `value` is provided, returns `true` when name-value pair with
-   * same `name` and `value` exists.
+   * If `value` is provided, returns `true` when name-value pair with same `name` and `value`
+   * exists.
    *
-   * If `value` is not provided, returns `true` if there is at least one name-value
-   * pair whose name is `name`.
+   * If `value` is not provided, returns `true` if there is at least one name-value pair whose name
+   * is `name`.
    *
    * @param name - The name of the parameter to check
    * @returns `true` if a matching name-value pair exists, `false` otherwise
@@ -206,7 +206,7 @@ export class URLSearchParams {
    * Returns an ES6 `Iterator` over the names of each name-value pair.
    *
    * ```js
-   * const params = new URLSearchParams('foo=bar&#x26;foo=baz');
+   * const params = new URLSearchParams("foo=bar&#x26;foo=baz");
    * for (const name of params.keys()) {
    *   console.log(name);
    * }
@@ -222,20 +222,20 @@ export class URLSearchParams {
   }
 
   /**
-   * Sets the value in the `URLSearchParams` object associated with `name` to`value`. If there are any pre-existing name-value pairs whose names are `name`,
-   * set the first such pair's value to `value` and remove all others. If not,
-   * append the name-value pair to the query string.
+   * Sets the value in the `URLSearchParams` object associated with `name` to`value`. If there are
+   * any pre-existing name-value pairs whose names are `name`, set the first such pair's value to
+   * `value` and remove all others. If not, append the name-value pair to the query string.
    *
    * ```js
    * const params = new URLSearchParams();
-   * params.append('foo', 'bar');
-   * params.append('foo', 'baz');
-   * params.append('abc', 'def');
+   * params.append("foo", "bar");
+   * params.append("foo", "baz");
+   * params.append("abc", "def");
    * console.log(params.toString());
    * // Prints foo=bar&#x26;foo=baz&#x26;abc=def
    *
-   * params.set('foo', 'def');
-   * params.set('xyz', 'opq');
+   * params.set("foo", "def");
+   * params.set("xyz", "opq");
    * console.log(params.toString());
    * // Prints foo=def&#x26;abc=def&#x26;xyz=opq
    * ```
@@ -248,14 +248,14 @@ export class URLSearchParams {
   }
 
   /**
-   * Sort all existing name-value pairs in-place by their names. Sorting is done
-   * with a [stable sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm#Stability), so relative order between name-value pairs
-   * with the same name is preserved.
+   * Sort all existing name-value pairs in-place by their names. Sorting is done with a [stable
+   * sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm#Stability), so relative
+   * order between name-value pairs with the same name is preserved.
    *
    * This method can be used, in particular, to increase cache hits.
    *
    * ```js
-   * const params = new URLSearchParams('query[]=abc&#x26;type=search&#x26;query[]=123');
+   * const params = new URLSearchParams("query[]=abc&#x26;type=search&#x26;query[]=123");
    * params.sort();
    * console.log(params.toString());
    * // Prints query%5B%5D=abc&#x26;query%5B%5D=123&#x26;type=search
@@ -266,8 +266,8 @@ export class URLSearchParams {
   }
 
   /**
-   * Returns the search parameters serialized as a string, with characters
-   * percent-encoded where necessary.
+   * Returns the search parameters serialized as a string, with characters percent-encoded where
+   * necessary.
    *
    * @returns The serialized query string
    */

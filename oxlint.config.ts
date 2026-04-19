@@ -2,11 +2,7 @@ import { defineHopeConfig } from "oxc-config-hope/oxlint";
 
 export default defineHopeConfig(
   {
-    vitest: {
-      bench: true,
-    },
-
-    ignorePatterns: ["demo/**/*.js"],
+    ignore: ["demo/**/*.js"],
     rules: {
       "new-cap": ["warn", { capIsNewExceptions: ["App", "Component", "Emitter", "Page"] }],
       "no-console": "off",

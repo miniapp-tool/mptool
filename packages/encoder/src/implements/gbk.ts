@@ -1,4 +1,3 @@
-import { decoderError, encoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import { encodingIndex } from "../indexes.js";
 import type { Stream } from "../stream.js";
@@ -7,12 +6,13 @@ import { decoders } from "../textDecoder.js";
 import type { Encoder } from "../textEncoder.js";
 import { encoders } from "../textEncoder.js";
 import { inRange, isASCIIByte } from "../utils.js";
+import { decoderError, encoderError } from "./utils.js";
 
 /**
  * @param pointer The |pointer| to search for.
  * @param index The |index| to search within.
- * @returns The code point corresponding to |pointer| in |index|,
- *     or null if |code point| is not in |index|.
+ * @returns The code point corresponding to |pointer| in |index|, or null if |code point| is not in
+ *   |index|.
  */
 const indexCodePointFor = (pointer: number, index: number[] | undefined): number | null => {
   if (!index) return null;
@@ -23,8 +23,8 @@ const indexCodePointFor = (pointer: number, index: number[] | undefined): number
 /**
  * @param codePoint The |code point| to search for.
  * @param index The |index| to search within.
- * @returns The first pointer corresponding to |code point| in
- *     |index|, or null if |code point| is not in |index|.
+ * @returns The first pointer corresponding to |code point| in |index|, or null if |code point| is
+ *   not in |index|.
  */
 const indexPointerFor = (codePoint: number, index: number[]): number | null => {
   const pointer = index.indexOf(codePoint);
@@ -34,8 +34,8 @@ const indexPointerFor = (codePoint: number, index: number[]): number | null => {
 
 /**
  * @param pointer The |pointer| to search for in the gb18030 index.
- * @returns The code point corresponding to |pointer| in |index|,
- *     or null if |code point| is not in the gb18030 index.
+ * @returns The code point corresponding to |pointer| in |index|, or null if |code point| is not in
+ *   the gb18030 index.
  */
 const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
   // 1. If pointer is greater than 39419 and less than 189000, or
@@ -68,7 +68,7 @@ const indexGB18030RangesCodePointFor = (pointer: number): number | null => {
 /**
  * @param codePoint The |code point| to locate in the gb18030 index.
  * @returns The first pointer corresponding to |code point| in the
- *     gb18030 index.
+ * gb18030 index.
  */
 const indexGB18030RangesPointerFor = (codePoint: number): number => {
   // 1. If code point is U+E7C7, return pointer 7457.
@@ -109,9 +109,8 @@ class GB18030Decoder implements Decoder {
   /**
    * @param {Stream} stream The stream of bytes being decoded.
    * @param {number} bite The next byte read from the stream.
-   * @returns {?(number|!Array.<number>)} The next code point(s)
-   *     decoded, or null if not enough data exists in the input
-   *     stream to decode a complete code point.
+   * @returns {(number | !number[]) | null} The next code point(s) decoded, or null if not enough
+   *   data exists in the input stream to decode a complete code point.
    */
   handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and gb18030 first, gb18030

@@ -1,9 +1,7 @@
 import type { CookieType } from "./typings.js";
 import { getCookieScopeDomain } from "./utils.js";
 
-/**
- * Cookie 类
- */
+/** Cookie 类 */
 export class Cookie {
   name: string;
   value: string;
@@ -29,18 +27,14 @@ export class Cookie {
         : "session";
   }
 
-  /**
-   * @returns 是否已过期
-   */
+  /** @returns 是否已过期 */
   isExpired(): boolean {
     return (
       this.expires === "outdate" || (this.expires instanceof Date && new Date() > this.expires)
     );
   }
 
-  /**
-   * @returns 是否可持久化
-   */
+  /** @returns 是否可持久化 */
   isPersistence(): boolean {
     return this.expires !== "session";
   }

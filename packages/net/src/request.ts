@@ -20,9 +20,7 @@ export interface RequestOptions<
     any
   >,
 > extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
-  /**
-   * 请求方法
-   */
+  /** 请求方法 */
   method?:
     | "options"
     | "OPTIONS"
@@ -42,24 +40,16 @@ export interface RequestOptions<
     | "CONNECT"
     | undefined;
 
-  /**
-   * 请求头
-   */
+  /** 请求头 */
   headers?: Record<string, string>;
 
-  /**
-   * 请求主体
-   */
+  /** 请求主体 */
   body?: RequestBody;
 
-  /**
-   * Cookie 作用域
-   */
+  /** Cookie 作用域 */
   cookieScope?: string;
 
-  /**
-   * Cookie Store
-   */
+  /** Cookie Store */
   cookieStore?: CookieStore;
 }
 
@@ -192,19 +182,13 @@ export interface RequestInitOptions extends Pick<
   | "forceCellularNetwork"
   | "timeout"
 > {
-  /**
-   * 访问的默认域名
-   */
+  /** 访问的默认域名 */
   server?: string;
 
-  /**
-   * Cookie 存储
-   */
+  /** Cookie 存储 */
   cookieStore?: CookieStore | string;
 
-  /**
-   * 请求选项处理器
-   */
+  /** 请求选项处理器 */
   requestHandler?: <
     T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
       string,
@@ -260,18 +244,14 @@ export interface RequestInitOptions extends Pick<
 }
 
 export interface RequestFactory {
-  /**
-   * Cookie 存储
-   */
+  /** Cookie 存储 */
   cookieStore: CookieStore;
-  /**
-   * 请求方法
-   */
+  /** 请求方法 */
   request: RequestType;
 }
 
 /**
- * @param options request 配置选项
+ * @param options Request 配置选项
  * @returns 请求工厂，包含一个请求方法和一个 Cookie 存储
  */
 export const createRequest = ({

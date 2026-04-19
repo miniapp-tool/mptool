@@ -2,15 +2,13 @@ import type { TrivialComponentOptions } from "../component/index.js";
 import type { TrivialPageOptions } from "../page/index.js";
 
 export interface AppConfigCommonOptions {
-  /**
-   * 主页页面名称或路径
-   */
+  /** 主页页面名称或路径 */
   home?: string;
 
   /**
    * 跳转延迟执行的最长时间，单位 ms
    *
-   * @description 异步 onNavigate 方法用时过久会直接调转
+   * 异步 onNavigate 方法用时过久会直接调转
    *
    * @default 200
    */
@@ -77,16 +75,15 @@ export interface RoutePathConfig {
    *
    * ```js
    * {
-   *   main: '/pages/main/main',
-   *   cart: '/pages/cart/cart',
-   *   user: '/pages/user/user',
+   *   main: "/pages/main/main",
+   *   cart: "/pages/cart/cart",
+   *   user: "/pages/user/user"
    * }
    * ```
    *
    * 也支持以在页面复杂的情况下数组格式表示小程序路径映射，数组的元素有两种填写方式:
    *
    * - `[页面简称, 小程序路经]`
-   *
    * - `[页面简称数组, 小程序路经模式]`
    *
    *   小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
@@ -95,27 +92,27 @@ export interface RoutePathConfig {
    *
    * ```js
    * [
-   *   [['main', 'cart', 'user'], '/pages/$name/$name'],
-   *   [['search', 'details', 'order'], '/shop/$name/$name'],
-   *   ['about', '/others/about/about'],
-   * ]
+   *   [["main", "cart", "user"], "/pages/$name/$name"],
+   *   [["search", "details", "order"], "/shop/$name/$name"],
+   *   ["about", "/others/about/about"],
+   * ];
    * ```
    *
    * 等效于:
    *
    * ```js
    * {
-   *   'main': '/pages/main/main',
-   *   'cart': '/pages/cart/cart',
-   *   'user': '/pages/user/user',
-   *   'search': '/shop/search/search',
-   *   'details': '/shop/details/details',
-   *   'order': '/shop/order/order',
-   *   'about': '/others/about/about',
+   *   main: "/pages/main/main",
+   *   cart: "/pages/cart/cart",
+   *   user: "/pages/user/user",
+   *   search: "/shop/search/search",
+   *   details: "/shop/details/details",
+   *   order: "/shop/order/order",
+   *   about: "/others/about/about"
    * }
    * ```
    *
-   * @description 无法解析的路径会回退到 `defaultPage`
+   * 无法解析的路径会回退到 `defaultPage`
    */
   pages?: Record<string, string> | [string | string[], string][];
 }

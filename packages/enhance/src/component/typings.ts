@@ -16,7 +16,7 @@ export interface PropOption<Type = any, Default = Type> {
   /**
    * 是否必填
    *
-   * @description 仅用作类型推导，无检查
+   * 仅用作类型推导，无检查
    */
   required?: boolean;
   /** 属性初始值 */
@@ -127,26 +127,22 @@ export interface ComponentLifetimes {
 }
 
 export interface ExtendedComponentProperty {
-  /**
-   * 当前组件的唯一标识
-   */
+  /** 当前组件的唯一标识 */
   $id: number;
 
-  /**
-   * 当前组件上用于索引的 ref ID 值
-   */
+  /** 当前组件上用于索引的 ref ID 值 */
   $refID: string;
   /**
    * 当前组件所属的页面组件实例
    *
-   * @description 只在 `attached`, `ready` 生命周期后生效
+   * 只在 `attached`, `ready` 生命周期后生效
    */
   $root: TrivialPageInstance;
 
   /**
    * 当前组件所属的父组件实例引用
    *
-   * @description 只在 `attached`, `ready` 生命周期后生效
+   * 只在 `attached`, `ready` 生命周期后生效
    */
   $parent: TrivialPageInstance | TrivialComponentInstance;
 
@@ -156,16 +152,16 @@ export interface ExtendedComponentProperty {
    * 示例:
    *
    * ```html
-   * <custom-component binding="$" ref="customComp"/>
+   * <custom-component binding="$" ref="customComp" />
    * ```
    *
    * ```js
    * $Component({
-   *   lifetimes:{
+   *   lifetimes: {
    *     attached() {
-   *       this.$refs.customComp // 根据ref属性获取子组件的实例引用
-   *     }
-   *   }
+   *       this.$refs.customComp; // 根据ref属性获取子组件的实例引用
+   *     },
+   *   },
    * });
    * ```
    */

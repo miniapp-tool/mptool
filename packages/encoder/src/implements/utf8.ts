@@ -1,5 +1,3 @@
-// oxlint-disable no-bitwise
-import { decoderError } from "./utils.js";
 import { END_OF_STREAM, FINISHED } from "../constant.js";
 import type { Stream } from "../stream.js";
 import type { Decoder } from "../textDecoder.js";
@@ -7,6 +5,8 @@ import { decoders } from "../textDecoder.js";
 import type { Encoder } from "../textEncoder.js";
 import { encoders } from "../textEncoder.js";
 import { inRange, isASCIIByte } from "../utils.js";
+// oxlint-disable no-bitwise
+import { decoderError } from "./utils.js";
 
 class UTF8Decoder implements Decoder {
   // utf-8's decoder's has an associated utf-8 code point, utf-8
@@ -27,9 +27,8 @@ class UTF8Decoder implements Decoder {
   /**
    * @param stream The stream of bytes being decoded.
    * @param bite The next byte read from the stream.
-   * @returns The next code point(s)
-   *     decoded, or null if not enough data exists in the input
-   *     stream to decode a complete code point.
+   * @returns The next code point(s) decoded, or null if not enough data exists in the input stream
+   *   to decode a complete code point.
    */
   handler(stream: Stream, bite: number): number | number[] | null {
     // 1. If byte is end-of-stream and utf-8 bytes needed is not 0,

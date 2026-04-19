@@ -1,14 +1,13 @@
 import { MpError, logger } from "@mptool/shared";
 
-import { reportNetworkStatus } from "./report.js";
 import { showToast } from "../ui/index.js";
+import { reportNetworkStatus } from "./report.js";
 
 /**
  * 下载文件
  *
  * @param url 下载路径
  * @param mask 遮罩层
- *
  * @returns 下载完成回调，返回临时文件路径
  */
 export const download = (url: string, mask = false): Promise<string> =>

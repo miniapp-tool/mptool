@@ -11,8 +11,6 @@ export interface ParserOptions {
    */
   appendClass?: boolean;
 
-  /**
-   * 处理 Tag
-   */
+  /** 处理 Tag */
   transform?: Partial<Record<AllowTag, NodeHandler>>;
 }

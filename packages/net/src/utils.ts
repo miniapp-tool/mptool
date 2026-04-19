@@ -1,7 +1,7 @@
 /**
- * @see RFC 6265
  * @param domain - Domain to normalize
  * @returns Normalized domain
+ * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
   domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");

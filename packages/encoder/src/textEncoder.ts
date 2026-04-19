@@ -18,6 +18,7 @@ export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> 
 
 /**
  * A TextEncoder object has an associated encoding and encoder.
+ *
  * @param label The label of the encoding. NONSTANDARD.
  * @param options NONSTANDARD.
  */

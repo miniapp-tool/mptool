@@ -4,18 +4,14 @@
  *
  * @param original 原函数
  * @param pre 预执行函数
+ * @returns 包装函数 E.g.:
  *
- * @returns 包装函数
- *
- * E.g.:
- *
- * ```ts
- * const a = () => console.log('a');
- * const b = () => console.log('b');
- * const c = wrapFunction(a, b);
- *
- * c(); // expect to output 'a', and then output 'b'
- * ```
+ *   ```ts
+ *   const a = () => console.log("a");
+ *   const b = () => console.log("b");
+ *   const c = wrapFunction(a, b);
+ *   c(); // expect to output 'a', and then output 'b'
+ *   ```
  */
 export function wrapFunction<ThisType>(
   original: ((this: ThisType, ...args: any[]) => void) | undefined,
@@ -41,27 +37,24 @@ export function wrapFunction<ThisType, ReturnType extends void | Promise<void>>(
  *
  * @param fn 需要锁定的函数, 形式为 `(release: () => void, ...args: A) => R`
  * @param ctx 可选的上下文环境
- *
  * @returns 封装函数，形式为 `(...args: A) => R`
  *
- * ```ts
- * let count = 0;
- * const func = (release: () => void) => {
- *   count += 1;
+ *   ```ts
+ *   let count = 0;
+ *   const func = (release: () => void) => {
+ *     count += 1;
+ *     setTimeout(() => {
+ *       release();
+ *     }, 10);
+ *   };
+ *   const fn = tool.lock(func);
+ *   fn(); // count is 1
+ *   fn(); // count is still 1 because it's not released
  *   setTimeout(() => {
- *     release();
- *   }, 10)
- * };
- *
- * const fn = tool.lock(func);
- *
- * fn(); // count is 1
- * fn(); // count is still 1 because it's not released
- * setTimeout(() => {
- *   fn(); // count is 2 because it's released
- *   fn(); // count is still 2 because it's locked again
- * }, 15);
- * ```
+ *     fn(); // count is 2 because it's released
+ *     fn(); // count is still 2 because it's locked again
+ *   }, 15);
+ *   ```
  */
 export const lock = <ThisType, Args extends unknown[], ReturnType>(
   fn: (this: ThisType, release: () => void, ...args: Args) => ReturnType,
@@ -89,17 +82,14 @@ export const lock = <ThisType, Args extends unknown[], ReturnType>(
  *
  * @param func 调用的函数
  * @param ctx 可选的上下文环境
+ * @returns 包装过的函数 E.g.:
  *
- * @returns 包装过的函数
- *
- * E.g.:
- *
- * ```ts
- * let count = 0;
- * const counter = once(() => count++ );
- * counter(); // count is 1
- * counter(); // count is still 1
- * ```
+ *   ```ts
+ *   let count = 0;
+ *   const counter = once(() => count++);
+ *   counter(); // count is 1
+ *   counter(); // count is still 1
+ *   ```
  */
 export const once = <ThisType, Args extends unknown[], ReturnType>(
   func: (...args: Args) => ReturnType,
@@ -125,9 +115,7 @@ export interface Task<ArgType extends unknown[] = unknown[], This = unknown> {
   args: ArgType;
 }
 
-/**
- * 一个队列，在上一个函数执行完毕后执行 `next()`  才会开始执行下一个函数。
- */
+/** 一个队列，在上一个函数执行完毕后执行 `next()` 才会开始执行下一个函数。 */
 export class Queue {
   constructor(
     /** 允许同时并行的任务数 */
@@ -166,6 +154,7 @@ export class Queue {
 
   /**
    * 添加函数
+   *
    * @param func 函数
    * @param ctx 函数运行上下文
    * @param args 函数参数
@@ -194,13 +183,12 @@ export class Queue {
 }
 
 /**
- * 在调用函数的时候启用队列，在上一个函数执行完毕后执行 `next()`  才会开始执行下一个函数。
+ * 在调用函数的时候启用队列，在上一个函数执行完毕后执行 `next()` 才会开始执行下一个函数。
  *
+ * @async
  * @param fn 处理的函数
  * @param capacity 允许同时并行的任务数
- *
  * @returns 包装过的函数
- * @async
  */
 export const funcQueue = <Args extends unknown[], T = unknown>(
   fn: (next: () => void, ...args: Args) => void,
@@ -217,16 +205,15 @@ export interface PromiseQueue<StopMessage = void> {
   /**
    * 运行队列中的函数，直到所有函数执行完毕或调用 `stop` 方法停止队列。
    *
-   * @returns 一个 Promise，解析为一个对象，表示队列是否被中断以及中断时的消息（如果有的话）。
-   * - 如果队列正常执行完毕，Promise 解析为 `{ interrupted: false }`。
-   * - 如果队列被 `stop` 方法中断，Promise 解析为 `{ interrupted: true; msg: T }`，其中 `msg` 是通过 `stop` 方法传递的消息。
    * @async
+   * @returns 一个 Promise，解析为一个对象，表示队列是否被中断以及中断时的消息（如果有的话）。
+   *
+   *   - 如果队列正常执行完毕，Promise 解析为 `{ interrupted: false }`。
+   *   - 如果队列被 `stop` 方法中断，Promise 解析为 `{ interrupted: true; msg: T }`，其中 `msg` 是通过 `stop` 方法传递的消息。
    */
   run: () => Promise<{ interrupted: false } | { interrupted: true; msg: StopMessage }>;
 
-  /**
-   * 停止队列，正在执行的函数会继续执行完毕，但尚未执行的函数将不再执行。
-   */
+  /** 停止队列，正在执行的函数会继续执行完毕，但尚未执行的函数将不再执行。 */
   stop: (msg: StopMessage) => void;
 }
 
@@ -235,7 +222,6 @@ export interface PromiseQueue<StopMessage = void> {
  *
  * @param actionList 任务列表，形式为 `(() => Promise<void>)[]`
  * @param capacity 允许同时并行的任务数
- *
  * @returns 拥有 `run` 和 `stop` 方法的对象
  */
 export const createQueue = <StopMessage>(

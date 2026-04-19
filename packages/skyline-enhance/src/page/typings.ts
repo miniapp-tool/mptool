@@ -36,14 +36,14 @@ export interface ExtendedPageProperties {
    * 示例:
    *
    * ```html
-   * <custom-component binding="$" ref="customComp"/>
+   * <custom-component binding="$" ref="customComp" />
    * ```
    *
    * ```js
    * $Page({
    *   onLoad() {
-   *     this.$refs.customComp // 根据ref属性获取子组件的实例引用
-   *   }
+   *     this.$refs.customComp; // 根据ref属性获取子组件的实例引用
+   *   },
    * });
    * ```
    */
@@ -55,14 +55,10 @@ export interface ExtendedPageMethods<
   Custom extends WechatMiniprogram.IAnyObject,
 >
   extends InstanceEmitterMethods, NavigatorMethods {
-  /**
-   * 绑定组件函数
-   */
+  /** 绑定组件函数 */
   // oxlint-disable-next-line id-length
   $: typeof bind;
-  /**
-   * 获取当前页面实例。
-   */
+  /** 获取当前页面实例。 */
   $currentPage(): PageInstance<Data, Custom>;
 
   /**

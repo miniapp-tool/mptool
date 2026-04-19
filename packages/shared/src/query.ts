@@ -3,7 +3,6 @@
  *
  * @param queryString 需要解析的字符串
  * @param splitter 分隔符
- *
  * @returns 参数对象
  */
 export const parse = (queryString = "", splitter = "&"): Record<string, string> => {
@@ -23,12 +22,11 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
 };
 
 /**
- * query 对象转换字符串
+ * Query 对象转换字符串
  *
- * @param params query 对象
+ * @param params Query 对象
  * @param splitter 分隔符
  * @param unencoded 是否已经解码
- *
  * @returns 解析的字符串
  */
 export const stringify = (
@@ -48,9 +46,8 @@ export const stringify = (
  * URL 添加 query
  *
  * @param path 前部分路径
- * @param queries query对象
+ * @param queries Query对象
  * @param unencoded 是否已经解码，默认为否
- *
  * @returns 处理过的 url
  */
 export const join = (path: string, queries: Record<string, string>, unencoded = false): string => {

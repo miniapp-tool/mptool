@@ -8,9 +8,8 @@ export interface Decoder {
   /**
    * @param stream The stream of bytes being decoded.
    * @param bite The next byte read from the stream.
-   * @returns The next code point(s)
-   *     decoded, or null if not enough data exists in the input
-   *     stream to decode a complete code point, or |finished|.
+   * @returns The next code point(s) decoded, or null if not enough data exists in the input stream
+   *   to decode a complete code point, or |finished|.
    */
   handler: (stream: Stream, bite: number) => number | number[] | null;
 }
@@ -18,12 +17,11 @@ export interface Decoder {
 export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> = {};
 
 /**
- * A TextDecoder object has an associated encoding, decoder,
- * stream, ignore BOM flag (initially unset), BOM seen flag
- * (initially unset), error mode (initially replacement), and do
- * not flush flag (initially unset).
- * @param label The label of the encoding;
- *     defaults to 'utf-8'.
+ * A TextDecoder object has an associated encoding, decoder, stream, ignore BOM flag (initially
+ * unset), BOM seen flag (initially unset), error mode (initially replacement), and do not flush
+ * flag (initially unset).
+ *
+ * @param label The label of the encoding; defaults to 'utf-8'.
  * @param options Decoder options
  */
 export class TextDecoder {

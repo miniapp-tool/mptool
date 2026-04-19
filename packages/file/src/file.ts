@@ -59,7 +59,7 @@ export const isDir = (path: string): boolean =>
 /**
  * 删除文件或文件夹
  *
- * @description 传入 `type` 可以略微提升删除性能
+ * 传入 `type` 可以略微提升删除性能
  *
  * @param path 要删除的文件或文件夹路径
  * @param type 要删除的类型

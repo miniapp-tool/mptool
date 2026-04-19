@@ -37,18 +37,16 @@ export interface ExtendedPageLifeCycles {
    *
    * 可在其他页面中使用 `this.$preload(pageNameWithArgs|pageUrl)` 触发特定页面的预加载周期
    *
-   * @param options url 参数对象
+   * @param options Url 参数对象
    */
   onPreload(options: PageQuery): void | Promise<void>;
 
   /**
    * 页面即将被导航时触发
    *
-   * 需要在调用页面中使用框架提供的跳转方式 `this.$go(pageNameWithArgs|pageUrl)`
-   * 才能正确触发 `onNavigate`
+   * 需要在调用页面中使用框架提供的跳转方式 `this.$go(pageNameWithArgs|pageUrl)` 才能正确触发 `onNavigate`
    *
-   * 另外需要特别注意第一次进入一个分包界面
-   * 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
+   * 另外需要特别注意第一次进入一个分包界面 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
    */
   onNavigate(options: PageQuery): void | Promise<void>;
 }
@@ -65,14 +63,14 @@ export interface ExtendedPageProperties {
    * 示例:
    *
    * ```html
-   * <custom-component binding="$" ref="customComp"/>
+   * <custom-component binding="$" ref="customComp" />
    * ```
    *
    * ```js
    * $Page({
    *   onLoad() {
-   *     this.$refs.customComp // 根据ref属性获取子组件的实例引用
-   *   }
+   *     this.$refs.customComp; // 根据ref属性获取子组件的实例引用
+   *   },
    * });
    * ```
    */
@@ -84,14 +82,10 @@ export interface ExtendedPageMethods<
   Custom extends WechatMiniprogram.IAnyObject,
 >
   extends InstanceEmitterMethods, NavigatorMethods {
-  /**
-   * 绑定组件函数
-   */
+  /** 绑定组件函数 */
   // oxlint-disable-next-line id-length
   $: typeof bind;
-  /**
-   * 获取当前页面实例。
-   */
+  /** 获取当前页面实例。 */
   $currentPage(): PageInstance<Data, Custom>;
 
   /**

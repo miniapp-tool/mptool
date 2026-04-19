@@ -111,7 +111,8 @@ export class Headers {
   }
 
   /**
-   * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it
+   * does not already exist.
    *
    * @param name - The name of the header
    * @param value - The value to append
@@ -157,9 +158,7 @@ export class Headers {
   }
 
   /**
-   * Returns an array containing the values
-   * of all Set-Cookie headers associated
-   * with a response
+   * Returns an array containing the values of all Set-Cookie headers associated with a response
    *
    * @returns An array of Set-Cookie header values
    */
@@ -188,7 +187,8 @@ export class Headers {
   }
 
   /**
-   * Sets a new value for an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   * Sets a new value for an existing header inside a `Headers` object, or adds the header if it
+   * does not already exist.
    *
    * @param name - The name of the header
    * @param value - The value to set
@@ -204,8 +204,7 @@ export class Headers {
   }
 
   /**
-   * Traverses the `Headers` object,
-   * calling the given callback for each header.
+   * Traverses the `Headers` object, calling the given callback for each header.
    *
    * @param callback - The callback function to call for each header
    * @param thisArg - The `this` value to use when calling the callback

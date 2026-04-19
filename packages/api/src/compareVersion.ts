@@ -1,8 +1,8 @@
 /**
  * 比较版本号
+ *
  * @param versionA 版本号A
  * @param versionB 版本号B
- *
  * @returns 1: versionA > versionB, 0: versionA = versionB, -1: versionA < versionB
  */
 export const compareVersion = (versionA: string, versionB: string): number => {

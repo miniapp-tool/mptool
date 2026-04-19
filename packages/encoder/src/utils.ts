@@ -17,7 +17,7 @@ export const isASCIIByte = (a: number): boolean => a >= 0x00 && a <= 0x7f;
 
 /**
  * @param content Input string of UTF-16 code units.
- * @returns code points.
+ * @returns Code points.
  */
 export const stringToCodePoints = (content: string): number[] => {
   // https://heycam.github.io/webidl/#dfn-obtain-unicode
@@ -98,7 +98,7 @@ export const stringToCodePoints = (content: string): number[] => {
 
 /**
  * @param codePoints Array of code points.
- * @returns string String of UTF-16 code units.
+ * @returns String String of UTF-16 code units.
  */
 export const codePointsToString = (codePoints: number[]): string => {
   let result = "";

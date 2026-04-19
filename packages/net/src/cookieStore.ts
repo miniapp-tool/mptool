@@ -19,9 +19,7 @@ export interface SetCookieOptions {
   httpOnly?: boolean;
 }
 
-/**
- * CookieStore 类
- */
+/** CookieStore 类 */
 export class CookieStore {
   private readonly store: CookieStoreType = new Map();
 
@@ -37,7 +35,7 @@ export class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @returns cookie 对象
+   * @returns Cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
     const { domain, path } = getUrlInfo(options);
@@ -79,7 +77,7 @@ export class CookieStore {
   /**
    * 设置 cookie
    *
-   * @param cookieOptions cookie 选项
+   * @param cookieOptions Cookie 选项
    * @returns 设置的 cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
@@ -99,7 +97,7 @@ export class CookieStore {
   /**
    * 删除 cookie
    *
-   * @param name cookie 名称
+   * @param name Cookie 名称
    * @param domain 域名
    */
   delete(name: string, domain = ""): void {
@@ -278,7 +276,7 @@ export class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @returns request cookie header
+   * @returns Request cookie header
    */
   getHeader(options: CookieOptions): string {
     // 转化为 request cookies 字符串
@@ -287,9 +285,7 @@ export class CookieStore {
       .join("; ");
   }
 
-  /**
-   * 从 Storage 读取 cookies
-   */
+  /** 从 Storage 读取 cookies */
   #init(): void {
     try {
       // 从本地存储读取 cookie 数据数组
@@ -308,9 +304,7 @@ export class CookieStore {
     }
   }
 
-  /**
-   * 将 cookies 保存到 Storage
-   */
+  /** 将 cookies 保存到 Storage */
   #save(): void {
     try {
       const saveCookies = [];

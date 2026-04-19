@@ -1,6 +1,5 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
 import { appState } from "../app/index.js";
 import { mount } from "../bridge.js";
 import { getConfig } from "../config/index.js";
@@ -13,6 +12,7 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
+import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
 

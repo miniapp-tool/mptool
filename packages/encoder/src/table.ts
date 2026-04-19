@@ -8,9 +8,7 @@ export interface EncodingConfig {
   encodings: Encoding[];
 }
 
-/**
- * Encodings table: https://encoding.spec.whatwg.org/encodings.json
- */
+/** Encodings table: https://encoding.spec.whatwg.org/encodings.json */
 export const encodingTable: EncodingConfig[] = [
   {
     encodings: [
