@@ -1,7 +1,10 @@
+import path from "node:path";
+
 import type { UserConfig, CopyEntry } from "tsdown";
 import { defineConfig } from "tsdown";
 
 const isProduction = process.env.NODE_ENV === "production";
+const __dirname = import.meta.dirname;
 
 /**
  * Tsdown options
@@ -72,12 +75,14 @@ export interface TsdownOptions extends Omit<UserConfig, "entry" | "copy"> {
 export const tsdownConfig = (
   fileInfo: string | string[],
   {
-    platform = "neutral",
+    platform = "browser",
     dts = true,
     alwaysBundle = [],
     neverBundle = [],
     onlyBundle = false,
-    treeshake = {},
+    treeshake = {
+      moduleSideEffects: false,
+    },
     copy = [],
     publint = isProduction,
     ...rest
@@ -87,23 +92,24 @@ export const tsdownConfig = (
 
   return defineConfig({
     entry: files.map((item) => `./src/${item}.ts`),
-    format: ["cjs", "esm"],
-    inputOptions: {
-      resolve: {
-        mainFields: ["module", "main"],
-      },
-    },
-    outDir: "./dist",
+    format: "esm",
     sourcemap: true,
     dts,
     minify: isProduction,
-    target: "es2015",
+    target: "es2017",
     platform,
     treeshake,
     deps: {
       alwaysBundle,
       neverBundle,
       onlyBundle,
+    },
+    inputOptions: {
+      transform: {
+        inject: {
+          Buffer: [path.resolve(__dirname, "./buffer.ts"), "Buffer"],
+        },
+      },
     },
     copy: copy.map((item) => {
       if (typeof item === "string") {
