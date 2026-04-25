@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
-    "miniprogram-api-typings": "5.1.2"
+    "miniprogram-api-typings": "5.1.3"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
