@@ -45,7 +45,7 @@
     "@mptool/file": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
-    "miniprogram-api-typings": "5.1.2"
+    "miniprogram-api-typings": "5.1.3"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
