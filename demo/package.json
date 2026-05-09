@@ -10,7 +10,7 @@
     "@mptool/all": "workspace:*"
   },
   "devDependencies": {
-    "miniprogram-api-typings": "5.1.3",
+    "miniprogram-api-typings": "5.2.0",
     "typescript": "6.0.3"
   }
 }
