@@ -44,7 +44,7 @@
     "miniprogram-api-typings": "5.2.0",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.0",
-    "oxfmt": "0.47.0",
+    "oxfmt": "0.48.0",
     "oxlint": "1.60.0",
     "oxlint-tsgolint": "0.21.1",
     "publint": "0.3.20",
