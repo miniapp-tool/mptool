@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 
 import { handleProperties } from "../src/component/index.js";
 
-describe("Should handel properties", () => {
-  it("Should handle empty properties", () => {
-    expect(handleProperties()).toEqual({ ref: { type: String, value: "" } });
+describe("should handle properties", () => {
+  it("should handle empty properties", () => {
+    expect(handleProperties()).toStrictEqual({ ref: { type: String, value: "" } });
   });
 
-  it("Should keep contructor and 'null' as is", () => {
+  it("should keep constructor and 'null' as is", () => {
     expect(
       handleProperties({
         a: null,
@@ -18,7 +18,7 @@ describe("Should handel properties", () => {
         e: Object,
         f: Array,
       }),
-    ).toEqual({
+    ).toStrictEqual({
       a: null,
       b: String,
       c: Number,
@@ -29,7 +29,7 @@ describe("Should handel properties", () => {
     });
   });
 
-  it("Should keep simple type as is", () => {
+  it("should keep simple type as is", () => {
     expect(
       handleProperties({
         a: { type: null },
@@ -39,18 +39,18 @@ describe("Should handel properties", () => {
         e: { type: Object },
         f: { type: Array },
       }),
-    ).toEqual({
-      a: { type: null },
-      b: { type: String },
-      c: { type: Number },
-      d: { type: Boolean },
-      e: { type: Object },
-      f: { type: Array },
+    ).toStrictEqual({
+      a: { type: null, value: undefined },
+      b: { type: String, value: undefined },
+      c: { type: Number, value: undefined },
+      d: { type: Boolean, value: undefined },
+      e: { type: Object, value: undefined },
+      f: { type: Array, value: undefined },
       ref: { type: String, value: "" },
     });
   });
 
-  it("Should rename 'default' as 'value'", () => {
+  it("should rename 'default' as 'value'", () => {
     expect(
       handleProperties({
         a: { type: null, default: "" },
@@ -60,7 +60,7 @@ describe("Should handel properties", () => {
         e: { type: Object, default: { a: 1 } },
         f: { type: Array, default: ["a", "b"] },
       }),
-    ).toEqual({
+    ).toStrictEqual({
       a: { type: null, value: "" },
       b: { type: String, value: "" },
       c: { type: Number, value: 1 },
@@ -71,13 +71,13 @@ describe("Should handel properties", () => {
     });
   });
 
-  it("Should handle mutiple types", () => {
+  it("should handle multiple types", () => {
     expect(
       handleProperties({
         a: { type: [String, Number, Boolean], default: "" },
         b: { type: [Number, Array], default: 1 },
       }),
-    ).toEqual({
+    ).toStrictEqual({
       a: { type: String, value: "", optionalTypes: [Number, Boolean] },
       b: { type: Number, value: 1, optionalTypes: [Array] },
       ref: { type: String, value: "" },

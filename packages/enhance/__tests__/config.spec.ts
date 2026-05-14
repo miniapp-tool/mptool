@@ -4,21 +4,21 @@ import { describe, expect, it } from "vitest";
 import { $Config, getConfig } from "../src/config/index.js";
 
 describe("$Config Test", () => {
-  it("Should work when only have 'defaultPage'", () => {
+  it("should work when only have 'defaultPage'", () => {
     $Config({ defaultPage: "/pages/$name" });
 
-    expect(getConfig().getPath("main")).toEqual("/pages/main");
-    expect(getConfig().getPath("user")).toEqual("/pages/user");
+    expect(getConfig().getPath("main")).toBe("/pages/main");
+    expect(getConfig().getPath("user")).toBe("/pages/user");
   });
 
-  it("Should work with mutiple $name", () => {
+  it("should work with multiple $name", () => {
     $Config({ defaultPage: "/pages/$name/$name" });
 
-    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
-    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
+    expect(getConfig().getPath("main")).toBe("/pages/main/main");
+    expect(getConfig().getPath("user")).toBe("/pages/user/user");
   });
 
-  it("Should work with object 'pages'", () => {
+  it("should work with object 'pages'", () => {
     $Config({
       pages: {
         user: "/pages/user/user",
@@ -27,12 +27,12 @@ describe("$Config Test", () => {
       defaultPage: "/pages/$name/$name",
     });
 
-    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
-    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
-    expect(getConfig().getPath("about")).toEqual("/others/about/about");
+    expect(getConfig().getPath("main")).toBe("/pages/main/main");
+    expect(getConfig().getPath("user")).toBe("/pages/user/user");
+    expect(getConfig().getPath("about")).toBe("/others/about/about");
   });
 
-  it("Should work with array 'pages'", () => {
+  it("should work with array 'pages'", () => {
     $Config({
       pages: [
         [["main", "cart", "user"], "/pages/$name/$name"],
@@ -43,13 +43,13 @@ describe("$Config Test", () => {
       defaultPage: "/pages/$name/$name",
     });
 
-    expect(getConfig().getPath("main")).toEqual("/pages/main/main");
-    expect(getConfig().getPath("cart")).toEqual("/pages/cart/cart");
-    expect(getConfig().getPath("user")).toEqual("/pages/user/user");
-    expect(getConfig().getPath("search")).toEqual("/shop/search/search");
-    expect(getConfig().getPath("details")).toEqual("/shop/details/details");
-    expect(getConfig().getPath("order")).toEqual("/shop/order/order");
-    expect(getConfig().getPath("about")).toEqual("/others/about/about");
-    expect(getConfig().getPath("info")).toEqual("/others/info/info");
+    expect(getConfig().getPath("main")).toBe("/pages/main/main");
+    expect(getConfig().getPath("cart")).toBe("/pages/cart/cart");
+    expect(getConfig().getPath("user")).toBe("/pages/user/user");
+    expect(getConfig().getPath("search")).toBe("/shop/search/search");
+    expect(getConfig().getPath("details")).toBe("/shop/details/details");
+    expect(getConfig().getPath("order")).toBe("/shop/order/order");
+    expect(getConfig().getPath("about")).toBe("/others/about/about");
+    expect(getConfig().getPath("info")).toBe("/others/info/info");
   });
 });

@@ -123,10 +123,10 @@ export class Queue {
   ) {}
 
   /** 回调队列 */
-  public funcQueue: Task[] = [];
+  funcQueue: Task[] = [];
 
   /** 正在运行的数量 */
-  public running = 0;
+  running = 0;
 
   /** 执行下一个函数 */
   next(): void {

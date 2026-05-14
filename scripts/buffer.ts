@@ -7,7 +7,7 @@ const lookup = new Uint8Array(256);
 for (let i = 0; i < chars.length; i++) lookup[chars.charCodeAt(i)] = i;
 
 const base64ToBinaryString = (base64: string): string => {
-  const cleanBase64 = base64.replace(/[\s=]/g, "");
+  const cleanBase64 = base64.replace(/[\s=]/gu, "");
   const len = cleanBase64.length;
   let bin = "";
 

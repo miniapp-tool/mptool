@@ -52,7 +52,7 @@ export class Cookie {
    * @returns 是否匹配
    */
   isPathMatched(path: string): boolean {
-    return path.startsWith(this.path) || this.path.replace(/\/$/, "") === path;
+    return path.startsWith(this.path) || this.path.replace(/\/$/u, "") === path;
   }
 
   toString(): string {

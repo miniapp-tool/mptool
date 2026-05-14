@@ -11,7 +11,7 @@ export class MpError extends Error {
     this.name = "MpError";
   }
 
-  public override toString(): string {
+  override toString(): string {
     return `code: ${this.code}, message: ${this.message}`;
   }
 }

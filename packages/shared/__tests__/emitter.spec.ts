@@ -3,27 +3,7 @@ import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import type { EmitterInstance, EventHandlerMap } from "../src/emitter";
 import { Emitter } from "../src/emitter";
 
-describe("mitt", () => {
-  it("should default export be a function", () => {
-    expectTypeOf(Emitter).toBeFunction();
-  });
-
-  it("should accept an optional event handler map", () => {
-    expect(() => Emitter(new Map())).not.toThrow();
-    const map: EventHandlerMap<{ foo: undefined }> = new Map();
-    const a = vi.fn<() => void>();
-    const b = vi.fn<() => void>();
-
-    map.set("foo", [a, b]);
-    const events = Emitter<{ foo: undefined }>(map);
-
-    events.emit("foo");
-    expect(a).toHaveBeenCalledTimes(1);
-    expect(b).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("mitt#", () => {
+describe(Emitter, () => {
   const eventType = Symbol("eventType");
 
   interface Events {
@@ -39,9 +19,28 @@ describe("mitt#", () => {
   }
   let events: EventHandlerMap<Events>, inst: EmitterInstance<Events>;
 
+  // oxlint-disable-next-line vitest/no-hooks
   beforeEach(() => {
     events = new Map();
     inst = Emitter(events);
+  });
+
+  it("should default export be a function", () => {
+    expectTypeOf(Emitter).toBeFunction();
+  });
+
+  it("should accept an optional event handler map", () => {
+    expect(() => Emitter(new Map())).not.toThrow();
+    const map: EventHandlerMap<{ foo: undefined }> = new Map();
+    const a = vi.fn<() => void>();
+    const b = vi.fn<() => void>();
+
+    map.set("foo", [a, b]);
+    const emitter = Emitter<{ foo: undefined }>(map);
+
+    emitter.emit("foo");
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(b).toHaveBeenCalledTimes(1);
   });
 
   describe("properties", () => {
@@ -62,7 +61,7 @@ describe("mitt#", () => {
 
       inst.on("foo", foo);
 
-      expect(events.get("foo")).toEqual([foo]);
+      expect(events.get("foo")).toStrictEqual([foo]);
     });
 
     it("should register handlers for any type strings", () => {
@@ -70,7 +69,7 @@ describe("mitt#", () => {
 
       inst.on("constructor", foo);
 
-      expect(events.get("constructor")).toEqual([foo]);
+      expect(events.get("constructor")).toStrictEqual([foo]);
     });
 
     it("should append handler for existing type", () => {
@@ -80,7 +79,7 @@ describe("mitt#", () => {
       inst.on("foo", foo);
       inst.on("foo", bar);
 
-      expect(events.get("foo")).toEqual([foo, bar]);
+      expect(events.get("foo")).toStrictEqual([foo, bar]);
     });
 
     it("should NOT normalize case", () => {
@@ -90,18 +89,18 @@ describe("mitt#", () => {
       inst.on("Bar", foo);
       inst.on("baz:baT!", foo);
 
-      expect(events.get("FOO")).toEqual([foo]);
-      expect(events.has("foo")).toEqual(false);
-      expect(events.get("Bar")).toEqual([foo]);
-      expect(events.has("bar")).toEqual(false);
-      expect(events.get("baz:baT!")).toEqual([foo]);
+      expect(events.get("FOO")).toStrictEqual([foo]);
+      expect(events.has("foo")).toBe(false);
+      expect(events.get("Bar")).toStrictEqual([foo]);
+      expect(events.has("bar")).toBe(false);
+      expect(events.get("baz:baT!")).toStrictEqual([foo]);
     });
 
     it("can take symbols for event types", () => {
       const foo = vi.fn<() => void>();
 
       inst.on(eventType, foo);
-      expect(events.get(eventType)).toEqual([foo]);
+      expect(events.get(eventType)).toStrictEqual([foo]);
     });
 
     // Adding the same listener multiple times should register it multiple times.
@@ -111,7 +110,7 @@ describe("mitt#", () => {
 
       inst.on("foo", foo);
       inst.on("foo", foo);
-      expect(events.get("foo")).toEqual([foo, foo]);
+      expect(events.get("foo")).toStrictEqual([foo, foo]);
     });
   });
 
@@ -127,7 +126,7 @@ describe("mitt#", () => {
       inst.on("foo", foo);
       inst.off("foo", foo);
 
-      expect(events.get("foo")).toEqual([]);
+      expect(events.get("foo")).toStrictEqual([]);
     });
 
     it("should NOT normalize case", () => {
@@ -141,10 +140,10 @@ describe("mitt#", () => {
       inst.off("Bar", foo);
       inst.off("baz:baT!", foo);
 
-      expect(events.get("FOO")).toEqual([]);
-      expect(events.has("foo")).toEqual(false);
-      expect(events.get("Bar")).toEqual([]);
-      expect(events.has("bar")).toEqual(false);
+      expect(events.get("FOO")).toStrictEqual([]);
+      expect(events.has("foo")).toBe(false);
+      expect(events.get("Bar")).toStrictEqual([]);
+      expect(events.has("bar")).toBe(false);
       expect(events.get("baz:bat!")).toHaveLength(1);
     });
 
@@ -154,9 +153,9 @@ describe("mitt#", () => {
       inst.on("foo", foo);
       inst.on("foo", foo);
       inst.off("foo", foo);
-      expect(events.get("foo")).toEqual([foo]);
+      expect(events.get("foo")).toStrictEqual([foo]);
       inst.off("foo", foo);
-      expect(events.get("foo")).toEqual([]);
+      expect(events.get("foo")).toStrictEqual([]);
     });
 
     it('off("type") should remove all handlers of the given type', () => {
@@ -164,10 +163,10 @@ describe("mitt#", () => {
       inst.on("foo", vi.fn());
       inst.on("bar", vi.fn());
       inst.off("foo");
-      expect(events.get("foo")).toEqual([]);
+      expect(events.get("foo")).toStrictEqual([]);
       expect(events.get("bar")).toHaveLength(1);
       inst.off("bar");
-      expect(events.get("bar")).toEqual([]);
+      expect(events.get("bar")).toStrictEqual([]);
     });
   });
 
@@ -181,7 +180,7 @@ describe("mitt#", () => {
       const event = { a: "b" };
 
       inst.on("foo", (one, two?: unknown) => {
-        expect(one).toEqual(event);
+        expect(one).toStrictEqual(event);
         expect(two).toBeUndefined();
       });
 
@@ -217,7 +216,7 @@ describe("mitt#", () => {
 
       inst.emit("bar", eb);
       expect(star).toHaveBeenCalledTimes(2);
-      expect(star).lastCalledWith("bar", eb);
+      expect(star).toHaveBeenLastCalledWith("bar", eb);
     });
   });
 });

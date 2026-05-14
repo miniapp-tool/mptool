@@ -36,7 +36,6 @@ const clickHandlerFactory = function (
     event?: WechatMiniprogram.TouchEvent<
       WechatMiniprogram.IAnyObject,
       WechatMiniprogram.IAnyObject,
-      // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
       { before?: string; after?: string; url?: string }
     >,
   ): Promise<void> {
@@ -75,12 +74,11 @@ const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
 };
 
-const bindBack = async function touchHandler(
+const bindBack = async function bindBack(
   this: TrivialPageInstance,
   event?: WechatMiniprogram.TouchEvent<
     WechatMiniprogram.IAnyObject,
     WechatMiniprogram.IAnyObject,
-    // oxlint-disable-next-line typescript/no-unnecessary-type-arguments
     { before?: string; after?: string; delta?: number | string }
   >,
 ): Promise<void> {

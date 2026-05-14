@@ -1,11 +1,10 @@
 // oxlint-disable promise/no-multiple-resolved
-import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
 import { funcQueue } from "../src";
 
-describe("queue", () => {
-  it("Run by sequence", () =>
+describe(funcQueue, () => {
+  it("run by sequence", () =>
     new Promise<void>((resolve) => {
       const result: number[] = [];
       const fn = funcQueue((next, num: number, timer: number) => {
@@ -20,12 +19,12 @@ describe("queue", () => {
       fn(3, 20);
 
       setTimeout(() => {
-        expect(result).toEqual([1, 2, 3]);
+        expect(result).toStrictEqual([1, 2, 3]);
         resolve();
       }, 200);
     }));
 
-  it("Parall 3 task", () =>
+  it("parallel 3 task", () =>
     new Promise<void>((resolve) => {
       let count = 0;
       const fn = funcQueue((next, timer: number) => {
@@ -41,13 +40,13 @@ describe("queue", () => {
       fn(50);
       fn(100);
       setTimeout(() => {
-        expect(count).toEqual(3);
+        expect(count).toBe(3);
       }, 60);
       setTimeout(() => {
-        expect(count).toEqual(4);
+        expect(count).toBe(4);
       }, 120);
       setTimeout(() => {
-        expect(count).toEqual(5);
+        expect(count).toBe(5);
         resolve();
       }, 170);
     }));

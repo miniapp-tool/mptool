@@ -25,12 +25,12 @@ export const decoders: Record<string, (options: { fatal: boolean }) => Decoder> 
  * @param options Decoder options
  */
 export class TextDecoder {
-  _encoding: Encoding;
-  _ignoreBOM = false;
-  _decoder: Decoder | null = null;
-  _BOMseen = false;
-  _fatal = false;
-  doNotFlush = false;
+  readonly #encoding: Encoding;
+  readonly #ignoreBOM: boolean = false;
+  #decoder: Decoder | null = null;
+  #BOMseen = false;
+  readonly #fatal: boolean = false;
+  #doNotFlush = false;
 
   constructor(label = DEFAULT_ENCODING, options: { fatal?: boolean; ignoreBOM?: boolean } = {}) {
     // 1. Let encoding be the result of getting an encoding from
@@ -43,32 +43,32 @@ export class TextDecoder {
     if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
 
     // 4. Set encoding.
-    this._encoding = encoding;
+    this.#encoding = encoding;
 
     // 5. If options's fatal member is true, set dec's error mode to
     // fatal.
-    if (options.fatal) this._fatal = true;
+    if (options.fatal) this.#fatal = true;
 
     // 6. If options's ignoreBOM member is true, set dec's ignore BOM
     // flag.
-    if (options.ignoreBOM) this._ignoreBOM = true;
+    if (options.ignoreBOM) this.#ignoreBOM = true;
   }
 
   // The encoding attribute's getter must return encoding's name.
   get encoding(): string {
-    return this._encoding.name.toLowerCase();
+    return this.#encoding.name.toLowerCase();
   }
 
   // The fatal attribute's getter must return true if error mode
   // is fatal, and false otherwise.
   get fatal(): boolean {
-    return this._fatal;
+    return this.#fatal;
   }
 
   // The ignoreBOM attribute's getter must return true if ignore
   // BOM flag is set, and false otherwise.
   get ignoreBOM(): boolean {
-    return this._ignoreBOM;
+    return this.#ignoreBOM;
   }
 
   /**
@@ -87,16 +87,16 @@ export class TextDecoder {
     // 1. If the do not flush flag is unset, set decoder to a new
     // encoding's decoder, set stream to a new stream, and unset the
     // BOM seen flag.
-    if (!this.doNotFlush) {
-      this._decoder = decoders[this._encoding.name]({
-        fatal: this._fatal,
+    if (!this.#doNotFlush) {
+      this.#decoder = decoders[this.#encoding.name]({
+        fatal: this.#fatal,
       });
-      this._BOMseen = false;
+      this.#BOMseen = false;
     }
 
     // 2. If options's stream is true, set the do not flush flag, and
     // unset the do not flush flag otherwise.
-    this.doNotFlush = Boolean(options.stream);
+    this.#doNotFlush = Boolean(options.stream);
 
     // 3. If input is given, push a copy of input to stream.
     // TODO: Align with spec algorithm - maintain stream on instance.
@@ -122,7 +122,7 @@ export class TextDecoder {
       // 1. Let result be the result of processing token for decoder,
       // stream, output, and error mode.
       // oxlint-disable-next-line typescript/no-non-null-assertion
-      result = this._decoder!.handler(inputStream, token);
+      result = this.#decoder!.handler(inputStream, token);
 
       // 2. If result is finished, return output, serialized.
       if (result === FINISHED) break;
@@ -138,17 +138,17 @@ export class TextDecoder {
       // 4. Otherwise, do nothing.
     }
     // TODO: Align with spec algorithm.
-    if (!this.doNotFlush) {
+    if (!this.#doNotFlush) {
       do {
         // oxlint-disable-next-line typescript/no-non-null-assertion
-        result = this._decoder!.handler(inputStream, inputStream.read());
+        result = this.#decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;
         if (result == null) continue;
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       } while (!inputStream.endOfStream());
-      this._decoder = null;
+      this.#decoder = null;
     }
 
     return this.serializeStream(output);
@@ -167,18 +167,18 @@ export class TextDecoder {
     // 2. If encoding is UTF-8, UTF-16BE, or UTF-16LE, and ignore
     // BOM flag and BOM seen flag are unset, run these subsubsteps:
     if (
-      ["UTF-8", "UTF-16LE", "UTF-16BE"].includes(this._encoding.name) &&
-      !this._ignoreBOM &&
-      !this._BOMseen
+      ["UTF-8", "UTF-16LE", "UTF-16BE"].includes(this.#encoding.name) &&
+      !this.#ignoreBOM &&
+      !this.#BOMseen
     ) {
       if (stream.length > 0 && stream[0] === 0xfeff) {
         // 1. If token is U+FEFF, set BOM seen flag.
-        this._BOMseen = true;
+        this.#BOMseen = true;
         stream.shift();
       } else if (stream.length > 0) {
         // 2. Otherwise, if token is not end-of-stream, set BOM seen
         // flag and append token to stream.
-        this._BOMseen = true;
+        this.#BOMseen = true;
       } else {
         // 3. Otherwise, if token is not end-of-stream, append token
         // to output.

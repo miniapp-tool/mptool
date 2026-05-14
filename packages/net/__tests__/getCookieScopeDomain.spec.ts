@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { getCookieScopeDomain } from "../src/utils.js";
 
-describe("normalizeDomain", () => {
+describe(getCookieScopeDomain, () => {
   it("should normalize domain", () => {
     expect(getCookieScopeDomain("example.com")).toStrictEqual([
       "example.com",

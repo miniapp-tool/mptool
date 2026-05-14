@@ -14,6 +14,8 @@ export default defineHopeConfig(
       // we are targeting es6
       "unicorn/prefer-array-flat": "off",
       "unicorn/prefer-string-replace-all": "off",
+
+      "vitest/consistent-test-it": "off",
     },
   },
   {

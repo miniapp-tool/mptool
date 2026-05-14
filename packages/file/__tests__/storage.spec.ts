@@ -6,18 +6,18 @@ import { get, getAsync, set, setAsync } from "../src/storage.js";
 describe(set, () => {
   it("set sync simple", () => {
     set("simple-sync", "mister-hope");
-    expect(get("simple-sync")).toEqual("mister-hope");
+    expect(get("simple-sync")).toBe("mister-hope");
   });
 
   it("set sync", () => {
     set("data-sync", { title: 123 });
-    expect(get("data-sync")).toEqual({ title: 123 });
+    expect(get("data-sync")).toStrictEqual({ title: 123 });
   });
 
   it("set async", () =>
     new Promise<void>((resolve) => {
       void setAsync("data-async", { title: 123 }).then(() => {
-        expect(get("data-async")).toEqual({ title: 123 });
+        expect(get("data-async")).toStrictEqual({ title: 123 });
         resolve();
       });
     }));
@@ -33,7 +33,7 @@ describe(set, () => {
 
     const data = await getAsync("data-expire");
 
-    expect(data).toEqual(undefined);
+    expect(data).toBeUndefined();
   });
 
   it("set expire x2", () =>
@@ -41,7 +41,7 @@ describe(set, () => {
       void setAsync("data-expire-x2", { title: 123 }, 100).then(() => {
         set("data-expire-x2", { title: 456 }, 200);
         setTimeout(() => {
-          expect(get("data-expire-x2")).toEqual({ title: 456 });
+          expect(get("data-expire-x2")).toStrictEqual({ title: 456 });
           resolve();
         }, 150);
       });
@@ -52,7 +52,7 @@ describe(set, () => {
       void setAsync("data-expire-update", { title: 123 }, 100).then(() => {
         set("data-expire-update", { title: 456 }, "keep");
         setTimeout(() => {
-          expect(get("data-expire-update")).toEqual(undefined);
+          expect(get("data-expire-update")).toBeUndefined();
           resolve();
         }, 200);
       });

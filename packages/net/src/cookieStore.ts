@@ -249,7 +249,7 @@ export class CookieStore {
       ? setCookieHeader.filter(Boolean).join(",")
       : env === "qq"
         ? setCookieHeader.replace(
-            /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/gi,
+            /;((?!Path|Expires|Max-Age|Domain|Path|SameSite)[^\s;]*?)=/giu,
             ",$1=",
           )
         : setCookieHeader;

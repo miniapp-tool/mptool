@@ -31,9 +31,9 @@ const ENCODE_MAP: Record<string, string> = {
 };
 
 const encode = (str: string): string =>
-  encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => ENCODE_MAP[match]);
+  encodeURIComponent(str).replace(/[!'()~]|%20|%00/gu, (match) => ENCODE_MAP[match]);
 
-const decode = (str: string): string => decodeURIComponent(str.replace(/\+/g, " "));
+const decode = (str: string): string => decodeURIComponent(str.replace(/\+/gu, " "));
 
 export class URLSearchParams {
   private params: Map<string, string[]>;
@@ -61,7 +61,7 @@ export class URLSearchParams {
         )
           .split("&")
           .forEach((pair) => {
-            const [, key, value] = /^([^=]+)=?(.*?)$/.exec(pair) ?? [];
+            const [, key, value] = /^([^=]+)=?(.*?)$/u.exec(pair) ?? [];
 
             if (key) this.append(decode(key), decode(value));
           });

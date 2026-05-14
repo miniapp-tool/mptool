@@ -4,9 +4,9 @@ import { Cookie } from "./cookie.js";
 import type { CookieType } from "./typings.js";
 import { normalizeDomain } from "./utils.js";
 
-const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/i;
+const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/iu;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
-const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`, "g");
+const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`, "gu");
 
 /**
  * Validate the given header name.

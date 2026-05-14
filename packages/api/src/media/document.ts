@@ -28,7 +28,7 @@ export const openDocument = (url: string): void => {
 
 export const saveDocument = (
   url: string,
-  filename = /\/([^/]+)\.[^/]+?$/.exec(url)?.[1] ?? "document",
+  filename = /\/([^/]+)\.[^/]+?$/u.exec(url)?.[1] ?? "document",
 ): void => {
   // 首选添加到收藏
   if (wx.canIUse("addFileToFavorites")) {

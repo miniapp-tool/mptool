@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { TextDecoder, TextEncoder } from "../src/index.js";
 
@@ -40,49 +40,51 @@ const generateBlock = (from: number, len: number, skip: number): string => {
   return block.join("");
 };
 
-it("UTF-8 - Encode/Decode - reference sample", () => {
-  // z, cent, CJK water, G-Clef, Private-use character
-  const sample = "z\u00A2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
-  const cases = [
-    {
-      encoding: "utf-8",
-      expected: [
-        0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f, 0xbf, 0xbd,
-      ],
-    },
-  ];
+describe(TextDecoder, () => {
+  it("utf-8 - Encode/Decode - reference sample", () => {
+    // z, cent, CJK water, G-Clef, Private-use character
+    const sample = "z\u00A2\u6C34\uD834\uDD1E\uDBFF\uDFFD";
+    const cases = [
+      {
+        encoding: "utf-8",
+        expected: [
+          0x7a, 0xc2, 0xa2, 0xe6, 0xb0, 0xb4, 0xf0, 0x9d, 0x84, 0x9e, 0xf4, 0x8f, 0xbf, 0xbd,
+        ],
+      },
+    ];
 
-  cases.forEach((t) => {
-    const decoded = new TextDecoder(t.encoding).decode(new Uint8Array(t.expected));
+    cases.forEach((t) => {
+      const decoded = new TextDecoder(t.encoding).decode(new Uint8Array(t.expected));
 
-    expect(decoded).toEqual(sample);
+      expect(decoded).toStrictEqual(sample);
+    });
   });
-});
 
-it("UTF-8 - Encode/Decode - full roundtrip and agreement with encode/decodeURIComponent", () => {
-  const MIN_CODEPOINT = 0;
-  const MAX_CODEPOINT = 0x10ffff;
-  const BLOCK_SIZE = 0x1000;
-  const SKIP_SIZE = 31;
+  it("utf-8 - Encode/Decode - full roundtrip and agreement with encode/decodeURIComponent", () => {
+    const MIN_CODEPOINT = 0;
+    const MAX_CODEPOINT = 0x10ffff;
+    const BLOCK_SIZE = 0x1000;
+    const SKIP_SIZE = 31;
 
-  const TE_U8 = new TextEncoder();
-  const TD_U8 = new TextDecoder("UTF-8");
+    const TE_U8 = new TextEncoder();
+    const TD_U8 = new TextDecoder("UTF-8");
 
-  for (let index = MIN_CODEPOINT; index < MAX_CODEPOINT; index += BLOCK_SIZE) {
-    const block = generateBlock(index, BLOCK_SIZE, SKIP_SIZE);
+    for (let index = MIN_CODEPOINT; index < MAX_CODEPOINT; index += BLOCK_SIZE) {
+      const block = generateBlock(index, BLOCK_SIZE, SKIP_SIZE);
 
-    const encoded = TE_U8.encode(block);
-    const decoded = TD_U8.decode(encoded);
+      const encoded = TE_U8.encode(block);
+      const decoded = TD_U8.decode(encoded);
 
-    expect(block).toEqual(decoded);
+      expect(block).toStrictEqual(decoded);
 
-    // test TextEncoder(UTF-8) against the older idiom
-    const expWncoded = encodeUtf8(block);
+      // test TextEncoder(UTF-8) against the older idiom
+      const expEncoded = encodeUtf8(block);
 
-    expect(encoded).toEqual(expWncoded);
+      expect(encoded).toStrictEqual(expEncoded);
 
-    const expDecoded = decodeUtf8(expWncoded);
+      const expDecoded = decodeUtf8(expEncoded);
 
-    expect(decoded).toEqual(expDecoded);
-  }
+      expect(decoded).toStrictEqual(expDecoded);
+    }
+  });
 });

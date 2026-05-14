@@ -23,10 +23,10 @@ export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> 
  * @param options NONSTANDARD.
  */
 export class TextEncoder {
-  _encoding: Encoding;
-  _encoder: Encoder | null = null;
-  doNotFlush = false;
-  _fatal = false;
+  readonly #encoding: Encoding;
+  #encoder: Encoder | null = null;
+  #doNotFlush = false;
+  readonly #fatal: boolean = false;
 
   constructor(
     label = DEFAULT_ENCODING,
@@ -39,18 +39,18 @@ export class TextEncoder {
       throw new TypeError("Called as a function. Did you forget 'new'?");
 
     // Non-standard
-    this.doNotFlush = false;
-    if (options.fatal) this._fatal = true;
+    this.#doNotFlush = false;
+    if (options.fatal) this.#fatal = true;
 
     // oxlint-disable-next-line typescript/no-non-null-assertion
-    this._encoding = getEncoding("utf-8")!;
+    this.#encoding = getEncoding("utf-8")!;
 
     if (label !== DEFAULT_ENCODING && "console" in globalThis)
       console.warn("TextEncoder constructor called with encoding label, which is ignored.");
   }
 
   get encoding(): string {
-    return this._encoding.name.toLowerCase();
+    return this.#encoding.name.toLowerCase();
   }
 
   /**
@@ -62,12 +62,12 @@ export class TextEncoder {
     // NOTE: This option is nonstandard. None of the encodings
     // permitted for encoding (i.e. UTF-8, UTF-16) are stateful when
     // the input is a USVString so streaming is not necessary.
-    if (!this.doNotFlush) {
-      this._encoder = encoders[this._encoding.name]({
-        fatal: this._fatal,
+    if (!this.#doNotFlush) {
+      this.#encoder = encoders[this.#encoding.name]({
+        fatal: this.#fatal,
       });
     }
-    this.doNotFlush = Boolean(options.stream);
+    this.#doNotFlush = Boolean(options.stream);
 
     // 1. Convert input to a stream.
     const input = new Stream(stringToCodePoints(content));
@@ -87,21 +87,21 @@ export class TextEncoder {
       // 2. Let result be the result of processing token for encoder,
       // input, output.
       // oxlint-disable-next-line typescript/no-non-null-assertion
-      result = this._encoder!.handler(input, token);
+      result = this.#encoder!.handler(input, token);
       if (result === FINISHED) break;
       if (Array.isArray(result)) output.push(...result);
       else output.push(result);
     }
     // TODO: Align with spec algorithm.
-    if (!this.doNotFlush) {
+    if (!this.#doNotFlush) {
       while (true) {
         // oxlint-disable-next-line typescript/no-non-null-assertion
-        result = this._encoder!.handler(input, input.read());
+        result = this.#encoder!.handler(input, input.read());
         if (result === FINISHED) break;
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       }
-      this._encoder = null;
+      this.#encoder = null;
     }
 
     // 3. If result is finished, convert output into a byte sequence,

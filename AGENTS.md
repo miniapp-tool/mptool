@@ -79,7 +79,6 @@
 ### Build Commands
 
 ```sh
-pnpm install        # Install dependencies
 pnpm run build          # Build all packages
 pnpm run clean          # Clean dist files
 pnpm run test           # Run tests

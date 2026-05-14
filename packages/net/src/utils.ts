@@ -4,23 +4,23 @@
  * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/gi, ".").replace(/\.+$/, "");
+  domain.replace(/^(\.*)?(?=\S)/giu, ".").replace(/\.+$/u, "");
 
-const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/, "");
+const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/u, "");
 
 export const getDomain = (domainOrURL: string): string =>
   // oxlint-disable-next-line typescript/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
-    .replace(/^https?:\/\//, "")
+    .replace(/^https?:\/\//u, "")
     .split("/")
     .shift()!
-    .replace(/:\d+$/, "");
+    .replace(/:\d+$/u, "");
 
 export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
 
   // 获取 cookie 作用域范围列表
-  const normalizedDomain = normalizeDomain(domain).replace(/^\.+/gi, "");
+  const normalizedDomain = normalizeDomain(domain).replace(/^\.+/giu, "");
 
   const scopes = normalizedDomain
     .split(".")
@@ -36,7 +36,7 @@ export interface UrlInfo {
 
 export const parseUrl = (url: string): UrlInfo => {
   const domain = getDomain(url);
-  const path = removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/, "") || "/";
+  const path = removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/u, "") || "/";
 
   return {
     domain,

@@ -4,8 +4,6 @@ import { describe, expect, it } from "vitest";
 import { Cookie } from "../src/cookie.js";
 import { CookieStore } from "../src/index.js";
 
-const cookieStore = new CookieStore();
-
 const mockedResponse = {
   header: {
     "Set-Cookie":
@@ -16,7 +14,9 @@ const mockedResponse = {
 const TEST_NAME = "session_id";
 const TEST_VALUE = "session_id_value";
 
-describe("cookies", () => {
+describe(CookieStore, () => {
+  const cookieStore = new CookieStore();
+
   it("request", () => {
     cookieStore.applyResponse(mockedResponse, "baidu.com");
 
@@ -53,7 +53,7 @@ describe("cookies", () => {
   it("getCookies", () => {
     const result = cookieStore.getCookies({ domain: "baidu.com" });
 
-    expect(result.length).toBe(4);
+    expect(result).toHaveLength(4);
   });
 
   it("getCookiesMap", () => {
@@ -77,16 +77,16 @@ describe("cookies", () => {
   it("clear", () => {
     cookieStore.clear("baidu.com", true);
 
-    expect(cookieStore.getCookies({ domain: "baidu.com" }).length).toBe(1);
+    expect(cookieStore.getCookies({ domain: "baidu.com" })).toHaveLength(1);
 
     cookieStore.clear(".baidu.com");
-    expect(cookieStore.getCookies({ domain: "baidu.com" }).length).toBe(0);
+    expect(cookieStore.getCookies({ domain: "baidu.com" })).toHaveLength(0);
 
     const result1 = cookieStore.getAllCookies();
 
     cookieStore.clear();
     const result2 = cookieStore.getAllCookies();
 
-    expect(result1.length).not.toBe(result2.length);
+    expect(result1).not.toHaveLength(result2.length);
   });
 });

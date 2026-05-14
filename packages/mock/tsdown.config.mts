@@ -1,7 +1,7 @@
 import { tsdownConfig } from "../../scripts/tsdown.js";
 
 export default tsdownConfig("index", {
-  alwaysBundle: [/^@mptool\//],
+  alwaysBundle: [/^@mptool\//u],
   format: "esm",
   fixedExtension: false,
 });

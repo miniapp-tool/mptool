@@ -28,8 +28,8 @@ describe(createQueue, () => {
     ]);
 
     const res = await queue.run();
-    expect(res).toEqual({ interrupted: false });
-    expect(result).toEqual([1, 2, 3]);
+    expect(res).toStrictEqual({ interrupted: false });
+    expect(result).toStrictEqual([1, 2, 3]);
   });
 
   it("run tasks with concurrency", async () => {
@@ -74,7 +74,7 @@ describe(createQueue, () => {
     );
 
     const res = await queue.run();
-    expect(res).toEqual({ interrupted: false });
+    expect(res).toStrictEqual({ interrupted: false });
     expect(maxConcurrent).toBe(2);
   });
 
@@ -132,6 +132,6 @@ describe(createQueue, () => {
     queue.stop("custom message");
 
     const res = await queue.run();
-    expect(res).toEqual({ interrupted: true, msg: "custom message" });
+    expect(res).toStrictEqual({ interrupted: true, msg: "custom message" });
   });
 });

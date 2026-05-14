@@ -10,8 +10,8 @@ describe(once, () => {
       const fn = once((num: number) => {
         count += 1;
         setTimeout(() => {
-          expect(count).toEqual(1);
-          expect(num).toEqual(1);
+          expect(count).toBe(1);
+          expect(num).toBe(1);
           resolve();
         }, 20);
       });
@@ -21,19 +21,19 @@ describe(once, () => {
       fn(3);
 
       setTimeout(() => {
-        expect(count).toEqual(1);
+        expect(count).toBe(1);
       }, 10);
     }));
 
-  it("run once with muti args", () =>
+  it("run once with multiple args", () =>
     new Promise<void>((resolve) => {
       let count = 0;
       const fn = once((x: number, y: number) => {
         count += x + y;
         setTimeout(() => {
-          expect(x).toEqual(1);
-          expect(y).toEqual(2);
-          expect(count).toEqual(3);
+          expect(x).toBe(1);
+          expect(y).toBe(2);
+          expect(count).toBe(3);
           resolve();
         }, 20);
       });
@@ -43,7 +43,7 @@ describe(once, () => {
       fn(5, 6);
 
       setTimeout(() => {
-        expect(count).toEqual(3);
+        expect(count).toBe(3);
       }, 10);
     }));
 });

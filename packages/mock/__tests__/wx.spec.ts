@@ -1,8 +1,10 @@
+// oxlint-disable vitest/no-commented-out-tests
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { wx } from "../src/index.js";
 
 describe("wx mock", () => {
+  // oxlint-disable-next-line vitest/no-hooks
   beforeEach(() => {
     wx.clearStorageSync();
   });
@@ -25,7 +27,7 @@ describe("wx mock", () => {
         wx.getStorage({
           key: "callback-key",
           success: (res) => {
-            expect(res.data).toEqual({ foo: "bar" });
+            expect(res.data).toStrictEqual({ foo: "bar" });
             resolve();
           },
         });
@@ -51,13 +53,13 @@ describe("wx mock", () => {
     it("should return stored object value", () => {
       const obj = { nested: { data: true } };
       wx.setStorageSync("sync-obj", obj);
-      expect(wx.getStorageSync("sync-obj")).toEqual(obj);
+      expect(wx.getStorageSync("sync-obj")).toStrictEqual(obj);
     });
 
     it("should return stored array value", () => {
       const arr = [1, 2, 3];
       wx.setStorageSync("sync-arr", arr);
-      expect(wx.getStorageSync("sync-arr")).toEqual(arr);
+      expect(wx.getStorageSync("sync-arr")).toStrictEqual(arr);
     });
   });
 
@@ -89,7 +91,7 @@ describe("wx mock", () => {
     it("should store objects", async () => {
       const data = { complex: { nested: [1, 2, 3] } };
       await wx.setStorage({ key: "object-key", data });
-      expect(wx.getStorageSync("object-key")).toEqual(data);
+      expect(wx.getStorageSync("object-key")).toStrictEqual(data);
     });
   });
 
@@ -166,7 +168,7 @@ describe("wx mock", () => {
       wx.setStorageSync("key1", "value1");
       wx.setStorageSync("key2", "value2");
       wx.clearStorageSync();
-      expect(wx.getStorageInfoSync().keys).toEqual([]);
+      expect(wx.getStorageInfoSync().keys).toStrictEqual([]);
     });
 
     it("should return empty after clear", () => {
@@ -203,7 +205,7 @@ describe("wx mock", () => {
         wx.batchGetStorage({
           keyList: ["batch-key-1", "batch-key-2"],
           success: (res) => {
-            expect(res.data).toEqual(["value1", "value2"]);
+            expect(res.data).toStrictEqual(["value1", "value2"]);
             resolve();
           },
         });
@@ -215,14 +217,14 @@ describe("wx mock", () => {
       const res = await wx.batchGetStorage({
         keyList: ["batch-promise-1", "batch-promise-2"],
       });
-      expect(res.data).toEqual([{ a: 1 }, { b: 2 }]);
+      expect(res.data).toStrictEqual([{ a: 1 }, { b: 2 }]);
     });
 
     it("should return undefined for non-existent keys", async () => {
       const res = await wx.batchGetStorage({
         keyList: ["nonexistent-1", "nonexistent-2"],
       });
-      expect(res.data).toEqual([undefined, undefined]);
+      expect(res.data).toStrictEqual([undefined, undefined]);
     });
   });
 
@@ -251,7 +253,7 @@ describe("wx mock", () => {
         ],
       });
       expect(wx.getStorageSync("batch-promise-set-1")).toBe(123);
-      expect(wx.getStorageSync("batch-promise-set-2")).toEqual({ nested: true });
+      expect(wx.getStorageSync("batch-promise-set-2")).toStrictEqual({ nested: true });
     });
 
     it("should overwrite existing values", async () => {
@@ -341,7 +343,7 @@ describe("wx mock", () => {
 
     it("should return empty keys when no storage", () => {
       const result = wx.getStorageInfoSync();
-      expect(result.keys).toEqual([]);
+      expect(result.keys).toStrictEqual([]);
     });
   });
 

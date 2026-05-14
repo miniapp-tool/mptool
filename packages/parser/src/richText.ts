@@ -13,9 +13,9 @@ const handleSVG = (node: Element): RichTextNode => {
 
   let style = "";
 
-  if (width) style += `width:${width}${/^[\d.]*\d$/.test(width) ? "px" : ""};`;
+  if (width) style += `width:${width}${/^[\d.]*\d$/u.test(width) ? "px" : ""};`;
 
-  if (height) style += `height:${height}${/^[\d.]*\d$/.test(height) ? "px" : ""};`;
+  if (height) style += `height:${height}${/^[\d.]*\d$/u.test(height) ? "px" : ""};`;
 
   if (!style && viewbox) {
     // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
@@ -55,7 +55,7 @@ const handleNode = async (
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
   // remove \r in text node
-  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/g, "") };
+  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/gu, "") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);

@@ -11,7 +11,7 @@ describe(lock, () => {
       const fn = lock((release) => {
         count += 1;
         setTimeout(() => {
-          expect(count).toEqual(1);
+          expect(count).toBe(1);
           release();
           resolve();
         }, 10);
@@ -26,13 +26,14 @@ describe(lock, () => {
       const fn = lock((release, callbackFunc?: () => unknown) => {
         setTimeout(() => {
           release();
+          // oxlint-disable-next-line vitest/no-conditional-in-test
           if (callbackFunc) callbackFunc();
         }, 10);
       });
 
       fn();
       fn(() => {
-        expect(false).toEqual("The function should be locked");
+        expect(false).toBe("The function should be locked");
       });
       setTimeout(() => {
         fn(() => {

@@ -5,69 +5,69 @@ import { query } from "../src";
 
 const { parse, stringify, join } = query;
 
-describe("queryParse", () => {
+describe(parse, () => {
   it("parse normal", () => {
-    const queryString = "a=2&aaoq12=asd8a9ij";
+    const queryString = "a=2&test12=asd8a9ij";
     const parsedQuery = parse(queryString);
 
-    expect(parsedQuery.a).toEqual("2");
-    expect(parsedQuery.aaoq12).toEqual("asd8a9ij");
+    expect(parsedQuery.a).toBe("2");
+    expect(parsedQuery.test12).toBe("asd8a9ij");
   });
 
-  it("parse with DIY spliter", () => {
-    const queryString = "a=2/aaoq12=asd8a9ij";
+  it("parse with DIY splitter", () => {
+    const queryString = "a=2/test12=asd8a9ij";
     const parsedQuery = parse(queryString, "/");
 
-    expect(parsedQuery.a).toEqual("2");
-    expect(parsedQuery.aaoq12).toEqual("asd8a9ij");
+    expect(parsedQuery.a).toBe("2");
+    expect(parsedQuery.test12).toBe("asd8a9ij");
   });
 });
 
-describe("queryStringify", () => {
+describe(stringify, () => {
   it("stringify normal", () => {
     const queryObj = {
       a: "1",
-      mrhope: "handsome",
+      hope: "handsome",
     };
 
-    expect(stringify(queryObj)).toEqual("a=1&mrhope=handsome");
+    expect(stringify(queryObj)).toBe("a=1&hope=handsome");
   });
 
   it("stringify with DIY spliter", () => {
     const queryObj = {
       a: "1",
-      mrhope: "handsome",
+      hope: "handsome",
     };
 
-    expect(stringify(queryObj, "/")).toEqual("a=1/mrhope=handsome");
+    expect(stringify(queryObj, "/")).toBe("a=1/hope=handsome");
   });
 });
 
-describe("queryJoin", () => {
+describe(join, () => {
   it("join on complete path", () => {
     const path = "/page/main/main";
     const queryObj = {
       a: "1",
-      mrhope: "handsome",
+      hope: "handsome",
     };
 
-    expect(join(path, queryObj)).toEqual("/page/main/main?a=1&mrhope=handsome");
+    expect(join(path, queryObj)).toBe("/page/main/main?a=1&hope=handsome");
   });
 
   it("join on path with query", () => {
-    const path = "/page/main/main?mrhope=handsome";
+    const path = "/page/main/main?hope=handsome";
     const queryObj = {
       a: "1",
-      mrhope: "handsome",
+      hope: "handsome",
     };
 
-    expect(join(path, queryObj)).toEqual("/page/main/main?mrhope=handsome&a=1&mrhope=handsome");
+    expect(join(path, queryObj)).toBe("/page/main/main?hope=handsome&a=1&hope=handsome");
   });
 
   it("join without query", () => {
-    const path = "/page/main/main?mrhope=handsome";
+    const path = "/page/main/main?hope=handsome";
     const queryObj = {};
 
-    expect(join(path, queryObj)).toEqual("/page/main/main?mrhope=handsome");
+    expect(join(path, queryObj)).toBe("/page/main/main?hope=handsome");
   });
 });

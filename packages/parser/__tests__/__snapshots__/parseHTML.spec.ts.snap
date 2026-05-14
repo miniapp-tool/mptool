@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parseHTML() 1`] = `
+exports[`parseHTML > should parse html string to nodes 1`] = `
 [
   <div
     class="test"
@@ -10,7 +10,7 @@ exports[`parseHTML() 1`] = `
 ]
 `;
 
-exports[`parseHTML() 2`] = `
+exports[`parseHTML > should parse html string to nodes 2`] = `
 [
   <div
     class="test"
@@ -22,7 +22,7 @@ exports[`parseHTML() 2`] = `
 ]
 `;
 
-exports[`parseHTML() 3`] = `
+exports[`parseHTML > should parse html string to nodes 3`] = `
 [
   <div
     class="test"
@@ -37,7 +37,7 @@ exports[`parseHTML() 3`] = `
 ]
 `;
 
-exports[`parseHTML() 4`] = `
+exports[`parseHTML > should parse html string to nodes 4`] = `
 [
   <table>
     <tr>
@@ -49,7 +49,7 @@ exports[`parseHTML() 4`] = `
 ]
 `;
 
-exports[`parseHTML() 5`] = `
+exports[`parseHTML > should parse html string to nodes 5`] = `
 [
   <table>
     <tr>
@@ -64,7 +64,7 @@ exports[`parseHTML() 5`] = `
 ]
 `;
 
-exports[`parseHTML() 6`] = `
+exports[`parseHTML > should parse html string to nodes 6`] = `
 [
   ProcessingInstruction {
     "data": "!doctype html",
@@ -118,7 +118,7 @@ exports[`parseHTML() 6`] = `
 ]
 `;
 
-exports[`parseHTML() 7`] = `
+exports[`parseHTML > should parse html string to nodes 7`] = `
 [
   <svg
     viewbox="0 0 100 100"
