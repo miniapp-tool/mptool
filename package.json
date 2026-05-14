@@ -43,7 +43,7 @@
     "husky": "9.1.7",
     "miniprogram-api-typings": "5.2.0",
     "nano-staged": "1.0.2",
-    "oxc-config-hope": "0.3.0",
+    "oxc-config-hope": "0.3.5",
     "oxfmt": "0.48.0",
     "oxlint": "1.60.0",
     "oxlint-tsgolint": "0.21.1",
