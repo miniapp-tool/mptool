@@ -16,21 +16,21 @@ export interface ExtendedPageLifeCycles {
    *
    * 此时页面的 this 还不可用
    */
-  onRegister(): void;
+  onRegister: () => void;
 
   /**
    * 在 `App.onLaunch` 触发时调用
    *
    * @param App.onLaunch 参数
    */
-  onAppLaunch(options: WechatMiniprogram.App.LaunchShowOption): void | Promise<void>;
+  onAppLaunch: (options: WechatMiniprogram.App.LaunchShowOption) => void | Promise<void>;
 
   /**
    * 小程序在切入后台后被唤醒
    *
    * @param time 休眠时间 (单位 ms)
    */
-  onAwake(time: number): void | Promise<void>;
+  onAwake: (time: number) => void | Promise<void>;
 
   /**
    * 页面预加载时触发
@@ -39,7 +39,7 @@ export interface ExtendedPageLifeCycles {
    *
    * @param options Url 参数对象
    */
-  onPreload(options: PageQuery): void | Promise<void>;
+  onPreload: (options: PageQuery) => void | Promise<void>;
 
   /**
    * 页面即将被导航时触发
@@ -48,7 +48,7 @@ export interface ExtendedPageLifeCycles {
    *
    * 另外需要特别注意第一次进入一个分包界面 或者是通过微信小程序二维码或微信内分享直接跳转到小程序子页面时同样不会触发
    */
-  onNavigate(options: PageQuery): void | Promise<void>;
+  onNavigate: (options: PageQuery) => void | Promise<void>;
 }
 
 export interface ExtendedPageProperties {
@@ -86,14 +86,14 @@ export interface ExtendedPageMethods<
   // oxlint-disable-next-line id-length
   $: typeof bind;
   /** 获取当前页面实例。 */
-  $currentPage(): PageInstance<Data, Custom>;
+  $currentPage: () => PageInstance<Data, Custom>;
 
   /**
    * 获得页面路径
    *
    * @param name 页面简称
    */
-  $getPath(name: string): string;
+  $getPath: (name: string) => string;
 }
 
 export type PageInstance<

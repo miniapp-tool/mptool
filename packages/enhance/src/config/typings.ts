@@ -28,7 +28,7 @@ export interface AppConfigCommonOptions {
    *
    * @param options 组件选项
    */
-  extendComponent?(options: TrivialComponentOptions): void;
+  extendComponent?: (options: TrivialComponentOptions) => void;
 
   /**
    * 自定义注入组件
@@ -37,7 +37,7 @@ export interface AppConfigCommonOptions {
    *
    * @param options 组件选项
    */
-  injectComponent?(options: TrivialComponentOptions): void;
+  injectComponent?: (options: TrivialComponentOptions) => void;
 
   /**
    * 自定义扩展页面，在框架执行扩展之前
@@ -45,7 +45,7 @@ export interface AppConfigCommonOptions {
    * @param name 页面名称
    * @param options 页面选项
    */
-  extendPage?(name: string, options: TrivialPageOptions): void;
+  extendPage?: (name: string, options: TrivialPageOptions) => void;
 
   /**
    * 自定义注入页面
@@ -55,7 +55,7 @@ export interface AppConfigCommonOptions {
    * @param name 页面名称
    * @param options 页面选项
    */
-  injectPage?(name: string, options: TrivialPageOptions): void;
+  injectPage?: (name: string, options: TrivialPageOptions) => void;
 }
 export interface RoutePathConfig {
   /**

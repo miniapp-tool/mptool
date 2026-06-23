@@ -6,7 +6,7 @@ export interface ExtendsAppOptions {
    *
    * @param time 休眠时间 (单位ms)
    */
-  onAwake?(time: number): void;
+  onAwake?: (time: number) => void;
 }
 
 export type ExtendedAppMethods = InstanceEmitterMethods;

@@ -185,13 +185,9 @@ export function mount(
   // 实例引用集合
   ctx.$refs = new Map();
 
-  // oxlint-disable-next-line typescript/unbound-method
   ctx.$on = userEmitter.on;
-  // oxlint-disable-next-line typescript/unbound-method
   ctx.$off = userEmitter.off;
-  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emit = userEmitter.emit;
-  // oxlint-disable-next-line typescript/unbound-method
   ctx.$emitAsync = userEmitter.emitAsync;
 
   // 路由方法

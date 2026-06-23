@@ -7,6 +7,8 @@ export default defineHopeConfig(
       "new-cap": ["warn", { capIsNewExceptions: ["App", "Component", "Emitter", "Page"] }],
       "no-console": "off",
       "no-warning-comments": "off",
+      "prefer-named-capture-group": "off",
+
       "import/no-unassigned-import": ["warn", { allow: ["@mptool/mock"] }],
       "typescript/no-unnecessary-type-parameters": "off",
       "unicorn/text-encoding-identifier-case": "off",

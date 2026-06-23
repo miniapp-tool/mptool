@@ -17,7 +17,7 @@ describe($Page, () => {
       globalData: {
         userInfo?: WechatMiniprogram.UserInfo;
       };
-      userInfoReadyCallback(userInfo: WechatMiniprogram.UserInfo): void;
+      userInfoReadyCallback: (userInfo: WechatMiniprogram.UserInfo) => void;
     }>();
 
     expectTypeOf(app.globalData.userInfo).toEqualTypeOf<WechatMiniprogram.UserInfo | undefined>();
@@ -124,7 +124,7 @@ describe($Page, () => {
             "object.text": "changed data",
             "newField.text": "new data",
           },
-          function viewTap() {},
+          () => {},
         );
         expectTypeOf(this.data.text).toEqualTypeOf<string>();
         expectTypeOf(this.route).toEqualTypeOf<string>();
@@ -199,7 +199,7 @@ describe($Page, () => {
       logs: string[];
     }
     interface CustomOption {
-      getLogs(): string[];
+      getLogs: () => string[];
     }
 
     $Page<DataType, CustomOption>("example", {

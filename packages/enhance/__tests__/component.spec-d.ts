@@ -202,13 +202,9 @@ describe($Component, () => {
             ],
             5000,
             () => {
-              this.clearAnimation(
-                "#container",
-                { opacity: true, rotate: true },
-                function animate() {
-                  console.log("清除了#container上的opacity和rotate属性");
-                },
-              );
+              this.clearAnimation("#container", { opacity: true, rotate: true }, () => {
+                console.log("清除了#container上的opacity和rotate属性");
+              });
             },
           );
 
@@ -221,7 +217,7 @@ describe($Component, () => {
             ],
             5000,
             () => {
-              this.clearAnimation(".block", function animate() {
+              this.clearAnimation(".block", () => {
                 console.log("清除了.block上的所有动画属性");
               });
             },
@@ -305,7 +301,7 @@ describe($Component, () => {
       },
     });
 
-    $Component<Record<never, never>, Record<never, never>, { fn(): void }, []>({
+    $Component<Record<never, never>, Record<never, never>, { fn: () => void }, []>({
       methods: {
         fn() {
           // @ts-expect-error: notExists
@@ -331,7 +327,7 @@ describe($Component, () => {
       $Component<
         typeof data,
         typeof props,
-        /* methods= */ { fn(): string },
+        /* methods= */ { fn: () => string },
         /* behaviors= */ [],
         /* customProperties= */ Record<never, never>,
         /* isPage= */ true

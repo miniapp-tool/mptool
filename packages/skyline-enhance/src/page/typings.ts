@@ -14,14 +14,14 @@ export interface ExtendedPageLifeCycles {
    *
    * 此时页面的 this 还不可用
    */
-  onRegister(): void;
+  onRegister: () => void;
 
   /**
    * 小程序在切入后台后被唤醒
    *
    * @param time 休眠时间 (单位 ms)
    */
-  onAwake(time: number): void | Promise<void>;
+  onAwake: (time: number) => void | Promise<void>;
 }
 
 export interface ExtendedPageProperties {
@@ -59,14 +59,14 @@ export interface ExtendedPageMethods<
   // oxlint-disable-next-line id-length
   $: typeof bind;
   /** 获取当前页面实例。 */
-  $currentPage(): PageInstance<Data, Custom>;
+  $currentPage: () => PageInstance<Data, Custom>;
 
   /**
    * 获得页面路径
    *
    * @param name 页面简称
    */
-  $getPath(name: string): string;
+  $getPath: (name: string) => string;
 }
 
 export type PageInstance<

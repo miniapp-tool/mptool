@@ -57,13 +57,9 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
     logger.debug("App: registered onAwake");
   }
 
-  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$on = userEmitter.on;
-  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$off = userEmitter.off;
-  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emit = userEmitter.emit;
-  // oxlint-disable-next-line typescript/unbound-method
   appOptions.$emitAsync = userEmitter.emitAsync;
 
   /** Use app config */

@@ -31,10 +31,12 @@ const generateBlock = (from: number, len: number, skip: number): string => {
       continue;
     }
     cp -= 0x10000;
-    // oxlint-disable-next-line no-bitwise
-    block.push(String.fromCodePoint(0xd800 + (cp >> 10)));
-    // oxlint-disable-next-line no-bitwise
-    block.push(String.fromCodePoint(0xdc00 + (cp & 0x3ff)));
+    block.push(
+      // oxlint-disable-next-line no-bitwise
+      String.fromCodePoint(0xd800 + (cp >> 10)),
+      // oxlint-disable-next-line no-bitwise
+      String.fromCodePoint(0xdc00 + (cp & 0x3ff)),
+    );
   }
 
   return block.join("");

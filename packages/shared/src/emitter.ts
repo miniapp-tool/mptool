@@ -19,19 +19,25 @@ export type EventHandlerMap<Events> = Map<
 export interface EmitterInstance<Events> {
   all: EventHandlerMap<Events>;
 
-  on<Key extends keyof Events>(type: Key, handler: Handler<Events[Key]>): void;
-  on(type: "*", handler: WildcardHandler<Events>): void;
+  on: {
+    <Key extends keyof Events>(type: Key, handler: Handler<Events[Key]>): void;
+    (type: "*", handler: WildcardHandler<Events>): void;
+  };
 
-  off<Key extends keyof Events>(type: Key, handler?: Handler<Events[Key]>): void;
-  off(type: "*", handler: WildcardHandler<Events>): void;
+  off: {
+    <Key extends keyof Events>(type: Key, handler?: Handler<Events[Key]>): void;
+    (type: "*", handler: WildcardHandler<Events>): void;
+  };
 
-  emit<Key extends keyof Events>(type: Key, event: Events[Key]): void;
-  emit<Key extends keyof Events>(type: undefined extends Events[Key] ? Key : never): void;
+  emit: {
+    <Key extends keyof Events>(type: Key, event: Events[Key]): void;
+    <Key extends keyof Events>(type: undefined extends Events[Key] ? Key : never): void;
+  };
 
-  emitAsync<Key extends keyof Events>(type: Key, event: Events[Key]): Promise<void>;
-  emitAsync<Key extends keyof Events>(
-    type: undefined extends Events[Key] ? Key : never,
-  ): Promise<void>;
+  emitAsync: {
+    <Key extends keyof Events>(type: Key, event: Events[Key]): Promise<void>;
+    <Key extends keyof Events>(type: undefined extends Events[Key] ? Key : never): Promise<void>;
+  };
 }
 
 /**

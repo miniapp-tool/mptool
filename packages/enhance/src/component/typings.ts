@@ -92,37 +92,37 @@ export interface ComponentLifetimes {
      *
      * 最低基础库版本：[`1.6.3`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    created(): void;
+    created: () => void;
     /**
      * 在组件实例进入页面节点树时执行
      *
      * 最低基础库版本：[`1.6.3`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    attached(): void;
+    attached: () => void;
     /**
      * 在组件在视图层布局完成后执行
      *
      * 最低基础库版本：[`1.6.3`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    ready(): void;
+    ready: () => void;
     /**
      * 在组件实例被移动到节点树另一个位置时执行
      *
      * 最低基础库版本：[`1.6.3`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    moved(): void;
+    moved: () => void;
     /**
      * 在组件实例被从页面节点树移除时执行
      *
      * 最低基础库版本：[`1.6.3`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    detached(): void;
+    detached: () => void;
     /**
      * 每当组件方法抛出错误时执行
      *
      * 最低基础库版本：[`2.4.1`](https://developers.weixin.qq.com/miniprogram/dev/framework/compatibility.html)
      */
-    error(err: Error): void;
+    error: (err: Error) => void;
   }>;
 }
 
@@ -176,9 +176,9 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
    * @param method 方法名称
    * @param args 传递的参数
    */
-  $call(method: string, ...args: unknown[]): void;
+  $call: (method: string, ...args: unknown[]) => void;
 
-  $attached(parent: TrivialComponentInstance | TrivialPageInstance): void;
+  $attached: (parent: TrivialComponentInstance | TrivialPageInstance) => void;
 }
 
 export type ComponentInstance<
