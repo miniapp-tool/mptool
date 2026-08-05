@@ -203,6 +203,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+packageExtensionsChecksum: sha256-b783SdlA1H5BEixn1TPk1WvL+XVnrGd8Wx9UvODTHDw=
+
 importers:
 
   .:
@@ -218,10 +220,10 @@ importers:
         version: 21.2.0
       '@lerna-lite/cli':
         specifier: 5.4.2
-        version: 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
+        version: 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
       '@lerna-lite/publish':
         specifier: 5.4.2
-        version: 5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1)
+        version: 5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)
       '@mr-hope/tsconfig':
         specifier: 0.0.4
         version: 0.0.4(typescript@6.0.3)
@@ -299,8 +301,8 @@ importers:
         specifier: 2.0.0-rc.30
         version: 2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0)
       '@vuepress/plugin-meilisearch':
-        specifier: 2.0.0-rc.133
-        version: 2.0.0-rc.133(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
+        specifier: 2.0.0-rc.130
+        version: 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
       sass-embedded:
         specifier: 1.100.0
         version: 1.100.0
@@ -312,7 +314,7 @@ importers:
         version: 2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2))
       vuepress-theme-hope:
         specifier: 2.0.0-rc.107
-        version: 2.0.0-rc.107(8e4ed01fb02d7cef702e1f35899cf61f)
+        version: 2.0.0-rc.107(390aa3bcfbd341460621d08af37d3ecf)
 
   packages/all:
     devDependencies:
@@ -952,6 +954,8 @@ packages:
   '@lerna-lite/version@5.4.2':
     resolution: {integrity: sha512-NwVJQMPnhOyUeSuLamalVr35503AmcdwjOGx/jQXlJsJsMNGus5M5wsnpxqaUkGf4s7R3ux6pR97PIBFCDLGag==}
     engines: {node: ^22.17.0 || >=24.0.0}
+    peerDependencies:
+      conventional-changelog-conventionalcommits: ^10.2.0
 
   '@lit-labs/ssr-dom-shim@1.6.0':
     resolution: {integrity: sha512-VHb0ALPMTlgKjM6yIxxoQNnpKyUKLD04VzeQdsiXkMqkvYlAHxq9glGLmgbb889/1GsohSOAjvQYoiBppXFqrQ==}
@@ -2368,18 +2372,6 @@ packages:
       '@vuepress/bundler-webpack':
         optional: true
 
-  '@vuepress/helper@2.0.0-rc.131':
-    resolution: {integrity: sha512-VlzJre0tJhlyoHpiRzclM9KntYzdip9rUWf8zaqfwlOV8A280fexTfWdxZwDkekgh9E3l6jJTqRJZpVDdXVFYg==}
-    peerDependencies:
-      '@vuepress/bundler-vite': 2.0.0-rc.30
-      '@vuepress/bundler-webpack': 2.0.0-rc.30
-      vuepress: 2.0.0-rc.30
-    peerDependenciesMeta:
-      '@vuepress/bundler-vite':
-        optional: true
-      '@vuepress/bundler-webpack':
-        optional: true
-
   '@vuepress/highlighter-helper@2.0.0-rc.130':
     resolution: {integrity: sha512-5tWF5I9gRFEcY8LIPUkPoe391LZeblMIrsJqhSSgJkoFUUe664DiEVpyBTpGGikd7q9+Wn9w8OWionBtR5POgg==}
     peerDependencies:
@@ -2527,8 +2519,8 @@ packages:
     peerDependencies:
       vuepress: 2.0.0-rc.30
 
-  '@vuepress/plugin-meilisearch@2.0.0-rc.133':
-    resolution: {integrity: sha512-fSQgtNZ6Nii57XQQAswg7gQcKwmt7yTlh5Wast9iuNArkDXGivNbeaw1ZZvK8VaAsw+/6HrV/EonOZSoBi/b3g==}
+  '@vuepress/plugin-meilisearch@2.0.0-rc.130':
+    resolution: {integrity: sha512-AzQsfKNowkGBhbFvd9qH2skQCCY1j9Znof5bjtreuVEtQfcGGHBqO10ymddaWY+SFbxHw20NeC84FJx6Yi5x3g==}
     hasBin: true
     peerDependencies:
       vuepress: 2.0.0-rc.30
@@ -2974,10 +2966,6 @@ packages:
   commander@14.0.3:
     resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
     engines: {node: '>=20'}
-
-  commander@15.0.0:
-    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
-    engines: {node: '>=22.12.0'}
 
   common-ancestor-path@2.0.0:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
@@ -3723,8 +3711,8 @@ packages:
   meilisearch@0.50.0:
     resolution: {integrity: sha512-9IzIkobvnuS18Eg4dq/eJB9W+eXqeLZjNRgq/kKMswSmVYYSQsXqGgSuCA0JkF+o5RwJlwIsieQee6rh313VhA==}
 
-  meilisearch@0.59.0:
-    resolution: {integrity: sha512-9KxasX98+qYhOVa4PPeaX/yY/ukM9DMuJlUJRgJVwrdCkWw+mkkiIh6EJmYyCxU8nXhj0VEzdYr3dNUJT1BQow==}
+  meilisearch@0.58.0:
+    resolution: {integrity: sha512-MXFlU+JVG2I3tDI4brS3UHxEv2fjOROP24TPP16c8dGHTulb1kxMgXvKP0x4ImvUcsVVJFi4QXP0JNDS/TaWaw==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   micromark-util-character@2.1.1:
@@ -5526,7 +5514,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@lerna-lite/cli@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)':
+  '@lerna-lite/cli@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)':
     dependencies:
       '@lerna-lite/core': 5.4.2(@types/node@24.13.3)
       '@lerna-lite/init': 5.4.2(@types/node@24.13.3)
@@ -5535,8 +5523,8 @@ snapshots:
       import-local: 3.2.0
       yargs: 18.1.0
     optionalDependencies:
-      '@lerna-lite/publish': 5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1)
-      '@lerna-lite/version': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1)
+      '@lerna-lite/publish': 5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)
+      '@lerna-lite/version': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)
     transitivePeerDependencies:
       - '@types/node'
 
@@ -5572,12 +5560,12 @@ snapshots:
       fast-string-width: 3.0.2
       signal-exit: 4.1.0
 
-  '@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1)':
+  '@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)':
     dependencies:
-      '@lerna-lite/cli': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
+      '@lerna-lite/cli': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
       '@lerna-lite/core': 5.4.2(@types/node@24.13.3)
       '@lerna-lite/npmlog': 5.4.1
-      '@lerna-lite/version': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1)
+      '@lerna-lite/version': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)
       '@npmcli/arborist': 9.9.1
       '@npmcli/package-json': 7.0.5
       ci-info: 4.4.0
@@ -5596,20 +5584,22 @@ snapshots:
       - '@lerna-lite/run'
       - '@lerna-lite/watch'
       - '@types/node'
+      - conventional-changelog-conventionalcommits
       - conventional-commits-filter
       - supports-color
 
-  '@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1)':
+  '@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1)':
     dependencies:
       '@conventional-changelog/git-client': 3.1.0(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.2)
       '@conventional-changelog/template': 1.2.1
-      '@lerna-lite/cli': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
+      '@lerna-lite/cli': 5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@lerna-lite/version@5.4.2(@lerna-lite/publish@5.4.2(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)(conventional-changelog-conventionalcommits@10.2.1)(conventional-commits-filter@6.0.1))(@types/node@24.13.3)
       '@lerna-lite/core': 5.4.2(@types/node@24.13.3)
       '@lerna-lite/npmlog': 5.4.1
       '@octokit/plugin-enterprise-rest': 6.0.1
       '@octokit/rest': 22.0.1
       conventional-changelog: 8.1.0(conventional-commits-filter@6.0.1)
       conventional-changelog-angular: 9.2.1
+      conventional-changelog-conventionalcommits: 10.2.1
       conventional-changelog-writer: 9.2.0
       conventional-commits-parser: 7.1.2
       conventional-recommended-bump: 12.1.0
@@ -6899,20 +6889,6 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@vuepress/helper@2.0.0-rc.131(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))':
-    dependencies:
-      '@vue/shared': 3.5.40
-      '@vueuse/core': 14.4.0(vue@3.5.40(typescript@7.0.2))
-      cheerio: 1.2.0
-      fflate: 0.8.3
-      gray-matter: 4.0.3
-      vue: 3.5.40(typescript@7.0.2)
-      vuepress: 2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2))
-    optionalDependencies:
-      '@vuepress/bundler-vite': 2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0)
-    transitivePeerDependencies:
-      - typescript
-
   '@vuepress/highlighter-helper@2.0.0-rc.130(f1d778565d5f08d5e86542e65dc4beb1)':
     dependencies:
       '@vuepress/helper': 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
@@ -7186,11 +7162,11 @@ snapshots:
       - markdown-it
       - typescript
 
-  '@vuepress/plugin-meilisearch@2.0.0-rc.133(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))':
+  '@vuepress/plugin-meilisearch@2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))':
     dependencies:
-      '@vuepress/helper': 2.0.0-rc.131(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
-      commander: 15.0.0
-      meilisearch: 0.59.0
+      '@vuepress/helper': 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
+      commander: 14.0.3
+      meilisearch: 0.58.0
       meilisearch-docsearch: 0.8.0
       vue: 3.5.40(typescript@7.0.2)
       vuepress: 2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2))
@@ -7632,8 +7608,6 @@ snapshots:
   comma-separated-tokens@2.0.3: {}
 
   commander@14.0.3: {}
-
-  commander@15.0.0: {}
 
   common-ancestor-path@2.0.0: {}
 
@@ -8372,7 +8346,7 @@ snapshots:
 
   meilisearch@0.50.0: {}
 
-  meilisearch@0.59.0: {}
+  meilisearch@0.58.0: {}
 
   micromark-util-character@2.1.1:
     dependencies:
@@ -9525,7 +9499,7 @@ snapshots:
       - '@vuepress/bundler-webpack'
       - typescript
 
-  vuepress-theme-hope@2.0.0-rc.107(8e4ed01fb02d7cef702e1f35899cf61f):
+  vuepress-theme-hope@2.0.0-rc.107(390aa3bcfbd341460621d08af37d3ecf):
     dependencies:
       '@vuepress/helper': 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
       '@vuepress/plugin-active-header-links': 2.0.0-rc.130(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
@@ -9568,7 +9542,7 @@ snapshots:
       vuepress-plugin-md-enhance: 2.0.0-rc.107(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(markdown-it@14.3.0)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
       vuepress-shared: 2.0.0-rc.107(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
     optionalDependencies:
-      '@vuepress/plugin-meilisearch': 2.0.0-rc.133(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
+      '@vuepress/plugin-meilisearch': 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(typescript@7.0.2)(vuepress@2.0.0-rc.30(@vue/compiler-sfc@3.5.40)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@24.13.3)(@vue/compiler-sfc@3.5.40)(esbuild@0.28.1)(jiti@2.6.1)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.2.2)(rollup@4.62.4)(typescript@7.0.2)(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.40(typescript@7.0.2)))
       sass: 1.100.0
       sass-embedded: 1.100.0
     transitivePeerDependencies:

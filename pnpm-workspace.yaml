@@ -15,3 +15,8 @@ minimumReleaseAgeExclude:
   - oxc-config-hope
   - oxfmt
   - oxlint
+
+packageExtensions:
+  "@lerna-lite/version":
+    peerDependencies:
+      conventional-changelog-conventionalcommits: ^10.2.0
