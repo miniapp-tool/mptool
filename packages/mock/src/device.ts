@@ -1,4 +1,16 @@
-import { callCallback } from "./ui.js";
+import { callCallback, offEvent, onEvent } from "./ui.js";
+
+/** 生成管理器对象 mock：指定名称的方法均为 noop，可传入自定义实现 */
+const createManager = (
+  names: string[],
+  custom: Record<string, (...args: unknown[]) => unknown> = {},
+): Record<string, (...args: unknown[]) => unknown> => {
+  const manager: Record<string, (...args: unknown[]) => unknown> = {};
+
+  for (const name of names) manager[name] = custom[name] ?? ((): void => void 0);
+
+  return manager;
+};
 
 /** 设备、媒体、位置、用户、支付等相关 wx API mock */
 export const deviceApi = {
@@ -180,5 +192,254 @@ export const deviceApi = {
 
   reportAnalytics(_eventName: string, _data?: Record<string, unknown>): void {
     // noop
+  },
+
+  onAccelerometerChange(listener: (result: { x: number; y: number; z: number }) => void): void {
+    onEvent("accelerometerChange", listener);
+  },
+
+  offAccelerometerChange(listener?: (result: { x: number; y: number; z: number }) => void): void {
+    offEvent("accelerometerChange", listener);
+  },
+
+  startAccelerometer(option: unknown): unknown {
+    return callCallback(option, { errMsg: "startAccelerometer:ok" });
+  },
+
+  stopAccelerometer(option: unknown): unknown {
+    return callCallback(option, { errMsg: "stopAccelerometer:ok" });
+  },
+
+  onCompassChange(listener: (result: { direction: number }) => void): void {
+    onEvent("compassChange", listener);
+  },
+
+  offCompassChange(listener?: (result: { direction: number }) => void): void {
+    offEvent("compassChange", listener);
+  },
+
+  startCompass(option: unknown): unknown {
+    return callCallback(option, { errMsg: "startCompass:ok" });
+  },
+
+  stopCompass(option: unknown): unknown {
+    return callCallback(option, { errMsg: "stopCompass:ok" });
+  },
+
+  onDeviceMotionChange(
+    listener: (result: { alpha: number; beta: number; gamma: number }) => void,
+  ): void {
+    onEvent("deviceMotionChange", listener);
+  },
+
+  offDeviceMotionChange(
+    listener?: (result: { alpha: number; beta: number; gamma: number }) => void,
+  ): void {
+    offEvent("deviceMotionChange", listener);
+  },
+
+  startDeviceMotionListening(option: unknown): unknown {
+    return callCallback(option, { errMsg: "startDeviceMotionListening:ok" });
+  },
+
+  stopDeviceMotionListening(option: unknown): unknown {
+    return callCallback(option, { errMsg: "stopDeviceMotionListening:ok" });
+  },
+
+  onNetworkStatusChange(
+    listener: (result: { isConnected: boolean; networkType: string }) => void,
+  ): void {
+    onEvent("networkStatusChange", listener);
+  },
+
+  offNetworkStatusChange(
+    listener?: (result: { isConnected: boolean; networkType: string }) => void,
+  ): void {
+    offEvent("networkStatusChange", listener);
+  },
+
+  getFileInfo(option: unknown): unknown {
+    return callCallback(option, { size: 0, digest: "", errMsg: "getFileInfo:ok" });
+  },
+
+  getWeRunData(option: unknown): unknown {
+    return callCallback(option, {
+      encryptedData: "",
+      iv: "",
+      cloudID: "",
+      errMsg: "getWeRunData:ok",
+    });
+  },
+
+  getShareInfo(option: unknown): unknown {
+    return callCallback(option, { encryptedData: "", iv: "", errMsg: "getShareInfo:ok" });
+  },
+
+  createInnerAudioContext(): Record<string, (...args: unknown[]) => unknown> {
+    return createManager([
+      "play",
+      "pause",
+      "stop",
+      "seek",
+      "destroy",
+      "onCanplay",
+      "offCanplay",
+      "onPlay",
+      "offPlay",
+      "onPause",
+      "offPause",
+      "onStop",
+      "offStop",
+      "onEnded",
+      "offEnded",
+      "onTimeUpdate",
+      "offTimeUpdate",
+      "onError",
+      "offError",
+      "onWaiting",
+      "offWaiting",
+      "onSeeking",
+      "offSeeking",
+      "onSeeked",
+      "offSeeked",
+      "onVolumeChange",
+      "offVolumeChange",
+    ]);
+  },
+
+  createVideoContext(_id?: string): Record<string, (...args: unknown[]) => unknown> {
+    return createManager([
+      "play",
+      "pause",
+      "stop",
+      "seek",
+      "requestFullScreen",
+      "exitFullScreen",
+      "onPlay",
+      "offPlay",
+      "onPause",
+      "offPause",
+      "onEnded",
+      "offEnded",
+      "onError",
+      "offError",
+      "onTimeUpdate",
+      "offTimeUpdate",
+    ]);
+  },
+
+  createMapContext(_id?: string): Record<string, (...args: unknown[]) => unknown> {
+    return createManager([
+      "moveToLocation",
+      "translateMarker",
+      "includePoints",
+      "getCenterLocation",
+      "getRegion",
+      "getScale",
+      "getRotate",
+      "getSkew",
+    ]);
+  },
+
+  createCanvasContext(
+    _id?: string,
+    _component?: unknown,
+  ): Record<string, (...args: unknown[]) => unknown> {
+    return createManager(
+      [
+        "setFillStyle",
+        "setStrokeStyle",
+        "setLineWidth",
+        "setLineCap",
+        "setLineJoin",
+        "setFontSize",
+        "setTextAlign",
+        "setTextBaseline",
+        "setShadow",
+        "setGlobalAlpha",
+        "setTransform",
+        "transform",
+        "scale",
+        "rotate",
+        "translate",
+        "fillRect",
+        "strokeRect",
+        "clearRect",
+        "fillText",
+        "strokeText",
+        "beginPath",
+        "closePath",
+        "moveTo",
+        "lineTo",
+        "arc",
+        "rect",
+        "fill",
+        "stroke",
+        "clip",
+        "save",
+        "restore",
+        "drawImage",
+        "draw",
+        "measureText",
+        "createLinearGradient",
+        "createCircularGradient",
+      ],
+      {
+        measureText: (): { width: number } => ({ width: 0 }),
+        createLinearGradient: (): Record<string, (...args: unknown[]) => void> =>
+          createManager(["addColorStop"]),
+        createCircularGradient: (): Record<string, (...args: unknown[]) => void> =>
+          createManager(["addColorStop"]),
+      },
+    );
+  },
+
+  getRecorderManager(): Record<string, (...args: unknown[]) => unknown> {
+    return createManager([
+      "start",
+      "stop",
+      "pause",
+      "resume",
+      "onStart",
+      "onStop",
+      "onPause",
+      "onResume",
+      "onError",
+      "onFrameRecorded",
+    ]);
+  },
+
+  getBackgroundAudioManager(): Record<string, (...args: unknown[]) => unknown> {
+    return createManager([
+      "play",
+      "pause",
+      "stop",
+      "seek",
+      "destroy",
+      "onCanplay",
+      "onPlay",
+      "onPause",
+      "onStop",
+      "onEnded",
+      "onTimeUpdate",
+      "onError",
+    ]);
+  },
+
+  canvasToTempFilePath(option: unknown): unknown {
+    return callCallback(option, { tempFilePath: "", errMsg: "canvasToTempFilePath:ok" });
+  },
+
+  canvasGetImageData(option: unknown): unknown {
+    return callCallback(option, {
+      width: 0,
+      height: 0,
+      data: new Uint8ClampedArray(0),
+      errMsg: "canvasGetImageData:ok",
+    });
+  },
+
+  canvasPutImageData(option: unknown): unknown {
+    return callCallback(option, { errMsg: "canvasPutImageData:ok" });
   },
 };

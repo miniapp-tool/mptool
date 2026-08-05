@@ -1,3 +1,4 @@
+// oxlint-disable promise/prefer-await-to-callbacks
 // oxlint-disable typescript/no-explicit-any
 
 interface CallbackOption {
@@ -30,7 +31,7 @@ type Listener = (...args: any[]) => void;
 const eventListeners = new Map<string, Set<Listener>>();
 
 /** 注册事件监听器 */
-const onEvent = (event: string, listener: Listener): void => {
+export const onEvent = (event: string, listener: Listener): void => {
   const listeners = eventListeners.get(event) ?? new Set<Listener>();
 
   listeners.add(listener);
@@ -38,7 +39,7 @@ const onEvent = (event: string, listener: Listener): void => {
 };
 
 /** 移除事件监听器，未传入 listener 时移除该事件的全部监听器 */
-const offEvent = (event: string, listener?: Listener): void => {
+export const offEvent = (event: string, listener?: Listener): void => {
   if (!listener) {
     eventListeners.delete(event);
     return;
@@ -82,6 +83,26 @@ export const uiApi = {
 
   hideKeyboard(): void {
     // noop
+  },
+
+  showKeyboard(option: unknown): unknown {
+    return callCallback(option, { errMsg: "showKeyboard:ok" });
+  },
+
+  onKeyboardHeightChange(listener: (result: { height: number }) => void): void {
+    onEvent("keyboardHeightChange", listener);
+  },
+
+  offKeyboardHeightChange(listener?: (result: { height: number }) => void): void {
+    offEvent("keyboardHeightChange", listener);
+  },
+
+  onCopyUrl(listener: (result: { query: string }) => void): void {
+    onEvent("copyUrl", listener);
+  },
+
+  offCopyUrl(listener?: (result: { query: string }) => void): void {
+    offEvent("copyUrl", listener);
   },
 
   getSetting(option: unknown): unknown {
@@ -239,6 +260,10 @@ export const uiApi = {
     return true;
   },
 
+  nextTick(callback: () => void): void {
+    callback();
+  },
+
   reportEvent(_eventName: string, _data?: Record<string, unknown>): void {
     // noop
   },
@@ -333,6 +358,22 @@ export const uiApi = {
     return callCallback(option, { errMsg: "hideHomeButton:ok" });
   },
 
+  navigateToMiniProgram(option: unknown): unknown {
+    return callCallback(option, { errMsg: "navigateToMiniProgram:ok" });
+  },
+
+  navigateBackMiniProgram(option: unknown): unknown {
+    return callCallback(option, { errMsg: "navigateBackMiniProgram:ok" });
+  },
+
+  openCustomerServiceChat(option: unknown): unknown {
+    return callCallback(option, { errMsg: "openCustomerServiceChat:ok" });
+  },
+
+  updateShareMenu(option: unknown): unknown {
+    return callCallback(option, { errMsg: "updateShareMenu:ok" });
+  },
+
   setTabBarBadge(option: unknown): unknown {
     return callCallback(option, { errMsg: "setTabBarBadge:ok" });
   },
@@ -410,6 +451,42 @@ export const uiApi = {
       notificationBadgeAuthorized: "authorized",
       notificationSoundAuthorized: "authorized",
       phoneCalendarAuthorized: "authorized",
+    };
+  },
+
+  getPrivacySetting(option: unknown): unknown {
+    return callCallback(option, {
+      needAuthorization: false,
+      privacyContractName: "",
+      errMsg: "getPrivacySetting:ok",
+    });
+  },
+
+  requirePrivacyAuthorize(option: unknown): unknown {
+    return callCallback(option, { errMsg: "requirePrivacyAuthorize:ok" });
+  },
+
+  onNeedPrivacyAuthorization(
+    listener: (result: { needAuthorization: boolean; privacyContractName: string }) => void,
+  ): void {
+    onEvent("needPrivacyAuthorization", listener);
+  },
+
+  offNeedPrivacyAuthorization(
+    listener?: (result: { needAuthorization: boolean; privacyContractName: string }) => void,
+  ): void {
+    offEvent("needPrivacyAuthorization", listener);
+  },
+
+  getExptInfoSync(keys?: string[]): Record<string, unknown> {
+    return Object.fromEntries((keys ?? []).map((key) => [key, ""]));
+  },
+
+  getEnvInfoSync(): Record<string, unknown> {
+    return {
+      appName: "WeChat",
+      appVersion: "8.0.0",
+      miniProgram: { envVersion: "develop", version: "" },
     };
   },
 

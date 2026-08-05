@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { wx } from "../src/index.js";
+import { emitEvent, wx } from "../src/index.js";
 
 describe("request mock", () => {
   it("should resolve a successful response", async () => {
@@ -121,5 +121,54 @@ describe("uploadFile mock", () => {
 
     expect(task.onProgressUpdate).toBeTypeOf("function");
     expect(task.abort).toBeTypeOf("function");
+  });
+});
+
+describe("socket mock", () => {
+  it("connectSocket should return a socket task", () => {
+    const task = wx.connectSocket({ url: "wss://example.com" }) as {
+      send: (option?: { data?: string }) => void;
+      close: (option?: { code?: number }) => void;
+      onOpen: (cb: () => void) => void;
+    };
+
+    expect(task.send).toBeTypeOf("function");
+    expect(task.close).toBeTypeOf("function");
+    expect(task.onOpen).toBeTypeOf("function");
+
+    expect(() => task.send({ data: "hi" })).not.toThrow();
+    expect(() => task.close()).not.toThrow();
+  });
+
+  it("onSocketMessage should register and offSocketMessage should remove listener", () => {
+    const listener = vi.fn<(result: { data: string | ArrayBuffer }) => void>();
+
+    wx.onSocketMessage(listener);
+    emitEvent("socketMessage", { data: "hi" });
+    expect(listener).toHaveBeenCalledWith({ data: "hi" });
+
+    wx.offSocketMessage(listener);
+    emitEvent("socketMessage", { data: "bye" });
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("sendSocketMessage and closeSocket should resolve", async () => {
+    await expect(wx.sendSocketMessage({ data: "hi" })).resolves.toStrictEqual({
+      errMsg: "sendSocketMessage:ok",
+    });
+    await expect(wx.closeSocket({})).resolves.toStrictEqual({ errMsg: "closeSocket:ok" });
+  });
+
+  it("onSocketOpen and onSocketClose should register listeners", () => {
+    const open = vi.fn<(result: { header: Record<string, string> }) => void>();
+    const close = vi.fn<(result: { code: number; reason: string }) => void>();
+
+    wx.onSocketOpen(open);
+    wx.onSocketClose(close);
+    emitEvent("socketOpen", { header: {} });
+    emitEvent("socketClose", { code: 1000, reason: "" });
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(close).toHaveBeenCalledTimes(1);
   });
 });

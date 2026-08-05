@@ -357,4 +357,104 @@ describe("ui mock", () => {
     emitEvent("userCaptureScreen");
     expect(listener).toHaveBeenCalledTimes(1);
   });
+
+  it("navigateToMiniProgram should resolve", async () => {
+    await expect(wx.navigateToMiniProgram({ appId: "wx1234567890abcdef" })).resolves.toStrictEqual({
+      errMsg: "navigateToMiniProgram:ok",
+    });
+  });
+
+  it("navigateBackMiniProgram should resolve", async () => {
+    await expect(wx.navigateBackMiniProgram({})).resolves.toStrictEqual({
+      errMsg: "navigateBackMiniProgram:ok",
+    });
+  });
+
+  it("openCustomerServiceChat should resolve", async () => {
+    await expect(wx.openCustomerServiceChat({ url: "https://example.com" })).resolves.toStrictEqual(
+      { errMsg: "openCustomerServiceChat:ok" },
+    );
+  });
+
+  it("updateShareMenu should resolve", async () => {
+    await expect(wx.updateShareMenu({ withShareTicket: true })).resolves.toStrictEqual({
+      errMsg: "updateShareMenu:ok",
+    });
+  });
+
+  it("showKeyboard should resolve", async () => {
+    await expect(wx.showKeyboard({ defaultValue: "", maxLength: 140 })).resolves.toStrictEqual({
+      errMsg: "showKeyboard:ok",
+    });
+  });
+
+  it("onKeyboardHeightChange should register and remove listener", () => {
+    const listener = vi.fn<(result: { height: number }) => void>();
+
+    wx.onKeyboardHeightChange(listener);
+    emitEvent("keyboardHeightChange", { height: 300 });
+    expect(listener).toHaveBeenCalledWith({ height: 300 });
+
+    wx.offKeyboardHeightChange(listener);
+    emitEvent("keyboardHeightChange", { height: 0 });
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("onCopyUrl should register and offCopyUrl should remove listener", () => {
+    const listener = vi.fn<(result: { query: string }) => void>();
+
+    wx.onCopyUrl(listener);
+    emitEvent("copyUrl", { query: "a=1" });
+    expect(listener).toHaveBeenCalledWith({ query: "a=1" });
+
+    wx.offCopyUrl(listener);
+    emitEvent("copyUrl", { query: "a=2" });
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("nextTick should call the callback", () => {
+    const callback = vi.fn<() => void>();
+
+    wx.nextTick(callback);
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  it("getPrivacySetting should resolve", async () => {
+    const res = (await wx.getPrivacySetting({})) as { needAuthorization: boolean };
+
+    expect(res.needAuthorization).toBe(false);
+  });
+
+  it("requirePrivacyAuthorize should resolve", async () => {
+    await expect(wx.requirePrivacyAuthorize({})).resolves.toStrictEqual({
+      errMsg: "requirePrivacyAuthorize:ok",
+    });
+  });
+
+  it("onNeedPrivacyAuthorization should register listener", () => {
+    const listener =
+      vi.fn<(result: { needAuthorization: boolean; privacyContractName: string }) => void>();
+
+    wx.onNeedPrivacyAuthorization(listener);
+    emitEvent("needPrivacyAuthorization", {
+      needAuthorization: true,
+      privacyContractName: "协议",
+    });
+    expect(listener).toHaveBeenCalledWith({
+      needAuthorization: true,
+      privacyContractName: "协议",
+    });
+  });
+
+  it("getExptInfoSync should return requested keys", () => {
+    const res = wx.getExptInfoSync(["color", "size"]);
+
+    expect(res).toStrictEqual({ color: "", size: "" });
+  });
+
+  it("getEnvInfoSync should return env info", () => {
+    const res = wx.getEnvInfoSync();
+
+    expect(res.appName).toBe("WeChat");
+  });
 });
