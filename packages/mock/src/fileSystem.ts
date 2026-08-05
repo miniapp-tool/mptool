@@ -56,6 +56,9 @@ export class FileSystemManager {
   rmdirSync(path: string, recursive = false): void {
     const dir = normalizePath(path);
 
+    // 真实微信：目标目录不存在时删除失败
+    if (!this.files.has(dir)) throw new Error(`ENOENT: ${path}`);
+
     if (recursive) {
       [...this.files.keys()].forEach((key) => {
         if (key.startsWith(`${dir}/`)) this.files.delete(key);
@@ -66,11 +69,21 @@ export class FileSystemManager {
   }
 
   unlinkSync(path: string): void {
-    this.files.delete(normalizePath(path));
+    const file = normalizePath(path);
+
+    // 真实微信：目标文件不存在时删除失败
+    if (!this.files.has(file)) throw new Error(`ENOENT: ${path}`);
+
+    this.files.delete(file);
   }
 
   readdirSync(path: string): string[] {
     const dir = normalizePath(path);
+
+    // 真实微信：目标目录不存在时读取失败
+    if (!this.files.has(dir) && ![...this.files.keys()].some((key) => key.startsWith(`${dir}/`)))
+      throw new Error(`ENOENT: ${path}`);
+
     const names = new Set<string>();
 
     for (const key of this.files.keys()) {

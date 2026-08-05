@@ -169,3 +169,35 @@ describe(removeAsync, () => {
     await expect(getAsync("remove-async-key")).resolves.toBeUndefined();
   });
 });
+
+describe(setAsync, () => {
+  it("should catch setStorage failure", async () => {
+    const mockSetStorage = wx as unknown as {
+      setStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
+    };
+
+    mockSetStorage.setStorage = (option): Promise<never> => {
+      option.fail?.({ errMsg: "set fail" });
+
+      return Promise.reject(new Error("set fail"));
+    };
+
+    await expect(setAsync("fail-set-key", "value")).resolves.toBeUndefined();
+  });
+});
+
+describe(getAsync, () => {
+  it("should return undefined when getStorage fails", async () => {
+    const mockGetStorage = wx as unknown as {
+      getStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
+    };
+
+    mockGetStorage.getStorage = (option): Promise<never> => {
+      option.fail?.({ errMsg: "get fail" });
+
+      return Promise.reject(new Error("get fail"));
+    };
+
+    await expect(getAsync("fail-get-key")).resolves.toBeUndefined();
+  });
+});

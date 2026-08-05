@@ -131,4 +131,79 @@ describe("file edge cases", () => {
 
     expect(result).toBeInstanceOf(ArrayBuffer);
   });
+
+  it("should not throw when removing a missing directory", () => {
+    expect(() => rm("tmp/missing-dir", "dir")).not.toThrow();
+  });
+
+  it("should remove a directory by default when it is a directory", () => {
+    mkdir("tmp/default-dir");
+
+    rm("tmp/default-dir");
+
+    expect(exists("tmp/default-dir")).toBe(false);
+  });
+
+  it("should not throw when removing a missing file", () => {
+    expect(() => rm("tmp/missing-file", "file")).not.toThrow();
+  });
+
+  it("should return empty list for a missing directory", () => {
+    expect(ls("tmp/missing-ls")).toStrictEqual([]);
+  });
+
+  it("should not throw when saving to an existing path", () => {
+    writeFile("tmp/exist.txt", "x");
+
+    expect(() => saveFile("mock://temp/source", "tmp/exist.txt")).not.toThrow();
+  });
+
+  it("should reject saveOnlineFile on non-200 status", async () => {
+    const mockDownloadFileApi = wx as unknown as {
+      downloadFile: (option: {
+        success?: (result: { statusCode: number; tempFilePath: string }) => void;
+      }) => void;
+    };
+
+    mockDownloadFileApi.downloadFile = (option): void => {
+      option.success?.({ statusCode: 404, tempFilePath: "" });
+    };
+
+    await expect(
+      saveOnlineFile("https://example.com/file", "tmp/fail-status.txt"),
+    ).rejects.toMatchObject({ code: 404 });
+  });
+
+  it("should reject saveOnlineFile when download fails", async () => {
+    const mockDownloadFileApi = wx as unknown as {
+      downloadFile: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockDownloadFileApi.downloadFile = (option): void => {
+      option.fail?.({ errMsg: "download fail" });
+    };
+
+    await expect(
+      saveOnlineFile("https://example.com/file", "tmp/fail-download.txt"),
+    ).rejects.toThrow("download fail");
+  });
+
+  it("should not throw when mkdir fails on missing parent without recursion", () => {
+    expect(() => mkdir("mkdir-fail-dir/x", false)).not.toThrow();
+  });
+
+  it("should reject when unzip fails", async () => {
+    const fs = wx.getFileSystemManager();
+
+    (fs as { unzip?: unknown }).unzip = (options: {
+      zipFilePath: string;
+      targetPath: string;
+      success: () => void;
+      fail?: (result: { errCode: number; errMsg: string }) => void;
+    }): void => {
+      options.fail?.({ errCode: 1, errMsg: "unzip fail" });
+    };
+
+    await expect(unzip("tmp/archive.zip", "tmp/unzip-fail")).rejects.toMatchObject({ code: 1 });
+  });
 });
