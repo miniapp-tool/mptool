@@ -57,4 +57,8 @@ describe(getCookieScopeDomain, () => {
     expect(getCookieScopeDomain()).toStrictEqual([]);
     expect(getCookieScopeDomain("")).toStrictEqual([]);
   });
+
+  it("should not duplicate scopes for repeated labels", () => {
+    expect(getCookieScopeDomain("com.com")).toStrictEqual(["com.com", ".com.com", ".com"]);
+  });
 });

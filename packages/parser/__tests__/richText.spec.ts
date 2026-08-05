@@ -364,6 +364,18 @@ describe(getRichTextNodes, () => {
     ]);
   });
 
+  it("omits style for non-numeric viewBox", async () => {
+    const nodes = await getRichTextNodes('<svg viewbox="0 0 abc def"></svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: { src: expect.stringContaining("data:image/svg+xml,") },
+      },
+    ]);
+  });
+
   it("accepts pre-parsed nodes", async () => {
     const nodes = await getRichTextNodes([{ type: "text", data: "hello" }] as never);
 

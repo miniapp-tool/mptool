@@ -27,7 +27,9 @@ const handleSVG = (node: Element): RichTextNode => {
     // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     const [, , viewboxWidth, viewboxHeight] = viewbox.split(" ").map(Number);
 
-    style = `width:${viewboxWidth}px;height:${viewboxHeight}px;`;
+    // 非数字 viewBox 时跳过，避免生成无效样式
+    if (Number.isFinite(viewboxWidth) && Number.isFinite(viewboxHeight))
+      style = `width:${viewboxWidth}px;height:${viewboxHeight}px;`;
   }
 
   return {

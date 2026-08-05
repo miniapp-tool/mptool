@@ -22,9 +22,15 @@ export const getCookieScopeDomain = (domain = ""): string[] => {
   // 获取 cookie 作用域范围列表
   const normalizedDomain = normalizeDomain(domain).replace(/^\.+/giu, "");
 
-  const scopes = normalizedDomain
-    .split(".")
-    .map((k) => [".", normalizedDomain.slice(normalizedDomain.indexOf(k))].join(""));
+  const scopes: string[] = [`.${normalizedDomain}`];
+
+  // 从每个点分隔位置生成后缀作用域，避免 indexOf 只取首次出现导致重复域名（如 com.com）出错
+  for (
+    let index = normalizedDomain.indexOf(".");
+    index !== -1;
+    index = normalizedDomain.indexOf(".", index + 1)
+  )
+    scopes.push(`.${normalizedDomain.slice(index + 1)}`);
 
   return [normalizedDomain, ...scopes];
 };

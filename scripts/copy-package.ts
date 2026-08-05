@@ -10,8 +10,6 @@ try {
   // do nothing
 }
 
-copy("./packages/file/dist", `${parentFolderPath}/file/dist`);
-copy("./packages/file/package.json", `${parentFolderPath}/file/package.json`);
-
-copy("./packages/enhance/dist", `${parentFolderPath}/enhance/dist`);
-copy("./packages/enhance/package.json", `${parentFolderPath}/enhance/package.json`);
+// demo 依赖 @mptool/all（其 dist 已内联 api/enhance/file/net/parser）
+copy("./packages/all/dist", `${parentFolderPath}/all/dist`);
+copy("./packages/all/package.json", `${parentFolderPath}/all/package.json`);

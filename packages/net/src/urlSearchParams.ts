@@ -156,9 +156,13 @@ export class URLSearchParams {
     callbackfn: (value: string, key: string, iterable: URLSearchParams) => void,
     thisArg?: unknown,
   ): void {
+    // 只绑定一次 thisArg，避免每次迭代都生成新函数
+    // oxlint-disable-next-line no-undefined
+    const bound = thisArg === undefined ? callbackfn : callbackfn.bind(thisArg);
+
     this.params.forEach((value, key) => {
       value.forEach((item) => {
-        callbackfn.bind(thisArg)(item, key, this);
+        bound(item, key, this);
       });
     });
   }
