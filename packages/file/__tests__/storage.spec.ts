@@ -1,7 +1,19 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
-import { check, checkAsync, get, getAsync, set, setAsync } from "../src/storage.js";
+import {
+  check,
+  checkAsync,
+  get,
+  getAsync,
+  put,
+  remove,
+  removeAsync,
+  set,
+  setAsync,
+  storage,
+  take,
+} from "../src/storage.js";
 
 describe(set, () => {
   it("set sync simple", () => {
@@ -100,5 +112,60 @@ describe(checkAsync, () => {
     await checkAsync();
 
     await expect(getAsync("check-async-expired")).resolves.toBeUndefined();
+  });
+});
+
+describe(put, () => {
+  it("should store value in memory", () => {
+    put("put-key", { a: 1 });
+
+    expect(storage.get("put-key")).toStrictEqual({ a: 1 });
+  });
+});
+
+describe(take, () => {
+  it("should return and remove the value", () => {
+    put("take-key", "value");
+
+    expect(take("take-key")).toBe("value");
+    expect(take("take-key")).toBeUndefined();
+  });
+
+  it("should return undefined for a missing key", () => {
+    expect(take("take-missing-key")).toBeUndefined();
+  });
+});
+
+describe(set, () => {
+  it("should be valid within the session when once", () => {
+    set("once-key", "value", "once");
+
+    expect(get("once-key")).toBe("value");
+  });
+
+  it("should not cache when keep has no previous value", () => {
+    set("keep-none-key", "value", "keep");
+
+    expect(get("keep-none-key")).toBeUndefined();
+  });
+});
+
+describe(remove, () => {
+  it("should remove synced cache", () => {
+    set("remove-key", "value");
+
+    remove("remove-key");
+
+    expect(get("remove-key")).toBeUndefined();
+  });
+});
+
+describe(removeAsync, () => {
+  it("should remove async cache", async () => {
+    await setAsync("remove-async-key", "value");
+
+    await removeAsync("remove-async-key");
+
+    await expect(getAsync("remove-async-key")).resolves.toBeUndefined();
   });
 });
