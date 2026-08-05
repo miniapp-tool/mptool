@@ -21,4 +21,42 @@ describe(download, () => {
 
     await expect(download("https://example.com/file.png")).rejects.toThrow("download fail");
   });
+
+  it("should reject with status code on non-200 response", async () => {
+    const titles: string[] = [];
+    const mockShowToastApi = wx as unknown as {
+      showToast: (option: { title: string }) => void;
+    };
+
+    mockShowToastApi.showToast = (option): void => {
+      titles.push(option.title);
+    };
+    const mockDownloadFile = wx as unknown as {
+      downloadFile: (option: {
+        success?: (result: { statusCode: number; tempFilePath: string }) => void;
+      }) => void;
+    };
+
+    mockDownloadFile.downloadFile = (option): void => {
+      option.success?.({ statusCode: 404, tempFilePath: "" });
+    };
+
+    await expect(download("https://example.com/file.png")).rejects.toThrow("statusCode: 404");
+
+    expect(titles).toStrictEqual(["下载失败"]);
+  });
+
+  it("should resolve the downloaded temp file path", async () => {
+    const mockDownloadFile = wx as unknown as {
+      downloadFile: (option: {
+        success?: (result: { statusCode: number; tempFilePath: string }) => void;
+      }) => void;
+    };
+
+    mockDownloadFile.downloadFile = (option): void => {
+      option.success?.({ statusCode: 200, tempFilePath: "mock://temp/file.png" });
+    };
+
+    await expect(download("https://example.com/file.png")).resolves.toBe("mock://temp/file.png");
+  });
 });
