@@ -1,3 +1,5 @@
+import { callCallback } from "./ui.js";
+
 export interface MockFileNode {
   type: "file" | "dir";
   content?: string;
@@ -130,3 +132,25 @@ let fileSystemManager: FileSystemManager | undefined;
 /** 获取文件系统管理器 */
 export const getFileSystemManager = (): FileSystemManager =>
   (fileSystemManager ??= new FileSystemManager());
+
+/** 文件保存相关 wx API mock */
+export const fileApi = {
+  saveFile(option: unknown): unknown {
+    const savedFilePath =
+      (option as { filePath?: string } | undefined)?.filePath ?? `wxfile://store_${Date.now()}`;
+
+    return callCallback(option, { savedFilePath, errMsg: "saveFile:ok" });
+  },
+
+  getSavedFileList(option: unknown): unknown {
+    return callCallback(option, { fileList: [], errMsg: "getSavedFileList:ok" });
+  },
+
+  getSavedFileInfo(option: unknown): unknown {
+    return callCallback(option, { size: 0, createTime: 0, errMsg: "getSavedFileInfo:ok" });
+  },
+
+  removeSavedFile(option: unknown): unknown {
+    return callCallback(option, { errMsg: "removeSavedFile:ok" });
+  },
+};

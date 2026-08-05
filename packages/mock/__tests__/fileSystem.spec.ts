@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getFileSystemManager } from "../src/fileSystem.js";
+import { wx } from "../src/index.js";
 
 describe(getFileSystemManager, () => {
   const fileSystem = getFileSystemManager();
@@ -81,5 +82,48 @@ describe(getFileSystemManager, () => {
     expect(() => fileSystem.rmdirSync("fs10/missing-dir")).toThrow("ENOENT");
     expect(() => fileSystem.readdirSync("fs10/missing-dir")).toThrow("ENOENT");
     expect(() => fileSystem.statSync("fs10/missing.txt")).toThrow("ENOENT");
+  });
+});
+
+describe("file save API mock", () => {
+  it("saveFile should resolve with savedFilePath", async () => {
+    const res = (await wx.saveFile({ tempFilePath: "mock://temp/1" })) as {
+      savedFilePath: string;
+    };
+
+    expect(res.savedFilePath).toBeTypeOf("string");
+  });
+
+  it("saveFile should keep provided filePath", async () => {
+    const res = (await wx.saveFile({
+      tempFilePath: "mock://temp/1",
+      filePath: "wxfile://saved",
+    })) as {
+      savedFilePath: string;
+    };
+
+    expect(res.savedFilePath).toBe("wxfile://saved");
+  });
+
+  it("getSavedFileList should resolve with empty list", async () => {
+    const res = (await wx.getSavedFileList({})) as { fileList: unknown[] };
+
+    expect(res.fileList).toStrictEqual([]);
+  });
+
+  it("getSavedFileInfo should resolve", async () => {
+    const res = (await wx.getSavedFileInfo({ filePath: "wxfile://saved" })) as {
+      size: number;
+      createTime: number;
+    };
+
+    expect(res.size).toBe(0);
+    expect(res.createTime).toBe(0);
+  });
+
+  it("removeSavedFile should resolve", async () => {
+    await expect(wx.removeSavedFile({ filePath: "wxfile://saved" })).resolves.toStrictEqual({
+      errMsg: "removeSavedFile:ok",
+    });
   });
 });

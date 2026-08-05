@@ -6,7 +6,12 @@ interface CallbackOption {
 }
 
 /** 调用回调或返回 Promise */
-const callCallback = (option: any, result: unknown, errMsg = "ok"): void | Promise<unknown> => {
+export const callCallback = (
+  // oxlint-disable-next-line typescript/explicit-module-boundary-types
+  option: any,
+  result: unknown,
+  errMsg = "ok",
+): void | Promise<unknown> => {
   const realOption = option as CallbackOption | undefined;
 
   if (!realOption) return Promise.resolve(result);
@@ -64,6 +69,18 @@ export const uiApi = {
   },
 
   hideLoading(): void {
+    // noop
+  },
+
+  hideToast(): void {
+    // noop
+  },
+
+  showActionSheet(option: unknown): unknown {
+    return callCallback(option, { tapIndex: 0, errMsg: "showActionSheet:ok" });
+  },
+
+  hideKeyboard(): void {
     // noop
   },
 
@@ -222,7 +239,7 @@ export const uiApi = {
     return true;
   },
 
-  reportEvent(): void {
+  reportEvent(_eventName: string, _data?: Record<string, unknown>): void {
     // noop
   },
 
@@ -274,5 +291,133 @@ export const uiApi = {
       onUpdateFailed: (): void => void 0,
       applyUpdate: (): void => void 0,
     };
+  },
+
+  vibrateShort(option: unknown): unknown {
+    return callCallback(option, { errMsg: "vibrateShort:ok" });
+  },
+
+  vibrateLong(option: unknown): unknown {
+    return callCallback(option, { errMsg: "vibrateLong:ok" });
+  },
+
+  setNavigationBarTitle(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setNavigationBarTitle:ok" });
+  },
+
+  setNavigationBarColor(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setNavigationBarColor:ok" });
+  },
+
+  pageScrollTo(option: unknown): unknown {
+    return callCallback(option, { errMsg: "pageScrollTo:ok" });
+  },
+
+  stopPullDownRefresh(option: unknown): unknown {
+    return callCallback(option, { errMsg: "stopPullDownRefresh:ok" });
+  },
+
+  showShareMenu(option: unknown): unknown {
+    return callCallback(option, { errMsg: "showShareMenu:ok" });
+  },
+
+  hideShareMenu(option: unknown): unknown {
+    return callCallback(option, { errMsg: "hideShareMenu:ok" });
+  },
+
+  showShareImageMenu(option: unknown): unknown {
+    return callCallback(option, { errMsg: "showShareImageMenu:ok" });
+  },
+
+  hideHomeButton(option: unknown): unknown {
+    return callCallback(option, { errMsg: "hideHomeButton:ok" });
+  },
+
+  setTabBarBadge(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setTabBarBadge:ok" });
+  },
+
+  removeTabBarBadge(option: unknown): unknown {
+    return callCallback(option, { errMsg: "removeTabBarBadge:ok" });
+  },
+
+  showTabBarRedDot(option: unknown): unknown {
+    return callCallback(option, { errMsg: "showTabBarRedDot:ok" });
+  },
+
+  hideTabBarRedDot(option: unknown): unknown {
+    return callCallback(option, { errMsg: "hideTabBarRedDot:ok" });
+  },
+
+  setTabBarItem(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setTabBarItem:ok" });
+  },
+
+  setTabBarStyle(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setTabBarStyle:ok" });
+  },
+
+  showTabBar(option: unknown): unknown {
+    return callCallback(option, { errMsg: "showTabBar:ok" });
+  },
+
+  hideTabBar(option: unknown): unknown {
+    return callCallback(option, { errMsg: "hideTabBar:ok" });
+  },
+
+  setBackgroundColor(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setBackgroundColor:ok" });
+  },
+
+  setBackgroundTextStyle(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setBackgroundTextStyle:ok" });
+  },
+
+  setEnableDebug(option: unknown): unknown {
+    return callCallback(option, { errMsg: "setEnableDebug:ok" });
+  },
+
+  getLaunchOptionsSync(): Record<string, unknown> {
+    return {
+      path: "",
+      query: {},
+      scene: 1001,
+      shareTicket: "",
+      referrerInfo: {},
+    };
+  },
+
+  getEnterOptionsSync(): Record<string, unknown> {
+    return {
+      path: "",
+      query: {},
+      scene: 1001,
+      shareTicket: "",
+      referrerInfo: {},
+    };
+  },
+
+  getAppAuthorizeSetting(): Record<string, unknown> {
+    return {
+      albumAuthorized: "authorized",
+      bluetoothAuthorized: "authorized",
+      cameraAuthorized: "authorized",
+      locationAuthorized: "authorized",
+      locationReducedAccuracy: false,
+      microphoneAuthorized: "authorized",
+      notificationAlertAuthorized: "authorized",
+      notificationAuthorized: "authorized",
+      notificationBadgeAuthorized: "authorized",
+      notificationSoundAuthorized: "authorized",
+      phoneCalendarAuthorized: "authorized",
+    };
+  },
+
+  onUserCaptureScreen(listener: () => void): void {
+    onEvent("userCaptureScreen", listener);
+  },
+
+  offUserCaptureScreen(listener?: () => void): void {
+    offEvent("userCaptureScreen", listener);
   },
 };

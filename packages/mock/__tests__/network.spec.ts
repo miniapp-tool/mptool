@@ -79,3 +79,47 @@ describe("downloadFile mock", () => {
     expect(task.onProgressUpdate).toBeTypeOf("function");
   });
 });
+
+describe("uploadFile mock", () => {
+  it("should resolve a promise without callbacks", async () => {
+    const res = (await wx.uploadFile({
+      url: "https://example.com/upload",
+      filePath: "a.txt",
+      name: "file",
+    })) as {
+      statusCode: number;
+      data: string;
+    };
+
+    expect(res.statusCode).toBe(200);
+    expect(res.data).toBe("");
+  });
+
+  it("should call success callback", () =>
+    new Promise<void>((resolve) => {
+      void wx.uploadFile({
+        url: "https://example.com/upload",
+        filePath: "a.txt",
+        name: "file",
+        success: (res: { statusCode: number }): void => {
+          expect(res.statusCode).toBe(200);
+          resolve();
+        },
+      });
+    }));
+
+  it("should return an upload task when callbacks are provided", () => {
+    const task = wx.uploadFile({
+      url: "https://example.com/upload",
+      filePath: "a.txt",
+      name: "file",
+      success: () => {},
+    }) as {
+      onProgressUpdate: (cb: (result: { progress: number }) => void) => void;
+      abort: () => void;
+    };
+
+    expect(task.onProgressUpdate).toBeTypeOf("function");
+    expect(task.abort).toBeTypeOf("function");
+  });
+});

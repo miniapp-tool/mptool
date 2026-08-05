@@ -1,8 +1,10 @@
-import { getFileSystemManager } from "./fileSystem.js";
+import { deviceApi } from "./device.js";
+import { fileApi, getFileSystemManager } from "./fileSystem.js";
 import { frameworkApiMethods, setFrameworkMock } from "./framework.js";
 import { networkApi } from "./network.js";
 import { storageApi } from "./storage.js";
 import { uiApi } from "./ui.js";
+import { wxmlApi } from "./wxml.js";
 
 // 设置全局 Page/App/Component/Behavior/getCurrentPages mock
 setFrameworkMock();
@@ -32,6 +34,9 @@ const wxMock = {
   ...storageApi,
   ...networkApi,
   ...uiApi,
+  ...deviceApi,
+  ...wxmlApi,
+  ...fileApi,
   ...frameworkApiMethods,
 
   getRealtimeLogManager(): Pick<

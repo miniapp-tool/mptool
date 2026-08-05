@@ -159,7 +159,7 @@ describe("ui mock", () => {
   });
 
   it("reportEvent should not throw", () => {
-    expect(() => wx.reportEvent()).not.toThrow();
+    expect(() => wx.reportEvent("event", {})).not.toThrow();
   });
 
   it("onThemeChange should register and offThemeChange should remove listener", () => {
@@ -227,4 +227,134 @@ describe("ui mock", () => {
         },
       });
     }));
+
+  it("hideToast should not throw", () => {
+    expect(() => wx.hideToast()).not.toThrow();
+  });
+
+  it("showActionSheet should resolve with tapIndex 0", async () => {
+    const res = (await wx.showActionSheet({ itemList: ["a", "b"] })) as { tapIndex: number };
+
+    expect(res.tapIndex).toBe(0);
+  });
+
+  it("hideKeyboard should not throw", () => {
+    expect(() => wx.hideKeyboard()).not.toThrow();
+  });
+
+  it("vibrateShort should resolve", async () => {
+    await expect(wx.vibrateShort({})).resolves.toStrictEqual({ errMsg: "vibrateShort:ok" });
+  });
+
+  it("vibrateLong should resolve", async () => {
+    await expect(wx.vibrateLong({})).resolves.toStrictEqual({ errMsg: "vibrateLong:ok" });
+  });
+
+  it("setNavigationBarTitle should resolve", async () => {
+    await expect(wx.setNavigationBarTitle({ title: "hi" })).resolves.toStrictEqual({
+      errMsg: "setNavigationBarTitle:ok",
+    });
+  });
+
+  it("setNavigationBarColor should resolve", async () => {
+    await expect(
+      wx.setNavigationBarColor({ frontColor: "#ffffff", backgroundColor: "#000000" }),
+    ).resolves.toStrictEqual({ errMsg: "setNavigationBarColor:ok" });
+  });
+
+  it("pageScrollTo should resolve", async () => {
+    await expect(wx.pageScrollTo({ scrollTop: 100 })).resolves.toStrictEqual({
+      errMsg: "pageScrollTo:ok",
+    });
+  });
+
+  it("stopPullDownRefresh should resolve", async () => {
+    await expect(wx.stopPullDownRefresh({})).resolves.toStrictEqual({
+      errMsg: "stopPullDownRefresh:ok",
+    });
+  });
+
+  it("showShareMenu and hideShareMenu should resolve", async () => {
+    await expect(wx.showShareMenu({})).resolves.toStrictEqual({ errMsg: "showShareMenu:ok" });
+    await expect(wx.hideShareMenu({})).resolves.toStrictEqual({ errMsg: "hideShareMenu:ok" });
+  });
+
+  it("showShareImageMenu should resolve", async () => {
+    await expect(wx.showShareImageMenu({ path: "x.png" })).resolves.toStrictEqual({
+      errMsg: "showShareImageMenu:ok",
+    });
+  });
+
+  it("hideHomeButton should resolve", async () => {
+    await expect(wx.hideHomeButton({})).resolves.toStrictEqual({ errMsg: "hideHomeButton:ok" });
+  });
+
+  it("tabBar methods should resolve", async () => {
+    await expect(wx.setTabBarBadge({ index: 0, text: "1" })).resolves.toStrictEqual({
+      errMsg: "setTabBarBadge:ok",
+    });
+    await expect(wx.removeTabBarBadge({ index: 0 })).resolves.toStrictEqual({
+      errMsg: "removeTabBarBadge:ok",
+    });
+    await expect(wx.showTabBarRedDot({ index: 0 })).resolves.toStrictEqual({
+      errMsg: "showTabBarRedDot:ok",
+    });
+    await expect(wx.hideTabBarRedDot({ index: 0 })).resolves.toStrictEqual({
+      errMsg: "hideTabBarRedDot:ok",
+    });
+    await expect(wx.setTabBarItem({ index: 0, text: "a" })).resolves.toStrictEqual({
+      errMsg: "setTabBarItem:ok",
+    });
+    await expect(wx.setTabBarStyle({})).resolves.toStrictEqual({ errMsg: "setTabBarStyle:ok" });
+    await expect(wx.showTabBar({})).resolves.toStrictEqual({ errMsg: "showTabBar:ok" });
+    await expect(wx.hideTabBar({})).resolves.toStrictEqual({ errMsg: "hideTabBar:ok" });
+  });
+
+  it("setBackgroundColor and setBackgroundTextStyle should resolve", async () => {
+    await expect(wx.setBackgroundColor({ backgroundColor: "#fff" })).resolves.toStrictEqual({
+      errMsg: "setBackgroundColor:ok",
+    });
+    await expect(wx.setBackgroundTextStyle({ textStyle: "dark" })).resolves.toStrictEqual({
+      errMsg: "setBackgroundTextStyle:ok",
+    });
+  });
+
+  it("setEnableDebug should resolve", async () => {
+    await expect(wx.setEnableDebug({ enableDebug: true })).resolves.toStrictEqual({
+      errMsg: "setEnableDebug:ok",
+    });
+  });
+
+  it("getLaunchOptionsSync should return launch options", () => {
+    const res = wx.getLaunchOptionsSync() as { path: string; query: unknown; scene: number };
+
+    expect(res.path).toBe("");
+    expect(res.query).toStrictEqual({});
+    expect(res.scene).toBe(1001);
+  });
+
+  it("getEnterOptionsSync should return enter options", () => {
+    const res = wx.getEnterOptionsSync() as { path: string; query: unknown; scene: number };
+
+    expect(res.path).toBe("");
+    expect(res.query).toStrictEqual({});
+  });
+
+  it("getAppAuthorizeSetting should return authorized settings", () => {
+    const res = wx.getAppAuthorizeSetting() as { albumAuthorized: string };
+
+    expect(res.albumAuthorized).toBe("authorized");
+  });
+
+  it("onUserCaptureScreen should register and offUserCaptureScreen should remove listener", () => {
+    const listener = vi.fn<() => void>();
+
+    wx.onUserCaptureScreen(listener);
+    emitEvent("userCaptureScreen");
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    wx.offUserCaptureScreen(listener);
+    emitEvent("userCaptureScreen");
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
 });
