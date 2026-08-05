@@ -279,6 +279,12 @@ describe(URLSearchParams, () => {
 
       expect([...obj.values()]).toStrictEqual(["1", "2", "3"]);
     });
+
+    it("values with duplicate keys", () => {
+      const obj = new URLSearchParams("a=1&a=1&b=2");
+
+      expect([...obj.values()]).toStrictEqual(["1", "1", "2"]);
+    });
   });
 
   describe("sort", () => {

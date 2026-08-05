@@ -289,10 +289,10 @@ export class URLSearchParams {
    * @returns An iterator over the values
    */
   values(): IterableIterator<string> {
-    const items = new Set<string>();
+    const items: string[] = [];
 
     this.forEach((item) => {
-      items.add(item);
+      items.push(item);
     });
 
     return items.values();
