@@ -172,32 +172,42 @@ describe(removeAsync, () => {
 
 describe(setAsync, () => {
   it("should catch setStorage failure", async () => {
-    const mockSetStorage = wx as unknown as {
+    const wxAny = wx as unknown as {
       setStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
     };
+    const original = wxAny.setStorage;
 
-    mockSetStorage.setStorage = (option): Promise<never> => {
+    wxAny.setStorage = (option): Promise<never> => {
       option.fail?.({ errMsg: "set fail" });
 
       return Promise.reject(new Error("set fail"));
     };
 
-    await expect(setAsync("fail-set-key", "value")).resolves.toBeUndefined();
+    try {
+      await expect(setAsync("fail-set-key", "value")).resolves.toBeUndefined();
+    } finally {
+      wxAny.setStorage = original;
+    }
   });
 });
 
 describe(getAsync, () => {
   it("should return undefined when getStorage fails", async () => {
-    const mockGetStorage = wx as unknown as {
+    const wxAny = wx as unknown as {
       getStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
     };
+    const original = wxAny.getStorage;
 
-    mockGetStorage.getStorage = (option): Promise<never> => {
+    wxAny.getStorage = (option): Promise<never> => {
       option.fail?.({ errMsg: "get fail" });
 
       return Promise.reject(new Error("get fail"));
     };
 
-    await expect(getAsync("fail-get-key")).resolves.toBeUndefined();
+    try {
+      await expect(getAsync("fail-get-key")).resolves.toBeUndefined();
+    } finally {
+      wxAny.getStorage = original;
+    }
   });
 });

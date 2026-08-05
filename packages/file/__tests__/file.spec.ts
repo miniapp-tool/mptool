@@ -99,7 +99,8 @@ describe("file operations", () => {
   it("should save online file", async () => {
     const path = await saveOnlineFile("https://example.com/file", "tmp/online.txt");
 
-    expect(path).toBeDefined();
+    // 传入 filePath 时返回 filePath（而非 tempFilePath）
+    expect(path).toBe("wxfile:///tmp/online.txt");
   });
 });
 
@@ -159,33 +160,43 @@ describe("file edge cases", () => {
   });
 
   it("should reject saveOnlineFile on non-200 status", async () => {
-    const mockDownloadFileApi = wx as unknown as {
+    const wxAny = wx as unknown as {
       downloadFile: (option: {
         success?: (result: { statusCode: number; tempFilePath: string }) => void;
       }) => void;
     };
+    const original = wxAny.downloadFile;
 
-    mockDownloadFileApi.downloadFile = (option): void => {
+    wxAny.downloadFile = (option): void => {
       option.success?.({ statusCode: 404, tempFilePath: "" });
     };
 
-    await expect(
-      saveOnlineFile("https://example.com/file", "tmp/fail-status.txt"),
-    ).rejects.toMatchObject({ code: 404 });
+    try {
+      await expect(
+        saveOnlineFile("https://example.com/file", "tmp/fail-status.txt"),
+      ).rejects.toMatchObject({ code: 404 });
+    } finally {
+      wxAny.downloadFile = original;
+    }
   });
 
   it("should reject saveOnlineFile when download fails", async () => {
-    const mockDownloadFileApi = wx as unknown as {
+    const wxAny = wx as unknown as {
       downloadFile: (option: { fail?: (result: { errMsg: string }) => void }) => void;
     };
+    const original = wxAny.downloadFile;
 
-    mockDownloadFileApi.downloadFile = (option): void => {
+    wxAny.downloadFile = (option): void => {
       option.fail?.({ errMsg: "download fail" });
     };
 
-    await expect(
-      saveOnlineFile("https://example.com/file", "tmp/fail-download.txt"),
-    ).rejects.toThrow("download fail");
+    try {
+      await expect(
+        saveOnlineFile("https://example.com/file", "tmp/fail-download.txt"),
+      ).rejects.toThrow("download fail");
+    } finally {
+      wxAny.downloadFile = original;
+    }
   });
 
   it("should not throw when mkdir fails on missing parent without recursion", () => {
@@ -194,8 +205,9 @@ describe("file edge cases", () => {
 
   it("should reject when unzip fails", async () => {
     const fs = wx.getFileSystemManager();
+    const original = fs.unzip;
 
-    (fs as { unzip?: unknown }).unzip = (options: {
+    fs.unzip = (options: {
       zipFilePath: string;
       targetPath: string;
       success: () => void;
@@ -204,6 +216,12 @@ describe("file edge cases", () => {
       options.fail?.({ errCode: 1, errMsg: "unzip fail" });
     };
 
-    await expect(unzip("tmp/archive.zip", "tmp/unzip-fail")).rejects.toMatchObject({ code: 1 });
+    try {
+      await expect(unzip("tmp/archive.zip", "tmp/unzip-fail")).rejects.toMatchObject({
+        code: 1,
+      });
+    } finally {
+      fs.unzip = original;
+    }
   });
 });

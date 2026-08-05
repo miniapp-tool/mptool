@@ -278,7 +278,7 @@ describe(getRichTextNodes, () => {
         type: "node",
         name: "img",
         attrs: {
-          src: expect.stringContaining("data:image/svg+xml,"),
+          src: expect.stringContaining("viewBox='0 0 100 50'"),
           style: "width:100px;height:50px;",
         },
       },

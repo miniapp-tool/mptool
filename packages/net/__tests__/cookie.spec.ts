@@ -15,9 +15,9 @@ const TEST_NAME = "session_id";
 const TEST_VALUE = "session_id_value";
 
 describe(CookieStore, () => {
-  const cookieStore = new CookieStore();
-
   it("request", () => {
+    const cookieStore = new CookieStore("cookie-request");
+
     cookieStore.applyResponse(mockedResponse, "baidu.com");
 
     expect(cookieStore.getHeader("baidu.com")).toBe(
@@ -26,6 +26,7 @@ describe(CookieStore, () => {
   });
 
   it("set", () => {
+    const cookieStore = new CookieStore("cookie-set");
     const result = cookieStore.set({
       name: TEST_NAME,
       value: TEST_VALUE,
@@ -36,10 +37,18 @@ describe(CookieStore, () => {
   });
 
   it("has", () => {
+    const cookieStore = new CookieStore("cookie-has");
+
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
+
     expect(cookieStore.has(TEST_NAME, { domain: "baidu.com" })).toBe(true);
   });
 
   it("get", () => {
+    const cookieStore = new CookieStore("cookie-get");
+
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
+
     const result = cookieStore.get(TEST_NAME, { domain: "baidu.com" })!;
 
     expect(result).toBeInstanceOf(Cookie);
@@ -47,47 +56,61 @@ describe(CookieStore, () => {
   });
 
   it("getValue", () => {
+    const cookieStore = new CookieStore("cookie-getvalue");
+
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
+
     expect(cookieStore.getValue(TEST_NAME, { domain: "baidu.com" })).toBe(TEST_VALUE);
   });
 
   it("getCookies", () => {
-    const result = cookieStore.getCookies({ domain: "baidu.com" });
+    const cookieStore = new CookieStore("cookie-getcookies");
 
-    expect(result).toHaveLength(4);
+    cookieStore.applyResponse(mockedResponse, "baidu.com");
+
+    // mockedResponse 中属于 baidu.com 作用域的 cookie 有 3 个
+    expect(cookieStore.getCookies({ domain: "baidu.com" })).toHaveLength(3);
   });
 
   it("getCookiesMap", () => {
-    const result = cookieStore.getCookiesMap({ domain: "baidu.com" });
+    const cookieStore = new CookieStore("cookie-getcookiesmap");
 
-    expect(result[TEST_NAME]).toBe(TEST_VALUE);
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
+
+    expect(cookieStore.getCookiesMap({ domain: "baidu.com" })[TEST_NAME]).toBe(TEST_VALUE);
   });
 
   it("delete", () => {
+    const cookieStore = new CookieStore("cookie-delete");
+
+    cookieStore.applyResponse(mockedResponse, "baidu.com");
     cookieStore.delete("EGG_SESSION", "baidu.com");
 
     expect(cookieStore.has("EGG_SESSION", "baidu.com")).toBe(false);
   });
 
   it("list()", () => {
-    const result = cookieStore.list();
+    const cookieStore = new CookieStore("cookie-list");
 
-    expect(result["baidu.com"]).toBeTypeOf("object");
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
+
+    expect(cookieStore.list()["baidu.com"]).toBeTypeOf("object");
   });
 
   it("clear", () => {
+    const cookieStore = new CookieStore("cookie-clear");
+
+    cookieStore.set({ name: "a", value: "1", domain: "baidu.com", path: "/" });
+    cookieStore.set({ name: "b", value: "2", domain: "example.com", path: "/" });
+
     cookieStore.clear("baidu.com", true);
 
-    expect(cookieStore.getCookies({ domain: "baidu.com" })).toHaveLength(1);
-
-    cookieStore.clear(".baidu.com");
-    expect(cookieStore.getCookies({ domain: "baidu.com" })).toHaveLength(0);
-
-    const result1 = cookieStore.getAllCookies();
+    expect(cookieStore.get("a", { domain: "baidu.com", path: "/" })).toBeNull();
+    expect(cookieStore.get("b", { domain: "example.com", path: "/" })).not.toBeNull();
 
     cookieStore.clear();
-    const result2 = cookieStore.getAllCookies();
 
-    expect(result1).not.toHaveLength(result2.length);
+    expect(cookieStore.getAllCookies()).toHaveLength(0);
   });
 });
 
@@ -174,31 +197,41 @@ describe("cookie store extras", () => {
   });
 
   it("should not throw when writing storage fails", () => {
-    const mockSetStorageSync = wx as unknown as {
+    const wxAny = wx as unknown as {
       setStorageSync: (key: string, data: unknown) => void;
     };
+    const original = wxAny.setStorageSync;
 
-    mockSetStorageSync.setStorageSync = (): void => {
+    wxAny.setStorageSync = (): void => {
       throw new Error("storage fail");
     };
 
-    expect(() => {
-      const store = new CookieStore("storage-fail-key");
+    try {
+      expect(() => {
+        const store = new CookieStore("storage-fail-key");
 
-      store.set({ name: "a", value: "1", domain: "example.com" });
-    }).not.toThrow();
+        store.set({ name: "a", value: "1", domain: "example.com" });
+      }).not.toThrow();
+    } finally {
+      wxAny.setStorageSync = original;
+    }
   });
 
   it("should not throw when reading storage fails", () => {
-    const mockGetStorageSync = wx as unknown as {
+    const wxAny = wx as unknown as {
       getStorageSync: (key: string) => unknown;
     };
+    const original = wxAny.getStorageSync;
 
-    mockGetStorageSync.getStorageSync = (): never => {
+    wxAny.getStorageSync = (): never => {
       throw new Error("storage fail");
     };
 
-    expect(() => new CookieStore("storage-read-fail-key")).not.toThrow();
+    try {
+      expect(() => new CookieStore("storage-read-fail-key")).not.toThrow();
+    } finally {
+      wxAny.getStorageSync = original;
+    }
   });
 
   it("should delete a cookie across all domains", () => {

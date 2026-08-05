@@ -456,6 +456,8 @@ describe(Headers, () => {
   });
 
   describe("invalid header normalization", () => {
+    // 注意：此处对引号类字符抛错是当前实现的刻意行为；
+    // 与 WHATWG Fetch 规范（append/set 对非法名静默忽略）不同，空格名走静默忽略。
     it("throws for a name with an invalid character", () => {
       const headers = new Headers();
 
