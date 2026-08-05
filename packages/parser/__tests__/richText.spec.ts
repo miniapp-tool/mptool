@@ -269,4 +269,54 @@ describe(getRichTextNodes, () => {
       },
     ]);
   });
+
+  it("converts svg to image node", async () => {
+    const nodes = await getRichTextNodes('<svg viewbox="0 0 100 50"></svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: {
+          src: expect.stringContaining("data:image/svg+xml,"),
+          style: "width:100px;height:50px;",
+        },
+      },
+    ]);
+  });
+
+  it("keeps class when appendClass is false", async () => {
+    const nodes = await getRichTextNodes('<div class="test">hello</div>', {
+      appendClass: false,
+    });
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "div",
+        attrs: { class: "test" },
+        children: [{ type: "text", text: "hello" }],
+      },
+    ]);
+  });
+
+  it("filters disallowed tags", async () => {
+    const nodes = await getRichTextNodes("<div><script>alert(1)</script><p>hi</p></div>");
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "div",
+        attrs: { class: "div" },
+        children: [
+          {
+            type: "node",
+            name: "p",
+            attrs: { class: "p" },
+            children: [{ type: "text", text: "hi" }],
+          },
+        ],
+      },
+    ]);
+  });
 });
