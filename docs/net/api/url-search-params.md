@@ -7,10 +7,7 @@ export class URLSearchParams {
   private params;
   constructor(
     init?:
-      | URLSearchParams
-      | string
-      | Record<string, string | string[]>
-      | Iterable<[string, string]>,
+      URLSearchParams | string | Record<string, string | string[]> | Iterable<[string, string]>,
   );
   get size(): number;
   /**

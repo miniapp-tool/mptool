@@ -6,11 +6,7 @@ title: request
 
 ```ts
 export type RequestBody =
-  | WechatMiniprogram.IAnyObject
-  | ArrayBuffer
-  | URLSearchParams
-  | string
-  | null;
+  WechatMiniprogram.IAnyObject | ArrayBuffer | URLSearchParams | string | null;
 
 export interface RequestOptions<
   T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
