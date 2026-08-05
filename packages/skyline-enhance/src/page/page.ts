@@ -24,6 +24,9 @@ export const $Page: PageConstructor = <
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
   };
 
+  /** OnAwake 监听器，用于在页面卸载时注销 */
+  let onAwakeHandler: ((time: number) => void) | undefined;
+
   // extend page config
   if (extendPage) extendPage(name, options);
 
@@ -38,12 +41,13 @@ export const $Page: PageConstructor = <
   options.onLoad = wrapFunction(options.onLoad, (): void => {
     // After onLoad, onAwake is valid if defined
     if (options.onAwake) {
-      appEmitter.on(ON_APP_AWAKE, (time: number) => {
+      onAwakeHandler = (time: number): void => {
         callLog("onAwake");
 
         // oxlint-disable-next-line typescript/no-non-null-assertion
         void options.onAwake!(time);
-      });
+      };
+      appEmitter.on(ON_APP_AWAKE, onAwakeHandler);
       registerLog("onAwake");
     }
 
@@ -52,6 +56,17 @@ export const $Page: PageConstructor = <
 
       // oxlint-disable-next-line typescript/no-non-null-assertion
       options.$state!.firstOpen = true;
+    }
+  });
+
+  // oxlint-disable-next-line typescript/no-misused-promises
+  options.onUnload = wrapFunction(options.onUnload, () => {
+    // 注销 onAwake 监听器，避免页面卸载后残留
+    if (onAwakeHandler) {
+      appEmitter.off(ON_APP_AWAKE, onAwakeHandler);
+
+      // oxlint-disable-next-line no-undefined
+      onAwakeHandler = undefined;
     }
   });
 

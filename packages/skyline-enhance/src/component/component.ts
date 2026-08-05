@@ -142,8 +142,7 @@ export const $Component: ComponentConstructor = <
     $call(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       method: string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      ...args: any[]
+      ...args: unknown[]
     ): void {
       logger.debug(`Component ${this.$id} call ${method}:`, args);
       this.triggerEvent("ing", {
@@ -176,10 +175,13 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
       value: string,
     ): void {
-      if (this.$refID && this.$refID !== value) {
+      if (this.$refID !== value) {
         this.$parent?.$refs.delete(this.$refID);
 
         this.$refID = value;
+
+        if (value !== "") this.$parent?.$refs.set(value, this);
+
         logger.debug(`Component ${this.$id} ref: ${value}`);
       }
     },

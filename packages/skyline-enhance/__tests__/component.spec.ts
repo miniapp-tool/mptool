@@ -1,7 +1,9 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
-import { handleProperties } from "../src/component/index.js";
+import { $Component, handleProperties } from "../src/component/index.js";
+import type { TrivialComponentOptions } from "../src/component/index.js";
+import { $Config } from "../src/config/index.js";
 
 describe(handleProperties, () => {
   it("should handle empty properties", () => {
@@ -82,5 +84,64 @@ describe(handleProperties, () => {
       b: { type: Number, value: 1, optionalTypes: [Array] },
       ref: { type: String, value: "" },
     });
+  });
+});
+
+describe("should handle dynamic ref", () => {
+  it("should register new ref to parent when ref is set dynamically", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const parent = {
+      $refs: new Map<string, unknown>(),
+    };
+    const instance = {
+      $id: 1,
+      $refID: "",
+      $parent: parent,
+      data: { ref: "" },
+    };
+
+    componentOptions?.observers?.ref?.call(instance, "newRef");
+
+    expect(instance.$refID).toBe("newRef");
+    expect(parent.$refs.get("newRef")).toBe(instance);
+  });
+
+  it("should remove old ref and register the new one", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const parent = {
+      $refs: new Map<string, unknown>(),
+    };
+    const instance = {
+      $id: 1,
+      $refID: "oldRef",
+      $parent: parent,
+      data: { ref: "oldRef" },
+    };
+
+    parent.$refs.set("oldRef", instance);
+
+    componentOptions?.observers?.ref?.call(instance, "newRef");
+
+    expect(instance.$refID).toBe("newRef");
+    expect(parent.$refs.has("oldRef")).toBe(false);
+    expect(parent.$refs.get("newRef")).toBe(instance);
   });
 });

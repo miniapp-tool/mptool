@@ -34,13 +34,11 @@ export const $Config = (config: AppConfigOptions): void => {
   }
 
   let nameToRouteMap: Record<string, string> = {};
-  let routeToNameMap: Record<string, string> = {};
 
   const addRoute = (name: string, route: string): void => {
     const actualRoute = route.replace(/\$name/gu, name);
 
     nameToRouteMap[name] = actualRoute;
-    routeToNameMap[actualRoute] = name;
   };
 
   if (Array.isArray(pages)) {
@@ -55,10 +53,6 @@ export const $Config = (config: AppConfigOptions): void => {
     });
   } else if (typeof pages === "object") {
     nameToRouteMap = pages;
-    routeToNameMap = Object.keys(pages).reduce<Record<string, string>>((acc, route) => {
-      acc[pages[route]] = route;
-      return acc;
-    }, {});
   }
 
   appConfig = {
