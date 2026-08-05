@@ -21,7 +21,7 @@ export default defineUserConfig({
     repo: "miniapp-tool/mptool",
     docsDir: "docs",
 
-    navbar: ["/enhance/", "/net/", "/file/", "/api/", "/parser/"],
+    navbar: ["/enhance/", "/net/", "/file/", "/api/", "/parser/", "/mock/"],
     sidebar: "structure",
     footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
     displayFooter: true,
