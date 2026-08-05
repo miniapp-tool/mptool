@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseUrl } from "../src/utils.js";
+import { getUrlInfo, parseUrl } from "../src/utils.js";
 
 describe(parseUrl, () => {
   it("should parse root url", () => {
@@ -105,6 +105,22 @@ describe(parseUrl, () => {
 
     expect(parseUrl("sub.example.com")).toStrictEqual({
       domain: "sub.example.com",
+      path: "/",
+    });
+  });
+});
+
+describe(getUrlInfo, () => {
+  it("should parse a url string", () => {
+    expect(getUrlInfo("https://example.com/a/b")).toStrictEqual({
+      domain: ".example.com",
+      path: "/a/b",
+    });
+  });
+
+  it("should use object options with defaults", () => {
+    expect(getUrlInfo({ domain: "example.com" })).toStrictEqual({
+      domain: ".example.com",
       path: "/",
     });
   });

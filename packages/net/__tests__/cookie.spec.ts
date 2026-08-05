@@ -155,4 +155,61 @@ describe("cookie store extras", () => {
 
     expect(store.getValue("a", { domain: "example.com", path: "/" })).toBe("2");
   });
+
+  it("should restore persisted cookies from storage", () => {
+    const store = new CookieStore("persist-restore-key");
+    store.set({ name: "a", value: "1", domain: "example.com", path: "/", maxAge: 100 });
+
+    const restored = new CookieStore("persist-restore-key");
+
+    expect(restored.getValue("a", { domain: "example.com", path: "/" })).toBe("1");
+  });
+
+  it("should return null for a non-matching domain", () => {
+    const store = new CookieStore("domain-mismatch-key");
+
+    store.set({ name: "a", value: "1", domain: "example.com", path: "/" });
+
+    expect(store.get("a", { domain: "other.com" })).toBeNull();
+  });
+
+  it("should not throw when writing storage fails", () => {
+    const mockSetStorageSync = wx as unknown as {
+      setStorageSync: (key: string, data: unknown) => void;
+    };
+
+    mockSetStorageSync.setStorageSync = (): void => {
+      throw new Error("storage fail");
+    };
+
+    expect(() => {
+      const store = new CookieStore("storage-fail-key");
+
+      store.set({ name: "a", value: "1", domain: "example.com" });
+    }).not.toThrow();
+  });
+
+  it("should not throw when reading storage fails", () => {
+    const mockGetStorageSync = wx as unknown as {
+      getStorageSync: (key: string) => unknown;
+    };
+
+    mockGetStorageSync.getStorageSync = (): never => {
+      throw new Error("storage fail");
+    };
+
+    expect(() => new CookieStore("storage-read-fail-key")).not.toThrow();
+  });
+
+  it("should delete a cookie across all domains", () => {
+    const store = new CookieStore("delete-all-key");
+
+    store.set({ name: "a", value: "1", domain: "example.com", path: "/" });
+    store.set({ name: "a", value: "2", domain: "other.com", path: "/" });
+
+    store.delete("a");
+
+    expect(store.get("a", { domain: "example.com", path: "/" })).toBeNull();
+    expect(store.get("a", { domain: "other.com", path: "/" })).toBeNull();
+  });
 });

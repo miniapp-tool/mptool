@@ -454,4 +454,36 @@ describe(Headers, () => {
       ]);
     });
   });
+
+  describe("invalid header normalization", () => {
+    it("throws for a name with an invalid character", () => {
+      const headers = new Headers();
+
+      expect(() => headers.append('na"me', "value")).toThrow(
+        new TypeError("Invalid character in header field name"),
+      );
+    });
+
+    it("ignores a value containing a NUL byte", () => {
+      const headers = new Headers();
+
+      expect(headers.append("foo", "bar\u0000baz")).toBeUndefined();
+      expect(headers.has("foo")).toBe(false);
+    });
+
+    it("ignores a name with a space", () => {
+      const headers = new Headers();
+
+      expect(headers.append("foo bar", "value")).toBeUndefined();
+      expect(Object.fromEntries(headers.entries())).toStrictEqual({});
+    });
+
+    it("joins array values from an object init", () => {
+      const headers = new Headers({
+        accept: ["application/json", "image/png"],
+      } as never);
+
+      expect(headers.get("accept")).toBe("application/json, image/png");
+    });
+  });
 });

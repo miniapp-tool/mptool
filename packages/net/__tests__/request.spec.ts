@@ -1,5 +1,5 @@
 import "@mptool/mock";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { CookieStore } from "../src/cookieStore.js";
 import { Headers, URLSearchParams, createRequest, request } from "../src/index.js";
@@ -152,5 +152,43 @@ describe(createRequest, () => {
     const [call] = calls;
 
     expect(call.url).toBe("https://other.com/api");
+  });
+
+  it("should call errorHandler when request fails with MpError", async () => {
+    const mockRequestApi = wx as unknown as {
+      request: (option: { fail?: (result: { errMsg: string; errno?: number }) => void }) => void;
+    };
+
+    mockRequestApi.request = (option): void => {
+      option.fail?.({ errMsg: "fail", errno: 500 });
+    };
+    const errorHandler = vi.fn<() => void>();
+    const { request: req } = createRequest({
+      server: "https://example.com",
+      errorHandler: errorHandler as never,
+    });
+
+    await req("/api");
+
+    expect(errorHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "MpError", code: 500 }),
+      "/api",
+      expect.anything(),
+    );
+  });
+
+  it("should rethrow non-MpError when errorHandler is set", async () => {
+    mockRequest();
+    const errorHandler = vi.fn<() => void>();
+    const { request: req } = createRequest({
+      server: "https://example.com",
+      responseHandler: (): never => {
+        throw new Error("boom");
+      },
+      errorHandler: errorHandler as never,
+    });
+
+    await expect(req("/api")).rejects.toThrow("boom");
+    expect(errorHandler).not.toHaveBeenCalled();
   });
 });

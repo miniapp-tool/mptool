@@ -52,4 +52,9 @@ describe(getCookieScopeDomain, () => {
       ".com",
     ]);
   });
+
+  it("should return empty array for empty domain", () => {
+    expect(getCookieScopeDomain()).toStrictEqual([]);
+    expect(getCookieScopeDomain("")).toStrictEqual([]);
+  });
 });
