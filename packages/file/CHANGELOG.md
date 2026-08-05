@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
+
+### ✨ Features
+
+- improve mock ([e2dc48e](https://github.com/miniapp-tool/mptool/commit/e2dc48ed15151c879f247ad089b5e7560e64b27d))
+
+### 🐛 Bug Fixes
+
+- **file:** correct error log in getAsync ([3dc915f](https://github.com/miniapp-tool/mptool/commit/3dc915fe1ce089a50aa56efdc88131165f63a8bb))
+- **file:** keep permanent cache in check() and checkAsync() ([50436a9](https://github.com/miniapp-tool/mptool/commit/50436a96d69c9f5ce90b2e5eecf827250bce5256))
+- **file:** lazily initialize file system manager to avoid import crash ([b11bb5b](https://github.com/miniapp-tool/mptool/commit/b11bb5bb40c81973c5ec822ec5043de97a761db4))
+- **file:** read filePath result in saveOnlineFile ([ed81140](https://github.com/miniapp-tool/mptool/commit/ed811400e63e7702fd11d9ba992a054d0ebebbce))
+
+### Styles
+
+- update linter ([6fd2652](https://github.com/miniapp-tool/mptool/commit/6fd2652bc5552ea57a5d1bcaa49b6f3067ce9fbb))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.1.3 ([#1313](https://github.com/miniapp-tool/mptool/issues/1313)) ([2067f41](https://github.com/miniapp-tool/mptool/commit/2067f414e9b742f2661213494f84d902e1519f54))
+- **deps:** update dependency miniprogram-api-typings to v5.2.0 ([#1333](https://github.com/miniapp-tool/mptool/issues/1333)) ([66df6b5](https://github.com/miniapp-tool/mptool/commit/66df6b588cc0acce001ee27e59d4124f16cf2273))
+- **deps:** update dependency miniprogram-api-typings to v5.2.1 ([#1340](https://github.com/miniapp-tool/mptool/issues/1340)) ([3f9ecf5](https://github.com/miniapp-tool/mptool/commit/3f9ecf5eec8f12772baafddb430a6734f127fe04))
+- **deps:** update dependency miniprogram-api-typings to v5.2.2 ([#1397](https://github.com/miniapp-tool/mptool/issues/1397)) ([7a20b1d](https://github.com/miniapp-tool/mptool/commit/7a20b1dd3756157d31871428479cff678506fe72))
+
+### Tests
+
+- **file:** cover error branches and align mock fs with wx behavior ([68243f7](https://github.com/miniapp-tool/mptool/commit/68243f70827495cfa0b2c3892a331c6ec0be612f))
+- **file:** cover put, take, once and remove in storage ([edd4df1](https://github.com/miniapp-tool/mptool/commit/edd4df1d32d6ae8d612ee3ebe985ae83db7956d2))
+- **file:** cover save and readJSON edge cases ([f6d485e](https://github.com/miniapp-tool/mptool/commit/f6d485e0222509a03d91724c48a1b4ef7ef555dc))
+- fix test pollution and strengthen assertions after review ([f9878f6](https://github.com/miniapp-tool/mptool/commit/f9878f61d32863e478b1e868c2dc26ad0108db74))
+
 ## [0.14.0](/github.com/miniapp-tool/mptool/compare/v0.13.0...v0.14.0) (2026-04-22)
 
 ### ⚠ BREAKING CHANGES

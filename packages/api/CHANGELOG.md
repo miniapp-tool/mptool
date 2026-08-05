@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
+
+### ✨ Features
+
+- improve mock ([e2dc48e](https://github.com/miniapp-tool/mptool/commit/e2dc48ed15151c879f247ad089b5e7560e64b27d))
+
+### 🐛 Bug Fixes
+
+- **api:** handle 4g/5g as healthy network in reportNetworkStatus ([9175666](https://github.com/miniapp-tool/mptool/commit/9175666d33cc2b27ff7f3deb8a5aefbf4a6fb492))
+
+### Styles
+
+- update linter ([6fd2652](https://github.com/miniapp-tool/mptool/commit/6fd2652bc5552ea57a5d1bcaa49b6f3067ce9fbb))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.1.3 ([#1313](https://github.com/miniapp-tool/mptool/issues/1313)) ([2067f41](https://github.com/miniapp-tool/mptool/commit/2067f414e9b742f2661213494f84d902e1519f54))
+- **deps:** update dependency miniprogram-api-typings to v5.2.0 ([#1333](https://github.com/miniapp-tool/mptool/issues/1333)) ([66df6b5](https://github.com/miniapp-tool/mptool/commit/66df6b588cc0acce001ee27e59d4124f16cf2273))
+- **deps:** update dependency miniprogram-api-typings to v5.2.1 ([#1340](https://github.com/miniapp-tool/mptool/issues/1340)) ([3f9ecf5](https://github.com/miniapp-tool/mptool/commit/3f9ecf5eec8f12772baafddb430a6734f127fe04))
+- **deps:** update dependency miniprogram-api-typings to v5.2.2 ([#1397](https://github.com/miniapp-tool/mptool/issues/1397)) ([7a20b1d](https://github.com/miniapp-tool/mptool/commit/7a20b1dd3756157d31871428479cff678506fe72))
+
+### Tests
+
+- **api:** add confirm test ([4b08479](https://github.com/miniapp-tool/mptool/commit/4b08479f5e219803ddfb637124a09cf96006832a))
+- **api:** add tests for update, report and document ([9b71171](https://github.com/miniapp-tool/mptool/commit/9b711711579d10538544622298b0a9044dd7a7a0))
+- **api:** cover already-authorized paths for addContact and savePhoto ([d29bdf4](https://github.com/miniapp-tool/mptool/commit/d29bdf40eefd7a3b46c477b23d52b101c5aac634))
+- **api:** cover authorization deny paths for addContact and savePhoto ([51a8e4c](https://github.com/miniapp-tool/mptool/commit/51a8e4c21530358b28be1ad5d06c18509432c08e))
+- **api:** cover download and showToast failure paths ([bd8a204](https://github.com/miniapp-tool/mptool/commit/bd8a20462f1d56277e36b692df3421f4c5d821d7))
+- **api:** cover non-200 download response ([48c0180](https://github.com/miniapp-tool/mptool/commit/48c01808ccff9310f11920c3aefc09280486283b))
+- **api:** cover update, confirm, retry and clipboard branches ([3a32a94](https://github.com/miniapp-tool/mptool/commit/3a32a94f292b9d11523e9ff10b4b52970654c34a))
+- **api:** rewrite document tests to verify real behavior ([f951f7f](https://github.com/miniapp-tool/mptool/commit/f951f7f043b34f3cab320fffe15e69901e5c3bba))
+
+### Build System
+
+- bump deps ([bda0a5a](https://github.com/miniapp-tool/mptool/commit/bda0a5a710587959cf17163bed13a5f9697fcc7a))
+
 ## [0.14.0](/github.com/miniapp-tool/mptool/compare/v0.13.0...v0.14.0) (2026-04-22)
 
 ### ⚠ BREAKING CHANGES

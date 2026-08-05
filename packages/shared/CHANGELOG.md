@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
+
+### ✨ Features
+
+- improve mock ([e2dc48e](https://github.com/miniapp-tool/mptool/commit/e2dc48ed15151c879f247ad089b5e7560e64b27d))
+
+### 🐛 Bug Fixes
+
+- **shared:** guard wx.env access in logger.debug on js environment ([94faf1d](https://github.com/miniapp-tool/mptool/commit/94faf1d3eb10d3d0d65cd9666fcae0f89628a529))
+- **shared:** keep createQueue progressing when a task rejects ([2d191d7](https://github.com/miniapp-tool/mptool/commit/2d191d7636fde6b9bdae7a74eff92fbf7846f4b6))
+- **shared:** skip empty segments in query.parse ([afd05c8](https://github.com/miniapp-tool/mptool/commit/afd05c81e860016740590182b52271784108047d))
+
+### Styles
+
+- update linter ([6fd2652](https://github.com/miniapp-tool/mptool/commit/6fd2652bc5552ea57a5d1bcaa49b6f3067ce9fbb))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.1.3 ([#1313](https://github.com/miniapp-tool/mptool/issues/1313)) ([2067f41](https://github.com/miniapp-tool/mptool/commit/2067f414e9b742f2661213494f84d902e1519f54))
+- **deps:** update dependency miniprogram-api-typings to v5.2.0 ([#1333](https://github.com/miniapp-tool/mptool/issues/1333)) ([66df6b5](https://github.com/miniapp-tool/mptool/commit/66df6b588cc0acce001ee27e59d4124f16cf2273))
+- **deps:** update dependency miniprogram-api-typings to v5.2.1 ([#1340](https://github.com/miniapp-tool/mptool/issues/1340)) ([3f9ecf5](https://github.com/miniapp-tool/mptool/commit/3f9ecf5eec8f12772baafddb430a6734f127fe04))
+- **deps:** update dependency miniprogram-api-typings to v5.2.2 ([#1397](https://github.com/miniapp-tool/mptool/issues/1397)) ([7a20b1d](https://github.com/miniapp-tool/mptool/commit/7a20b1dd3756157d31871428479cff678506fe72))
+
+### Tests
+
+- fix test pollution and strengthen assertions after review ([f9878f6](https://github.com/miniapp-tool/mptool/commit/f9878f61d32863e478b1e868c2dc26ad0108db74))
+- **shared:** add env detection tests ([fd8a135](https://github.com/miniapp-tool/mptool/commit/fd8a135f1a5b4017df303d18f06be95b2e402ff0))
+- **shared:** cover emitAsync wildcard ([0d52b00](https://github.com/miniapp-tool/mptool/commit/0d52b00be3282942084ec05c4ad5053e87d884ad))
+- **shared:** cover logger in wx environment ([a4bee4e](https://github.com/miniapp-tool/mptool/commit/a4bee4e218bb9f472ecb744d83c8397907454983))
+- **shared:** cover logger info, warn, error and filter ([0a09e46](https://github.com/miniapp-tool/mptool/commit/0a09e46b3e1e3032405b025f1270feb621c91541))
+- **shared:** reach 100% statement coverage ([5330d14](https://github.com/miniapp-tool/mptool/commit/5330d1447e43f5923f33e89733722217b81242dc))
+
+### Build System
+
+- bump deps ([1a63935](https://github.com/miniapp-tool/mptool/commit/1a63935289b5619265893465c1a21ab6a7ca478d))
+- bump deps ([bda0a5a](https://github.com/miniapp-tool/mptool/commit/bda0a5a710587959cf17163bed13a5f9697fcc7a))
+
 ## [0.14.0](/github.com/miniapp-tool/mptool/compare/v0.13.0...v0.14.0) (2026-04-22)
 
 ### ⚠ BREAKING CHANGES

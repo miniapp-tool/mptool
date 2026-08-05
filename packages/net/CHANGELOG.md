@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
+
+### ✨ Features
+
+- improve mock ([e2dc48e](https://github.com/miniapp-tool/mptool/commit/e2dc48ed15151c879f247ad089b5e7560e64b27d))
+
+### 🐛 Bug Fixes
+
+- **net:** correct cookie scope for repeated labels and bind forEach once ([64f559f](https://github.com/miniapp-tool/mptool/commit/64f559fc2100a08a7a3446742b731b7c55bc8a61))
+- **net:** match cookie path at segment boundary ([14d1e01](https://github.com/miniapp-tool/mptool/commit/14d1e014d740656b4a81175dadd81e68d2dcf62e))
+- **net:** preserve duplicate values in URLSearchParams[#values](https://github.com/miniapp-tool/mptool/issues/values) ([1663942](https://github.com/miniapp-tool/mptool/commit/166394207da2335bb6533191cbffc7e8214ae354))
+
+### Styles
+
+- update linter ([6fd2652](https://github.com/miniapp-tool/mptool/commit/6fd2652bc5552ea57a5d1bcaa49b6f3067ce9fbb))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.1.3 ([#1313](https://github.com/miniapp-tool/mptool/issues/1313)) ([2067f41](https://github.com/miniapp-tool/mptool/commit/2067f414e9b742f2661213494f84d902e1519f54))
+- **deps:** update dependency miniprogram-api-typings to v5.2.0 ([#1333](https://github.com/miniapp-tool/mptool/issues/1333)) ([66df6b5](https://github.com/miniapp-tool/mptool/commit/66df6b588cc0acce001ee27e59d4124f16cf2273))
+- **deps:** update dependency miniprogram-api-typings to v5.2.1 ([#1340](https://github.com/miniapp-tool/mptool/issues/1340)) ([3f9ecf5](https://github.com/miniapp-tool/mptool/commit/3f9ecf5eec8f12772baafddb430a6734f127fe04))
+- **deps:** update dependency miniprogram-api-typings to v5.2.2 ([#1397](https://github.com/miniapp-tool/mptool/issues/1397)) ([7a20b1d](https://github.com/miniapp-tool/mptool/commit/7a20b1dd3756157d31871428479cff678506fe72))
+- **deps:** update dependency set-cookie-parser to v3.1.1 ([#1368](https://github.com/miniapp-tool/mptool/issues/1368)) ([202928a](https://github.com/miniapp-tool/mptool/commit/202928aab8a05071f291dcb9b9273c56de2bec2f))
+- **deps:** update dependency set-cookie-parser to v3.1.2 ([#1381](https://github.com/miniapp-tool/mptool/issues/1381)) ([6748649](https://github.com/miniapp-tool/mptool/commit/674864947e851dd56c54121ac30d4696caf48059))
+
+### Tests
+
+- fix test pollution and strengthen assertions after review ([f9878f6](https://github.com/miniapp-tool/mptool/commit/f9878f61d32863e478b1e868c2dc26ad0108db74))
+- **net:** add tests for Cookie class ([6ef773e](https://github.com/miniapp-tool/mptool/commit/6ef773ebc4fc09daf547dbae28c62f0f8cc79027))
+- **net:** cover cookieStore apply and applyHeader ([e3a86ba](https://github.com/miniapp-tool/mptool/commit/e3a86baa19a2d118454120961c7f217f14d03ebb))
+- **net:** cover request content-type, cookie and failure ([b2dfbb8](https://github.com/miniapp-tool/mptool/commit/b2dfbb8097a5b48799f31b7449db3e9079b5f5c1))
+- **net:** push coverage toward 100% ([0b0036f](https://github.com/miniapp-tool/mptool/commit/0b0036f07fd76e1a212c36fa2bad2d0dd7f521ba))
+
 ## [0.14.0](/github.com/miniapp-tool/mptool/compare/v0.13.0...v0.14.0) (2026-04-22)
 
 ### ⚠ BREAKING CHANGES
