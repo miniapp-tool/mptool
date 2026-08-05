@@ -204,7 +204,10 @@ export const check = (): void => {
     if (key.startsWith(CACHE_PREFIX)) {
       const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
-      if (!value || (value.expired !== sessionId && Date.now() >= value.expired))
+      if (
+        !value ||
+        (value.expired > 0 && value.expired !== sessionId && Date.now() >= value.expired)
+      )
         wx.removeStorageSync(key);
     }
   });
@@ -225,7 +228,7 @@ export const checkAsync = async (): Promise<void> => {
       .map(async (key) => {
         const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
 
-        if (!data || (data.expired !== sessionId && Date.now() >= data.expired))
+        if (!data || (data.expired > 0 && data.expired !== sessionId && Date.now() >= data.expired))
           await wx.removeStorage({ key });
       }),
   );

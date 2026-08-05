@@ -1,7 +1,7 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
-import { get, getAsync, set, setAsync } from "../src/storage.js";
+import { check, checkAsync, get, getAsync, set, setAsync } from "../src/storage.js";
 
 describe(set, () => {
   it("set sync simple", () => {
@@ -57,4 +57,48 @@ describe(set, () => {
         }, 200);
       });
     }));
+});
+
+describe(check, () => {
+  it("should keep permanent cache", () => {
+    set("check-permanent", { a: 1 }, 0);
+
+    check();
+
+    expect(get("check-permanent")).toStrictEqual({ a: 1 });
+  });
+
+  it("should remove expired cache", () =>
+    new Promise<void>((resolve) => {
+      set("check-expired", { a: 1 }, 50);
+
+      setTimeout(() => {
+        check();
+
+        expect(get("check-expired")).toBeUndefined();
+        resolve();
+      }, 100);
+    }));
+});
+
+describe(checkAsync, () => {
+  it("should keep permanent cache", async () => {
+    await setAsync("check-async-permanent", { a: 1 }, 0);
+
+    await checkAsync();
+
+    await expect(getAsync("check-async-permanent")).resolves.toStrictEqual({ a: 1 });
+  });
+
+  it("should remove expired cache", async () => {
+    await setAsync("check-async-expired", { a: 1 }, 50);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    await checkAsync();
+
+    await expect(getAsync("check-async-expired")).resolves.toBeUndefined();
+  });
 });
