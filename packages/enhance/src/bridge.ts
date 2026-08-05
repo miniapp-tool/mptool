@@ -71,8 +71,13 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
  */
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
+  const pageStackLength = getCurrentPages().length;
 
-  return getCurrentPages().length <= delta && home ? reLaunch(home) : wx.navigateBack({ delta });
+  // 页面栈不足以后退 delta 层时，回到主页（若配置了 home）
+  if (pageStackLength <= delta && home) return reLaunch(home);
+
+  // 无 home 配置时，钳制 delta 至实际可退的最大层数，避免后退失败
+  return wx.navigateBack({ delta: Math.min(delta, pageStackLength - 1) });
 };
 
 const bindBack = async function bindBack(
