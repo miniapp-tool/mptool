@@ -219,4 +219,26 @@ describe(Emitter, () => {
       expect(star).toHaveBeenLastCalledWith("bar", eb);
     });
   });
+
+  describe("emitAsync()", () => {
+    it("should invoke all handlers asynchronously", async () => {
+      const foo = vi.fn<() => void>();
+
+      inst.on("foo", foo);
+
+      await inst.emitAsync("foo", "arg");
+
+      expect(foo).toHaveBeenCalledWith("arg");
+    });
+
+    it("should invoke * handlers asynchronously", async () => {
+      const star = vi.fn<() => void>();
+
+      inst.on("*", star);
+
+      await inst.emitAsync("foo", "arg");
+
+      expect(star).toHaveBeenCalledWith("foo", "arg");
+    });
+  });
 });
