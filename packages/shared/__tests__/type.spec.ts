@@ -1,7 +1,7 @@
 import "@mptool/mock";
 import { describe, expect, it } from "vitest";
 
-import { type } from "../src";
+import { isFunction, type } from "../src";
 
 describe(type, () => {
   it("function", () => {
@@ -30,5 +30,14 @@ describe(type, () => {
 
   it("string", () => {
     expect(type("zhangbowang")).toBe("string");
+  });
+
+  it("unidentifiable object", () => {
+    expect(type({ [Symbol.toStringTag]: "!!!" })).toBe("");
+  });
+
+  it("isFunction", () => {
+    expect(isFunction(() => {})).toBe(true);
+    expect(isFunction("str")).toBe(false);
   });
 });

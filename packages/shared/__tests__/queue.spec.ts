@@ -1,7 +1,7 @@
 // oxlint-disable promise/no-multiple-resolved
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { funcQueue } from "../src";
+import { Queue, funcQueue } from "../src";
 
 describe(funcQueue, () => {
   it("run by sequence", () =>
@@ -49,5 +49,24 @@ describe(funcQueue, () => {
         expect(count).toBe(5);
         resolve();
       }, 170);
+    }));
+
+  it("should clear pending tasks", () =>
+    new Promise<void>((resolve) => {
+      const queue = new Queue();
+      const fn = vi.fn<() => void>();
+
+      queue.add((next) => {
+        setTimeout(() => {
+          next();
+        }, 10);
+      });
+      queue.add(fn);
+      queue.clear();
+
+      setTimeout(() => {
+        expect(fn).not.toHaveBeenCalled();
+        resolve();
+      }, 50);
     }));
 });
