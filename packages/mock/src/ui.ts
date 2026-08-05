@@ -19,6 +19,36 @@ const callCallback = (option: any, result: unknown, errMsg = "ok"): void | Promi
   }, 0);
 };
 
+type Listener = (...args: any[]) => void;
+
+/** 事件监听器注册表 */
+const eventListeners = new Map<string, Set<Listener>>();
+
+/** 注册事件监听器 */
+const onEvent = (event: string, listener: Listener): void => {
+  const listeners = eventListeners.get(event) ?? new Set<Listener>();
+
+  listeners.add(listener);
+  eventListeners.set(event, listeners);
+};
+
+/** 移除事件监听器，未传入 listener 时移除该事件的全部监听器 */
+const offEvent = (event: string, listener?: Listener): void => {
+  if (!listener) {
+    eventListeners.delete(event);
+    return;
+  }
+
+  eventListeners.get(event)?.delete(listener);
+};
+
+/** 触发事件，供测试或下游代码手动模拟 */
+export const emitEvent = (event: string, ...args: unknown[]): void => {
+  eventListeners.get(event)?.forEach((listener) => {
+    listener(...args);
+  });
+};
+
 /** UI、权限、设备等相关 wx API mock */
 export const uiApi = {
   showToast(option: unknown): unknown {
@@ -68,6 +98,65 @@ export const uiApi = {
     };
   },
 
+  getAppBaseInfo(): Record<string, unknown> {
+    return {
+      PCKernelVersion: "",
+      SDKVersion: "3.8.0",
+      enableDebug: false,
+      fontSizeScaleFactor: 1,
+      fontSizeSetting: 16,
+      host: { appId: "" },
+      language: "zh_CN",
+      theme: "light",
+      version: "8.0.0",
+    };
+  },
+
+  getAccountInfoSync(): Record<string, unknown> {
+    return {
+      miniProgram: {
+        appId: "wx1234567890abcdef",
+        envVersion: "develop",
+        version: "",
+      },
+      plugin: { appId: "", version: "" },
+    };
+  },
+
+  getDeviceInfo(): Record<string, unknown> {
+    return {
+      abi: "",
+      benchmarkLevel: 0,
+      brand: "devtools",
+      cpuType: "",
+      deviceAbi: "",
+      memorySize: "",
+      model: "test",
+      platform: "devtools",
+      system: "macOS 14.0",
+    };
+  },
+
+  getMenuButtonBoundingClientRect(): Record<string, number> {
+    return {
+      bottom: 76,
+      height: 32,
+      left: 280,
+      right: 365,
+      top: 44,
+      width: 85,
+    };
+  },
+
+  getSystemSetting(): Record<string, unknown> {
+    return {
+      bluetoothEnabled: true,
+      deviceOrientation: "portrait",
+      locationEnabled: true,
+      wifiEnabled: true,
+    };
+  },
+
   getSystemInfoSync(): Record<string, unknown> {
     return {
       windowWidth: 375,
@@ -108,6 +197,11 @@ export const uiApi = {
     return callCallback(option, { errMsg: "setClipboardData:ok" });
   },
 
+  getClipboardData(option: unknown): unknown {
+    // 真实微信中读取剪贴板通常为空且依赖用户授权，这里直接返回空字符串
+    return callCallback(option, { data: "", errMsg: "getClipboardData:ok" });
+  },
+
   saveImageToPhotosAlbum(option: unknown): unknown {
     return callCallback(option, { errMsg: "saveImageToPhotosAlbum:ok" });
   },
@@ -130,6 +224,42 @@ export const uiApi = {
 
   reportEvent(): void {
     // noop
+  },
+
+  onAppShow(listener: (result: Record<string, unknown>) => void): void {
+    onEvent("appShow", listener);
+  },
+
+  offAppShow(listener?: (result: Record<string, unknown>) => void): void {
+    offEvent("appShow", listener);
+  },
+
+  onAppHide(listener: () => void): void {
+    onEvent("appHide", listener);
+  },
+
+  offAppHide(listener?: () => void): void {
+    offEvent("appHide", listener);
+  },
+
+  onThemeChange(listener: (result: { theme: "dark" | "light" }) => void): void {
+    onEvent("themeChange", listener);
+  },
+
+  offThemeChange(listener?: (result: { theme: "dark" | "light" }) => void): void {
+    offEvent("themeChange", listener);
+  },
+
+  onWindowResize(
+    listener: (result: { size: { windowWidth: number; windowHeight: number } }) => void,
+  ): void {
+    onEvent("windowResize", listener);
+  },
+
+  offWindowResize(
+    listener?: (result: { size: { windowWidth: number; windowHeight: number } }) => void,
+  ): void {
+    offEvent("windowResize", listener);
   },
 
   getUpdateManager(): {

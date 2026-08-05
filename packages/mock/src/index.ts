@@ -91,3 +91,4 @@ const wxMock = {
 
 export const wx = wxMock;
 export { frameworkApi } from "./framework.js";
+export { emitEvent } from "./ui.js";
