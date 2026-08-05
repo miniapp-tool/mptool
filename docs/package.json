@@ -9,7 +9,7 @@
     "docs:dev": "vuepress dev ."
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.30",
+    "@vuepress/bundler-vite": "2.0.0-rc.31",
     "@vuepress/plugin-meilisearch": "2.0.0-rc.133",
     "sass-embedded": "1.100.0",
     "vue": "3.5.40",
