@@ -130,7 +130,7 @@ describe($Page, () => {
 
     void getOptions()?.onReady?.();
 
-    expect(readyHandler).toHaveBeenCalledWith();
+    expect(readyHandler).toHaveBeenCalledTimes(1);
   });
 
   it("should emit page unload on onUnload", () => {
@@ -146,7 +146,7 @@ describe($Page, () => {
 
     void getOptions()?.onUnload?.();
 
-    expect(unloadHandler).toHaveBeenCalledWith();
+    expect(unloadHandler).toHaveBeenCalledTimes(1);
   });
 
   it("should unregister onAwake listener on unload", () => {
