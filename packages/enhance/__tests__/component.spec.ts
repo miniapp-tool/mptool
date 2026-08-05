@@ -261,3 +261,108 @@ describe("should handle component methods", () => {
     expect(instance.$parent).toBe(parent);
   });
 });
+
+describe("$ (bind)", () => {
+  interface BindEvent {
+    detail: { id: number; event: string; args: unknown[] };
+  }
+
+  const getBind = (
+    componentOptions: TrivialComponentOptions | undefined,
+  ): ((event: BindEvent) => void) | undefined =>
+    (componentOptions?.methods as unknown as { $?: (event: BindEvent) => void })?.$;
+
+  const getAttached = (
+    componentOptions: TrivialComponentOptions | undefined,
+  ): ((this: unknown) => void) | undefined =>
+    (componentOptions?.lifetimes as unknown as { attached?: (this: unknown) => void })?.attached;
+
+  it("should dispatch custom method", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const method = vi.fn<(a: number, b: number) => void>();
+    const instance = { customMethod: method };
+
+    getBind(componentOptions)?.call(instance, {
+      detail: { id: 1, event: "customMethod", args: [1, 2] },
+    });
+
+    expect(method).toHaveBeenCalledWith(1, 2);
+  });
+
+  it("should not throw when method is missing", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    expect(() =>
+      getBind(componentOptions)?.call({}, { detail: { id: 1, event: "missing", args: [] } }),
+    ).not.toThrow();
+  });
+
+  it("should attach ref on $attached event", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const childInstance = {
+      $id: 0,
+      $refID: "",
+      data: { ref: "childRef" },
+      triggerEvent: vi.fn<() => void>(),
+      $attached: vi.fn<(parent: unknown) => void>(),
+    };
+
+    // 通过 attached 生命周期注册 ref
+    getAttached(componentOptions)?.call(childInstance);
+
+    const parent = { $refs: new Map<string, unknown>() };
+
+    getBind(componentOptions)?.call(parent, {
+      detail: { id: childInstance.$id, event: "$attached", args: [] },
+    });
+
+    expect(parent.$refs.get("childRef")).toBe(childInstance);
+    expect(childInstance.$attached).toHaveBeenCalledWith(parent);
+  });
+
+  it("should ignore $attached when ref is missing", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const parent = { $refs: new Map<string, unknown>() };
+
+    expect(() =>
+      getBind(componentOptions)?.call(parent, {
+        detail: { id: 999, event: "$attached", args: [] },
+      }),
+    ).not.toThrow();
+  });
+});
