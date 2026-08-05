@@ -300,7 +300,7 @@ export const storageApi = {
     const result = {
       keys: [...storage.keys()],
       currentSize: getStorageSize(),
-      limitSize: 1024 * 1024 * 10,
+      limitSize: 1024 * 10,
       errMsg: "",
     };
 
@@ -354,7 +354,7 @@ export const storageApi = {
     return {
       keys: [...storage.keys()],
       currentSize: getStorageSize(),
-      limitSize: 1024 * 1024 * 10,
+      limitSize: 1024 * 10,
     };
   },
 

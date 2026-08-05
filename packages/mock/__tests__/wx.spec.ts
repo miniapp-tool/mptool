@@ -318,7 +318,7 @@ describe("wx mock", () => {
             expect(result.keys).toContain("info-key-1");
             expect(result.keys).toContain("info-key-2");
             expect(result.currentSize).toBeGreaterThan(0);
-            expect(result.limitSize).toBe(1024 * 1024 * 10);
+            expect(result.limitSize).toBe(1024 * 10);
             resolve();
           },
         });
@@ -338,7 +338,7 @@ describe("wx mock", () => {
       const result = wx.getStorageInfoSync();
       expect(result.keys).toContain("sync-info-1");
       expect(result.keys).toContain("sync-info-2");
-      expect(result.limitSize).toBe(1024 * 1024 * 10);
+      expect(result.limitSize).toBe(1024 * 10);
     });
 
     it("should return empty keys when no storage", () => {
