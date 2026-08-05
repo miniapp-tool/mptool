@@ -4,7 +4,10 @@ export default defineHopeConfig(
   {
     ignore: ["demo/**/*.js"],
     rules: {
-      "new-cap": ["warn", { capIsNewExceptions: ["App", "Component", "Emitter", "Page"] }],
+      "new-cap": [
+        "warn",
+        { capIsNewExceptions: ["App", "Behavior", "Component", "Emitter", "Page"] },
+      ],
       "no-console": "off",
       "no-warning-comments": "off",
       "prefer-named-capture-group": "off",
