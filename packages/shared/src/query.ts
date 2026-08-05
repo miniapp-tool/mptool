@@ -12,9 +12,11 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
 
   if (splits && splits.length > 0) {
     splits.forEach((item) => {
+      if (item === "") return;
+
       const [key, value] = item.split("=");
 
-      queries[key] = value;
+      if (key !== "") queries[key] = value;
     });
   }
 

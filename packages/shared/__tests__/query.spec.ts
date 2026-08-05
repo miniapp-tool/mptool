@@ -21,6 +21,13 @@ describe(parse, () => {
     expect(parsedQuery.a).toBe("2");
     expect(parsedQuery.test12).toBe("asd8a9ij");
   });
+
+  it("parse should skip empty segments", () => {
+    const parsedQuery = parse("a=1&&b=2&");
+
+    expect(parsedQuery).toStrictEqual({ a: "1", b: "2" });
+    expect("" in parsedQuery).toBe(false);
+  });
 });
 
 describe(stringify, () => {
