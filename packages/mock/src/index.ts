@@ -49,34 +49,38 @@ const wxMock = {
 
   getFileSystemManager,
 
+  // 注意：真实微信中 wx.downloadFile 不支持 Promise 风格调用（恒返回 DownloadTask），
+  // 无回调时返回 Promise 是 mock 特有的测试便利扩展，不是微信真实契约。
   downloadFile(option?: {
     url: string;
     filePath?: string;
     header?: Record<string, string>;
-    success?: (result: { tempFilePath: string; statusCode: number }) => void;
+    success?: (result: { statusCode: number; tempFilePath?: string; filePath?: string }) => void;
     fail?: (result: { errMsg: string; statusCode?: number }) => void;
     complete?: (result: { errMsg: string }) => void;
-  }): void | Promise<{ tempFilePath: string; statusCode: number }> | MockDownloadTask {
+  }):
+    | void
+    | Promise<{ statusCode: number; tempFilePath?: string; filePath?: string }>
+    | MockDownloadTask {
+    // 真实微信行为：传入 filePath 时 success 返回 filePath 字段（tempFilePath 缺失），
+    // 未传入 filePath 时返回 tempFilePath 字段。
+    const getResult = (): { statusCode: number; tempFilePath?: string; filePath?: string } =>
+      option?.filePath
+        ? { statusCode: 200, filePath: option.filePath }
+        : { statusCode: 200, tempFilePath: `mock://temp/${Date.now()}` };
+
     if (!option) return Promise.resolve({ tempFilePath: "", statusCode: 0 });
 
     if (!option.success && !option.fail && !option.complete) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          resolve({
-            tempFilePath: option.filePath ?? `mock://temp/${Date.now()}`,
-            statusCode: 200,
-          });
+          resolve(getResult());
         }, 0);
       });
     }
 
     setTimeout(() => {
-      if (option.success) {
-        option.success({
-          tempFilePath: option.filePath ?? `mock://temp/${Date.now()}`,
-          statusCode: 200,
-        });
-      }
+      if (option.success) option.success(getResult());
     }, 0);
 
     return downloadTask();

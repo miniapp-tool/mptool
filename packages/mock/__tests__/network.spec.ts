@@ -34,6 +34,21 @@ describe("downloadFile mock", () => {
         url: "https://example.com/file",
         success: (res) => {
           expect(res.statusCode).toBe(200);
+          expect(res.tempFilePath).toBeTypeOf("string");
+          resolve();
+        },
+      });
+    }));
+
+  it("should return filePath when filePath is provided", () =>
+    new Promise<void>((resolve) => {
+      void wx.downloadFile({
+        url: "https://example.com/file",
+        filePath: "wxfile://saved/file.bin",
+        success: (res) => {
+          expect(res.statusCode).toBe(200);
+          expect(res.filePath).toBe("wxfile://saved/file.bin");
+          expect(res.tempFilePath).toBeUndefined();
           resolve();
         },
       });
