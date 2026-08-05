@@ -4711,8 +4711,8 @@ packages:
   varint@6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
 
-  verkit@0.3.1:
-    resolution: {integrity: sha512-w2Eo8LSIIoW7qxNBzT7/17k+bh8plXo7G3dHjEIDqPlnluhzaxr9JX8F28VSYEtDvc1/a3WBDih6xNUZseebXg==}
+  verkit@0.3.2:
+    resolution: {integrity: sha512-zj/ob3UsvJGN0whEAKFp53REA5X66hvffVqoCtVQAakJKnKlH+/PcOfMoFwIG/o4rElqLv/ycAFlx8ZlXUorCg==}
     engines: {node: '>=18.12.0'}
 
   vfile-location@5.0.3:
@@ -9218,7 +9218,7 @@ snapshots:
       tinyglobby: 0.2.17
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
-      verkit: 0.3.1
+      verkit: 0.3.2
     optionalDependencies:
       publint: 0.3.23
       typescript: 6.0.3
@@ -9364,7 +9364,7 @@ snapshots:
 
   varint@6.0.0: {}
 
-  verkit@0.3.1: {}
+  verkit@0.3.2: {}
 
   vfile-location@5.0.3:
     dependencies:
