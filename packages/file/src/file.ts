@@ -243,11 +243,12 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<s
     wx.downloadFile({
       url: onlinePath,
       filePath: `${getUserPath()}/${localPath}`,
-      success: ({ statusCode, tempFilePath }) => {
+      // 传入 filePath 时微信返回 filePath 字段，未传入时返回 tempFilePath
+      success: ({ statusCode, filePath, tempFilePath }) => {
         if (statusCode === 200) {
           logger.debug(`${onlinePath} saved`);
 
-          resolve(tempFilePath);
+          resolve(filePath ?? tempFilePath);
           return;
         }
 
