@@ -32,6 +32,12 @@ export const reportNetworkStatus = (): void => {
           break;
         }
 
+        case "4g":
+        case "5g": {
+          // 4g/5g 网络状态良好，无需提示
+          break;
+        }
+
         case "none": {
           void showToast("您没有连接到网络");
           break;

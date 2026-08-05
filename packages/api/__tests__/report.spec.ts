@@ -6,45 +6,120 @@ import { reportNetworkStatus } from "../src/index.js";
 describe(reportNetworkStatus, () => {
   const mockNetworkType = (networkType: string): void => {
     const mockGetNetworkType = wx as unknown as {
-      getNetworkType: (option: { success?: (result: { networkType: string }) => void }) => void;
+      getNetworkType: (option: { success: (result: { networkType: string }) => void }) => void;
     };
 
     mockGetNetworkType.getNetworkType = (option): void => {
-      option.success?.({ networkType });
+      option.success({ networkType });
     };
   };
 
-  it("should not throw", () => {
-    expect(() => reportNetworkStatus()).not.toThrow();
-  });
+  const mockShowToast = (): string[] => {
+    const titles: string[] = [];
 
-  it("should handle wifi", () => {
+    const mockShowToastApi = wx as unknown as {
+      showToast: (option: { title: string }) => void;
+    };
+
+    mockShowToastApi.showToast = (option): void => {
+      titles.push(option.title);
+    };
+
+    return titles;
+  };
+
+  const mockWifi = (signalStrength: number, fail = false): void => {
+    const mockWifiApi = wx as unknown as {
+      startWifi: (option: { success?: () => void; fail?: () => void }) => void;
+      getConnectedWifi: (option: {
+        success?: (result: { wifi: { signalStrength: number } }) => void;
+        fail?: () => void;
+      }) => void;
+    };
+
+    mockWifiApi.startWifi = (option): void => {
+      if (fail) option.fail?.();
+      else option.success?.();
+    };
+
+    mockWifiApi.getConnectedWifi = (option): void => {
+      if (fail) option.fail?.();
+      else option.success?.({ wifi: { signalStrength } });
+    };
+  };
+
+  it("should show warning when wifi signal is weak", () => {
+    const titles = mockShowToast();
     mockNetworkType("wifi");
+    mockWifi(0.3);
 
-    expect(() => reportNetworkStatus()).not.toThrow();
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["Wifi 信号不佳"]);
   });
 
-  it("should handle 2g", () => {
+  it("should not show toast when wifi signal is strong", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    mockWifi(1);
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual([]);
+  });
+
+  it("should show toast when wifi is unavailable", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    mockWifi(1, true);
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["无法连接网络"]);
+  });
+
+  it("should show toast for slow 2g/3g network", () => {
+    const titles = mockShowToast();
     mockNetworkType("2g");
 
-    expect(() => reportNetworkStatus()).not.toThrow();
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["您的网络状态不佳"]);
   });
 
-  it("should handle 3g", () => {
-    mockNetworkType("3g");
-
-    expect(() => reportNetworkStatus()).not.toThrow();
-  });
-
-  it("should handle none", () => {
-    mockNetworkType("none");
-
-    expect(() => reportNetworkStatus()).not.toThrow();
-  });
-
-  it("should handle unknown network type", () => {
+  it("should not show toast for healthy 4g network", () => {
+    const titles = mockShowToast();
     mockNetworkType("4g");
 
-    expect(() => reportNetworkStatus()).not.toThrow();
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual([]);
+  });
+
+  it("should not show toast for healthy 5g network", () => {
+    const titles = mockShowToast();
+    mockNetworkType("5g");
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual([]);
+  });
+
+  it("should show toast when not connected", () => {
+    const titles = mockShowToast();
+    mockNetworkType("none");
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["您没有连接到网络"]);
+  });
+
+  it("should show toast for unknown network type", () => {
+    const titles = mockShowToast();
+    mockNetworkType("unknown");
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["网络连接出现问题，请稍后重试"]);
   });
 });
