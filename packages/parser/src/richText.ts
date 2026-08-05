@@ -11,6 +11,12 @@ import type { ElementNode, RichTextNode } from "./typings.js";
 const handleSVG = (node: Element): RichTextNode => {
   const { width, height, viewbox } = node.attribs;
 
+  // SVG 属性名大小写敏感，cheerio 解析时会将属性名小写化，这里恢复 viewBox 的规范写法
+  if (viewbox) {
+    node.attribs.viewBox = viewbox;
+    delete node.attribs.viewbox;
+  }
+
   let style = "";
 
   if (width) style += `width:${width}${/^[\d.]*\d$/u.test(width) ? "px" : ""};`;

@@ -208,7 +208,7 @@ describe(getRichTextNodes, () => {
         [
           {
             attrs: {
-              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewbox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='red'/%3E%3C/svg%3E",
+              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='red'/%3E%3C/svg%3E",
               style: "width:100px;height:100px;",
             },
             name: "img",
