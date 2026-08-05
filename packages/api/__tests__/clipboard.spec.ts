@@ -11,4 +11,16 @@ describe(writeClipboard, () => {
   it("should reject on empty data", async () => {
     await expect(writeClipboard("")).rejects.toThrow("data is empty");
   });
+
+  it("should reject on fail", async () => {
+    const mockSetClipboardData = wx as unknown as {
+      setClipboardData: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockSetClipboardData.setClipboardData = (option): void => {
+      option.fail?.({ errMsg: "clipboard fail" });
+    };
+
+    await expect(writeClipboard("data")).rejects.toThrow("clipboard fail");
+  });
 });
