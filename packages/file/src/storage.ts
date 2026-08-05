@@ -166,7 +166,7 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
     })
     .then(({ data }) => getData(key, data))
     .catch(() => {
-      logger.error(`set "${key}" fail`);
+      logger.error(`get "${key}" fail`);
 
       // oxlint-disable-next-line no-undefined, unicorn/no-useless-undefined
       return undefined;
