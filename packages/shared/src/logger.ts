@@ -10,7 +10,8 @@ const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
-  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
+  // 仅在 wx 环境下访问 wx.env，js 环境下 wx 可能不存在
+  if (env !== "js" && ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined)) {
     if (isRealtime) log.info("debug", ...args);
     else (log as WechatMiniprogram.LogManager).debug(...args);
   }
