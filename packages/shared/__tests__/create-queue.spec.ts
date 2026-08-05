@@ -134,4 +134,25 @@ describe(createQueue, () => {
     const res = await queue.run();
     expect(res).toStrictEqual({ interrupted: true, msg: "custom message" });
   });
+
+  it("should not be stuck when a task rejects", async () => {
+    const result: number[] = [];
+    const queue = createQueue([
+      (): Promise<void> => {
+        result.push(1);
+
+        return Promise.reject(new Error("task error"));
+      },
+      (): Promise<void> => {
+        result.push(2);
+
+        return Promise.resolve();
+      },
+    ]);
+
+    const res = await queue.run();
+
+    expect(res).toStrictEqual({ interrupted: false });
+    expect(result).toStrictEqual([1, 2]);
+  });
 });
