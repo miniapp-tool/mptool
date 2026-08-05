@@ -16,6 +16,20 @@ describe("request mock", () => {
     expect(res.header).toStrictEqual({});
     expect(res.cookies).toStrictEqual([]);
   });
+
+  it("should call success and complete callbacks", () =>
+    new Promise<void>((resolve) => {
+      void wx.request({
+        url: "https://example.com/api",
+        success: (res: { statusCode: number }): void => {
+          expect(res.statusCode).toBe(200);
+        },
+        complete: (res: { errMsg: string }): void => {
+          expect(res.errMsg).toBe("request:ok");
+          resolve();
+        },
+      });
+    }));
 });
 
 describe("downloadFile mock", () => {
