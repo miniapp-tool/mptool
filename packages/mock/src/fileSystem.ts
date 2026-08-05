@@ -21,18 +21,23 @@ export class FileSystemManager {
     };
   }
 
-  readFileSync(path: string): string | ArrayBuffer {
+  readFileSync(path: string, encoding?: string): string | ArrayBuffer {
     const node = this.files.get(normalizePath(path));
 
     if (!node || node.type !== "file") throw new Error(`ENOENT: ${path}`);
 
-    return node.content ?? "";
+    const content = node.content ?? "";
+
+    // 真实微信：未指定 encoding 时返回 ArrayBuffer
+    if (!encoding || encoding === "binary") return new TextEncoder().encode(content).buffer;
+
+    return content;
   }
 
-  writeFileSync(path: string, data: string | ArrayBuffer): void {
+  writeFileSync(path: string, data: string | ArrayBuffer, _encoding?: string): void {
     this.files.set(normalizePath(path), {
       type: "file",
-      content: typeof data === "string" ? data : "",
+      content: typeof data === "string" ? data : new TextDecoder().decode(data),
     });
   }
 
@@ -80,8 +85,19 @@ export class FileSystemManager {
     return [...names];
   }
 
-  saveFileSync(_tempFilePath: string, filePath: string): void {
-    this.files.set(normalizePath(filePath), { type: "file", content: "" });
+  saveFileSync(tempFilePath: string, filePath: string): string {
+    const dir = normalizePath(filePath);
+
+    // 真实微信：目标文件已存在时保存失败
+    if (this.files.has(dir)) throw new Error(`EEXIST: ${filePath}`);
+
+    const source = this.files.get(normalizePath(tempFilePath));
+
+    this.files.set(dir, {
+      type: "file",
+      content: source?.type === "file" ? (source.content ?? "") : "",
+    });
+    return filePath;
   }
 
   unzip(options: {
