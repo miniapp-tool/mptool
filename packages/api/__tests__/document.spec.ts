@@ -7,6 +7,18 @@ describe(openDocument, () => {
   it("should not throw", () => {
     expect(() => openDocument("https://example.com/doc.pdf")).not.toThrow();
   });
+
+  it("should not throw when download fails", () => {
+    const mockDownloadFile = wx as unknown as {
+      downloadFile: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockDownloadFile.downloadFile = (option): void => {
+      option.fail?.({ errMsg: "download fail" });
+    };
+
+    expect(() => openDocument("https://example.com/doc.pdf")).not.toThrow();
+  });
 });
 
 describe(saveDocument, () => {
