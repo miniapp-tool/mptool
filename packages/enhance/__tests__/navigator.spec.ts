@@ -87,4 +87,20 @@ describe("navigator", () => {
     // 只有第一次导航真正执行了 wx.navigateTo
     expect(navigateTo).toHaveBeenCalledTimes(1);
   });
+
+  it("should navigate after maxDelay when onNavigate is pending", async () => {
+    $Config({ defaultPage: "/pages/$name", maxDelay: 20 });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    // onNavigate handler 保持 pending，maxDelay 后应照常导航
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:/pages/slow`, () => new Promise<void>(() => {}));
+
+    const go = getTrigger("navigateTo");
+
+    await expect(go("slow")).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/slow" });
+  });
 });
