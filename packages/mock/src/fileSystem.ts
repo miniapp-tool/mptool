@@ -111,5 +111,9 @@ export class FileSystemManager {
   }
 }
 
+/** 全局唯一的文件系统管理器（与真实微信行为一致） */
+let fileSystemManager: FileSystemManager | undefined;
+
 /** 获取文件系统管理器 */
-export const getFileSystemManager = (): FileSystemManager => new FileSystemManager();
+export const getFileSystemManager = (): FileSystemManager =>
+  (fileSystemManager ??= new FileSystemManager());
