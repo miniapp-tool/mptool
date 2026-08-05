@@ -49,30 +49,33 @@ export function getTrigger(
  */
 // oxlint-disable-next-line typescript/no-explicit-any
 export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => any {
-  // oxlint-disable-next-line typescript/no-explicit-any, typescript/consistent-return
-  return (pageNameWithArg: string): any => {
+  // oxlint-disable-next-line typescript/consistent-return
+  return async (pageNameWithArg: string): Promise<unknown> => {
     if (canNavigate) {
       // set navigate lock
       canNavigate = false;
 
       const { path, url, query: queries } = getPathDetail(pageNameWithArg);
 
-      return Promise.race([
-        routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, queries),
-        // 等待最小延迟
-        new Promise<void>((resolve) => {
-          setTimeout(() => {
-            resolve();
-          }, getConfig().maxDelay ?? 200);
-        }),
-      ]).then(() => {
-        // release navigate lock
-        canNavigate = true;
+      try {
+        await Promise.race([
+          routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, queries),
+          // 等待最小延迟
+          new Promise<void>((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, getConfig().maxDelay ?? 200);
+          }),
+        ]);
+      } catch {
+        // 忽略 onNavigate 处理器抛出的错误，导航不应被阻塞
+      }
 
-        // @ts-expect-error: argument can not union
-        // oxlint-disable-next-line typescript/no-unsafe-return
-        return wx[type]({ url });
-      });
+      // release navigate lock
+      canNavigate = true;
+
+      // @ts-expect-error: argument can not union
+      return wx[type]({ url });
     }
   };
 }
