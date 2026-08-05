@@ -17,3 +17,36 @@ describe("request mock", () => {
     expect(res.cookies).toStrictEqual([]);
   });
 });
+
+describe("downloadFile mock", () => {
+  it("should resolve a promise without callbacks", async () => {
+    const res = (await wx.downloadFile({ url: "https://example.com/file" })) as {
+      statusCode: number;
+      tempFilePath: string;
+    };
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  it("should call success callback", () =>
+    new Promise<void>((resolve) => {
+      void wx.downloadFile({
+        url: "https://example.com/file",
+        success: (res) => {
+          expect(res.statusCode).toBe(200);
+          resolve();
+        },
+      });
+    }));
+
+  it("should return a download task when callbacks are provided", () => {
+    const task = wx.downloadFile({
+      url: "https://example.com/file",
+      success: () => {},
+    }) as {
+      onProgressUpdate: (cb: (result: { progress: number }) => void) => void;
+    };
+
+    expect(task.onProgressUpdate).toBeTypeOf("function");
+  });
+});
