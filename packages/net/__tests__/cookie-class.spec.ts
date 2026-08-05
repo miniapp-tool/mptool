@@ -46,8 +46,25 @@ describe(Cookie, () => {
   it("isPathMatched", () => {
     const cookie = new Cookie({ name: "a", value: "b", domain: "example.com", path: "/foo" });
 
+    expect(cookie.isPathMatched("/foo")).toBe(true);
     expect(cookie.isPathMatched("/foo/bar")).toBe(true);
     expect(cookie.isPathMatched("/bar")).toBe(false);
+    expect(cookie.isPathMatched("/foobar")).toBe(false);
+  });
+
+  it("isPathMatched with trailing slash", () => {
+    const cookie = new Cookie({ name: "a", value: "b", domain: "example.com", path: "/foo/" });
+
+    expect(cookie.isPathMatched("/foo")).toBe(true);
+    expect(cookie.isPathMatched("/foo/bar")).toBe(true);
+    expect(cookie.isPathMatched("/foobar")).toBe(false);
+  });
+
+  it("isPathMatched with root path", () => {
+    const cookie = new Cookie({ name: "a", value: "b", domain: "example.com", path: "/" });
+
+    expect(cookie.isPathMatched("/foo")).toBe(true);
+    expect(cookie.isPathMatched("/foo/bar")).toBe(true);
   });
 
   it("toString", () => {

@@ -52,7 +52,13 @@ export class Cookie {
    * @returns 是否匹配
    */
   isPathMatched(path: string): boolean {
-    return path.startsWith(this.path) || this.path.replace(/\/$/u, "") === path;
+    // RFC 6265 §5.1.4: cookie-path matches request-path if they are identical,
+    // or cookie-path is a prefix of request-path followed by a "/" separator,
+    // or cookie-path ends with "/" and is a prefix of request-path.
+    return (
+      this.path.replace(/\/$/u, "") === path ||
+      (path.startsWith(this.path) && (this.path.endsWith("/") || path[this.path.length] === "/"))
+    );
   }
 
   toString(): string {
