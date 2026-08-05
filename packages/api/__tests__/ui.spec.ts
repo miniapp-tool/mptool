@@ -7,6 +7,18 @@ describe(showToast, () => {
   it("should resolve on success", async () => {
     await expect(showToast("hello")).resolves.toBeUndefined();
   });
+
+  it("should reject when showToast fails", async () => {
+    const mockShowToast = wx as unknown as {
+      showToast: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockShowToast.showToast = (option): void => {
+      option.fail?.({ errMsg: "showToast fail" });
+    };
+
+    await expect(showToast("hello")).rejects.toThrow("showToast fail");
+  });
 });
 
 describe(showModal, () => {
@@ -25,13 +37,13 @@ describe(showModal, () => {
   });
 
   it("should call cancel action on cancel", () => {
-    (
-      wx as unknown as {
-        showModal: (option: {
-          success?: (result: { confirm: boolean; cancel: boolean }) => void;
-        }) => void;
-      }
-    ).showModal = (option): void => {
+    const mockShowModal = wx as unknown as {
+      showModal: (option: {
+        success?: (result: { confirm: boolean; cancel: boolean }) => void;
+      }) => void;
+    };
+
+    mockShowModal.showModal = (option): void => {
       option.success?.({ confirm: false, cancel: true });
     };
 

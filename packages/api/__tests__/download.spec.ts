@@ -9,4 +9,16 @@ describe(download, () => {
 
     expect(path).toBeDefined();
   });
+
+  it("should reject when download fails", async () => {
+    const mockDownloadFile = wx as unknown as {
+      downloadFile: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockDownloadFile.downloadFile = (option): void => {
+      option.fail?.({ errMsg: "download fail" });
+    };
+
+    await expect(download("https://example.com/file.png")).rejects.toThrow("download fail");
+  });
 });
