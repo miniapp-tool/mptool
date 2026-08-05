@@ -81,7 +81,7 @@ export const Emitter = <Events>(
       const handlers: GenericEventHandler[] | undefined = all.get(type);
 
       if (handlers) {
-        // oxlint-disable-next-line no-bitwise, unicorn/prefer-math-trunc
+        // oxlint-disable-next-line no-bitwise
         if (handler) handlers.splice(handlers.indexOf(handler) >>> 0, 1);
         else all.set(type, []);
       }
