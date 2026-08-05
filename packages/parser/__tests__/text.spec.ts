@@ -18,4 +18,9 @@ describe(getText, () => {
   it("should return empty string for content without text", () => {
     expect(getText("<div></div>")).toBe("");
   });
+
+  it("should ignore comments", () => {
+    expect(getText("<!-- comment -->hello")).toBe("hello");
+    expect(getText("<!-- only comment -->")).toBe("");
+  });
 });

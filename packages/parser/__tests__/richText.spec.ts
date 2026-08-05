@@ -319,4 +319,74 @@ describe(getRichTextNodes, () => {
       },
     ]);
   });
+
+  it("omits attrs when appendClass is false and there are none", async () => {
+    const nodes = await getRichTextNodes("<span>hello</span>", {
+      appendClass: false,
+    });
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "span",
+        children: [{ type: "text", text: "hello" }],
+      },
+    ]);
+  });
+
+  it("converts svg with numeric width and height", async () => {
+    const nodes = await getRichTextNodes('<svg width="100" height="50"></svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: {
+          src: expect.stringContaining("data:image/svg+xml,"),
+          style: "width:100px;height:50px;",
+        },
+      },
+    ]);
+  });
+
+  it("keeps existing units in svg width and height", async () => {
+    const nodes = await getRichTextNodes('<svg width="100%" height="50%"></svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: {
+          src: expect.stringContaining("data:image/svg+xml,"),
+          style: "width:100%;height:50%;",
+        },
+      },
+    ]);
+  });
+
+  it("accepts pre-parsed nodes", async () => {
+    const nodes = await getRichTextNodes([{ type: "text", data: "hello" }] as never);
+
+    expect(nodes).toStrictEqual([{ type: "text", text: "hello" }]);
+  });
+
+  it("removes leading and trailing empty text nodes", async () => {
+    const nodes = await getRichTextNodes("<div>  <p>hi</p>  </div>");
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "div",
+        attrs: { class: "div" },
+        children: [
+          {
+            type: "node",
+            name: "p",
+            attrs: { class: "p" },
+            children: [{ type: "text", text: "hi" }],
+          },
+        ],
+      },
+    ]);
+  });
 });
