@@ -13,7 +13,7 @@
     "@vuepress/plugin-meilisearch": "2.0.0-rc.133",
     "sass-embedded": "1.100.0",
     "vue": "3.5.40",
-    "vuepress": "2.0.0-rc.30",
+    "vuepress": "2.0.0-rc.31",
     "vuepress-theme-hope": "2.0.0-rc.107"
   }
 }
