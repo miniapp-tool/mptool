@@ -90,3 +90,69 @@ describe(CookieStore, () => {
     expect(result1).not.toHaveLength(result2.length);
   });
 });
+
+describe("cookie store extras", () => {
+  it("apply should add cookies", () => {
+    const store = new CookieStore("apply-test");
+
+    store.apply([new Cookie({ name: "a", value: "1", domain: "example.com", path: "/" })]);
+
+    expect(store.getHeader("example.com")).toBe("a=1");
+  });
+
+  it("getAllCookies should return all valid cookies", () => {
+    const store = new CookieStore("all-test");
+
+    store.set({ name: "a", value: "1", domain: "example.com" });
+    store.set({ name: "b", value: "2", domain: "other.com" });
+
+    expect(
+      store
+        .getAllCookies()
+        .map((cookie) => cookie.name)
+        .sort(),
+    ).toStrictEqual(["a", "b"]);
+  });
+
+  it("should ignore expired cookies", () => {
+    const store = new CookieStore("expired-test");
+
+    store.set({ name: "a", value: "1", domain: "example.com", maxAge: -1 });
+
+    expect(store.getCookies({ domain: "example.com" })).toStrictEqual([]);
+    expect(store.getHeader("example.com")).toBe("");
+  });
+
+  it("applyHeader should parse string Set-Cookie", () => {
+    const store = new CookieStore("apply-header-string-test");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Domain=example.com; Path=/" }, "example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1");
+  });
+
+  it("applyHeader should parse array Set-Cookie", () => {
+    const store = new CookieStore("apply-header-array-test");
+
+    store.applyHeader({ "Set-Cookie": ["a=1; Path=/", "b=2; Path=/"] }, "example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1; b=2");
+  });
+
+  it("applyHeader should parse lowercase set-cookie", () => {
+    const store = new CookieStore("apply-header-lower-test");
+
+    store.applyHeader({ "set-cookie": "a=1; Path=/" }, "example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1");
+  });
+
+  it("set should overwrite existing cookie", () => {
+    const store = new CookieStore("overwrite-test");
+
+    store.set({ name: "a", value: "1", domain: "example.com", path: "/" });
+    store.set({ name: "a", value: "2", domain: "example.com", path: "/" });
+
+    expect(store.getValue("a", { domain: "example.com", path: "/" })).toBe("2");
+  });
+});
