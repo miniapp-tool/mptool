@@ -11,6 +11,7 @@ import {
   readFile,
   readJSON,
   rm,
+  saveFile,
   saveOnlineFile,
   unzip,
   writeFile,
@@ -99,5 +100,35 @@ describe("file operations", () => {
     const path = await saveOnlineFile("https://example.com/file", "tmp/online.txt");
 
     expect(path).toBeDefined();
+  });
+});
+
+describe("file edge cases", () => {
+  it("should save a file", () => {
+    saveFile("mock://temp/source", "tmp/saved.txt");
+
+    expect(exists("tmp/saved.txt")).toBe(true);
+  });
+
+  it("should read JSON and return undefined when missing", () => {
+    expect(readJSON("tmp/missing-json")).toBeUndefined();
+  });
+
+  it("should read JSON and return undefined on invalid content", () => {
+    const fs = wx.getFileSystemManager();
+
+    fs.writeFileSync(`${wx.env.USER_DATA_PATH}/tmp/bad.json`, "{invalid json");
+
+    expect(readJSON("tmp/bad")).toBeUndefined();
+  });
+
+  it("should read binary file as ArrayBuffer", () => {
+    const { buffer } = new TextEncoder().encode("data");
+
+    writeFile("tmp/data.bin", buffer);
+
+    const result = readFile("tmp/data.bin", "binary");
+
+    expect(result).toBeInstanceOf(ArrayBuffer);
   });
 });
