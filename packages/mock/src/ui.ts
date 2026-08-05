@@ -91,7 +91,17 @@ export const uiApi = {
   },
 
   getConnectedWifi(option: unknown): unknown {
-    return callCallback(option, { wifi: { signalStrength: 1 }, errMsg: "getConnectedWifi:ok" });
+    return callCallback(option, {
+      wifi: {
+        SSID: "",
+        BSSID: "",
+        secure: true,
+        // iOS 下 signalStrength 取值范围 0~1，1 表示信号最强
+        signalStrength: 1,
+        frequency: 0,
+      },
+      errMsg: "getConnectedWifi:ok",
+    });
   },
 
   setClipboardData(option: unknown): unknown {
