@@ -65,4 +65,26 @@ describe("navigator", () => {
     await expect(go("main")).resolves.toBeUndefined();
     expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/main" });
   });
+
+  it("should block concurrent navigation while lock is held", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    // onNavigate handler 保持 pending，使导航锁在等待期间持续占用
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:/pages/block`, () => new Promise<void>(() => {}));
+
+    const go = getTrigger("navigateTo");
+
+    const first = go("block");
+    const second = go("block");
+
+    await expect(first).resolves.toBeUndefined();
+    await expect(second).resolves.toBeUndefined();
+
+    // 只有第一次导航真正执行了 wx.navigateTo
+    expect(navigateTo).toHaveBeenCalledTimes(1);
+  });
 });
