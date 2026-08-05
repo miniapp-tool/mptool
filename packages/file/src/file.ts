@@ -1,4 +1,4 @@
-import { MpError, logger } from "@mptool/shared";
+import { MpError, env, logger } from "@mptool/shared";
 
 /** 文件编码 */
 type FileEncoding =
@@ -14,10 +14,37 @@ type FileEncoding =
   | "utf16le"
   | "utf-16le";
 
-/** 文件管理器 */
-const fileManager = wx.getFileSystemManager();
-/** 用户文件夹路径 */
-const userPath = wx.env.USER_DATA_PATH;
+/** 文件管理器（惰性初始化，避免在非小程序环境下导入即报错） */
+let fileManager: WechatMiniprogram.FileSystemManager | undefined;
+/** 用户文件夹路径（惰性初始化） */
+let userPath = "";
+
+/** 在非小程序环境下调用文件 API 时抛出明确错误 */
+const checkEnv = (): void => {
+  if (env === "js") throw new MpError({ message: "File API is only available in wx environment" });
+};
+
+/**
+ * 获取文件管理器
+ *
+ * @returns 文件管理器实例
+ */
+const getFileManager = (): WechatMiniprogram.FileSystemManager => {
+  checkEnv();
+
+  return (fileManager ??= wx.getFileSystemManager());
+};
+
+/**
+ * 获取用户文件夹路径
+ *
+ * @returns 用户文件夹路径
+ */
+const getUserPath = (): string => {
+  checkEnv();
+
+  return (userPath ||= wx.env.USER_DATA_PATH);
+};
 
 export const dirname = (path: string): string => path.split("/").slice(0, -1).join("/");
 
@@ -29,7 +56,7 @@ export const dirname = (path: string): string => path.split("/").slice(0, -1).jo
  */
 export const exists = (path: string): boolean => {
   try {
-    fileManager.statSync(`${userPath}/${path}`, false);
+    getFileManager().statSync(`${getUserPath()}/${path}`, false);
 
     return true;
   } catch {
@@ -44,7 +71,8 @@ export const exists = (path: string): boolean => {
  * @returns 是否是文件
  */
 export const isFile = (path: string): boolean =>
-  exists(path) && (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isFile();
+  exists(path) &&
+  (getFileManager().statSync(`${getUserPath()}/${path}`) as WechatMiniprogram.Stats).isFile();
 
 /**
  * 是否是文件夹
@@ -54,7 +82,7 @@ export const isFile = (path: string): boolean =>
  */
 export const isDir = (path: string): boolean =>
   exists(path) &&
-  (fileManager.statSync(`${userPath}/${path}`) as WechatMiniprogram.Stats).isDirectory();
+  (getFileManager().statSync(`${getUserPath()}/${path}`) as WechatMiniprogram.Stats).isDirectory();
 
 /**
  * 删除文件或文件夹
@@ -74,14 +102,14 @@ export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "f
 
   if (type === "dir") {
     try {
-      fileManager.rmdirSync(`${userPath}/${path}`, true);
+      getFileManager().rmdirSync(`${getUserPath()}/${path}`, true);
       deleteLog();
     } catch (err) {
       errorLog(err);
     }
   } else {
     try {
-      fileManager.unlinkSync(`${userPath}/${path}`);
+      getFileManager().unlinkSync(`${getUserPath()}/${path}`);
       deleteLog();
     } catch (err) {
       errorLog(err);
@@ -97,7 +125,7 @@ export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "f
  */
 export const ls = (path: string): string[] => {
   try {
-    const fileList = fileManager.readdirSync(`${userPath}/${path}`);
+    const fileList = getFileManager().readdirSync(`${getUserPath()}/${path}`);
 
     logger.debug(`Listing ${path} folder:`, fileList);
 
@@ -129,7 +157,7 @@ export const readFile = (<T extends FileEncoding>(
   encoding: T = "utf-8" as T,
 ): (T extends "binary" ? ArrayBuffer : string) | undefined => {
   try {
-    return fileManager.readFileSync(`${userPath}/${path}`, encoding) as
+    return getFileManager().readFileSync(`${getUserPath()}/${path}`, encoding) as
       | (T extends "binary" ? ArrayBuffer : string)
       | undefined;
   } catch {
@@ -155,7 +183,7 @@ export const readJSON = <T = unknown>(
   let data = undefined;
 
   try {
-    const fileContent = fileManager.readFileSync(`${userPath}/${path}.json`, encoding);
+    const fileContent = getFileManager().readFileSync(`${getUserPath()}/${path}.json`, encoding);
 
     try {
       data = JSON.parse(fileContent as string) as T;
@@ -180,7 +208,7 @@ export const readJSON = <T = unknown>(
  */
 export const mkdir = (path: string, recursive = true): void => {
   try {
-    fileManager.mkdirSync(`${userPath}/${path}`, recursive);
+    getFileManager().mkdirSync(`${getUserPath()}/${path}`, recursive);
   } catch {
     // 调试
     logger.debug(`${path} folder already exists`);
@@ -195,7 +223,7 @@ export const mkdir = (path: string, recursive = true): void => {
  */
 export const saveFile = (tempFilePath: string, path: string): void => {
   try {
-    fileManager.saveFileSync(tempFilePath, `${userPath}/${path}`);
+    getFileManager().saveFileSync(tempFilePath, `${getUserPath()}/${path}`);
   } catch (err) {
     logger.error(`Saving to ${path} failed:`, err);
   }
@@ -214,7 +242,7 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<s
   return new Promise((resolve, reject) => {
     wx.downloadFile({
       url: onlinePath,
-      filePath: `${userPath}/${localPath}`,
+      filePath: `${getUserPath()}/${localPath}`,
       success: ({ statusCode, tempFilePath }) => {
         if (statusCode === 200) {
           logger.debug(`${onlinePath} saved`);
@@ -249,8 +277,8 @@ export const writeFile = <T = unknown>(
   encoding: FileEncoding = data instanceof ArrayBuffer ? "binary" : "utf-8",
 ): void => {
   mkdir(dirname(path));
-  fileManager.writeFileSync(
-    `${userPath}/${path}`,
+  getFileManager().writeFileSync(
+    `${getUserPath()}/${path}`,
     data instanceof ArrayBuffer ? data : JSON.stringify(data),
     encoding,
   );
@@ -271,7 +299,7 @@ export const writeJSON = <T = unknown>(
   const jsonString = JSON.stringify(data);
 
   mkdir(dirname(path));
-  fileManager.writeFileSync(`${userPath}/${path}.json`, jsonString, encoding);
+  getFileManager().writeFileSync(`${getUserPath()}/${path}.json`, jsonString, encoding);
 };
 
 /**
@@ -283,9 +311,9 @@ export const writeJSON = <T = unknown>(
  */
 export const unzip = (zipFilePath: string, targetPath: string): Promise<void> =>
   new Promise((resolve, reject) => {
-    fileManager.unzip({
-      zipFilePath: `${userPath}/${zipFilePath}`,
-      targetPath: `${userPath}/${targetPath}`,
+    getFileManager().unzip({
+      zipFilePath: `${getUserPath()}/${zipFilePath}`,
+      targetPath: `${getUserPath()}/${targetPath}`,
       success: () => {
         resolve();
       },
