@@ -218,6 +218,49 @@ describe(Emitter, () => {
       expect(star).toHaveBeenCalledTimes(2);
       expect(star).toHaveBeenLastCalledWith("bar", eb);
     });
+
+    it("should continue to invoke remaining handlers when one throws", () => {
+      const first = vi.fn<() => void>(() => {
+        throw new Error("first handler error");
+      });
+      const second = vi.fn<() => void>();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      try {
+        inst.on("foo", first);
+        inst.on("foo", second);
+
+        expect(() => inst.emit("foo", "arg")).not.toThrow();
+        expect(first).toHaveBeenCalledTimes(1);
+        expect(second).toHaveBeenCalledTimes(1);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("should swallow rejected promises from async handlers", async () => {
+      const asyncHandler = vi.fn<() => Promise<void>>(() =>
+        Promise.reject(new Error("async handler error")),
+      );
+      const syncHandler = vi.fn<() => void>();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      try {
+        inst.on("foo", asyncHandler);
+        inst.on("foo", syncHandler);
+
+        inst.emit("foo", "arg");
+
+        // wait for the catch microtask to settle
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 0);
+        });
+
+        expect(syncHandler).toHaveBeenCalledTimes(1);
+      } finally {
+        spy.mockRestore();
+      }
+    });
   });
 
   describe("emitAsync()", () => {

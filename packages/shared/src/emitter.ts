@@ -101,17 +101,31 @@ export const Emitter = <Events>(
       let handlers = all.get(type);
 
       if (handlers) {
-        void [...(handlers as EventHandlerList<Events[keyof Events]>)]
-          // oxlint-disable-next-line typescript/no-non-null-assertion
-          .map((handler) => handler(event!));
+        [...(handlers as EventHandlerList<Events[keyof Events]>)].forEach((handler) => {
+          try {
+            // oxlint-disable-next-line typescript/no-non-null-assertion
+            const result = handler(event!);
+
+            if (result instanceof Promise) void result.catch(console.error);
+          } catch (err) {
+            console.error(err);
+          }
+        });
       }
 
       handlers = all.get("*");
 
       if (handlers) {
-        void [...(handlers as WildCardEventHandlerList<Events>)]
-          // oxlint-disable-next-line typescript/no-non-null-assertion
-          .map((handler) => handler(type, event!));
+        [...(handlers as WildCardEventHandlerList<Events>)].forEach((handler) => {
+          try {
+            // oxlint-disable-next-line typescript/no-non-null-assertion
+            const result = handler(type, event!);
+
+            if (result instanceof Promise) void result.catch(console.error);
+          } catch (err) {
+            console.error(err);
+          }
+        });
       }
     },
 
