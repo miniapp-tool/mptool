@@ -222,6 +222,8 @@ export const mkdir = (path: string, recursive = true): void => {
  * @param path 保存文件路径
  */
 export const saveFile = (tempFilePath: string, path: string): void => {
+  mkdir(dirname(path));
+
   try {
     getFileManager().saveFileSync(tempFilePath, `${getUserPath()}/${path}`);
   } catch (err) {

@@ -111,6 +111,12 @@ describe("file edge cases", () => {
     expect(exists("tmp/saved.txt")).toBe(true);
   });
 
+  it("should create the parent directory when saving a file", () => {
+    saveFile("mock://temp/source", "tmp/new-dir/saved.txt");
+
+    expect(exists("tmp/new-dir/saved.txt")).toBe(true);
+  });
+
   it("should read JSON and return undefined when missing", () => {
     expect(readJSON("tmp/missing-json")).toBeUndefined();
   });
