@@ -8,10 +8,10 @@ import * as net from "../../net/src/index.js";
 import * as parser from "../../parser/src/index.js";
 
 /**
- * Aggregated library namespace mounted on `globalThis.mptool`, so hot-reload code can access the
+ * Aggregated library namespace for `globalThis.mptool`, so hot-reload code can access the
  * api/file/net/parser helpers through the global object.
  *
- * 挂载到 `globalThis.mptool` 的聚合命名空间，热更新代码可通过全局对象访问 api/file/net/parser 工具。
+ * `globalThis.mptool` 的聚合命名空间，热更新代码可通过全局对象访问 api/file/net/parser 工具。
  */
 export const mptoolGlobals: Record<string, unknown> = {
   ...api,
@@ -20,13 +20,22 @@ export const mptoolGlobals: Record<string, unknown> = {
   ...parser,
 };
 
-// Automatically mount the `mptool` namespace onto the host global object (non-enumerable to avoid
-// polluting enumeration).
-// 自动将 `mptool` 命名空间挂载到宿主全局对象（不可枚举，避免污染枚举）。
-if (typeof globalThis !== "undefined") {
-  Object.defineProperty(globalThis, "mptool", {
-    value: mptoolGlobals,
-    configurable: true,
-    writable: true,
-  });
-}
+/**
+ * Mount the `mptool` namespace onto the host global object (`globalThis.mptool`, non-enumerable).
+ *
+ * 将 `mptool` 命名空间挂载到宿主全局对象（`globalThis.mptool`，不可枚举）。
+ *
+ * Call this manually (e.g. in `app.js`) when you need hot-reload code to access the api/file/net
+ * helpers through the global object.
+ *
+ * 需要热更新代码通过全局对象访问 api/file/net 工具时，请手动调用（例如在 `app.js` 中）。
+ */
+export const installMptoolGlobals = (): void => {
+  if (typeof globalThis !== "undefined") {
+    Object.defineProperty(globalThis, "mptool", {
+      value: mptoolGlobals,
+      configurable: true,
+      writable: true,
+    });
+  }
+};

@@ -177,8 +177,10 @@ return {
 ```ts
 // app.js
 import { installGlobal } from "@mptool/run";
+import { installMptoolGlobals } from "@mptool/all"; // 可选：把 api/file/net 挂到 globalThis.mptool
 
 installGlobal();
+installMptoolGlobals(); // 可选
 ```
 
 :::
