@@ -81,13 +81,13 @@ export class CookieStore {
    * @returns 设置的 cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
-    const { name, domain } = cookieOptions;
+    const { name } = cookieOptions;
     const cookie = new Cookie(cookieOptions);
 
-    const cookies = this.store.get(domain) ?? new Map<string, Cookie>();
+    const cookies = this.store.get(cookie.domain) ?? new Map<string, Cookie>();
 
     cookies.set(name, cookie);
-    this.store.set(domain, cookies);
+    this.store.set(cookie.domain, cookies);
 
     this.#save();
 
@@ -208,12 +208,15 @@ export class CookieStore {
    */
   clear(domain = "", exact = false): void {
     if (domain) {
-      const exactCookieMap = this.store.get(domain);
+      const normalizedDomain = normalizeDomain(domain);
+
+      // 兼容旧数据（无前导点键）与归一化键
+      const exactCookieMap = this.store.get(domain) ?? this.store.get(normalizedDomain);
 
       if (exactCookieMap) exactCookieMap.clear();
 
       if (!exact) {
-        const domainCookieMap = this.store.get(normalizeDomain(domain));
+        const domainCookieMap = this.store.get(normalizedDomain);
 
         if (domainCookieMap) domainCookieMap.clear();
       }

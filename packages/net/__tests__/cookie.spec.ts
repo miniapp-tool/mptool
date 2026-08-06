@@ -21,7 +21,7 @@ describe(CookieStore, () => {
     cookieStore.applyResponse(mockedResponse, "baidu.com");
 
     expect(cookieStore.getHeader("baidu.com")).toBe(
-      "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; PSINO=7; dwf_sg_task_completion=False",
+      "EGG_SESSION=cQgFSy2NnOAAqWu7YUVVEoFWkf2YxXL1pi4GYPBl9ieUPI_YSy6LBvs7lsxB52cZ; dwf_sg_task_completion=False; PSINO=7",
     );
   });
 
@@ -63,6 +63,15 @@ describe(CookieStore, () => {
     expect(cookieStore.getValue(TEST_NAME, { domain: "baidu.com" })).toBe(TEST_VALUE);
   });
 
+  it("set cookie with domain is sent to subdomains", () => {
+    const cookieStore = new CookieStore("cookie-subdomain");
+
+    cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "example.com" });
+
+    // 与 applyHeader 写入行为一致：子域请求也能获取该 cookie
+    expect(cookieStore.getValue(TEST_NAME, { domain: "www.example.com" })).toBe(TEST_VALUE);
+  });
+
   it("getCookies", () => {
     const cookieStore = new CookieStore("cookie-getcookies");
 
@@ -94,7 +103,7 @@ describe(CookieStore, () => {
 
     cookieStore.set({ name: TEST_NAME, value: TEST_VALUE, domain: "baidu.com" });
 
-    expect(cookieStore.list()["baidu.com"]).toBeTypeOf("object");
+    expect(cookieStore.list()[".baidu.com"]).toBeTypeOf("object");
   });
 
   it("clear", () => {

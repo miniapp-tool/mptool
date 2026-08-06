@@ -1,5 +1,5 @@
 import type { CookieType } from "./typings.js";
-import { getCookieScopeDomain } from "./utils.js";
+import { getCookieScopeDomain, normalizeDomain } from "./utils.js";
 
 /** Cookie 类 */
 export class Cookie {
@@ -13,7 +13,7 @@ export class Cookie {
   constructor(cookie: CookieType) {
     this.name = cookie.name || "";
     this.value = cookie.value || "";
-    this.domain = cookie.domain ?? "";
+    this.domain = normalizeDomain(cookie.domain ?? "");
     this.path = cookie.path ?? "/";
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
