@@ -170,4 +170,34 @@ describe($Page, () => {
     appEmitter.emit(ON_APP_AWAKE, 2000);
     expect(onAwake).toHaveBeenCalledTimes(1);
   });
+
+  it("should keep onAwake listeners isolated across instances", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const onAwakeA = vi.fn<(time: number) => void>();
+    const onAwakeB = vi.fn<(time: number) => void>();
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", { onAwake: onAwakeA });
+    const optionsA = getOptions();
+
+    $Page("index", { onAwake: onAwakeB });
+    const optionsB = getOptions();
+
+    // 两个实例各自 onLoad，注册各自的 onAwake 监听器
+    void optionsA?.onLoad?.({});
+    void optionsB?.onLoad?.({});
+
+    appEmitter.emit(ON_APP_AWAKE, 1000);
+    expect(onAwakeA).toHaveBeenCalledWith(1000);
+    expect(onAwakeB).toHaveBeenCalledWith(1000);
+
+    // 卸载实例 A，A 的监听器注销，B 的监听器仍应生效
+    void optionsA?.onUnload?.();
+
+    appEmitter.emit(ON_APP_AWAKE, 2000);
+    expect(onAwakeA).toHaveBeenCalledTimes(1);
+    expect(onAwakeB).toHaveBeenCalledTimes(2);
+  });
 });

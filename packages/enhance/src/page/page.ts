@@ -12,11 +12,13 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
-import type { PageConstructor, PageOptions, PageQuery } from "./typings.js";
+import type { PageConstructor, PageInstance, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
 
-// oxlint-disable-next-line max-statements
+/** 页面实例到其 onAwake 监听器的映射，按实例隔离，避免多实例共享闭包 */
+const onAwakeHandlers = new WeakMap<object, (time: number) => void>();
+
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
@@ -36,7 +38,6 @@ export const $Page: PageConstructor = <
   };
 
   /** OnAwake 监听器，用于在页面卸载时注销 */
-  let onAwakeHandler: ((time: number) => void) | undefined;
 
   // extend page config
   if (extendPage) extendPage(name, options);
@@ -89,45 +90,55 @@ export const $Page: PageConstructor = <
     registerLog("onPreload");
   }
 
-  // oxlint-disable-next-line typescript/no-misused-promises
-  options.onLoad = wrapFunction(options.onLoad, (): void => {
-    // After onLoad, onAwake is valid if defined
-    if (options.onAwake) {
-      onAwakeHandler = (time: number): void => {
-        callLog("onAwake");
+  /* oxlint-disable typescript/no-misused-promises */
+  options.onLoad = wrapFunction(
+    options.onLoad,
+    function handleOnLoad(this: PageInstance<Data, Custom>): void {
+      // After onLoad, onAwake is valid if defined
+      if (options.onAwake) {
+        const onAwakeHandler = (time: number): void => {
+          callLog("onAwake");
+
+          // oxlint-disable-next-line typescript/no-non-null-assertion
+          void options.onAwake!(time);
+        };
+
+        onAwakeHandlers.set(this, onAwakeHandler);
+        appEmitter.on(ON_APP_AWAKE, onAwakeHandler);
+        registerLog("onAwake");
+      }
+
+      if (shouldBeFirstPage) {
+        shouldBeFirstPage = false;
 
         // oxlint-disable-next-line typescript/no-non-null-assertion
-        void options.onAwake!(time);
-      };
-      appEmitter.on(ON_APP_AWAKE, onAwakeHandler);
-      registerLog("onAwake");
-    }
-
-    if (shouldBeFirstPage) {
-      shouldBeFirstPage = false;
-
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      options.$state!.firstOpen = true;
-    }
-  });
+        options.$state!.firstOpen = true;
+      }
+    },
+  );
+  /* oxlint-enable typescript/no-misused-promises */
 
   // oxlint-disable-next-line typescript/no-misused-promises
   options.onReady = wrapFunction(options.onReady, () => {
     appEmitter.emit(ON_PAGE_READY);
   });
 
-  // oxlint-disable-next-line typescript/no-misused-promises
-  options.onUnload = wrapFunction(options.onUnload, () => {
-    appEmitter.emit(ON_PAGE_UNLOAD);
+  /* oxlint-disable typescript/no-misused-promises */
+  options.onUnload = wrapFunction(
+    options.onUnload,
+    function handleOnUnload(this: PageInstance<Data, Custom>): void {
+      appEmitter.emit(ON_PAGE_UNLOAD);
 
-    // 注销 onAwake 监听器，避免页面卸载后残留
-    if (onAwakeHandler) {
-      appEmitter.off(ON_APP_AWAKE, onAwakeHandler);
+      // 注销 onAwake 监听器，避免页面卸载后残留
+      const onAwakeHandler = onAwakeHandlers.get(this);
 
-      // oxlint-disable-next-line no-undefined
-      onAwakeHandler = undefined;
-    }
-  });
+      if (onAwakeHandler) {
+        appEmitter.off(ON_APP_AWAKE, onAwakeHandler);
+        onAwakeHandlers.delete(this);
+      }
+    },
+  );
+  /* oxlint-enable typescript/no-misused-promises */
 
   mount(options);
 
