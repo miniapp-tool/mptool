@@ -359,6 +359,9 @@ importers:
       '@mptool/mock':
         specifier: workspace:*
         version: link:../mock
+      '@mptool/run':
+        specifier: workspace:*
+        version: link:../run
       '@mptool/shared':
         specifier: workspace:*
         version: link:../shared

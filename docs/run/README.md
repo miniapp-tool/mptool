@@ -96,6 +96,19 @@ Page({
 
 :::
 
+### `installGlobal()`
+
+将 `createFunction` 挂载到宿主全局对象（`globalThis.createFunction`），供 `@mptool/enhance` 的页面热更新使用。
+
+小程序中 `app.js` 一定最先运行，请在 `app.js` 中调用（先于任何页面注册）：
+
+```ts
+// app.js
+import { installGlobal } from "@mptool/run";
+
+installGlobal();
+```
+
 ### 选项 `RunOptions`
 
 | 选项       | 默认值   | 说明                                               |

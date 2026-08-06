@@ -202,3 +202,23 @@ export const createFunction = (
     return fn.apply(this, callArgs);
   };
 };
+
+/**
+ * Mount `createFunction` onto the host global object (`globalThis.createFunction`), so
+ * `@mptool/enhance` can pick it up for page hot reload without importing this package.
+ *
+ * 将 `createFunction` 挂载到宿主全局对象（`globalThis.createFunction`），使 `@mptool/enhance` 无需引入本包即可用于页面热更新。
+ *
+ * Call this in `app.js` before any page registers when you need hot reload.
+ *
+ * 需要热更新时，请在 `app.js` 中调用（先于任何页面注册）。
+ */
+export const installGlobal = (): void => {
+  if (typeof globalThis !== "undefined") {
+    Object.defineProperty(globalThis, "createFunction", {
+      value: createFunction,
+      configurable: true,
+      writable: true,
+    });
+  }
+};

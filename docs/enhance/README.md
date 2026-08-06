@@ -141,6 +141,48 @@ $App({
 - `injectComponent(componentOptions)` 用于为组件注入，在框架扩展之后执行，这意味着你可以覆盖框架注入的方法。
 - `injectPage(pageOptions)` 用于为页面注入，在框架扩展之后执行，这意味着你可以覆盖框架注入的方法。
 
+### 页面热更新
+
+设置 `hotReloadPattern` 后，框架会在页面注册时自动拉取并应用热更新代码，`$name` 会被替换为页面名称。
+
+```ts
+$Config({
+  hotReloadPattern: "https://example.com/hotReloadCode/$name",
+});
+```
+
+工作流程：
+
+1. 页面注册时，框架检测 `globalThis` 上是否挂载了 `createFunction`（见下方「挂载 `createFunction`」）。
+2. 若已挂载，框架异步请求 `hotReloadPattern` 对应的地址（不阻塞页面注册与加载）。
+3. 使用 `createFunction` 以 `global: true` 执行返回的代码，将结果（`{ func: { ... } }` 形式）合并到页面实例上。
+
+```js
+// 服务端返回的代码（函数体）
+return {
+  func: {
+    onLoad() {
+      this.setData({ count: this.data.count + 1 });
+    },
+  },
+};
+```
+
+热更新是尽力而为的：拉取或执行失败时静默跳过；若页面加载时热更新尚未就绪，实例会被登记并在拉取完成后补挂。合并的方法以页面实例作为 `this` 调用，可访问 `this.data`、`this.setData` 与页面方法。
+
+::: caution 需要挂载 `createFunction`
+
+热更新依赖 `createFunction`。小程序中 `app.js` 一定最先运行，请在 `app.js` 中引入 `@mptool/run` 并调用 `installGlobal()`（或手动 `globalThis.createFunction = createFunction`），先于任何页面注册：
+
+```ts
+// app.js
+import { installGlobal } from "@mptool/run";
+
+installGlobal();
+```
+
+:::
+
 ## $App
 
 框架提供的应用注册器

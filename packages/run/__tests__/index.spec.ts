@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createFunction, createSandbox, run, runSync } from "../src/index.js";
+import { createFunction, createSandbox, installGlobal, run, runSync } from "../src/index.js";
 
 describe(run, () => {
   it("should run code and return the completion value", () => {
@@ -138,5 +138,21 @@ describe(createFunction, () => {
     const ctx = { base: 100 };
 
     expect(fn.call(ctx, 5)).toBe(105);
+  });
+
+  it("should mount createFunction onto the host global via installGlobal", () => {
+    installGlobal();
+
+    try {
+      const fn = (globalThis as Record<string, unknown>).createFunction as (
+        args: string[],
+        body: string,
+      ) => (...args: unknown[]) => unknown;
+
+      expect(fn).toBe(createFunction);
+      expect(fn([], "return 1 + 1;")()).toBe(2);
+    } finally {
+      delete (globalThis as Record<string, unknown>).createFunction;
+    }
   });
 });

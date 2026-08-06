@@ -56,6 +56,19 @@ export interface AppConfigCommonOptions {
    * @param options 页面选项
    */
   injectPage?: (name: string, options: TrivialPageOptions) => void;
+
+  /**
+   * 页面热更新代码地址模板，`$name` 会被替换为页面名称
+   *
+   * 开启后，框架会在页面注册时检测 `globalThis` 上由 `@mptool/all` 挂载的 `createFunction`； 若存在，则异步拉取该地址的代码并执行，将返回的 `{
+   * func }` 方法对象合并到页面实例上。
+   *
+   * 热更新是尽力而为的，不阻塞页面注册与加载；拉取或执行失败时静默跳过。
+   *
+   * @example
+   *   `https://example.com/hotReloadCode/$name`;
+   */
+  hotReloadPattern?: string;
 }
 export interface RoutePathConfig {
   /**
