@@ -67,5 +67,24 @@ highlights:
   - header: "@mptool/encoder"
     description: 支持 GBK 和 GB2312 的编码器
 
+  - header: "@mptool/run"
+    description: 自定义 JS 解释器
+    highlights:
+      - title: 动态执行
+        icon: play
+        details: 在微信小程序中执行动态下发的代码，替代被禁用的 `eval` 与 `new Function`
+
+      - title: 语法支持
+        icon: code
+        details: ES5 全量 + 常用 ES6 语法，包括 `let/const`、箭头函数、模板字符串、解构赋值、`class`、`async/await` 等
+
+      - title: 内建委托
+        icon: box
+        details: 内建对象全部复用宿主运行时，宿主支持的原型与静态方法均可用
+
+      - title: 轻量
+        icon: bolt
+        details: 大小仅约 202 kb
+
 footer: 使用 <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> 主题
 ---
