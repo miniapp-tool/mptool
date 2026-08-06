@@ -104,6 +104,9 @@ exports[`parseHTML > should parse html string to nodes 6`] = `
     "prev": null,
     "startIndex": null,
     "type": "directive",
+    "x-name": undefined,
+    "x-publicId": undefined,
+    "x-systemId": undefined,
   },
   <html>
     <head>
