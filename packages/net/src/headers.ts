@@ -6,7 +6,7 @@ import { normalizeDomain } from "./utils.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/iu;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
-const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]|$[${REMOVED_CHARS}])`, "gu");
+const HEADER_VALUE_REMOVE_REGEXP = new RegExp(`(^[${REMOVED_CHARS}]+|[${REMOVED_CHARS}]+$)`, "gu");
 
 /**
  * Validate the given header name.
@@ -42,7 +42,7 @@ const normalizeHeaderName = (name: string): string => {
  * @see https://fetch.spec.whatwg.org/#header-value
  */
 const isValidHeaderValue = (value: unknown): boolean => {
-  if (typeof value !== "string" || value.trim() !== value) return false;
+  if (typeof value !== "string") return false;
 
   for (let i = 0; i < value.length; i++) {
     const character = value.charCodeAt(i);
@@ -199,7 +199,7 @@ export class Headers {
     const normalizedName = normalizeHeaderName(name);
     const normalizedValue = normalizeHeaderValue(value);
 
-    this.headers[normalizedName] = normalizeHeaderValue(normalizedValue);
+    this.headers[normalizedName] = normalizedValue;
     this.headerNames.set(normalizedName, name);
   }
 

@@ -309,8 +309,15 @@ describe(Headers, () => {
           123,
         ),
       ).toBeUndefined();
-      expect(headers.set("foo", "  value  ")).toBeUndefined();
       expect(Object.fromEntries(headers.entries())).toStrictEqual({});
+    });
+
+    it("normalizes leading and trailing whitespace in the header value", () => {
+      const headers = new Headers();
+
+      headers.set("foo", "  value  ");
+      expect(headers.get("foo")).toBe("value");
+      expect(Object.fromEntries(headers.entries())).toStrictEqual({ foo: "value" });
     });
 
     it("sets a new header", () => {
@@ -353,6 +360,13 @@ describe(Headers, () => {
 
       headers.append("Accept", "*/*");
       expect(headers.get("accept")).toBe("*/*, */*");
+    });
+
+    it("normalizes leading and trailing whitespace in the appended value", () => {
+      const headers = new Headers({ accept: "*/*" });
+
+      headers.append("accept", "  image/png  ");
+      expect(headers.get("accept")).toBe("*/*, image/png");
     });
   });
 
