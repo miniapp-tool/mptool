@@ -1,4 +1,4 @@
-export * from "@mptool/shared";
+export { Emitter } from "@mptool/shared";
 export { $App } from "./app/index.js";
 export { go, reLaunch, redirect, switchTab } from "./bridge.js";
 export { $Config } from "./config/index.js";

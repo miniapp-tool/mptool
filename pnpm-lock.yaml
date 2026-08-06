@@ -333,6 +333,9 @@ importers:
       '@mptool/parser':
         specifier: workspace:*
         version: link:../parser
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
       miniprogram-api-typings:
         specifier: 5.2.2
         version: 5.2.2
