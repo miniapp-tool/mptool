@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
+
+### ✨ Features
+
+- **parser:** append full links to anchor text ([c089c36](https://github.com/miniapp-tool/mptool/commit/c089c36a63f1a3ea023eb036616796ca1017bc58))
+- **parser:** insert line breaks between blocks in getText ([b509a84](https://github.com/miniapp-tool/mptool/commit/b509a84b334d5bf3534a3d33cc56d680dce7e2c3))
+
+### 🐛 Bug Fixes
+
+- **api:** avoid duplicating the extension in saveDocument ([f1a4fae](https://github.com/miniapp-tool/mptool/commit/f1a4fae3ea30ff103f80d9092b5eddfe831dfd64))
+- **api:** reject on wx api failures in addContact and savePhoto ([d4f670f](https://github.com/miniapp-tool/mptool/commit/d4f670f727b9c83699e819c31345b8876c4192ce))
+- **api:** scale wifi signal threshold by platform ([83b6ed0](https://github.com/miniapp-tool/mptool/commit/83b6ed04df52c3a85190291428bda517150c31a9))
+- **api:** strip query and hash from the url when deriving the file name ([7da364e](https://github.com/miniapp-tool/mptool/commit/7da364e85639db7f1e93d484efeade12b9ee9583))
+- **encoder:** align gb18030 index with the WHATWG spec ([6389640](https://github.com/miniapp-tool/mptool/commit/6389640e773d453732dd7c2e042fd3346ae4644a))
+- **encoder:** keep decoder registration from being tree-shaken ([c844fe0](https://github.com/miniapp-tool/mptool/commit/c844fe0185f57f1589617c8175f87a2d3b135a9d))
+- **enhance:** hold the navigate lock until the page transition completes ([cadc96a](https://github.com/miniapp-tool/mptool/commit/cadc96a008e3bda7374f80eacaaeb327cf5f516f))
+- **enhance:** isolate onAwake listeners per page instance ([7315ce1](https://github.com/miniapp-tool/mptool/commit/7315ce19d7e6260f6eb9bd388022299a17ff12fb))
+- **enhance:** normalize page path for onNavigate/onPreload event keys ([27fbd85](https://github.com/miniapp-tool/mptool/commit/27fbd854ebbe2a410931c26f65713fcc85d1fe32))
+- **enhance:** skip navigateBack when already at the first page ([3ec5b78](https://github.com/miniapp-tool/mptool/commit/3ec5b785771848f1a49f486fe3c79d1cf2069a83))
+- **enhance:** strip query from the wx.switchTab url ([654cc7c](https://github.com/miniapp-tool/mptool/commit/654cc7c9c1ec6e1ad317b0722ea0e624829d822c))
+- **file:** create the parent directory in saveFile ([1c0b812](https://github.com/miniapp-tool/mptool/commit/1c0b8129542696389f63bd1e97a983c2192e292e))
+- **file:** log original errors and skip undefined writes ([9aad1bf](https://github.com/miniapp-tool/mptool/commit/9aad1bf5bd0d3d9cb7791887014536b62b9dd8dd))
+- **file:** skip undefined writes in setAsync for keep expiry ([93e39e6](https://github.com/miniapp-tool/mptool/commit/93e39e657c10dc97c302a38febb1a20c9486e85a))
+- **mock:** make select query exec result match node count ([1fe6f75](https://github.com/miniapp-tool/mptool/commit/1fe6f7574c1e8600e3f1e832dc993977cb91eb22))
+- **mock:** trigger complete callback in storage async apis ([3847a18](https://github.com/miniapp-tool/mptool/commit/3847a18e103e19ee86e08c31746c95a94f3ed42e))
+- **net:** clear both legacy and normalized cookie keys ([3a9a260](https://github.com/miniapp-tool/mptool/commit/3a9a260d629b26f53a4435b70d44b1a7d4a3fc97))
+- **net:** decode URLSearchParams leniently like the native API ([58adf3c](https://github.com/miniapp-tool/mptool/commit/58adf3cba21587f13292565a91b618d81069c228))
+- **net:** keep NUL encoded as %00 in URLSearchParams ([1795bca](https://github.com/miniapp-tool/mptool/commit/1795bca2e8d95602aea95c414f77e9cbdcc1a00f))
+- **net:** normalize cookie domain across all write paths ([6a7030a](https://github.com/miniapp-tool/mptool/commit/6a7030aa12d4ed221d89ec5412e64912671e2f07))
+- **net:** normalize leading/trailing whitespace in header values ([1b92d3a](https://github.com/miniapp-tool/mptool/commit/1b92d3a1954e65e8808c4c88e08c5d10dd6a2a5b))
+- **net:** rewrite URLSearchParams to align with native behavior ([8b9379e](https://github.com/miniapp-tool/mptool/commit/8b9379e17bb9d9c12cd736965c2dd11a8d799ad3))
+- **net:** treat invalid cookie expiry as session and parse protocol-relative urls ([5f5c496](https://github.com/miniapp-tool/mptool/commit/5f5c496193e85a3a581801f8087e56ee3c033165))
+- **parser:** drop invalid marker camel-case svg attrs ([b5a390b](https://github.com/miniapp-tool/mptool/commit/b5a390b93f683ec84949c44d31ffa20d206a4d5f))
+- **parser:** restore svg camel case attrs and fix data uri encoding ([d9c8720](https://github.com/miniapp-tool/mptool/commit/d9c872007ff0ae8af7e6242d2d6371b54a6aa083))
+- **shared:** honor DEBUG flag in logger.debug and fix js error level ([2f9c40b](https://github.com/miniapp-tool/mptool/commit/2f9c40bc86d26622bdf123b69adc38e5f5d06c15))
+- **shared:** keep emitting when a handler throws or rejects ([9c456ee](https://github.com/miniapp-tool/mptool/commit/9c456ee1b8385be3785a2e9cf174184408340238))
+- **shared:** parse valueless query keys and avoid stuck lock/queue ([39677b1](https://github.com/miniapp-tool/mptool/commit/39677b17c2aa825c1ea4ff06a75dc05e4195356a))
+
+### Documentation
+
+- align documentation with the actual API implementation ([13f9fd1](https://github.com/miniapp-tool/mptool/commit/13f9fd176ee2619629e42c578d895d44f8ce3744))
+- rewrite AGENTS.md to reflect current project state ([12310a7](https://github.com/miniapp-tool/mptool/commit/12310a76d53db3b3ed55f8304788c7aa3fe43f04))
+
+### Code Refactoring
+
+- **api:** simplify saveDocument file name derivation ([f68c714](https://github.com/miniapp-tool/mptool/commit/f68c714dead92349bf9d6bf107bd372540fee6b8))
+- **net:** drop legacy cookie key compatibility ([2d0c3f4](https://github.com/miniapp-tool/mptool/commit/2d0c3f47d42209f720cc2b9bb0da75496626ef5c))
+
 ## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
 
 ### ✨ Features

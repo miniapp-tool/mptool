@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
+
+### 🐛 Bug Fixes
+
+- **mock:** make select query exec result match node count ([1fe6f75](https://github.com/miniapp-tool/mptool/commit/1fe6f7574c1e8600e3f1e832dc993977cb91eb22))
+- **mock:** trigger complete callback in storage async apis ([3847a18](https://github.com/miniapp-tool/mptool/commit/3847a18e103e19ee86e08c31746c95a94f3ed42e))
+
 ## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
 
 ### ✨ Features

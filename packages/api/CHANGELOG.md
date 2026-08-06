@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
+
+### 🐛 Bug Fixes
+
+- **api:** avoid duplicating the extension in saveDocument ([f1a4fae](https://github.com/miniapp-tool/mptool/commit/f1a4fae3ea30ff103f80d9092b5eddfe831dfd64))
+- **api:** reject on wx api failures in addContact and savePhoto ([d4f670f](https://github.com/miniapp-tool/mptool/commit/d4f670f727b9c83699e819c31345b8876c4192ce))
+- **api:** scale wifi signal threshold by platform ([83b6ed0](https://github.com/miniapp-tool/mptool/commit/83b6ed04df52c3a85190291428bda517150c31a9))
+- **api:** strip query and hash from the url when deriving the file name ([7da364e](https://github.com/miniapp-tool/mptool/commit/7da364e85639db7f1e93d484efeade12b9ee9583))
+
+### Code Refactoring
+
+- **api:** simplify saveDocument file name derivation ([f68c714](https://github.com/miniapp-tool/mptool/commit/f68c714dead92349bf9d6bf107bd372540fee6b8))
+
 ## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
 
 ### ✨ Features

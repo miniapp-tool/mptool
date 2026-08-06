@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
+
+### 🐛 Bug Fixes
+
+- **encoder:** align gb18030 index with the WHATWG spec ([6389640](https://github.com/miniapp-tool/mptool/commit/6389640e773d453732dd7c2e042fd3346ae4644a))
+- **encoder:** keep decoder registration from being tree-shaken ([c844fe0](https://github.com/miniapp-tool/mptool/commit/c844fe0185f57f1589617c8175f87a2d3b135a9d))
+
 ## [0.15.0](https://github.com/miniapp-tool/mptool/compare/v0.14.0...v0.15.0) (2026-08-05)
 
 ### Styles
