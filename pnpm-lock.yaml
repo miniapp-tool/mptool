@@ -419,6 +419,15 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
+  packages/run:
+    devDependencies:
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
+      miniprogram-api-typings:
+        specifier: 5.2.2
+        version: 5.2.2
+
   packages/shared:
     devDependencies:
       '@mptool/mock':
