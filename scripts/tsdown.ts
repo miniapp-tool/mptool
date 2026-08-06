@@ -96,7 +96,12 @@ export const tsdownConfig = (
     sourcemap: true,
     dts,
     minify: isProduction,
-    target: "es2017",
+    // The lowest supported base library version is 3.8.2, which maps to
+    // iOS 14 / Chrome 86 (Safari 14.0 does not support native class fields).
+    // es2021 keeps `?.`/`??`/logical assignment native while transpiling
+    // class fields, so the output runs on base library 3.8.2 without
+    // transformation while still dropping most downlevel helpers.
+    target: "es2021",
     platform,
     treeshake,
     deps: {
