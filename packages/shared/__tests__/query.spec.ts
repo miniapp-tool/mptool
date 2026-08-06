@@ -28,6 +28,14 @@ describe(parse, () => {
     expect(parsedQuery).toStrictEqual({ a: "1", b: "2" });
     expect("" in parsedQuery).toBe(false);
   });
+
+  it("parse should use an empty string for valueless keys", () => {
+    expect(parse("a")).toStrictEqual({ a: "" });
+  });
+
+  it("parse should keep everything after the first equals sign", () => {
+    expect(parse("a=1=2")).toStrictEqual({ a: "1=2" });
+  });
 });
 
 describe(stringify, () => {

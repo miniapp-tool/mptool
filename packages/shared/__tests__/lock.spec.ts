@@ -41,4 +41,18 @@ describe(lock, () => {
         });
       }, 10);
     }));
+
+  it("should release the lock when the function throws synchronously", () => {
+    let calls = 0;
+
+    const fn = lock(() => {
+      calls += 1;
+      throw new Error("sync error");
+    });
+
+    expect(() => fn()).toThrow("sync error");
+    // the lock is released, so the second call runs the function again
+    expect(() => fn()).toThrow("sync error");
+    expect(calls).toBe(2);
+  });
 });

@@ -14,7 +14,9 @@ export const parse = (queryString = "", splitter = "&"): Record<string, string> 
     splits.forEach((item) => {
       if (item === "") return;
 
-      const [key, value] = item.split("=");
+      const index = item.indexOf("=");
+      const key = index === -1 ? item : item.slice(0, index);
+      const value = index === -1 ? "" : item.slice(index + 1);
 
       if (key !== "") queries[key] = value;
     });

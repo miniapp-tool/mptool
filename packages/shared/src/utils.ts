@@ -68,12 +68,19 @@ export const lock = <ThisType, Args extends unknown[], ReturnType>(
 
     pending = true;
 
-    return fn.apply(ctx ?? this, [
-      (): void => {
-        pending = false;
-      },
-      ...args,
-    ]);
+    try {
+      return fn.apply(ctx ?? this, [
+        (): void => {
+          pending = false;
+        },
+        ...args,
+      ]);
+    } catch (err) {
+      // release the lock on a synchronous error so it cannot get stuck
+      pending = false;
+
+      throw err;
+    }
   };
 };
 
@@ -137,14 +144,21 @@ export class Queue {
       const { func, ctx, args } = task;
 
       const taskFunc = (): void => {
-        func.apply(ctx, [
-          (): void => {
-            this.running -= 1;
-            this.next();
-          },
-          // oxlint-disable-next-line typescript/no-unsafe-assignment
-          ...Array.prototype.slice.call(args, 0),
-        ]);
+        try {
+          func.apply(ctx, [
+            (): void => {
+              this.running -= 1;
+              this.next();
+            },
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
+            ...Array.prototype.slice.call(args, 0),
+          ]);
+        } catch (err) {
+          // continue the queue on a synchronous error so it cannot get stuck
+          this.running -= 1;
+          this.next();
+          console.error(err);
+        }
       };
 
       this.running += 1;

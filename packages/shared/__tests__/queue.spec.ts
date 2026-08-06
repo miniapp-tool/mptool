@@ -69,4 +69,25 @@ describe(funcQueue, () => {
         resolve();
       }, 50);
     }));
+
+  it("should continue the queue when a task throws synchronously", () =>
+    new Promise<void>((resolve) => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const queue = new Queue();
+      const results: string[] = [];
+
+      queue.add(() => {
+        throw new Error("sync error");
+      });
+      queue.add((next) => {
+        results.push("second");
+        next();
+      });
+
+      setTimeout(() => {
+        expect(results).toStrictEqual(["second"]);
+        spy.mockRestore();
+        resolve();
+      }, 20);
+    }));
 });
