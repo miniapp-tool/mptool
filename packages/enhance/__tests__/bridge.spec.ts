@@ -2,166 +2,182 @@ import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
 import { $Config } from "../src/config/index.js";
-import { ON_PAGE_PRELOAD } from "../src/constant.js";
-import { routeEmitter } from "../src/emitter/index.js";
+import { ON_PAGE_PRELOAD, ON_PAGE_READY } from "../src/constant.js";
+import { appEmitter, routeEmitter } from "../src/emitter/index.js";
 import { $Page } from "../src/page/index.js";
 
-describe("$back", () => {
-  it("should clamp delta to the actual page stack when no home is configured", async () => {
-    $Config({ defaultPage: "/pages/$name" });
+describe("bridge", () => {
+  // 模拟目标页加载完成 (ON_PAGE_READY)，在 minInterval 后释放导航锁
+  const releaseLock = async (): Promise<void> => {
+    appEmitter.emit(ON_PAGE_READY);
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  };
 
-    const navigateBack = vi.fn<() => void>();
+  // 配置并重置导航锁，避免测试间相互影响
+  const setup = async (config: Parameters<typeof $Config>[0]): Promise<void> => {
+    $Config({ minInterval: 0, ...config });
+    await releaseLock();
+  };
 
-    (wx as any).navigateBack = navigateBack;
-    (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+  describe("$back", () => {
+    it("should clamp delta to the actual page stack when no home is configured", async () => {
+      await setup({ defaultPage: "/pages/$name" });
 
-    let pageOptions: { $back?: (delta?: number) => Promise<unknown> } | undefined;
+      const navigateBack = vi.fn<() => void>();
 
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
+      (wx as any).navigateBack = navigateBack;
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
 
-    $Page("index", {});
+      let pageOptions: { $back?: (delta?: number) => Promise<unknown> } | undefined;
 
-    await pageOptions?.$back?.(3);
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
 
-    expect(navigateBack).toHaveBeenCalledWith({ delta: 2 });
+      $Page("index", {});
+
+      await pageOptions?.$back?.(3);
+
+      expect(navigateBack).toHaveBeenCalledWith({ delta: 2 });
+    });
+
+    it("should reLaunch home when page stack is insufficient", async () => {
+      await setup({ defaultPage: "/pages/$name", home: "main" });
+
+      const reLaunch = vi.fn<() => void>();
+
+      (wx as any).reLaunch = reLaunch;
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+
+      let pageOptions: { $back?: (delta?: number) => Promise<unknown> } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      await pageOptions?.$back?.();
+
+      expect(reLaunch).toHaveBeenCalledWith({ url: "/pages/main" });
+    });
   });
 
-  it("should reLaunch home when page stack is insufficient", async () => {
-    $Config({ defaultPage: "/pages/$name", home: "main" });
+  describe("$bindGo", () => {
+    it("should call before and after hooks around navigation", async () => {
+      await setup({ defaultPage: "/pages/$name" });
 
-    const reLaunch = vi.fn<() => void>();
+      const navigateTo = vi.fn<() => void>();
 
-    (wx as any).reLaunch = reLaunch;
-    (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+      (wx as any).navigateTo = navigateTo;
 
-    let pageOptions: { $back?: (delta?: number) => Promise<unknown> } | undefined;
+      let pageOptions:
+        | {
+            $bindGo?: (event: unknown) => Promise<void>;
+            beforeNavigate?: ReturnType<typeof vi.fn>;
+            afterNavigate?: ReturnType<typeof vi.fn>;
+          }
+        | undefined;
 
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
 
-    $Page("index", {});
+      const beforeNavigate = vi.fn<() => void>();
+      const afterNavigate = vi.fn<() => void>();
 
-    await pageOptions?.$back?.();
+      $Page("index", { beforeNavigate, afterNavigate } as never);
 
-    expect(reLaunch).toHaveBeenCalledWith({ url: "/pages/main" });
-  });
-});
-
-describe("$bindGo", () => {
-  it("should call before and after hooks around navigation", async () => {
-    $Config({ defaultPage: "/pages/$name" });
-
-    const navigateTo = vi.fn<() => void>();
-
-    (wx as any).navigateTo = navigateTo;
-
-    let pageOptions:
-      | {
-          $bindGo?: (event: unknown) => Promise<void>;
-          beforeNavigate?: ReturnType<typeof vi.fn>;
-          afterNavigate?: ReturnType<typeof vi.fn>;
-        }
-      | undefined;
-
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
-
-    const beforeNavigate = vi.fn<() => void>();
-    const afterNavigate = vi.fn<() => void>();
-
-    $Page("index", { beforeNavigate, afterNavigate } as never);
-
-    const event = {
-      currentTarget: {
-        dataset: {
-          before: "beforeNavigate",
-          after: "afterNavigate",
-          url: "play?cid=123",
+      const event = {
+        currentTarget: {
+          dataset: {
+            before: "beforeNavigate",
+            after: "afterNavigate",
+            url: "play?cid=123",
+          },
         },
-      },
-    };
+      };
 
-    await pageOptions?.$bindGo?.(event);
+      await pageOptions?.$bindGo?.(event);
 
-    expect(beforeNavigate).toHaveBeenCalledWith(event);
-    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play?cid=123" });
-    expect(afterNavigate).toHaveBeenCalledWith(event);
-  });
+      expect(beforeNavigate).toHaveBeenCalledWith(event);
+      expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play?cid=123" });
+      expect(afterNavigate).toHaveBeenCalledWith(event);
+    });
 
-  it("should not navigate when url is missing", async () => {
-    $Config({ defaultPage: "/pages/$name" });
+    it("should not navigate when url is missing", async () => {
+      await setup({ defaultPage: "/pages/$name" });
 
-    const navigateTo = vi.fn<() => void>();
+      const navigateTo = vi.fn<() => void>();
 
-    (wx as any).navigateTo = navigateTo;
+      (wx as any).navigateTo = navigateTo;
 
-    let pageOptions:
-      | { $bindGo?: (event: unknown) => Promise<void>; beforeNavigate?: ReturnType<typeof vi.fn> }
-      | undefined;
+      let pageOptions:
+        | { $bindGo?: (event: unknown) => Promise<void>; beforeNavigate?: ReturnType<typeof vi.fn> }
+        | undefined;
 
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
 
-    const beforeNavigate = vi.fn<() => void>();
+      const beforeNavigate = vi.fn<() => void>();
 
-    $Page("index", { beforeNavigate } as never);
+      $Page("index", { beforeNavigate } as never);
 
-    const event = {
-      currentTarget: {
-        dataset: {
-          before: "beforeNavigate",
+      const event = {
+        currentTarget: {
+          dataset: {
+            before: "beforeNavigate",
+          },
         },
-      },
-    };
+      };
 
-    await pageOptions?.$bindGo?.(event);
+      await pageOptions?.$bindGo?.(event);
 
-    expect(beforeNavigate).toHaveBeenCalledWith(event);
-    expect(navigateTo).not.toHaveBeenCalled();
+      expect(beforeNavigate).toHaveBeenCalledWith(event);
+      expect(navigateTo).not.toHaveBeenCalled();
+    });
   });
-});
 
-describe("$currentPage", () => {
-  it("should return the top page", () => {
-    $Config({ defaultPage: "/pages/$name" });
+  describe("$currentPage", () => {
+    it("should return the top page", async () => {
+      await setup({ defaultPage: "/pages/$name" });
 
-    (globalThis as any).getCurrentPages = (): unknown[] => [{ name: "a" }, { name: "b" }];
+      (globalThis as any).getCurrentPages = (): unknown[] => [{ name: "a" }, { name: "b" }];
 
-    let pageOptions: { $currentPage?: () => unknown } | undefined;
+      let pageOptions: { $currentPage?: () => unknown } | undefined;
 
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
 
-    $Page("index", {});
+      $Page("index", {});
 
-    expect(pageOptions?.$currentPage?.()).toStrictEqual({ name: "b" });
+      expect(pageOptions?.$currentPage?.()).toStrictEqual({ name: "b" });
+    });
   });
-});
 
-describe("$preload", () => {
-  it("should emit preload route event", () => {
-    $Config({ defaultPage: "/pages/$name" });
+  describe("$preload", () => {
+    it("should emit preload route event", async () => {
+      await setup({ defaultPage: "/pages/$name" });
 
-    const handler = vi.fn<() => void>();
+      const handler = vi.fn<() => void>();
 
-    routeEmitter.on(`${ON_PAGE_PRELOAD}:/pages/target`, handler);
+      routeEmitter.on(`${ON_PAGE_PRELOAD}:/pages/target`, handler);
 
-    let pageOptions: { $preload?: (pageName: string) => void } | undefined;
+      let pageOptions: { $preload?: (pageName: string) => void } | undefined;
 
-    (globalThis as any).Page = (options: any): void => {
-      pageOptions = options;
-    };
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
 
-    $Page("index", {});
+      $Page("index", {});
 
-    pageOptions?.$preload?.("target?a=1");
+      pageOptions?.$preload?.("target?a=1");
 
-    expect(handler).toHaveBeenCalledWith({ a: "1" });
+      expect(handler).toHaveBeenCalledWith({ a: "1" });
+    });
   });
 });

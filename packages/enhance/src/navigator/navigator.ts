@@ -72,11 +72,16 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
         // 忽略 onNavigate 处理器抛出的错误，导航不应被阻塞
       }
 
-      // release navigate lock
-      canNavigate = true;
-
-      // @ts-expect-error: argument can not union
-      return wx[type]({ url });
+      // Keep the navigate lock until the target page is ready (ON_PAGE_READY)
+      // to block repeated navigation from rapid taps. Release it on failure.
+      try {
+        // @ts-expect-error: argument can not union
+        return await wx[type]({ url });
+      } catch (err) {
+        // release navigate lock on navigation failure to avoid a dead lock
+        canNavigate = true;
+        throw err;
+      }
     }
   };
 }
@@ -88,7 +93,8 @@ appEmitter.on(ON_PAGE_READY, () => {
   }, getConfig().minInterval ?? 100);
 });
 
-// release navigate lock on page unload
+// release navigate lock on page unload, in case the target page never fires
+// onReady (e.g. it is forced to go back during onLoad) to avoid a dead lock
 appEmitter.on(ON_PAGE_UNLOAD, () => {
   canNavigate = true;
 });
