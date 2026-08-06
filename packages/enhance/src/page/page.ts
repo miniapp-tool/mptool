@@ -25,7 +25,8 @@ export const $Page: PageConstructor = <
   options: PageOptions<Data, Custom>,
 ): void => {
   const { getPath: getRoute, extendPage, injectPage } = getConfig();
-  const route = getRoute(name);
+  // 统一为带前导斜杠的路径，保证与导航触发端的事件 key 一致
+  const route = `/${getRoute(name).replace(/^\//u, "")}`;
 
   const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);

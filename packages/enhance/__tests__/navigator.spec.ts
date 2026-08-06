@@ -103,4 +103,25 @@ describe("navigator", () => {
     await expect(go("slow")).resolves.toBeUndefined();
     expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/slow" });
   });
+
+  it("should trigger onNavigate when config has no leading slash but call does", async () => {
+    $Config({ defaultPage: "pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    // 页面注册 key 归一化为带前导斜杠
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:/pages/play`, () => {});
+
+    const go = getTrigger("navigateTo");
+
+    // 带前导斜杠调用
+    await expect(go("/pages/play")).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play" });
+
+    // 不带前导斜杠调用（走 config.getPath）
+    await expect(go("play")).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledTimes(2);
+  });
 });

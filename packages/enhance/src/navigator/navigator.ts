@@ -25,7 +25,8 @@ export interface PathDetails {
 export const getPathDetail = (pageNameWithArg: string): PathDetails => {
   const config = getConfig();
   const [pageName, queryString] = pageNameWithArg.split("?");
-  const path = pageName.startsWith("/") ? pageName : config.getPath(pageName);
+  // 统一为带前导斜杠的路径，保证与页面注册时的事件 key 一致
+  const path = `/${(pageName.startsWith("/") ? pageName : config.getPath(pageName)).replace(/^\//u, "")}`;
 
   return {
     path,
