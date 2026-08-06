@@ -115,4 +115,28 @@ describe(createFunction, () => {
 
     expect(fn()).toBe("hi");
   });
+
+  it("should preserve the caller this for hot-update style usage", () => {
+    const fn = createFunction([], "return this.value * 2;");
+    const ctx = { value: 21 };
+
+    expect(fn.call(ctx)).toBe(42);
+  });
+
+  it("should access page-like state through this", () => {
+    const fn = createFunction([], "return this.data.list.length + this.getCount();");
+    const page = {
+      data: { list: [1, 2, 3] },
+      getCount: (): number => 4,
+    };
+
+    expect(fn.call(page)).toBe(7);
+  });
+
+  it("should forward arguments together with this", () => {
+    const fn = createFunction(["n"], "return this.base + n;");
+    const ctx = { base: 100 };
+
+    expect(fn.call(ctx, 5)).toBe(105);
+  });
 });

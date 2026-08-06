@@ -172,6 +172,11 @@ export const createSandbox = (options?: RunOptions): Sandbox => {
  *
  * 创建函数以替代 `new Function`
  *
+ * The returned function preserves the caller's `this` — use `.call(page)` to run the body with a
+ * page instance as `this`, e.g. for hot-update scenarios.
+ *
+ * 返回的函数保留调用方的 `this`——可用 `.call(page)` 以页面实例作为 `this` 执行函数体，例如用于热更新场景。
+ *
  * @param args - Parameter names / 参数名列表
  * @param body - Function body / 函数体
  * @param options - Interpreter options / 解释器选项
@@ -190,5 +195,10 @@ export const createFunction = (
     ...callArgs: unknown[]
   ) => unknown;
 
-  return (...callArgs: unknown[]): RunResult => fn(...callArgs);
+  // a plain (non-arrow) function preserves `this` from the call site and forwards it to the
+  // interpreter function, so `.call(page)` exposes the page instance to the body
+  // 使用普通函数（非箭头）保留调用点的 `this` 并转发给解释器函数，`.call(page)` 可将页面实例暴露给函数体
+  return function hotUpdate(this: unknown, ...callArgs: unknown[]): RunResult {
+    return fn.apply(this, callArgs);
+  };
 };

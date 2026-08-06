@@ -58,10 +58,43 @@ fn(1, 2); // 3
 
 ### `createFunction(args, body, options?): (...args: unknown[]) => unknown`
 
-替代 `new Function`，每个函数拥有独立沙箱。
+替代 `new Function`，每个函数拥有独立沙箱。返回的函数**保留调用方的 `this`**，可用 `.call(page)` 以页面实例作为 `this` 执行函数体。
 
 - `args`: 参数名数组，如 `["a", "b"]`
 - `body`: 函数体源码
+
+#### 热更新示例
+
+```ts
+// 页面里
+import { a } from "../../utils";
+
+Page({
+  data: { count: 0 },
+
+  onLoad() {
+    // 把模块级变量挂到页面实例上，只需挂载一次
+    this.utils = { a };
+  },
+
+  // 服务端下发新的函数体，热更新页面方法
+  applyHotUpdate(body: string) {
+    const fn = createFunction([], body);
+
+    // 以页面实例作为 `this` 执行，函数体内可直接使用 this.data / this.setData / this.utils
+    fn.call(this);
+  },
+});
+```
+
+函数体示例：`return this.data.list.length;`、`this.setData({ count: this.utils.a + 1 });`
+
+::: tip 热更新函数如何访问页面数据
+
+- **页面状态与方法**（`this.data`、`this.setData`、自定义方法）：通过 `.call(page)` 把页面实例作为 `this` 传入即可，无需逐个声明
+- **模块级变量**（`import`/`const` 声明的）：解释器与 `new Function` 一样无法自动读取调用方的词法变量（JS 语言限制），建议在页面初始化时挂到 `this` 上（如 `this.utils = { a }`），之后所有热更新代码均可通过 `this.utils.a` 访问
+
+:::
 
 ### 选项 `RunOptions`
 
