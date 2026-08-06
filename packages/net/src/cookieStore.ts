@@ -210,10 +210,9 @@ export class CookieStore {
     if (domain) {
       const normalizedDomain = normalizeDomain(domain);
 
-      // 兼容旧数据（无前导点键）与归一化键
-      const exactCookieMap = this.store.get(domain) ?? this.store.get(normalizedDomain);
-
-      if (exactCookieMap) exactCookieMap.clear();
+      // 兼容旧数据（无前导点键）与归一化键，两键分别清理（与 delete 一致）
+      this.store.get(domain)?.clear();
+      this.store.get(normalizedDomain)?.clear();
 
       if (!exact) {
         const domainCookieMap = this.store.get(normalizedDomain);

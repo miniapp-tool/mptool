@@ -121,6 +121,26 @@ describe(CookieStore, () => {
 
     expect(cookieStore.getAllCookies()).toHaveLength(0);
   });
+
+  it("clear should clean both legacy and normalized keys", () => {
+    const cookieStore = new CookieStore("cookie-clear-both");
+    const { store } = cookieStore as unknown as { store: Map<string, Map<string, Cookie>> };
+
+    // 模拟迁移期：同时存在无前导点的旧键与归一化新键
+    store.set(
+      "baidu.com",
+      new Map([["a", new Cookie({ name: "a", value: "1", domain: "baidu.com" })]]),
+    );
+    store.set(
+      ".baidu.com",
+      new Map([["b", new Cookie({ name: "b", value: "2", domain: "baidu.com" })]]),
+    );
+
+    cookieStore.clear("baidu.com", true);
+
+    expect(store.get("baidu.com")?.size).toBe(0);
+    expect(store.get(".baidu.com")?.size).toBe(0);
+  });
 });
 
 describe("cookie store extras", () => {
