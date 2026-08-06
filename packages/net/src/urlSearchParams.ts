@@ -36,7 +36,7 @@ const encode = (str: string): string =>
 const decode = (str: string): string => decodeURIComponent(str.replace(/\+/gu, " "));
 
 export class URLSearchParams {
-  private params: Map<string, string[]>;
+  private params: [name: string, value: string][];
 
   constructor(
     init?:
@@ -47,11 +47,11 @@ export class URLSearchParams {
   ) {
     // oxlint-disable-next-line typescript/strict-boolean-expressions
     if (!init) {
-      this.params = new Map();
+      this.params = [];
     } else if (init instanceof URLSearchParams) {
-      this.params = new Map(init.params);
+      this.params = init.params.map(([name, value]) => [name, value]);
     } else {
-      this.params = new Map();
+      this.params = [];
 
       if (typeof init === "string") {
         (init.startsWith("?")
@@ -61,9 +61,15 @@ export class URLSearchParams {
         )
           .split("&")
           .forEach((pair) => {
-            const [, key, value] = /^([^=]+)=?(.*?)$/u.exec(pair) ?? [];
+            // Ignore empty pairs (e.g. from "a&&b"), keep pairs with an empty
+            // name but a value (e.g. "=v") per the URL standard.
+            if (pair === "") return;
 
-            if (key) this.append(decode(key), decode(value));
+            const index = pair.indexOf("=");
+            const name = index === -1 ? pair : pair.slice(0, index);
+            const value = index === -1 ? "" : pair.slice(index + 1);
+
+            this.append(decode(name), decode(value));
           });
       } else if (Symbol.iterator in init) {
         for (const item of init) {
@@ -80,18 +86,14 @@ export class URLSearchParams {
         for (const key of Object.keys(init)) {
           const value = init[key];
 
-          this.params.set(key, [String(value)]);
+          this.append(key, String(value));
         }
       }
     }
   }
 
   get size(): number {
-    let count = 0;
-
-    for (const val of this.params.values()) count += val.length;
-
-    return count;
+    return this.params.length;
   }
 
   /**
@@ -102,19 +104,21 @@ export class URLSearchParams {
    */
   append(name: string, value: string): void {
     // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
-    this.params.set(name, [...this.getAll(name), String(value)]);
+    this.params.push([name, String(value)]);
   }
 
   /**
-   * If `value` is provided, removes all name-value pairs where name is `name` and value is
-   * `value`..
-   *
-   * If `value` is not provided, removes all name-value pairs whose name is `name`.
+   * Removes all name-value pairs whose name is `name` and, if `value` is provided, whose value is
+   * `value`.
    *
    * @param name - The name of the parameter to delete
+   * @param value - If provided, only removes pairs with this value
    */
-  delete(name: string): void {
-    this.params.delete(name);
+  delete(name: string, value?: string): void {
+    this.params = this.params.filter(
+      // oxlint-disable-next-line no-undefined
+      ([key, val]) => key !== name || (value !== undefined && val !== value),
+    );
   }
 
   /**
@@ -127,13 +131,7 @@ export class URLSearchParams {
    * @returns An iterator over the name-value pairs in the query
    */
   entries(): IterableIterator<[string, string]> {
-    const items = new Set<[name: string, value: string]>();
-
-    this.forEach((item, name) => {
-      items.add([name, item]);
-    });
-
-    return items.values();
+    return this.params.values();
   }
 
   /**
@@ -160,11 +158,7 @@ export class URLSearchParams {
     // oxlint-disable-next-line no-undefined
     const bound = thisArg === undefined ? callbackfn : callbackfn.bind(thisArg);
 
-    this.params.forEach((value, key) => {
-      value.forEach((item) => {
-        bound(item, key, this);
-      });
-    });
+    for (const [key, value] of this.params) bound(value, key, this);
   }
 
   /**
@@ -175,7 +169,7 @@ export class URLSearchParams {
    * @returns The value of the first matching parameter, or `null` if not found
    */
   get(name: string): string | null {
-    return this.getAll(name)[0] ?? null;
+    return this.params.find(([key]) => key === name)?.[1] ?? null;
   }
 
   /**
@@ -186,7 +180,7 @@ export class URLSearchParams {
    * @returns An array of values associated with the given parameter
    */
   getAll(name: string): string[] {
-    return [...(this.params.get(name) ?? [])];
+    return this.params.filter(([key]) => key === name).map(([, value]) => value);
   }
 
   /**
@@ -203,7 +197,7 @@ export class URLSearchParams {
    * @returns `true` if a matching name-value pair exists, `false` otherwise
    */
   has(name: string): boolean {
-    return this.params.has(name);
+    return this.params.some(([key]) => key === name);
   }
 
   /**
@@ -219,10 +213,11 @@ export class URLSearchParams {
    * //   foo
    * ```
    *
+   * @yields {string} The name of each name-value pair
    * @returns An iterator over the names of each name-value pair
    */
-  keys(): IterableIterator<string> {
-    return this.params.keys();
+  *keys(): IterableIterator<string> {
+    for (const [name] of this.params) yield name;
   }
 
   /**
@@ -248,7 +243,18 @@ export class URLSearchParams {
    * @param value - The value to set
    */
   set(name: string, value: string): void {
-    this.params.set(name, [value || ""]);
+    const firstIndex = this.params.findIndex(([key]) => key === name);
+
+    if (firstIndex === -1) {
+      // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
+      this.params.push([name, String(value)]);
+      return;
+    }
+
+    // Keep the first matching pair in place and drop the rest
+    this.params = this.params.filter(([key], index) => key !== name || index === firstIndex);
+    // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
+    this.params[firstIndex] = [name, String(value)];
   }
 
   /**
@@ -266,7 +272,9 @@ export class URLSearchParams {
    * ```
    */
   sort(): void {
-    this.params = new Map([...this.params.entries()].sort(([a], [b]) => a.localeCompare(b)));
+    // Code unit order, as required by the URL standard (String comparison is
+    // already based on UTF-16 code units)
+    this.params.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
   }
 
   /**
@@ -276,30 +284,17 @@ export class URLSearchParams {
    * @returns The serialized query string
    */
   toString(): string {
-    const query: string[] = [];
-
-    for (const [key, values] of this.params) {
-      const name = encode(key);
-
-      for (const value of values) query.push(`${name}=${encode(value)}`);
-    }
-
-    return query.join("&");
+    return this.params.map(([name, value]) => `${encode(name)}=${encode(value)}`).join("&");
   }
 
   /**
    * Returns an ES6 `Iterator` over the values of each name-value pair.
    *
+   * @yields {string} The value of each name-value pair
    * @returns An iterator over the values
    */
-  values(): IterableIterator<string> {
-    const items: string[] = [];
-
-    this.forEach((item) => {
-      items.push(item);
-    });
-
-    return items.values();
+  *values(): IterableIterator<string> {
+    for (const [, value] of this.params) yield value;
   }
 
   [Symbol.iterator](): IterableIterator<[string, string]> {

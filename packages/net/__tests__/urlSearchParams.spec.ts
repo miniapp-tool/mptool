@@ -68,6 +68,19 @@ describe(URLSearchParams, () => {
       expect(a.toString()).toBe("a=&b=&c=");
     });
 
+    it("construct with an empty name but a value", () => {
+      const a = new URLSearchParams("=v");
+
+      expect(a.get("")).toBe("v");
+      expect(a.toString()).toBe("=v");
+    });
+
+    it("construct ignoring empty pairs", () => {
+      const a = new URLSearchParams("a&&b");
+
+      expect(a.toString()).toBe("a=&b=");
+    });
+
     it("construct with a sequence", () => {
       const a = new URLSearchParams([
         // @ts-expect-error: non-standard value
@@ -194,6 +207,13 @@ describe(URLSearchParams, () => {
       a.delete("notExists");
       expect(a.toString()).toBe("a=1&b=2&c=3");
     });
+
+    it("remove data with the given value only", () => {
+      const a = new URLSearchParams("a=1&a=2&b=3");
+
+      a.delete("a", "2");
+      expect(a.toString()).toBe("a=1&b=3");
+    });
   });
 
   describe("has check key exists", () => {
@@ -219,6 +239,13 @@ describe(URLSearchParams, () => {
 
       a.set("id", "xx");
       expect(a.toString()).toBe("a=1&b=2&c=3&id=xx");
+    });
+
+    it("set keeps the first pair position and removes the rest", () => {
+      const a = new URLSearchParams("a=1&b=2&a=3");
+
+      a.set("a", "x");
+      expect(a.toString()).toBe("a=x&b=2");
     });
   });
 
@@ -269,6 +296,23 @@ describe(URLSearchParams, () => {
       expect([...obj.keys()]).toStrictEqual(["a", "b", "c"]);
     });
 
+    it("keys with duplicate names", () => {
+      const obj = new URLSearchParams("a=1&a=2&b=3");
+
+      expect([...obj.keys()]).toStrictEqual(["a", "a", "b"]);
+    });
+
+    it("entries preserve interleaved pair order", () => {
+      const obj = new URLSearchParams("a=1&b=2&a=3");
+
+      expect([...obj.entries()]).toStrictEqual([
+        ["a", "1"],
+        ["b", "2"],
+        ["a", "3"],
+      ]);
+      expect(obj.toString()).toBe("a=1&b=2&a=3");
+    });
+
     it("values", () => {
       const obj = getSimpleObj(),
         ret: string[] = [];
@@ -293,6 +337,20 @@ describe(URLSearchParams, () => {
 
       obj.sort();
       expect(obj.toString()).toBe("key=hello&q=flag&s=world");
+    });
+
+    it("sort uses code unit order", () => {
+      const obj = new URLSearchParams("a=1&A=2&z=3&_=4");
+
+      obj.sort();
+      expect(obj.toString()).toBe("A=2&_=4&a=1&z=3");
+    });
+
+    it("sort keeps relative order of duplicate names", () => {
+      const obj = new URLSearchParams("query[]=abc&type=search&query[]=123");
+
+      obj.sort();
+      expect(obj.toString()).toBe("query%5B%5D=abc&query%5B%5D=123&type=search");
     });
   });
 
