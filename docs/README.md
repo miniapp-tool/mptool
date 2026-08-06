@@ -84,7 +84,7 @@ highlights:
 
       - title: 轻量
         icon: bolt
-        details: 压缩后仅 44 kb
+        details: 大小仅约 202 kb
 
 footer: 使用 <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> 主题
 ---
