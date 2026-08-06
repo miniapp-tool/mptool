@@ -1,3 +1,5 @@
+import { logger } from "@mptool/shared";
+
 import type {
   ComponentOptions,
   InferPropTypes,
@@ -71,12 +73,20 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
 const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
   const { home } = getConfig();
   const pageStackLength = getCurrentPages().length;
+  const maxDelta = pageStackLength - 1;
 
   // 页面栈不足以后退 delta 层时，回到主页（若配置了 home）
   if (pageStackLength <= delta && home) return reLaunch(home);
 
+  // 无 home 配置且已处于栈底时，不触发 navigateBack({ delta: 0 })
+  if (maxDelta <= 0) {
+    logger.debug("Cannot go back: already at the first page");
+
+    return Promise.resolve({ errMsg: "" });
+  }
+
   // 无 home 配置时，钳制 delta 至实际可退的最大层数，避免后退失败
-  return wx.navigateBack({ delta: Math.min(delta, pageStackLength - 1) });
+  return wx.navigateBack({ delta: Math.min(delta, maxDelta) });
 };
 
 const bindBack = async function bindBack(
