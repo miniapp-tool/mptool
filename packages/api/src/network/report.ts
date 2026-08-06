@@ -13,7 +13,11 @@ export const reportNetworkStatus = (): void => {
             success: () => {
               wx.getConnectedWifi({
                 success: ({ wifi }) => {
-                  if (wifi.signalStrength < 0.5) void showToast("Wifi 信号不佳");
+                  // signalStrength ranges 0~1 on iOS and 0~100 on Android
+                  // oxlint-disable-next-line typescript/no-deprecated, typescript/strict-boolean-expressions
+                  const isIos = (wx.getDeviceInfo || wx.getSystemInfoSync)().platform === "ios";
+
+                  if (wifi.signalStrength < (isIos ? 0.5 : 50)) void showToast("Wifi 信号不佳");
                 },
                 fail: () => {
                   void showToast("无法连接网络");

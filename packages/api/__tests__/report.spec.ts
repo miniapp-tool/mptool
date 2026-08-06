@@ -28,14 +28,17 @@ describe(reportNetworkStatus, () => {
     return titles;
   };
 
-  const mockWifi = (signalStrength: number, fail = false): void => {
+  const mockWifi = (signalStrength: number, platform = "ios", fail = false): void => {
     const mockWifiApi = wx as unknown as {
+      getDeviceInfo: () => { platform: string };
       startWifi: (option: { success?: () => void; fail?: () => void }) => void;
       getConnectedWifi: (option: {
         success?: (result: { wifi: { signalStrength: number } }) => void;
         fail?: () => void;
       }) => void;
     };
+
+    mockWifiApi.getDeviceInfo = (): { platform: string } => ({ platform });
 
     mockWifiApi.startWifi = (option): void => {
       if (fail) option.fail?.();
@@ -51,7 +54,7 @@ describe(reportNetworkStatus, () => {
   it("should show warning when wifi signal is weak", () => {
     const titles = mockShowToast();
     mockNetworkType("wifi");
-    mockWifi(0.3);
+    mockWifi(0.3, "ios");
 
     reportNetworkStatus();
 
@@ -61,7 +64,7 @@ describe(reportNetworkStatus, () => {
   it("should not show toast when wifi signal is strong", () => {
     const titles = mockShowToast();
     mockNetworkType("wifi");
-    mockWifi(1);
+    mockWifi(1, "ios");
 
     reportNetworkStatus();
 
@@ -71,11 +74,31 @@ describe(reportNetworkStatus, () => {
   it("should show toast when wifi is unavailable", () => {
     const titles = mockShowToast();
     mockNetworkType("wifi");
-    mockWifi(1, true);
+    mockWifi(1, "ios", true);
 
     reportNetworkStatus();
 
     expect(titles).toStrictEqual(["无法连接网络"]);
+  });
+
+  it("should show warning when android wifi signal is weak", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    mockWifi(30, "android");
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["Wifi 信号不佳"]);
+  });
+
+  it("should not show toast when android wifi signal is strong", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    mockWifi(80, "android");
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual([]);
   });
 
   it("should show toast for slow 2g/3g network", () => {
