@@ -23,4 +23,11 @@ describe(parseHTML, () => {
       expect(parseHTML(content)).toMatchSnapshot();
     });
   });
+
+  it("should remove script elements", () => {
+    const nodes = parseHTML("<script>alert(1)</script><p>ok</p>");
+
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0]).toMatchObject({ type: "tag", name: "p" });
+  });
 });

@@ -38,4 +38,8 @@ describe(getText, () => {
     expect(getText("<p>  a   b  </p>")).toBe("a b");
     expect(getText("<p>a</p>  <p>b</p>")).toBe("a\nb");
   });
+
+  it("should ignore script content", () => {
+    expect(getText("<script>alert(1)</script>")).toBe("");
+  });
 });
