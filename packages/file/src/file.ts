@@ -160,8 +160,8 @@ export const readFile = (<T extends FileEncoding>(
     return getFileManager().readFileSync(`${getUserPath()}/${path}`, encoding) as
       | (T extends "binary" ? ArrayBuffer : string)
       | undefined;
-  } catch {
-    logger.warn(`${path} don't exist`);
+  } catch (err) {
+    logger.warn(`Cannot read ${path}`, err);
 
     // oxlint-disable-next-line no-undefined
     return undefined;
@@ -209,9 +209,9 @@ export const readJSON = <T = unknown>(
 export const mkdir = (path: string, recursive = true): void => {
   try {
     getFileManager().mkdirSync(`${getUserPath()}/${path}`, recursive);
-  } catch {
+  } catch (err) {
     // 调试
-    logger.debug(`${path} folder already exists`);
+    logger.debug(`Cannot create folder ${path}`, err);
   }
 };
 

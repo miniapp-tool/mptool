@@ -113,7 +113,11 @@ export const set = <Value = unknown>(
   value: Value,
   expire: number | "keep" | "once" = 0,
 ): void => {
-  wx.setStorageSync(`${CACHE_PREFIX}${key}`, prepareData(key, value, expire));
+  const data = prepareData(key, value, expire);
+
+  // prepareData returns undefined for "keep" without a previous cache; skip the
+  // write so no undefined value is stored
+  if (data) wx.setStorageSync(`${CACHE_PREFIX}${key}`, data);
 };
 
 /**
