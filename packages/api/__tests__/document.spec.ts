@@ -228,4 +228,22 @@ describe(saveDocument, () => {
 
     expect(saved).toStrictEqual([{ fileName: "custom.pdf" }]);
   });
+
+  it("should keep the user-provided filename with its own extension", async () => {
+    const saved: { fileName: string }[] = [];
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: { fileName: string }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      saved.push({ fileName: option.fileName });
+    };
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/files/doc.pdf?token=abc", "custom.pdf");
+    await flush();
+
+    expect(saved).toStrictEqual([{ fileName: "custom.pdf" }]);
+  });
 });
