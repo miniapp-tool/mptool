@@ -138,15 +138,22 @@ export const setAsync = <Value = unknown>(
   key: string,
   value: Value,
   expire: number | "keep" | "once" = 0,
-): Promise<WechatMiniprogram.GeneralCallbackResult | void> =>
-  wx
+): Promise<WechatMiniprogram.GeneralCallbackResult | void> => {
+  const data = prepareData(key, value, expire);
+
+  // prepareData returns undefined for "keep" without a previous cache; skip the
+  // write so no undefined value is stored
+  if (!data) return Promise.resolve();
+
+  return wx
     .setStorage({
       key: `${CACHE_PREFIX}${key}`,
-      data: prepareData(key, value, expire),
+      data,
     })
     .catch(() => {
       logger.error(`set "${key}" fail`);
     });
+};
 
 /**
  * 获取
