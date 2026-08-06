@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/miniapp-tool/mptool/compare/v0.16.0...v0.16.1) (2026-08-06)
+
+### Code Refactoring
+
+- **all:** bundle from workspace src to dedupe shared ([#1411](https://github.com/miniapp-tool/mptool/issues/1411)) ([cfafa4c](https://github.com/miniapp-tool/mptool/commit/cfafa4cbf8ae508e6b7d5130ae4cbee7981152a1))
+- **api:** extract the shared permission flow into withScope ([#1410](https://github.com/miniapp-tool/mptool/issues/1410)) ([bb9bfd6](https://github.com/miniapp-tool/mptool/commit/bb9bfd653a1067edd6aff262d1aa2ba2b063bff2))
+- **encoder:** pack the gb18030 index table as base64 Uint16Array ([#1408](https://github.com/miniapp-tool/mptool/issues/1408)) ([5ee2057](https://github.com/miniapp-tool/mptool/commit/5ee20571c39bcecfe0f8e87c81575c905cb76781))
+- **enhance:** stop re-exporting all of shared, keep all's full surface ([#1409](https://github.com/miniapp-tool/mptool/issues/1409)) ([58254ab](https://github.com/miniapp-tool/mptool/commit/58254ab9c9e88f7e599eb36c51408c694854161e))
+- **parser:** replace cheerio with htmlparser2 and dom-serializer ([#1407](https://github.com/miniapp-tool/mptool/issues/1407)) ([a5a47fa](https://github.com/miniapp-tool/mptool/commit/a5a47fadaa87e572302c4574dadc4d2e94a85d07))
+
+### Build System
+
+- raise tsdown target from es2017 to es2021 to dedup helpers ([#1412](https://github.com/miniapp-tool/mptool/issues/1412)) ([a27a71a](https://github.com/miniapp-tool/mptool/commit/a27a71a2144998a1d9c9feaae8bb2b8394c8d6f8))
+
 ## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
 
 ### ✨ Features

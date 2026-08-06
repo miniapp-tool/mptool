@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/miniapp-tool/mptool/compare/v0.16.0...v0.16.1) (2026-08-06)
+
+### Code Refactoring
+
+- **all:** bundle from workspace src to dedupe shared ([#1411](https://github.com/miniapp-tool/mptool/issues/1411)) ([cfafa4c](https://github.com/miniapp-tool/mptool/commit/cfafa4cbf8ae508e6b7d5130ae4cbee7981152a1))
+
 ## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
 
 **Note:** Version bump only for package @mptool/skyline

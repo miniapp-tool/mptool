@@ -1,6 +1,6 @@
 {
   "name": "@mptool/all",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Full back for mptool",
   "keywords": [
     "miniapp",
@@ -45,6 +45,7 @@
     "@mptool/file": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
+    "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "5.2.2"
   },
   "peerDependencies": {
