@@ -115,6 +115,9 @@ export const tsdownConfig = (
       transform: {
         inject: {
           Buffer: [path.resolve(__dirname, "./buffer.ts"), "Buffer"],
+          // `entities` (htmlparser2 dependency) uses the global `atob` to decode
+          // its entity tables, which does not exist in miniapp environments.
+          atob: [path.resolve(__dirname, "./atob.ts"), "atob"],
         },
       },
     },
