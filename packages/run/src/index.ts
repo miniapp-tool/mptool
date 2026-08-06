@@ -1,3 +1,6 @@
+import { Runtime } from "./interpreter.js";
+import { parse } from "./parser.js";
+
 /**
  * Interpreter options
  *
@@ -113,10 +116,9 @@ export interface Sandbox {
  * @returns Run result, maybe a `Promise` / 运行结果，可能为 Promise
  */
 export const run = (code: string, options?: RunOptions): RunResult => {
-  void code;
-  void options;
+  const runtime = new Runtime(options);
 
-  throw new Error("not implemented yet");
+  return runtime.run(parse(code, runtime.features));
 };
 
 /**
@@ -129,10 +131,12 @@ export const run = (code: string, options?: RunOptions): RunResult => {
  * @returns Run result / 运行结果
  */
 export const runSync = (code: string, options?: RunOptions): unknown => {
-  void code;
-  void options;
+  const result = run(code, options);
 
-  throw new Error("not implemented yet");
+  if (result instanceof Promise)
+    throw new Error("The code triggered async operations, which runSync does not support");
+
+  return result;
 };
 
 /**
@@ -144,9 +148,15 @@ export const runSync = (code: string, options?: RunOptions): unknown => {
  * @returns Sandbox instance / 沙箱实例
  */
 export const createSandbox = (options?: RunOptions): Sandbox => {
-  void options;
+  const runtime = new Runtime(options);
 
-  throw new Error("not implemented yet");
+  return {
+    run: (code: string): RunResult => runtime.run(parse(code, runtime.features)),
+    setGlobal: (name: string, value: unknown): void => {
+      runtime.setGlobal(name, value);
+    },
+    getGlobal: (name: string): unknown => runtime.getGlobal(name),
+  };
 };
 
 /**
@@ -164,9 +174,13 @@ export const createFunction = (
   body: string,
   options?: RunOptions,
 ): ((...args: unknown[]) => RunResult) => {
-  void args;
-  void body;
-  void options;
+  const runtime = new Runtime(options);
 
-  throw new Error("not implemented yet");
+  // `(function(a, b) { ... })` — an independent function with its own sandbox
+  // `(function(a, b) { ... })` —— 拥有独立沙箱的函数
+  const fn = runtime.run(parse(`(function(${args.join(", ")}) { ${body} })`, runtime.features)) as (
+    ...callArgs: unknown[]
+  ) => unknown;
+
+  return (...callArgs: unknown[]): RunResult => fn(...callArgs);
 };
