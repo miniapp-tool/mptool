@@ -26,19 +26,22 @@ export const openDocument = (url: string): void => {
     });
 };
 
-export const saveDocument = (
-  url: string,
-  filename = /\/([^/]+)\.[^/]+?$/u.exec(url)?.[1] ?? "document",
-): void => {
+export const saveDocument = (url: string, filename?: string): void => {
   // 首选添加到收藏
   if (wx.canIUse("addFileToFavorites")) {
+    // 去除 query 与 hash，避免污染文件名与扩展名
+    const cleanUrl = url.replace(/[?#].*$/u, "");
+    // 从 URL 末尾提取文件名（含扩展名），如 "doc.pdf"
+    const name = /\/([^/]+)$/u.exec(cleanUrl)?.[1] ?? "document";
+    const dotIndex = name.lastIndexOf(".");
+    // 不含扩展名的文件名，可被调用方覆盖
+    const baseName = filename ?? (dotIndex === -1 ? name : name.slice(0, dotIndex));
+    const docType = dotIndex === -1 ? "" : name.slice(dotIndex + 1);
+
     download(url)
       .then((filePath) => {
-        // oxlint-disable-next-line typescript/no-non-null-assertion
-        const docType = url.split(".").pop()!;
-
         wx.addFileToFavorites({
-          fileName: `${filename}.${docType}`,
+          fileName: docType ? `${baseName}.${docType}` : baseName,
           filePath,
           success: () => {
             showModal("文件已保存", "文件已保存至“微信收藏”");

@@ -158,4 +158,58 @@ describe(saveDocument, () => {
     expect(saved).toStrictEqual([]);
     expect(titles).toStrictEqual([]);
   });
+
+  it("should strip query and hash from the url before deriving the file name", async () => {
+    const saved: { fileName: string; filePath: string }[] = [];
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: { fileName: string; filePath: string }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      saved.push({ fileName: option.fileName, filePath: option.filePath });
+    };
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/files/doc.pdf?token=abc&x=1");
+    await flush();
+
+    expect(saved).toStrictEqual([{ fileName: "doc.pdf", filePath: "mock://temp/doc.pdf" }]);
+  });
+
+  it("should use the full name when the url has no extension", async () => {
+    const saved: { fileName: string }[] = [];
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: { fileName: string }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      saved.push({ fileName: option.fileName });
+    };
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/download");
+    await flush();
+
+    expect(saved).toStrictEqual([{ fileName: "download" }]);
+  });
+
+  it("should keep the user-provided filename", async () => {
+    const saved: { fileName: string }[] = [];
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: { fileName: string }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      saved.push({ fileName: option.fileName });
+    };
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/files/doc.pdf?token=abc", "custom");
+    await flush();
+
+    expect(saved).toStrictEqual([{ fileName: "custom.pdf" }]);
+  });
 });
