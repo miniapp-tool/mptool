@@ -1,6 +1,14 @@
 import type { CookieType } from "./typings.js";
 import { getCookieScopeDomain, normalizeDomain } from "./utils.js";
 
+/**
+ * Convert a date, treating an invalid date as a session cookie
+ *
+ * @param date The date to convert
+ * @returns The valid date, or "session" if the date is invalid
+ */
+const toDate = (date: Date): Date | "session" => (Number.isNaN(date.getTime()) ? "session" : date);
+
 /** Cookie 类 */
 export class Cookie {
   name: string;
@@ -23,14 +31,17 @@ export class Cookie {
           new Date(Date.now() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
-        ? new Date(cookie.expires)
+        ? toDate(new Date(cookie.expires))
         : "session";
   }
 
   /** @returns 是否已过期 */
   isExpired(): boolean {
     return (
-      this.expires === "outdate" || (this.expires instanceof Date && new Date() > this.expires)
+      this.expires === "outdate" ||
+      (this.expires instanceof Date &&
+        // Fallback: an invalid date is treated as expired
+        (Number.isNaN(this.expires.getTime()) || new Date() > this.expires))
     );
   }
 

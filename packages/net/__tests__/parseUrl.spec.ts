@@ -32,6 +32,10 @@ describe(parseUrl, () => {
       domain: "example.com",
       path: "/",
     });
+    expect(parseUrl("//example.com/?a=1")).toStrictEqual({
+      domain: "example.com",
+      path: "/",
+    });
   });
 
   it("should parse url", () => {

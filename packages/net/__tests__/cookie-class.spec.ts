@@ -36,6 +36,19 @@ describe(Cookie, () => {
     expect(cookie.expires).toBeInstanceOf(Date);
   });
 
+  it("should treat an invalid expires date as a session cookie", () => {
+    const cookie = new Cookie({
+      name: "a",
+      value: "b",
+      domain: "example.com",
+      expires: new Date("invalid"),
+    });
+
+    expect(cookie.expires).toBe("session");
+    expect(cookie.isExpired()).toBe(false);
+    expect(cookie.isPersistence()).toBe(false);
+  });
+
   it("isDomainMatched", () => {
     const cookie = new Cookie({ name: "a", value: "b", domain: ".example.com" });
 
