@@ -32,19 +32,16 @@ export const saveDocument = (url: string, filename?: string): void => {
     // 去除 query 与 hash，避免污染文件名与扩展名
     const cleanUrl = url.replace(/[?#].*$/u, "");
     // 从 URL 末尾提取文件名（含扩展名），如 "doc.pdf"
-    const name = /\/([^/]+)$/u.exec(cleanUrl)?.[1] ?? "document";
-    const dotIndex = name.lastIndexOf(".");
-    // 不含扩展名的文件名，可被调用方覆盖
-    const baseName = filename ?? (dotIndex === -1 ? name : name.slice(0, dotIndex));
-    const docType = dotIndex === -1 ? "" : name.slice(dotIndex + 1);
-    // 用户提供的文件名：已含扩展名则直接使用，否则追加 URL 推导的扩展名
+    const urlName = /\/([^/]+)$/u.exec(cleanUrl)?.[1] ?? "document";
+    // 从 URL 文件名提取扩展名，如 "pdf"
+    const dotIndex = urlName.lastIndexOf(".");
+    const docType = dotIndex === -1 ? "" : urlName.slice(dotIndex + 1);
+    // 用户提供的文件名视为完整文件名：未含扩展名时补充 URL 推导的扩展名；未提供则用 URL 文件名
     const fileName = filename
-      ? filename.includes(".") || !docType
-        ? filename
-        : `${filename}.${docType}`
-      : docType
-        ? `${baseName}.${docType}`
-        : baseName;
+      ? docType && !filename.includes(".")
+        ? `${filename}.${docType}`
+        : filename
+      : urlName;
 
     download(url)
       .then((filePath) => {
