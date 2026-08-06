@@ -285,6 +285,44 @@ describe(getRichTextNodes, () => {
     ]);
   });
 
+  it("restores camel case attributes in svg and its children", async () => {
+    const nodes = await getRichTextNodes(
+      '<svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMid"><linearGradient gradientUnits="userSpaceOnUse"></linearGradient></svg>',
+    );
+    const [node] = nodes;
+
+    expect(node).toMatchObject({
+      type: "node",
+      name: "img",
+      attrs: {
+        style: "width:100px;height:50px;",
+      },
+    });
+
+    const {
+      attrs: { src },
+    } = node as unknown as { attrs: { src: string } };
+
+    expect(src).toContain("viewBox='");
+    expect(src).toContain("preserveAspectRatio='");
+    expect(src).toContain("gradientUnits='");
+  });
+
+  it("parses comma separated viewBox", async () => {
+    const nodes = await getRichTextNodes('<svg viewBox="0,0,100,50"></svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: {
+          src: expect.stringContaining("data:image/svg+xml,"),
+          style: "width:100px;height:50px;",
+        },
+      },
+    ]);
+  });
+
   it("keeps class when appendClass is false", async () => {
     const nodes = await getRichTextNodes('<div class="test">hello</div>', {
       appendClass: false,
@@ -357,7 +395,7 @@ describe(getRichTextNodes, () => {
         type: "node",
         name: "img",
         attrs: {
-          src: expect.stringContaining("data:image/svg+xml,"),
+          src: expect.stringContaining("width='100%25'"),
           style: "width:100%;height:50%;",
         },
       },

@@ -8,14 +8,56 @@ import { getHTML, parseHTML } from "./parser.js";
 import { convertSVGToDataURI } from "./svg.js";
 import type { ElementNode, RichTextNode } from "./typings.js";
 
-const handleSVG = (node: Element): RichTextNode => {
-  const { width, height, viewbox } = node.attribs;
+// SVG attribute names are case-sensitive, but cheerio lowercases them during
+// HTML parsing. Restore the rendering-critical ones; filter and other rare
+// attributes are intentionally left out
+const SVG_CAMEL_CASE_ATTRS = [
+  "viewBox",
+  "preserveAspectRatio",
+  "gradientUnits",
+  "gradientTransform",
+  "patternUnits",
+  "patternContentUnits",
+  "patternTransform",
+  "markerWidth",
+  "markerHeight",
+  "markerUnits",
+  "markerStart",
+  "markerMid",
+  "markerEnd",
+  "refX",
+  "refY",
+  "clipPathUnits",
+  "maskUnits",
+  "maskContentUnits",
+] as const;
 
-  // SVG 属性名大小写敏感，cheerio 解析时会将属性名小写化，这里恢复 viewBox 的规范写法
-  if (viewbox) {
-    node.attribs.viewBox = viewbox;
-    delete node.attribs.viewbox;
-  }
+/**
+ * Restores camel-case attribute names on the svg node and its children
+ *
+ * @param node - The svg node
+ */
+const restoreSVGAttrs = (node: Element): void => {
+  SVG_CAMEL_CASE_ATTRS.forEach((attr) => {
+    const lowerAttr = attr.toLowerCase();
+
+    if (node.attribs[lowerAttr]) {
+      node.attribs[attr] = node.attribs[lowerAttr];
+      // oxlint-disable-next-line typescript/no-dynamic-delete
+      delete node.attribs[lowerAttr];
+    }
+  });
+
+  node.children.forEach((child) => {
+    if (child.type === "tag") restoreSVGAttrs(child);
+  });
+};
+
+const handleSVG = (node: Element): RichTextNode => {
+  // Restore camel-case attribute names so the svg renders correctly
+  restoreSVGAttrs(node);
+
+  const { width, height, viewBox } = node.attribs;
 
   let style = "";
 
@@ -23,11 +65,13 @@ const handleSVG = (node: Element): RichTextNode => {
 
   if (height) style += `height:${height}${/^[\d.]*\d$/u.test(height) ? "px" : ""};`;
 
-  if (!style && viewbox) {
-    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
-    const [, , viewboxWidth, viewboxHeight] = viewbox.split(" ").map(Number);
+  if (!style && viewBox) {
+    // viewBox 支持空格或逗号分隔，取宽高
+    const [viewboxWidth, viewboxHeight] = viewBox
+      .split(/[\s,]+/u)
+      .slice(2)
+      .map(Number);
 
-    // 非数字 viewBox 时跳过，避免生成无效样式
     if (Number.isFinite(viewboxWidth) && Number.isFinite(viewboxHeight))
       style = `width:${viewboxWidth}px;height:${viewboxHeight}px;`;
   }
