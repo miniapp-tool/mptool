@@ -372,6 +372,47 @@ describe(getRichTextNodes, () => {
     ]);
   });
 
+  it("appends a full link to anchor text", async () => {
+    const nodes = await getRichTextNodes('<a href="https://example.com">link</a>', {
+      appendClass: false,
+    });
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "a",
+        children: [
+          { type: "text", text: "link" },
+          { type: "text", text: " (https://example.com)" },
+        ],
+      },
+    ]);
+  });
+
+  it("does not append non-full links to anchor text", async () => {
+    const relative = await getRichTextNodes('<a href="/relative">link</a>', {
+      appendClass: false,
+    });
+
+    expect(relative).toStrictEqual([
+      {
+        type: "node",
+        name: "a",
+        children: [{ type: "text", text: "link" }],
+      },
+    ]);
+
+    const noHref = await getRichTextNodes("<a>link</a>", { appendClass: false });
+
+    expect(noHref).toStrictEqual([
+      {
+        type: "node",
+        name: "a",
+        children: [{ type: "text", text: "link" }],
+      },
+    ]);
+  });
+
   it("converts svg with numeric width and height", async () => {
     const nodes = await getRichTextNodes('<svg width="100" height="50"></svg>');
 

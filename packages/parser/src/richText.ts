@@ -129,6 +129,13 @@ const handleNode = async (
         ),
       );
 
+      // `a` 标签在 rich-text 中无法点击；若 href 是完整链接，以括号形式附加到文本后，方便查看
+      if (node.name === "a") {
+        const href = node.attributes.find(({ name }) => name === "href")?.value;
+
+        if (href && /^https?:\/\//u.test(href)) children.push({ type: "text", text: ` (${href})` });
+      }
+
       if (appendClass) attrs.class = attrs.class ? `${node.name} ${attrs.class}` : node.name;
 
       const convertedNode: ElementNode = {
