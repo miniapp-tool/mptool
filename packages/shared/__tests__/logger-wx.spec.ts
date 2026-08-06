@@ -1,5 +1,5 @@
 import "@mptool/mock";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 describe("logger in wx environment", () => {
   it("should use wx log manager and respect DEBUG flag", async () => {
@@ -20,15 +20,23 @@ describe("logger in wx environment", () => {
 
     const mod = await import("../src/logger.js");
 
-    // DEBUG 为 false 时 debug 不输出
+    // DEBUG 为 false 时 debug 不输出，也不写入控制台
+    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+
     mockWx.env.DEBUG = false;
     mod.debug("hidden");
     expect(calls).toStrictEqual([]);
+    expect(debugSpy).not.toHaveBeenCalled();
+    debugSpy.mockRestore();
 
-    // DEBUG 为 true 时 debug 通过 realtime manager 输出
+    // DEBUG 为 true 时 debug 通过 realtime manager 输出，并同步到控制台
+    const debugSpy2 = vi.spyOn(console, "debug").mockImplementation(() => {});
+
     mockWx.env.DEBUG = true;
     mod.debug("shown");
     expect(calls).toStrictEqual(["info:debug,shown"]);
+    expect(debugSpy2).toHaveBeenCalledWith("shown");
+    debugSpy2.mockRestore();
     calls.length = 0;
 
     mod.info("a");

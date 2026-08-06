@@ -10,12 +10,18 @@ const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
 /** 写入普通日志 */
 export const debug = (...args: any[]): void => {
-  // 仅在 wx 环境下访问 wx.env，js 环境下 wx 可能不存在
-  if (env !== "js" && ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined)) {
+  // js 环境直接输出到 console
+  if (env === "js") {
+    console.debug(...args);
+    return;
+  }
+
+  // wx 环境仅在 DEBUG 模式下写入微信日志并输出到控制台
+  if ((wx.env as Record<string, unknown>).DEBUG as boolean | undefined) {
     if (isRealtime) log.info("debug", ...args);
     else (log as WechatMiniprogram.LogManager).debug(...args);
+    console.debug(...args);
   }
-  if (log !== console) console.debug(...args);
 };
 
 /** 写入信息日志 */
@@ -32,9 +38,16 @@ export const warn = (...args: any[]): void => {
 
 /** 写入错误日志 */
 export const error = (...args: any[]): void => {
+  // js 环境直接输出到 console
+  if (env === "js") {
+    console.error(...args);
+    return;
+  }
+
+  // LogManager 无 error 方法，非实时日志用 warn 兜底并加 "error" 前缀标识
   if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
   else log.warn("error", ...args);
-  if (log !== console) console.error(...args);
+  console.error(...args);
 };
 
 /**
