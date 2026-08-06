@@ -1091,7 +1091,9 @@ export class Runtime {
   private evalForIn(stmt: ForInStatement, env: Environment, label: string | null = null): void {
     const right = this.evalExpression(stmt.right, env);
 
-    if (right == null) throw new TypeError("Cannot convert undefined or null to object");
+    // `for...in` over `null`/`undefined` iterates zero times (spec)
+    // `for...in` 对 `null`/`undefined` 迭代零次（规范）
+    if (right == null) return;
 
     // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
     const obj = Object(right) as Record<PropertyKey, unknown>;
@@ -1714,7 +1716,9 @@ export class Runtime {
           ? toPropertyKey(this.evalExpression(target.property as Expression, env))
           : (target.property as string);
 
-        return getProperty(ctx.superBase, key);
+        // accessors run with the instance as receiver
+        // accessor 以实例作为接收者运行
+        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
       }
 
       const object = this.evalExpression(target.object, env);
@@ -1761,6 +1765,62 @@ export class Runtime {
       : (node.property as string);
 
     return { object, key };
+  }
+
+  /**
+   * Evaluate the member target of a `delete` operation, tracking optional-chain short-circuits.
+   *
+   * 求值 `delete` 的成员目标，跟踪可选链短路。
+   *
+   * @param node - The member expression / 成员表达式
+   * @param env - Current environment / 当前环境
+   * @returns The object, key, and whether the chain short-circuited / 对象、键与是否短路
+   */
+  private evalDeleteTarget(
+    node: MemberExpr,
+    env: Environment,
+  ): { object: unknown; key: PropertyKey; shortCircuited: boolean } {
+    const { object, shortCircuited } = this.evalDeleteObject(node.object, env);
+    const key = node.computed
+      ? toPropertyKey(this.evalExpression(node.property as Expression, env))
+      : (node.property as string);
+
+    // the delete argument itself may be the optional link (e.g. `delete o?.a`)
+    // delete 参数本身可能就是可选链（例如 `delete o?.a`）
+    if (shortCircuited || (node.optional && object == null))
+      return { object, key, shortCircuited: true };
+
+    return { object, key, shortCircuited };
+  }
+
+  /**
+   * Evaluate the object chain of a `delete` target, propagating optional-chain short-circuits.
+   *
+   * 求值 `delete` 目标的对象链，传播可选链短路。
+   *
+   * @param expr - The object expression / 对象表达式
+   * @param env - Current environment / 当前环境
+   * @returns The object value and whether an optional link short-circuited / 对象值与是否短路
+   */
+  private evalDeleteObject(
+    expr: Expression,
+    env: Environment,
+  ): { object: unknown; shortCircuited: boolean } {
+    if (expr.type === "member") {
+      const inner = this.evalDeleteObject(expr.object, env);
+
+      if (inner.shortCircuited) return { object: void 0, shortCircuited: true };
+
+      if (expr.optional && inner.object == null) return { object: void 0, shortCircuited: true };
+
+      const key = expr.computed
+        ? toPropertyKey(this.evalExpression(expr.property as Expression, env))
+        : (expr.property as string);
+
+      return { object: getProperty(inner.object, key), shortCircuited: false };
+    }
+
+    return { object: this.evalExpression(expr, env), shortCircuited: false };
   }
 
   // -------------------------------------------------------------------------
@@ -1944,6 +2004,7 @@ export class Runtime {
       if (prop.kind === "get" || prop.kind === "set") {
         const fn = this.makeFunction(prop.value as FunctionExpr, env, {
           superBase: Object.getPrototypeOf(obj) as object | null,
+          constructable: false,
         });
         const descriptor: PropertyDescriptor = { enumerable: true, configurable: true };
 
@@ -1957,10 +2018,11 @@ export class Runtime {
       const { value } = prop;
 
       if (value.type === "functionExpr" || value.type === "arrow") {
-        // method shorthand: home object is `obj`
-        // 方法简写：home object 为 `obj`
+        // method shorthand: home object is `obj`, and methods are not constructable
+        // 方法简写：home object 为 `obj`，且方法不可被 `new`（`m: function(){}` 仍可构造）
         const fn = this.makeFunction(value, env, {
           superBase: Object.getPrototypeOf(obj) as object | null,
+          constructable: !prop.method,
         });
 
         Object.defineProperty(obj, key, {
@@ -2006,7 +2068,9 @@ export class Runtime {
         ? toPropertyKey(this.evalExpression(node.property as Expression, env))
         : (node.property as string);
 
-      return getProperty(ctx.superBase, key);
+      // accessors run with the instance as receiver
+      // accessor 以实例作为接收者运行
+      return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
     }
 
     const object = this.evalExpression(node.object, env);
@@ -2187,16 +2251,11 @@ export class Runtime {
       const { argument } = node;
 
       if (argument.type === "member") {
-        if (argument.object.type === "super")
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { object, key, shortCircuited } = this.evalDeleteTarget(argument, env);
 
-        const object = this.evalExpression(argument.object, env);
-
-        if (argument.optional && object == null) return true;
-
-        const key = argument.computed
-          ? toPropertyKey(this.evalExpression(argument.property as Expression, env))
-          : (argument.property as string);
+        // an optional chain that short-circuits makes the delete a no-op (returns true)
+        // 可选链短路使 delete 成为空操作（返回 true）
+        if (shortCircuited) return true;
 
         // oxlint-disable-next-line typescript/no-dynamic-delete -- `delete` operator semantics
         return delete (object as Record<PropertyKey, unknown>)[key];
@@ -2409,7 +2468,7 @@ export class Runtime {
   private makeFunction(
     node: FunctionExpr | ArrowFunctionExpr,
     env: Environment,
-    extra?: { superBase?: object | null },
+    extra?: { superBase?: object | null; constructable?: boolean },
   ): InterpreterFunction {
     if (node.type === "functionExpr" && node.name != null) {
       // named function expression: the name is bound in the function's own scope
@@ -2427,6 +2486,7 @@ export class Runtime {
         isAsync: node.isAsync,
         prototype: null,
         superBase: extra?.superBase ?? null,
+        constructable: extra?.constructable,
       });
 
       nameEnv.initialize(node.name, fn);
@@ -2443,6 +2503,7 @@ export class Runtime {
       isAsync: node.isAsync,
       prototype: null,
       superBase: extra?.superBase ?? null,
+      constructable: extra?.constructable,
     });
   }
 
@@ -2486,8 +2547,14 @@ export class Runtime {
     prototype: object | null;
     /** Base object for `super.x` / `super.x` 的基准对象 */
     superBase: object | null;
+    /**
+     * Whether the function is `new`-able; `false` for object-literal methods / 是否可被 `new`
+     * 调用（对象字面量方法为 `false`）
+     */
+    constructable?: boolean;
   }): InterpreterFunction {
-    const { name, params, body, closure, thisMode, isAsync, prototype, superBase } = options;
+    const { name, params, body, closure, thisMode, isAsync, prototype, superBase, constructable } =
+      options;
     const simpleParamNames = analyzeParams(params);
     const isArrow = thisMode === "arrow";
     const ctx = isArrow ? this.currentContext() : null;
@@ -2501,7 +2568,7 @@ export class Runtime {
         thisMode,
         isAsync,
         isClassConstructor: false,
-        constructable: !isArrow,
+        constructable: constructable ?? !isArrow,
         prototype,
         superClass: null,
         superBase,
@@ -2537,9 +2604,14 @@ export class Runtime {
   ): unknown {
     this.step();
 
-    // async functions always return a host Promise (driven by the async runner)
-    // async 函数总是返回宿主 Promise（由 async 运行器驱动）
-    if (meta.isAsync) return this.asyncInvoke(meta, args, thisArg, isConstruct);
+    // async functions always return a host Promise (driven by the async runner); constructing one
+    // throws synchronously (async functions have no [[Construct]])
+    // async 函数总是返回宿主 Promise（由 async 运行器驱动）；构造 async 函数同步抛错（无 [[Construct]]）
+    if (meta.isAsync) {
+      if (isConstruct) throw new TypeError(`${meta.name ?? "function"} is not a constructor`);
+
+      return this.asyncInvoke(meta, args, thisArg);
+    }
 
     this.stackDepth += 1;
 
@@ -3167,17 +3239,13 @@ export class Runtime {
    * @param meta - Function metadata / 函数元数据
    * @param args - Call arguments / 调用参数
    * @param thisArg - The `this` value / `this` 值
-   * @param isConstruct - Whether this is a `new` call / 是否为 `new` 调用
    * @returns A host Promise / 宿主 Promise
    */
   private async asyncInvoke(
     meta: InterpreterFunctionMeta,
     args: unknown[],
     thisArg: unknown,
-    isConstruct: boolean,
   ): Promise<unknown> {
-    if (isConstruct) throw new TypeError(`${meta.name ?? "function"} is not a constructor`);
-
     this.stackDepth += 1;
 
     if (this.stackDepth > this.maxStack) {
@@ -3662,7 +3730,9 @@ export class Runtime {
   ): Generator<unknown, void, unknown> {
     const right = yield* this.evalAsyncExpr(stmt.right, env);
 
-    if (right == null) throw new TypeError("Cannot convert undefined or null to object");
+    // `for...in` over `null`/`undefined` iterates zero times (spec)
+    // `for...in` 对 `null`/`undefined` 迭代零次（规范）
+    if (right == null) return;
 
     // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
     const obj = Object(right) as Record<PropertyKey, unknown>;
@@ -3941,7 +4011,9 @@ export class Runtime {
             ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
             : (expr.property as string);
 
-          return getProperty(ctx.superBase, key);
+          // accessors run with the instance as receiver
+          // accessor 以实例作为接收者运行
+          return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
         }
 
         const object = yield* this.evalAsyncExpr(expr.object, env);
@@ -4040,16 +4112,14 @@ export class Runtime {
           const { argument } = expr;
 
           if (argument.type === "member") {
-            if (argument.object.type === "super")
-              throw new ReferenceError("'super' keyword unexpected here");
+            const { object, key, shortCircuited } = yield* this.evalAsyncDeleteTarget(
+              argument,
+              env,
+            );
 
-            const object = yield* this.evalAsyncExpr(argument.object, env);
-
-            if (argument.optional && object == null) return true;
-
-            const key = argument.computed
-              ? toPropertyKey(yield* this.evalAsyncExpr(argument.property as Expression, env))
-              : (argument.property as string);
+            // an optional chain that short-circuits makes the delete a no-op (returns true)
+            // 可选链短路使 delete 成为空操作（返回 true）
+            if (shortCircuited) return true;
 
             // oxlint-disable-next-line typescript/no-dynamic-delete -- `delete` operator semantics
             return delete (object as Record<PropertyKey, unknown>)[key];
@@ -4389,6 +4459,66 @@ export class Runtime {
   }
 
   /**
+   * Evaluate the member target of a `delete` operation, tracking optional-chain short-circuits.
+   *
+   * 求值 `delete` 的成员目标，跟踪可选链短路。
+   *
+   * @param node - The member expression / 成员表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The object, key, and whether the chain short-circuited / 对象、键与是否短路
+   */
+  private *evalAsyncDeleteTarget(
+    node: MemberExpr,
+    env: Environment,
+  ): Generator<unknown, { object: unknown; key: PropertyKey; shortCircuited: boolean }, unknown> {
+    const { object, shortCircuited } = yield* this.evalAsyncDeleteObject(node.object, env);
+    const key = node.computed
+      ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
+      : (node.property as string);
+
+    // the delete argument itself may be the optional link (e.g. `delete o?.a`)
+    // delete 参数本身可能就是可选链（例如 `delete o?.a`）
+    if (shortCircuited || (node.optional && object == null))
+      return { object, key, shortCircuited: true };
+
+    return { object, key, shortCircuited };
+  }
+
+  /**
+   * Evaluate the object chain of a `delete` target, propagating optional-chain short-circuits.
+   *
+   * 求值 `delete` 目标的对象链，传播可选链短路。
+   *
+   * @param expr - The object expression / 对象表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The object value and whether an optional link short-circuited / 对象值与是否短路
+   */
+  private *evalAsyncDeleteObject(
+    expr: Expression,
+    env: Environment,
+  ): Generator<unknown, { object: unknown; shortCircuited: boolean }, unknown> {
+    if (expr.type === "member") {
+      const inner = yield* this.evalAsyncDeleteObject(expr.object, env);
+
+      if (inner.shortCircuited) return { object: void 0, shortCircuited: true };
+
+      if (expr.optional && inner.object == null) return { object: void 0, shortCircuited: true };
+
+      const key = expr.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
+        : (expr.property as string);
+
+      return { object: getProperty(inner.object, key), shortCircuited: false };
+    }
+
+    return { object: yield* this.evalAsyncExpr(expr, env), shortCircuited: false };
+  }
+
+  /**
    * Evaluate an async object literal (shorthand, computed keys, methods, spread, `__proto__`).
    *
    * 求值 async 对象字面量（简写、计算键、方法、展开、`__proto__`）。
@@ -4424,6 +4554,7 @@ export class Runtime {
       if (prop.kind === "get" || prop.kind === "set") {
         const fn = this.makeFunction(prop.value as FunctionExpr, env, {
           superBase: Object.getPrototypeOf(obj) as object | null,
+          constructable: false,
         });
         const descriptor: PropertyDescriptor = { enumerable: true, configurable: true };
 
@@ -4437,10 +4568,11 @@ export class Runtime {
       const { value } = prop;
 
       if (value.type === "functionExpr" || value.type === "arrow") {
-        // method shorthand: home object is `obj`
-        // 方法简写：home object 为 `obj`
+        // method shorthand: home object is `obj`, and methods are not constructable
+        // 方法简写：home object 为 `obj`，且方法不可被 `new`（`m: function(){}` 仍可构造）
         const fn = this.makeFunction(value, env, {
           superBase: Object.getPrototypeOf(obj) as object | null,
+          constructable: !prop.method,
         });
 
         Object.defineProperty(obj, key, {

@@ -623,6 +623,7 @@ describe("object literals", () => {
           computed: false,
           value: { type: "literal", value: 1 },
           shorthand: false,
+          method: false,
         },
         {
           type: "property",
@@ -631,6 +632,7 @@ describe("object literals", () => {
           computed: false,
           value: { type: "literal", value: "x" },
           shorthand: false,
+          method: false,
         },
       ],
     });
@@ -647,6 +649,7 @@ describe("object literals", () => {
           computed: false,
           value: { type: "identifier", name: "a" },
           shorthand: true,
+          method: false,
         },
       ],
     });
@@ -663,6 +666,7 @@ describe("object literals", () => {
           computed: true,
           value: { type: "identifier", name: "v" },
           shorthand: false,
+          method: false,
         },
       ],
     });
@@ -685,6 +689,7 @@ describe("object literals", () => {
             isAsync: false,
           },
           shorthand: false,
+          method: true,
         },
       ],
     });
@@ -707,6 +712,7 @@ describe("object literals", () => {
             isAsync: true,
           },
           shorthand: false,
+          method: true,
         },
       ],
     });
@@ -732,6 +738,7 @@ describe("object literals", () => {
             isAsync: false,
           },
           shorthand: false,
+          method: true,
         },
         {
           type: "property",
@@ -746,6 +753,7 @@ describe("object literals", () => {
             isAsync: false,
           },
           shorthand: false,
+          method: true,
         },
       ],
     });
@@ -769,6 +777,7 @@ describe("object literals", () => {
           computed: false,
           value: { type: "literal", value: null },
           shorthand: false,
+          method: false,
         },
       ],
     });
@@ -1234,6 +1243,7 @@ describe("template literals", () => {
               computed: false,
               value: { type: "literal", value: 1 },
               shorthand: false,
+              method: false,
             },
           ],
         },
@@ -2090,5 +2100,562 @@ describe("parser class", () => {
       type: "program",
       body: [{ type: "expression" }],
     });
+  });
+});
+
+describe("template edge cases", () => {
+  it("should reuse a prefetched template continuation after cover-grammar backtracking", () => {
+    expect(exprOf("`${async (`a${b}`)}`")).toStrictEqual({
+      type: "template",
+      quasis: [
+        { raw: "", cooked: "" },
+        { raw: "", cooked: "" },
+      ],
+      expressions: [
+        {
+          type: "call",
+          callee: { type: "identifier", name: "async" },
+          args: [
+            {
+              type: "template",
+              quasis: [
+                { raw: "a", cooked: "a" },
+                { raw: "", cooked: "" },
+              ],
+              expressions: [{ type: "identifier", name: "b" }],
+            },
+          ],
+          optional: false,
+        },
+      ],
+    });
+  });
+
+  it("should throw on an empty template substitution", () => {
+    expectError("`${}`");
+    expectError("`a${}`");
+  });
+
+  it("should throw when a template interpolation is malformed", () => {
+    expectError("`${a");
+    expectError("`${a b}`");
+    expectError("`${a + }`");
+  });
+
+  it("should throw on tagged templates", () => {
+    expectError("tag`x`");
+    expectError("f()`x`");
+  });
+});
+
+describe("for statement edge cases", () => {
+  it("should parse multiple declarators in the for init", () => {
+    expect(stmtOf("for (var a = 1, b = 2; a < 10; a++) {}")).toMatchObject({
+      type: "for",
+      init: {
+        type: "variable",
+        kind: "var",
+        declarations: [
+          { id: { type: "identifier", name: "a" }, init: { type: "literal", value: 1 } },
+          { id: { type: "identifier", name: "b" }, init: { type: "literal", value: 2 } },
+        ],
+      },
+      test: {
+        type: "binary",
+        op: "<",
+        left: { type: "identifier", name: "a" },
+        right: { type: "literal", value: 10 },
+      },
+    });
+  });
+
+  it("should reject `for await`", () => {
+    expectError("for await (x of y) {}");
+    expectError("for (await x of y) {}");
+    expectError("for (await x; ; ) {}");
+  });
+
+  it("should parse for loops with only a test or update", () => {
+    expect(stmtOf("for (; x; ) {}")).toMatchObject({
+      type: "for",
+      init: null,
+      test: { type: "identifier", name: "x" },
+      update: null,
+    });
+
+    expect(stmtOf("for (; ; i++) {}")).toMatchObject({
+      type: "for",
+      init: null,
+      test: null,
+      update: { type: "update", op: "++", prefix: false },
+    });
+
+    expect(stmtOf("for (i = 0; ; i++) {}")).toMatchObject({
+      type: "for",
+      init: { type: "assignment", op: "=" },
+      test: null,
+      update: { type: "update", op: "++", prefix: false },
+    });
+
+    expect(stmtOf("for (i = 0; x; ) {}")).toMatchObject({
+      type: "for",
+      init: { type: "assignment", op: "=" },
+      test: { type: "identifier", name: "x" },
+      update: null,
+    });
+  });
+
+  it("should reject for...of with an expression left when the feature is disabled", () => {
+    expectError("for (x of y) {}", { ...ALL_FEATURES, forOf: false });
+  });
+
+  it("should parse array and object patterns as for-in/for-of left", () => {
+    expect(stmtOf("for ([a, b] in obj) {}")).toMatchObject({
+      type: "forIn",
+      left: {
+        type: "arrayPattern",
+        elements: [
+          { type: "identifier", name: "a" },
+          { type: "identifier", name: "b" },
+        ],
+      },
+      right: { type: "identifier", name: "obj" },
+    });
+
+    expect(stmtOf("for ({a} of xs) {}")).toMatchObject({
+      type: "forOf",
+      left: {
+        type: "objectPattern",
+        props: [
+          {
+            key: "a",
+            computed: false,
+            value: { type: "identifier", name: "a" },
+            shorthand: true,
+          },
+        ],
+        rest: null,
+      },
+      right: { type: "identifier", name: "xs" },
+    });
+  });
+
+  it("should reject invalid destructuring targets in for-in/of heads", () => {
+    expectError("for ((a += 1) in obj) {}");
+    expectError("for ((a ? b : c) in obj) {}");
+  });
+});
+
+describe("statement edge cases", () => {
+  it("should reject a switch clause without 'case' or 'default'", () => {
+    expectError("switch (x) { foo }");
+    expectError("switch (x) { 1 }");
+  });
+
+  it("should reject an unterminated switch case body", () => {
+    expectError("switch (x) { case 1:");
+  });
+
+  it("should reject try without catch or finally", () => {
+    expectError("try {}");
+  });
+
+  it("should reject a function declaration without a name", () => {
+    expectError("function () {}");
+  });
+
+  it("should reject an unterminated block", () => {
+    expectError("{");
+  });
+
+  it("should parse debugger with and without a semicolon", () => {
+    expect(stmtOf("debugger;")).toMatchObject({ type: "debugger" });
+    expect(stmtOf("debugger")).toMatchObject({ type: "debugger" });
+  });
+
+  it("should parse an if statement without an else branch", () => {
+    expect(stmtOf("if (x) {}")).toMatchObject({
+      type: "if",
+      test: { type: "identifier", name: "x" },
+      consequent: { type: "block", body: [] },
+      alternate: null,
+    });
+  });
+
+  it("should parse catch without a binding", () => {
+    expect(stmtOf("try {} catch {}")).toMatchObject({
+      type: "try",
+      handler: { param: null, body: { type: "block", body: [] } },
+      finalizer: null,
+    });
+  });
+});
+
+describe("function parameter edge cases", () => {
+  it("should parse default parameter values", () => {
+    expect(stmtOf("function f(a = 1) {}")).toStrictEqual({
+      type: "functionDeclaration",
+      name: "f",
+      params: [
+        {
+          type: "assignmentPattern",
+          left: { type: "identifier", name: "a" },
+          right: { type: "literal", value: 1 },
+        },
+      ],
+      body: { type: "block", body: [] },
+      isAsync: false,
+    });
+  });
+
+  it("should parse a trailing comma in parameters", () => {
+    expect(stmtOf("function f(a,) {}")).toMatchObject({
+      type: "functionDeclaration",
+      name: "f",
+      params: [{ type: "identifier", name: "a" }],
+    });
+  });
+
+  it("should parse a rest parameter as the only parameter", () => {
+    expect(stmtOf("function f(...rest) {}")).toStrictEqual({
+      type: "functionDeclaration",
+      name: "f",
+      params: [{ type: "rest", argument: { type: "identifier", name: "rest" } }],
+      body: { type: "block", body: [] },
+      isAsync: false,
+    });
+  });
+
+  it("should parse a rest parameter after regular parameters", () => {
+    expect(stmtOf("function f(a, ...rest) {}")).toMatchObject({
+      type: "functionDeclaration",
+      name: "f",
+      params: [
+        { type: "identifier", name: "a" },
+        { type: "rest", argument: { type: "identifier", name: "rest" } },
+      ],
+    });
+  });
+});
+
+describe("class edge cases", () => {
+  it("should reject a class declaration without a name", () => {
+    expectError("class {}");
+  });
+
+  it("should parse empty class members (semicolons)", () => {
+    expect(stmtOf("class A { ; }")).toStrictEqual({
+      type: "classDeclaration",
+      name: "A",
+      superClass: null,
+      body: { type: "classBody", methods: [] },
+    });
+  });
+
+  it("should reject an unterminated class body", () => {
+    expectError("class A {");
+  });
+
+  it("should parse an async class method", () => {
+    expect(stmtOf("class A { async foo() {} }")).toMatchObject({
+      type: "classDeclaration",
+      name: "A",
+      body: {
+        type: "classBody",
+        methods: [
+          {
+            type: "classMethod",
+            kind: "method",
+            key: "foo",
+            computed: false,
+            params: [],
+            isAsync: true,
+          },
+        ],
+      },
+    });
+  });
+
+  it("should parse static getters and setters", () => {
+    expect(stmtOf("class A { static get x() { return 1 } static set x(v) {} }")).toMatchObject({
+      type: "classDeclaration",
+      name: "A",
+      body: {
+        type: "classBody",
+        methods: [
+          { type: "classMethod", kind: "staticGet", key: "x", params: [] },
+          {
+            type: "classMethod",
+            kind: "staticSet",
+            key: "x",
+            params: [{ type: "identifier", name: "v" }],
+          },
+        ],
+      },
+    });
+  });
+
+  it("should treat a method named async as a plain method", () => {
+    expect(stmtOf("class A { async() {} }")).toMatchObject({
+      type: "classDeclaration",
+      name: "A",
+      body: {
+        type: "classBody",
+        methods: [{ type: "classMethod", kind: "method", key: "async", isAsync: false }],
+      },
+    });
+  });
+});
+
+describe("object literal edge cases", () => {
+  it("should reject an async method without parentheses", () => {
+    expectError("({ async foo 1 })");
+  });
+
+  it("should reject a computed key without ':' or '('", () => {
+    expectError("({ [a] 1 })");
+  });
+
+  it("should reject a missing property name", () => {
+    expectError("({ : 1 })");
+    expectError("({ ( })");
+  });
+
+  it("should parse computed getters and async methods", () => {
+    expect(exprOf("({ get [k]() {} })")).toMatchObject({
+      type: "object",
+      props: [{ type: "property", kind: "get", computed: true }],
+    });
+
+    expect(exprOf("({ async [k]() {} })")).toMatchObject({
+      type: "object",
+      props: [{ type: "property", kind: "init", computed: true }],
+    });
+  });
+});
+
+describe("destructuring edge cases", () => {
+  it("should reject a computed shorthand in an object pattern", () => {
+    expectError("const { [a] } = x");
+  });
+
+  it("should reject member expressions as arrow parameter targets", () => {
+    expectError("([a.b]) => 1");
+    expectError("({ x: a.b }) => 1");
+  });
+
+  it("should parse elisions, defaults and rest in patterns", () => {
+    expect(stmtOf("const [, a] = x")).toMatchObject({
+      type: "variable",
+      kind: "const",
+      declarations: [
+        {
+          id: {
+            type: "arrayPattern",
+            elements: [null, { type: "identifier", name: "a" }],
+          },
+        },
+      ],
+    });
+
+    expect(stmtOf("const [a = 1] = x")).toMatchObject({
+      type: "variable",
+      kind: "const",
+      declarations: [
+        {
+          id: {
+            type: "arrayPattern",
+            elements: [
+              {
+                type: "assignmentPattern",
+                left: { type: "identifier", name: "a" },
+                right: { type: "literal", value: 1 },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(stmtOf("const { a, ...rest } = x")).toMatchObject({
+      type: "variable",
+      kind: "const",
+      declarations: [
+        {
+          id: {
+            type: "objectPattern",
+            props: [
+              {
+                key: "a",
+                computed: false,
+                value: { type: "identifier", name: "a" },
+                shorthand: true,
+              },
+            ],
+            rest: { type: "rest", argument: { type: "identifier", name: "rest" } },
+          },
+        },
+      ],
+    });
+  });
+
+  it("should reject compound assignment inside a destructuring pattern", () => {
+    expectError("[a += 1, b] = x");
+    expectError("({ x: a *= 2 } = y)");
+  });
+
+  it("should reject invalid arrow parameter targets", () => {
+    expectError("(a ? b : c) => 1");
+    expectError("(a + b) => c");
+    expectError("(1) => 1");
+  });
+
+  it("should parse object destructuring assignment", () => {
+    expect(exprOf("({ a } = x)")).toMatchObject({
+      type: "assignment",
+      op: "=",
+      target: {
+        type: "objectPattern",
+        props: [
+          {
+            key: "a",
+            computed: false,
+            value: { type: "identifier", name: "a" },
+            shorthand: true,
+          },
+        ],
+        rest: null,
+      },
+    });
+  });
+});
+
+describe("member and call edge cases", () => {
+  it("should reject a missing property name after '.'", () => {
+    expectError("a.");
+    expectError('a."x"');
+  });
+
+  it("should parse a trailing comma in call arguments", () => {
+    expect(exprOf("f(a,)")).toMatchObject({
+      type: "call",
+      callee: { type: "identifier", name: "f" },
+      args: [{ type: "identifier", name: "a" }],
+      optional: false,
+    });
+  });
+});
+
+describe("expression error paths", () => {
+  it("should reject keywords in expression position", () => {
+    expectError("1 + break");
+    expectError("x = return");
+    expectError("(if)");
+  });
+
+  it("should reject stray punctuators in expression position", () => {
+    expectError("1 + )");
+    expectError("a + }");
+  });
+
+  it("should reject empty parentheses", () => {
+    expectError("()");
+  });
+
+  it("should reject spread without an arrow function", () => {
+    expectError("(...a)");
+    expectError("(a, ...b)");
+  });
+
+  it("should reject a trailing comma in a parenthesized expression", () => {
+    expectError("(a,)");
+    expectError("(a, b,)");
+  });
+
+  it("should allow a trailing comma in arrow parameters", () => {
+    expect(exprOf("(a,) => a")).toStrictEqual({
+      type: "arrow",
+      params: [{ type: "identifier", name: "a" }],
+      body: { type: "identifier", name: "a" },
+      isAsync: false,
+    });
+  });
+
+  it("should treat a bare `async` as an identifier", () => {
+    expect(programOf("async x + 1")).toMatchObject({
+      type: "program",
+      body: [
+        { type: "expression", expression: { type: "identifier", name: "async" } },
+        { type: "expression" },
+      ],
+    });
+  });
+});
+
+describe("sequence expressions", () => {
+  it("should parse a top-level comma sequence", () => {
+    expect(exprOf("a, b")).toStrictEqual({
+      type: "sequence",
+      expressions: [
+        { type: "identifier", name: "a" },
+        { type: "identifier", name: "b" },
+      ],
+    });
+
+    expect(exprOf("a, b, c")).toMatchObject({
+      type: "sequence",
+      expressions: [
+        { type: "identifier", name: "a" },
+        { type: "identifier", name: "b" },
+        { type: "identifier", name: "c" },
+      ],
+    });
+  });
+});
+
+describe("statement semicolon edge cases", () => {
+  it("should accept optional semicolons", () => {
+    expect(stmtOf("let x = 1;")).toMatchObject({
+      type: "variable",
+      kind: "let",
+      declarations: [
+        { id: { type: "identifier", name: "x" }, init: { type: "literal", value: 1 } },
+      ],
+    });
+
+    expect(stmtOf("do {} while (x);")).toMatchObject({ type: "doWhile" });
+    expect(stmtOf("throw e;")).toMatchObject({ type: "throw" });
+    expect(stmtOf("function g() { return; }")).toMatchObject({
+      type: "functionDeclaration",
+      body: { type: "block", body: [{ type: "return", argument: null }] },
+    });
+  });
+});
+
+describe("feature toggle edge cases", () => {
+  it("should reject async function expressions when async is disabled", () => {
+    expectError("const f = async function() {}", { ...ALL_FEATURES, async: false });
+  });
+
+  it("should reject generator function expressions", () => {
+    expectError("const g = function* () {}");
+    expectError("const h = (function* () {})");
+  });
+});
+
+describe("error positions", () => {
+  it("should report error positions across lines", () => {
+    let caught: ParseError | undefined;
+
+    try {
+      parse("{\n");
+    } catch (err) {
+      caught = err as ParseError;
+    }
+
+    expect(caught).toBeInstanceOf(ParseError);
+    expect(caught?.message).toContain("expected '}'");
+    expect(caught?.line).toBe(2);
+    expect(caught?.column).toBe(1);
   });
 });

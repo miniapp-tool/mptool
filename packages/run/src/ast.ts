@@ -152,6 +152,8 @@ export interface ObjectProperty {
   computed: boolean;
   value: Expression | FunctionExpr | ArrowFunctionExpr;
   shorthand: boolean;
+  /** Whether this is a method shorthand (`m() {}`), which is not constructable / 是否为方法简写（不可构造） */
+  method: boolean;
   start: number;
   end: number;
 }

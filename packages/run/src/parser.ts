@@ -2225,6 +2225,7 @@ export class Parser {
         computed,
         value,
         shorthand: false,
+        method: true,
         start,
         end: body.end,
       };
@@ -2266,6 +2267,7 @@ export class Parser {
         computed,
         value,
         shorthand: false,
+        method: true,
         start,
         end: body.end,
       };
@@ -2285,6 +2287,7 @@ export class Parser {
         computed,
         value,
         shorthand: false,
+        method: false,
         start,
         end: value.end,
       };
@@ -2310,6 +2313,7 @@ export class Parser {
         computed,
         value,
         shorthand: false,
+        method: true,
         start,
         end: body.end,
       };
@@ -2344,6 +2348,7 @@ export class Parser {
         computed: false,
         value,
         shorthand: true,
+        method: false,
         start,
         end: this.lastEnd,
       };
@@ -2469,6 +2474,7 @@ export class Parser {
     this.expect("(");
 
     const items: ({ kind: "rest"; arg: Pattern } | { kind: "expr"; expr: Expression })[] = [];
+    let sawTrailingComma = false;
 
     if (this.match(")")) {
       this.advance();
@@ -2498,7 +2504,10 @@ export class Parser {
       if (this.match(",")) {
         this.advance();
 
-        if (this.match(")")) break;
+        if (this.match(")")) {
+          sawTrailingComma = true;
+          break;
+        }
 
         continue;
       }
@@ -2526,6 +2535,11 @@ export class Parser {
 
     if (items.some((item) => item.kind === "rest"))
       throw this.error("'...' can only be used in arrow function parameters");
+
+    // a trailing comma is only valid in arrow parameter lists, not in a plain
+    // parenthesized expression (e.g. `(a,)` is a SyntaxError)
+    // 尾逗号只允许出现在箭头函数参数列表中，普通括号表达式（如 `(a,)`）是语法错误
+    if (sawTrailingComma) throw this.error("Unexpected token ')'");
 
     const expressions: Expression[] = [];
 

@@ -703,3 +703,51 @@ describe("positions", () => {
     expect(caught?.column).toBe(1);
   });
 });
+
+describe("number edge cases", () => {
+  it("should reject a bigint literal followed by identifier characters", () => {
+    expectError("123na");
+    expectError("0x1Fnx");
+    expectError("0b101nfoo");
+  });
+});
+
+describe("string escape edge cases", () => {
+  it("should throw on a trailing backslash at the end of input", () => {
+    expectError('"abc\\');
+    expectError("'a\\");
+  });
+
+  it("should throw on an unterminated unicode code point escape", () => {
+    expectError(String.raw`"\u{41`);
+    expectError(String.raw`"\u{`);
+  });
+
+  it("should throw on a non-hex character inside a unicode code point escape", () => {
+    expectError(String.raw`"\u{4z}"`);
+    expectError(String.raw`"\u{zz}"`);
+  });
+
+  it("should handle a bare carriage-return line continuation", () => {
+    expect(cookedOf('"a\\\rb"')).toBe("ab");
+  });
+});
+
+describe("punct edge cases", () => {
+  it("should split `?.` before a digit into `?` and a number", () => {
+    expect(lex("a?.5 : b")).toStrictEqual([
+      ["identifier", "a"],
+      ["punct", "?"],
+      ["number", ".5"],
+      ["punct", ":"],
+      ["identifier", "b"],
+      ["eof", undefined],
+    ]);
+  });
+
+  it("should throw on characters that cannot start a token", () => {
+    expectError("@");
+    expectError("#");
+    expectError("a + @");
+  });
+});
