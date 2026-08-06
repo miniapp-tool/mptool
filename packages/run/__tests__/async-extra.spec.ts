@@ -191,6 +191,56 @@ describe("async functions extras", () => {
     ).rejects.toBe("nope");
   });
 
+  it("should await in destructuring declaration defaults", async () => {
+    await expect(
+      runAsync("async function f() { const {x = await Promise.resolve(9)} = {}; return x; } f()"),
+    ).resolves.toBe(9);
+    await expect(
+      runAsync("async function f() { const [a = await Promise.resolve(5)] = []; return a; } f()"),
+    ).resolves.toBe(5);
+    await expect(
+      runAsync("async function f() { let {x = await Promise.resolve(1)} = {x: 2}; return x; } f()"),
+    ).resolves.toBe(2);
+    await expect(
+      runAsync(
+        "async function f() { for (const {x = await Promise.resolve(3)} of [{}]) return x; } f()",
+      ),
+    ).resolves.toBe(3);
+  });
+
+  it("should support rest params in async functions", async () => {
+    await expect(
+      runAsync(
+        "async function f(a, ...rest) { return [a, await Promise.resolve(rest.length)]; } f(1, 2, 3)",
+      ),
+    ).resolves.toStrictEqual([1, 2]);
+  });
+
+  it("should await in catch destructuring defaults", async () => {
+    await expect(
+      runAsync(
+        "async function f() { try { throw {}; } catch ({x = await Promise.resolve(5)}) { return x; } } f()",
+      ),
+    ).resolves.toBe(5);
+    await expect(
+      runAsync(
+        "async function f() { try { throw {x: 7}; } catch ({x = await Promise.resolve(5)}) { return x; } } f()",
+      ),
+    ).resolves.toBe(7);
+  });
+
+  it("should propagate throw null/undefined through async finally", async () => {
+    await expect(
+      runAsync("async function f() { try { throw null; } finally {} } f()"),
+    ).rejects.toBeNull();
+    await expect(
+      runAsync("async function f() { try { throw undefined; } finally {} } f()"),
+    ).rejects.toBeUndefined();
+    await expect(
+      runAsync("async function f() { try { throw null; } finally {} } f()"),
+    ).rejects.toBeNull();
+  });
+
   it("should run finally with return/break/throw overrides", async () => {
     await expect(
       runAsync(

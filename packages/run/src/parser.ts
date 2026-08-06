@@ -973,6 +973,19 @@ export class Parser {
     }
 
     for (;;) {
+      // a rest parameter may follow regular parameters (it is the last parameter)
+      // rest 参数可位于普通参数之后（作为最后一个参数）
+      if (this.match("...")) {
+        const restStart = this.current().start;
+
+        this.advance();
+
+        const argument = this.parseBindingTarget();
+
+        params.push({ type: "rest", argument, start: restStart, end: argument.end });
+        break;
+      }
+
       let target = this.parseBindingTarget();
 
       if (this.match("=")) {

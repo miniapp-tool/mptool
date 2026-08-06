@@ -421,6 +421,35 @@ describe("destructuring", () => {
     runBoth("const f = (...args) => args[0] + args[1]; f(5, 6)");
     runBoth("const f = ([a, ...rest]) => rest; f([1, 2, 3])");
   });
+
+  it("should return undefined for block bodies without an explicit return", () => {
+    runBoth("(function() { 42; })()");
+    runBoth("const f = function() { let x = 5; }; f()");
+    runBoth("[1, 2, 3].map(function(x) { x * 2; })");
+    runBoth("const f = () => { 1 + 1; }; f()");
+    runBoth("const f = function() { if (true) { 9; } }; f()");
+    runBoth("(function() {})()");
+  });
+
+  it("should return explicit values from block bodies", () => {
+    runBoth("const f = function() { return 42; }; f()");
+    runBoth("const f = function() { let x = 5; return x * 2; }; f()");
+    runBoth("const f = () => 7; f()");
+    runBoth("const f = () => { return 'a'; }; f()");
+  });
+
+  it("should run code and return the completion value of the script", () => {
+    runBoth("42");
+    runBoth("let s = 0; for (let i = 0; i < 3; i += 1) s += i; s");
+  });
+
+  it("should support rest parameters in non-arrow functions", () => {
+    runBoth("const f = function(a, ...rest) { return [a, rest]; }; f(1, 2, 3)");
+    runBoth("const f = function(...rest) { return rest.length; }; f(1, 2, 3)");
+    runBoth("class A { m(a, ...rest) { return [a, rest]; } } new A().m(1, 2, 3)");
+    runBoth("class A { constructor(a, ...rest) { this.v = [a, rest]; } } new A(1, 2).v");
+    runBoth("const f = function(a, ...rest) { return arguments.length; }; f(1, 2, 3)");
+  });
 });
 
 describe("class", () => {
@@ -471,6 +500,21 @@ describe("class", () => {
     runBoth("const C = class { m() { return 3; } }; new C().m()");
     runBoth("const C = class Named { static m() { return Named === C; } }; C.m()");
     runBoth("class A { constructor() { return {custom: true}; } } new A().custom");
+  });
+
+  it("should ignore block completion values for constructors", () => {
+    // only an explicit `return <object>` overrides the instance
+    // 仅显式 `return <对象>` 覆盖实例
+    runBoth("class A { constructor() { this.v = [1, 2]; } } new A() instanceof A");
+    runBoth("class A { constructor() { this.v = [1, 2]; } } new A().v");
+    runBoth("class A { constructor() { return 42; } } new A() instanceof A");
+    runBoth("class A { constructor(a, ...rest) { this.v = [a, rest]; } } new A(1, 2).v");
+    runBoth(
+      "class A { constructor(a, ...rest) { this.v = [a, rest]; } } class B extends A { constructor() { super(1, 2, 3); } } new B().v",
+    );
+    runBoth(
+      "class A { constructor() { this.v = 1; } } class B extends A { constructor() { const s = super(); this.isInstance = s instanceof B; } } new B().isInstance",
+    );
   });
 
   it("should support extends null", () => {

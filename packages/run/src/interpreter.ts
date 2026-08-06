@@ -9,16 +9,17 @@
  * objects thrown through the tree and caught at the appropriate boundary. All builtins are host
  * values delegated to the host runtime (design doc §4.4).
  *
- * Async support is **not** implemented in this round: `await` expressions and async function calls
- * throw `"not implemented yet"`. The `asyncCount` counter and the explicit execution-context stack
- * are the extension points for the upcoming frame-based async round.
+ * Async support is implemented with a generator-based runner: `async` functions return a host
+ * `Promise` driven by a resumable generator; `await` yields the pending promise and the driver
+ * resumes on settlement. While suspended, the async call's `contextStack` frames and `stackDepth`
+ * are released and restored on resume (see the "Async functions" section below).
  *
  * `Runtime` 持有沙箱全局对象、全局 `Environment`、步数/栈上限与显式执行上下文栈（解析 `this`/`super`）。 它通过递归树遍历求值已解析的
  * `Program`；控制流（`return`/`break`/`continue`/`throw`）使用内部信号对象 沿树抛出，并在相应边界捕获。全部内建均为委托宿主的宿主值（设计文档
  * §4.4）。
  *
- * 本轮**不实现** async：`await` 表达式与 async 函数调用直接抛 "not implemented yet"。`asyncCount` 计数器与显式执行上下文栈是后续帧式
- * async 轮次的扩展点。
+ * Async 支持由生成器运行器实现：`async` 函数返回由可恢复生成器驱动的宿主 `Promise`；`await` 挂起 pending promise，结算后由驱动恢复。挂起期间
+ * async 调用的 `contextStack` 帧与 `stackDepth` 会被释放，恢复时还原（见下文 "Async functions" 一节）。
  */
 import type {
   ArrayExpr,
@@ -2629,16 +2630,27 @@ export class Runtime {
         }
 
         let result: unknown;
+        let returned = false;
 
         try {
-          result = this.evalFunctionBody(meta.body, env);
+          const evaluated = this.evalFunctionBodyEx(meta.body, env);
+          const { value, returned: didReturn } = evaluated;
+
+          result = value;
+          returned = didReturn;
         } catch (err) {
           if (err instanceof ThrowSignalError) throw err.value;
           throw err;
         }
 
         if (isConstruct) {
-          if ((typeof result === "object" && result != null) || typeof result === "function")
+          // only an explicit `return <object>` overrides the instance; the block completion
+          // value is ignored for constructors
+          // 仅显式 `return <对象>` 覆盖实例；构造器的块完成值被忽略
+          if (
+            returned &&
+            ((typeof result === "object" && result != null) || typeof result === "function")
+          )
             return result;
 
           if (thisRef.value === UNINITIALIZED)
@@ -2657,6 +2669,40 @@ export class Runtime {
   }
 
   /**
+   * Evaluate a function body, reporting whether an explicit `return` occurred.
+   *
+   * 求值函数体，报告是否发生显式 `return`。
+   *
+   * @param body - The function body / 函数体
+   * @param env - Current environment / 当前环境
+   * @returns The value and whether it came from an explicit `return` / 值及是否来自显式 `return`
+   */
+  private evalFunctionBodyEx(
+    body: BlockStatement | Expression,
+    env: Environment,
+  ): {
+    value: unknown;
+    returned: boolean;
+  } {
+    if (body.type === "block") {
+      try {
+        // a block without an explicit `return` yields `undefined` — script completion values
+        // apply to `run`/`eval`, not to function calls
+        // 无显式 `return` 的块返回 `undefined`——完成值仅适用于 `run`/`eval`，不适用于函数调用
+        this.evalBlock(body, env);
+
+        return { value: void 0, returned: false };
+      } catch (err) {
+        if (err instanceof ReturnSignalError) return { value: err.value, returned: true };
+
+        throw err;
+      }
+    }
+
+    return { value: this.evalExpression(body, env), returned: true };
+  }
+
+  /**
    * Evaluate a function body, catching `return` signals.
    *
    * 求值函数体，捕获 `return` 信号。
@@ -2666,16 +2712,7 @@ export class Runtime {
    * @returns The returned value / 返回值
    */
   private evalFunctionBody(body: BlockStatement | Expression, env: Environment): unknown {
-    if (body.type === "block") {
-      try {
-        return this.evalBlock(body, env);
-      } catch (err) {
-        if (err instanceof ReturnSignalError) return err.value;
-        throw err;
-      }
-    }
-
-    return this.evalExpression(body, env);
+    return this.evalFunctionBodyEx(body, env).value;
   }
 
   /**
@@ -2836,19 +2873,27 @@ export class Runtime {
     });
 
     try {
-      let result: unknown;
+      let evaluated: { value: unknown; returned: boolean };
 
       try {
-        result = this.evalFunctionBody(parentMeta.body, env);
+        evaluated = this.evalFunctionBodyEx(parentMeta.body, env);
       } catch (err) {
         if (err instanceof ThrowSignalError) throw err.value;
         throw err;
       }
 
-      if ((typeof result === "object" && result != null) || typeof result === "function")
-        ctx.thisRef.value = result;
+      // only an explicit `return <object>` from the base constructor replaces the shared `this`
+      // 仅基类构造器的显式 `return <对象>` 替换共享的 `this`
+      if (
+        evaluated.returned &&
+        ((typeof evaluated.value === "object" && evaluated.value != null) ||
+          typeof evaluated.value === "function")
+      )
+        ctx.thisRef.value = evaluated.value;
 
-      return result;
+      // `super()` evaluates to the shared instance (or the explicitly returned object)
+      // `super()` 求值为共享实例（或显式返回的对象）
+      return ctx.thisRef.value;
     } finally {
       this.contextStack.pop();
       this.stackDepth -= 1;
@@ -3492,7 +3537,7 @@ export class Runtime {
 
         const value = yield* this.evalAsyncExpr(decl.init, env);
 
-        this.assignTo(decl.id, value, env);
+        yield* this.evalAsyncAssignTo(decl.id, value, env);
       }
 
       return;
@@ -3503,7 +3548,7 @@ export class Runtime {
     for (const decl of stmt.declarations) {
       const value = decl.init == null ? void 0 : yield* this.evalAsyncExpr(decl.init, env);
 
-      this.assignTo(decl.id, value, env, true);
+      yield* this.evalAsyncAssignTo(decl.id, value, env, true);
     }
   }
 
@@ -3527,7 +3572,7 @@ export class Runtime {
 
       const value = yield* this.evalAsyncExpr(decl.init, env);
 
-      this.assignTo(decl.id, value, env);
+      yield* this.evalAsyncAssignTo(decl.id, value, env);
     }
   }
 
@@ -3643,10 +3688,14 @@ export class Runtime {
       previous = hasBinding ? iterEnv : null;
 
       if (stmt.left.type === "variable") {
-        if (stmt.left.kind === "var") this.assignTo(stmt.left.declarations[0].id, key, iterEnv);
-        else this.assignTo(stmt.left.declarations[0].id, key, iterEnv, true);
+        yield* this.evalAsyncAssignTo(
+          stmt.left.declarations[0].id,
+          key,
+          iterEnv,
+          stmt.left.kind !== "var",
+        );
       } else {
-        this.assignTo(stmt.left, key, iterEnv);
+        yield* this.evalAsyncAssignTo(stmt.left, key, iterEnv);
       }
 
       try {
@@ -3699,11 +3748,14 @@ export class Runtime {
       previous = hasBinding ? iterEnv : null;
 
       if (stmt.left.type === "variable") {
-        if (stmt.left.kind === "var")
-          this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv);
-        else this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv, true);
+        yield* this.evalAsyncAssignTo(
+          stmt.left.declarations[0].id,
+          step.value,
+          iterEnv,
+          stmt.left.kind !== "var",
+        );
       } else {
-        this.assignTo(stmt.left, step.value, iterEnv);
+        yield* this.evalAsyncAssignTo(stmt.left, step.value, iterEnv);
       }
 
       try {
@@ -3781,6 +3833,7 @@ export class Runtime {
    */
   private *evalAsyncTry(stmt: TryStatement, env: Environment): Generator<unknown, void, unknown> {
     let pending: unknown = null;
+    let hasPending = false;
 
     try {
       try {
@@ -3804,7 +3857,7 @@ export class Runtime {
             // the value is thrown natively (unwrapped), bind it directly
             // 值以原生方式抛出（未包装），直接绑定
             this.declarePattern(stmt.handler.param, catchEnv, "let");
-            this.assignTo(stmt.handler.param, err, catchEnv, true);
+            yield* this.evalAsyncAssignTo(stmt.handler.param, err, catchEnv, true);
           }
 
           yield* this.evalAsyncBody(stmt.handler.body.body, catchEnv);
@@ -3812,6 +3865,7 @@ export class Runtime {
       }
     } catch (err) {
       pending = err;
+      hasPending = true;
     }
 
     if (stmt.finalizer != null) {
@@ -3820,7 +3874,9 @@ export class Runtime {
       yield* this.evalAsyncBody(stmt.finalizer.body, finEnv);
     }
 
-    if (pending != null) throw pending as Error;
+    // rethrow the pending exception (which may be `null`/`undefined` from a raw throw)
+    // 重抛未决异常（原始 throw 可能为 `null`/`undefined`）
+    if (hasPending) throw pending as Error;
   }
 
   /**
