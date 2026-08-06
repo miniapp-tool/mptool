@@ -151,11 +151,7 @@ $App({
 
 - `onAwake(time: number)`: 在小程序从后台唤醒时调用
 
-  参数 `time` 为本次切入后台的时间，单位 ms
-
-### 属性扩展
-
-- `$all`: [Emitter](#emitter) 实例属性
+  参数 `time` 为本次休眠持续时间，单位 ms
 
 ### 方法扩展
 
@@ -194,7 +190,7 @@ this.$redirect("about?year=2021");
 
 this.$switch("main?user=mrhope");
 
-this.$launch("main?user=mrhope");
+this.$reLaunch("main?user=mrhope");
 ```
 
 :::
@@ -202,6 +198,18 @@ this.$launch("main?user=mrhope");
 ::: warning
 
 请注意由于 `wx.switchTab` 不支持参数，参数将只用于触发 `onNavigate`
+
+:::
+
+::: tip
+
+框架同时导出了对应的顶层函数 `go`、`redirect`、`switchTab` 和 `reLaunch`，可以在没有页面实例的情况下直接调用。
+
+```js
+import { go } from "@mptool/enhance";
+
+go("play?vid=xxx");
+```
 
 :::
 
@@ -560,13 +568,11 @@ $Page("main", {
   ```js
   $Page({
     onLoad() {
-      this.$refs.customComp1; // custom-component1 子组件的实例引用
-      this.$refs.customComp2; // custom-component2 子组件的实例引用
+      this.$refs.get("customComp1"); // custom-component1 子组件的实例引用
+      this.$refs.get("customComp2"); // custom-component2 子组件的实例引用
     },
   });
   ```
-
-- `$all`: [Emitter](#emitter) 实例属性
 
 ### 方法扩展
 
@@ -628,13 +634,11 @@ $Page("main", {
   $Component({
     lifetimes: {
       attached() {
-        this.$refs.customComp; // 根据ref属性获取子组件的实例引用
+        this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
       },
     },
   });
   ```
-
-- `$all`: [Emitter](#emitter) 实例属性
 
 ### 实例方法
 
@@ -656,9 +660,9 @@ $Page("main", {
 
 ## Emitter
 
-`Emitter` 是一个很常规的发布订阅器。
+`Emitter` 是一个很常规的发布订阅器，额外提供了 `emitAsync` 方法加入了对 async 函数的支持，可以异步的触发所有的监听器之后触发自身的回调。
 
-我们在 [mitt](https://github.com/developit/mitt) 之上提供了新的 `emitAsync` 方法加入了对 async 函数的支持，可以异步的触发所有的监听器之后触发自身的回调。
+框架同时导出了一个全局的 `emitter` 实例，可用于任意模块之间的通信。
 
 ### 使用案例
 

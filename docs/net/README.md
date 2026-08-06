@@ -46,13 +46,19 @@ icon: network-wired
 
 `request` 会返回一个 `Promise`，你可以通过 `then` 方法获取响应，或者通过 `catch` 方法捕获错误。
 
+::: info
+
+框架默认开启 `enableHttp2` 与 `useHighPerformanceMode`，如需关闭可在单个请求中传入对应选项覆盖。
+
+:::
+
 请求成功 (任何状态码) 会触发 `.then` 回调，返回包含下列信息的对象:
 
 - status: 数字形式的响应状态码
 - headers: Headers 实例
 - data: 响应数据
 
-如果请求失败 (基础库、底层或网络问题)，会走 `.catch` 逻辑，返回一个 `MpError` 错误。你可以通过 `message` 属性获取错误信息，或者通过 `errno` 属性获取错误码。
+如果请求失败 (基础库、底层或网络问题)，会走 `.catch` 逻辑，返回一个 `MpError` 错误。你可以通过 `message` 属性获取错误信息，或者通过 `code` 属性获取错误码。
 
 ## Cookie
 
@@ -60,13 +66,13 @@ icon: network-wired
 
 Cookie 类有如下内容:
 
-静态成员:
+实例属性:
 
 - `name: string`: Cookie 名称
 - `value: string`: Cookie 值
 - `domain: string`: Cookie 域名
 - `path: string`: Cookie 路径
-- `expires: number | "session" | "outdate"`: 过期时间
+- `expires: Date | "session" | "outdate"`: 过期时间
 - `httpOnly: boolean`: 是否只在 HTTP 下使用
 
 方法:
@@ -119,6 +125,7 @@ const cookieStore = new CookieStore(key);
 - `getValue(name, options)`: 获取 Cookie 值
 - `has(name, options)`: 是否有 Cookie
 - `set(options)`: 设置 Cookie
+- `delete(name, domain?)`: 删除指定 Cookie
 - `list()`: 按 domain 结构获取全部 Cookie
 - `getCookies(options)`: 获取满足条件的 Cookie
 - `getAllCookies()`: 获取全部 Cookies

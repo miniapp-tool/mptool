@@ -3,7 +3,7 @@ title: $Component
 order: 5
 ---
 
-- 类型: `$Component(options: ComponentOPtions): string`
+- 类型: `$Component(options: ComponentOptions): string`
 
 框架提供的组件注册器。
 
@@ -47,7 +47,7 @@ order: 5
 
 ### $refs
 
-- 类型: `Record<string, ComponentInstance>`
+- 类型: `Map<string, ComponentInstance>`
 
 指定了 ref 的子组件实例 Map，可用于获取子组件引用
 
@@ -61,7 +61,7 @@ order: 5
 $Component({
   lifetimes: {
     attached() {
-      this.$refs.customComp; // 根据 ref 属性获取子组件的实例引用
+      this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
     },
   },
 });
@@ -83,6 +83,19 @@ $Component({
 
 通过消息的方式调用父组件方法，即使父组件方法不存在也不会报错
 
+### $getRef
+
+- 类型:
+
+  ```ts
+  function $getRef(id: number): TrivialComponentInstance | undefined;
+  ```
+
+- 参数:
+  - `id`: 组件的唯一标识 ($id)
+
+根据组件 ID 获取组件实例引用
+
 ### 事件派发
 
 事件派发相关，均为 [$Emitter](./emitter.md) 实例属性或方法
@@ -94,8 +107,6 @@ $Component({
 - `$emitAsync(type:string, event?:any): Promise<void>`: 异步触发 `type` 事件并接受回调
 
 - `$off(type:string, handler?: (event?:any) => void | Promise<void>): void`: 取消监听 `type` 的 `handler` 事件或全部事件 (当未传入 `handler`)
-
-- `$all`: 事件名称到已注册处理函数的映射
 
 ### $
 
@@ -209,7 +220,7 @@ this.$switch("main?user=mrhope");
 ::: tip 示例
 
 ```js
-this.$launch("main?user=mrhope");
+this.$reLaunch("main?user=mrhope");
 ```
 
 :::

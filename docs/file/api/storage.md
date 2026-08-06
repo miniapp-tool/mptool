@@ -91,7 +91,7 @@
 - 类型:
 
   ```ts
-  function get<T = unknown>(key: string): T;
+  function get<T = unknown>(key: string): T | undefined;
   ```
 
 - 参数:

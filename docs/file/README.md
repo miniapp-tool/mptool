@@ -39,7 +39,7 @@ icon: folder
 
   读取指定路径的文件内容并返回。当文件不存在时，返回 `undefined`。
 
-  `encoding` 为文件的编码格式，可选，当文件为文本文件时默认 `"utf-8"`，为二进制文件时默认为 `'buffer'`
+  `encoding` 为文件的编码格式，可选，默认 `"utf-8"`
 
 - `readJSON(path: string, encoding = 'utf-8'): any | undefined`
 
@@ -51,9 +51,9 @@ icon: folder
 
 ### 操作类
 
-- `mkdir(path: string, recursive = false): void`
+- `mkdir(path: string, recursive = true): void`
 
-  创建目录。第二个参数 `recursive`可选，代表是否递归父目录。
+  创建目录。第二个参数 `recursive` 可选，代表是否递归父目录，默认递归创建。
 
 - `rm(path: string, type?: "dir" | "file"): void`
 
@@ -81,9 +81,9 @@ icon: folder
   - `tempFilePath`: 缓存文件路径
   - `path`: 保存文件路径
 
-- `saveOnlineFile(onlinePath: string, localPath: string): Promise<void>`
+- `saveOnlineFile(onlinePath: string, localPath: string): Promise<string>`
 
-  将在线文件保存到本地指定位置
+  将在线文件保存到本地指定位置，返回保存后的本地文件路径。
   - `onlinePath`: 在线文件路径
   - `localPath`: 本地文件路径
 
@@ -138,16 +138,16 @@ icon: folder
 
 :::
 
-- `set(key: string, value: any, expire?: number | 'once' | 'keep' = 'once'): void`
+- `set(key: string, value: any, expire?: number | 'once' | 'keep' = 0): void`
 
   同步设置数据。
   - `key`: 设置的键名
   - `value`: 存入的值
-  - `expire`: 过期时间，可选，默认为 `'once'`
-    - `'once'`: 默认，表示仅本次启动有效
+  - `expire`: 过期时间，可选，默认为 `0`
+    - `0`: 默认，永久有效
+    - `'once'`: 仅本次启动有效
     - `'keep'`: 表示保持上一次有效时间
-    - 数字: 已毫秒为单位的有效时间
-    - 0: 永久有效
+    - 数字: 以毫秒为单位的有效时间
 
   ::: tip
 

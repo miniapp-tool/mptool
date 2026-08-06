@@ -151,7 +151,7 @@ order: 4
 
 ### $refs
 
-- 类型: `Record<string, ComponentInstance>`
+- 类型: `Map<string, ComponentInstance>`
 
 指定了 ref 的子组件实例 Map，可用于获取子组件引用
 
@@ -165,7 +165,7 @@ order: 4
 $Component({
   lifetimes: {
     attached() {
-      this.$refs.customComp; // 根据 ref 属性获取子组件的实例引用
+      this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
     },
   },
 });
@@ -285,7 +285,7 @@ this.$switch("main?user=mrhope");
 ::: tip 示例
 
 ```js
-this.$launch("main?user=mrhope");
+this.$reLaunch("main?user=mrhope");
 ```
 
 :::

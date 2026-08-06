@@ -63,7 +63,7 @@ export interface RequestResponse<
 
 export interface MpError extends Error {
   /** 错误码 */
-  errno?: number;
+  code: number | null;
 }
 
 export type RequestType = <

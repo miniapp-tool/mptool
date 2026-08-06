@@ -47,5 +47,9 @@ export class Headers {
   values(): IterableIterator<string>;
   entries(): IterableIterator<[string, string]>;
   [Symbol.iterator](): IterableIterator<[string, string]>;
+  /**
+   * 将 Headers 转换为普通对象。
+   */
+  toObject(): Record<string, string>;
 }
 ```

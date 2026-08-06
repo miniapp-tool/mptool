@@ -133,13 +133,13 @@ icon: puzzle-piece
 
 ### confirm
 
-- 类型: `(text: string, confirmAction: () => Promise<void> | void, cancelAction?: () => void | Promise<void>, warning?: string) => void`
+- 类型: `(text: string, confirmAction: () => Promise<void> | void, warning?: string, cancelAction?: () => void | Promise<void>) => void`
 
 - 参数:
   - `text`: 行为描述文字
   - `confirmAction`: 确定回调
+  - `warning`: 额外警告信息（可选）
   - `cancelAction`: 取消回调（可选）
-  - `warning`: 额外警告信息
 
 显示操作确认对话框。
 

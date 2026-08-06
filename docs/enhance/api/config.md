@@ -80,6 +80,13 @@ order: 2
 
 :::
 
+## getPath
+
+- 类型: `(pageName: string) => string`
+- 必填: 否
+
+自定义页面简称到页面路径的解析函数，作为 `defaultPage`/`pages` 的替代方案。配置了 `getPath` 后，`defaultPage` 可以不填。
+
 ## home
 
 - 类型: `string`
