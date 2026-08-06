@@ -19,6 +19,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
             success: () => {
               resolve();
             },
+            fail: ({ errMsg }) => {
+              reject(new MpError({ message: errMsg }));
+            },
           });
           return;
         }
@@ -33,6 +36,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
                 success: () => {
                   resolve();
                 },
+                fail: ({ errMsg }) => {
+                  reject(new MpError({ message: errMsg }));
+                },
               });
             }
             // 没有授权 —> 提示用户授权
@@ -44,6 +50,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
                     filePath: path,
                     success: () => {
                       resolve();
+                    },
+                    fail: ({ errMsg }) => {
+                      reject(new MpError({ message: errMsg }));
                     },
                   });
                 },
@@ -57,6 +66,9 @@ export const savePhoto = (imgPath: string): Promise<void> =>
                 },
               });
             }
+          },
+          fail: ({ errMsg }) => {
+            reject(new MpError({ message: errMsg }));
           },
         });
       }),

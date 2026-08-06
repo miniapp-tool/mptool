@@ -17,6 +17,9 @@ export const addContact = (
         success: () => {
           resolve();
         },
+        fail: ({ errMsg }) => {
+          reject(new MpError({ message: errMsg }));
+        },
       });
       return;
     }
@@ -30,6 +33,9 @@ export const addContact = (
             success: () => {
               resolve();
             },
+            fail: ({ errMsg }) => {
+              reject(new MpError({ message: errMsg }));
+            },
           });
         }
         // 没有授权 —> 提示用户授权
@@ -41,6 +47,9 @@ export const addContact = (
                 ...config,
                 success: () => {
                   resolve();
+                },
+                fail: ({ errMsg }) => {
+                  reject(new MpError({ message: errMsg }));
                 },
               });
             },
@@ -58,6 +67,9 @@ export const addContact = (
             },
           });
         }
+      },
+      fail: ({ errMsg }) => {
+        reject(new MpError({ message: errMsg }));
       },
     });
   });

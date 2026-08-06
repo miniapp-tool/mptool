@@ -101,4 +101,32 @@ describe(addContact, () => {
     expect(modalShown).toBe(true);
     expect(openCalls).toStrictEqual(["openSetting"]);
   });
+
+  it("should reject when getSetting fails", async () => {
+    const mockGetSettingApi = wx as unknown as {
+      getSetting: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockGetSettingApi.getSetting = (option): void => {
+      option.fail?.({ errMsg: "getSetting fail" });
+    };
+
+    await expect(addContact({ firstName: "test" })).rejects.toThrow("getSetting fail");
+  });
+
+  it("should reject when addPhoneContact fails", async () => {
+    const mockAddPhoneContactApi = wx as unknown as {
+      addPhoneContact: (option: {
+        firstName: string;
+        fail?: (result: { errMsg: string }) => void;
+      }) => void;
+    };
+
+    mockAddPhoneContactApi.addPhoneContact = (option): void => {
+      option.fail?.({ errMsg: "addPhoneContact fail" });
+    };
+    mockGetSetting(true);
+
+    await expect(addContact({ firstName: "test" })).rejects.toThrow("addPhoneContact fail");
+  });
 });

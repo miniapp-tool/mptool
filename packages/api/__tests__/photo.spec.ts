@@ -128,4 +128,34 @@ describe(savePhoto, () => {
 
     await expect(savePhoto("https://example.com/img.png")).rejects.toThrow("download fail");
   });
+
+  it("should reject when getSetting fails", async () => {
+    const mockGetSettingApi = wx as unknown as {
+      getSetting: (option: { fail?: (result: { errMsg: string }) => void }) => void;
+    };
+
+    mockGetSettingApi.getSetting = (option): void => {
+      option.fail?.({ errMsg: "getSetting fail" });
+    };
+    mockDownloadFile();
+
+    await expect(savePhoto("https://example.com/img.png")).rejects.toThrow("getSetting fail");
+  });
+
+  it("should reject when saveImageToPhotosAlbum fails", async () => {
+    const mockSaveImageApi = wx as unknown as {
+      saveImageToPhotosAlbum: (option: {
+        filePath: string;
+        fail?: (result: { errMsg: string }) => void;
+      }) => void;
+    };
+
+    mockSaveImageApi.saveImageToPhotosAlbum = (option): void => {
+      option.fail?.({ errMsg: "saveImage fail" });
+    };
+    mockDownloadFile();
+    mockGetSetting(true);
+
+    await expect(savePhoto("https://example.com/img.png")).rejects.toThrow("saveImage fail");
+  });
 });
