@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.3](https://github.com/miniapp-tool/mptool/compare/v0.16.2...v0.16.3) (2026-08-06)
+
+### 🐛 Bug Fixes
+
+- **build:** inject atob polyfill for miniapp environments ([#1414](https://github.com/miniapp-tool/mptool/issues/1414)) ([04d55b3](https://github.com/miniapp-tool/mptool/commit/04d55b317f3d6559637796c7b4d0d1c2fed96c27))
+
 ## [0.16.2](https://github.com/miniapp-tool/mptool/compare/v0.16.1...v0.16.2) (2026-08-06)
 
 ### Build System
