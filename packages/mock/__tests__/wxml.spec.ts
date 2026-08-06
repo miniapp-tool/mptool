@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { wx } from "../src/index.js";
 
 describe("wxml mock", () => {
-  it("createSelectorQuery should be chainable and exec with empty result", () => {
+  it("createSelectorQuery should be chainable and exec with null results", () => {
     const query = wx.createSelectorQuery();
 
     query.select("#foo").boundingClientRect();
@@ -12,7 +12,7 @@ describe("wxml mock", () => {
 
     expect(() =>
       query.exec((res) => {
-        expect(res).toStrictEqual([]);
+        expect(res).toStrictEqual([null, null, null]);
       }),
     ).not.toThrow();
   });
@@ -20,10 +20,35 @@ describe("wxml mock", () => {
   it("createSelectorQuery exec should call boundingClientRect callback with null", () => {
     const query = wx.createSelectorQuery();
 
+    let called = false;
+
     query.select("#foo").boundingClientRect((rect) => {
+      called = true;
       expect(rect).toBeNull();
     });
     query.exec();
+    expect(called).toBe(true);
+  });
+
+  it("createSelectorQuery exec result length should match node count", () => {
+    const query = wx.createSelectorQuery();
+
+    const called = [false, false, false];
+
+    query.select("#a").boundingClientRect(() => {
+      called[0] = true;
+    });
+    query.select("#b").fields({}, () => {
+      called[1] = true;
+    });
+    query.selectAll(".c").scrollOffset(() => {
+      called[2] = true;
+    });
+
+    query.exec((res) => {
+      expect(res).toHaveLength(3);
+    });
+    expect(called).toStrictEqual([true, true, true]);
   });
 
   it("createSelectorQuery in should not throw", () => {

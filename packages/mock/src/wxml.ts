@@ -11,40 +11,54 @@ export interface SelectorQueryMock {
   exec: (callback?: (result: unknown[]) => void) => void;
 }
 
-/** 简化版 SelectorQuery mock：exec 时以空结果触发回调 */
+/** 简化版 SelectorQuery mock：exec 时以 null 结果触发各节点回调 */
 const createSelectorQueryMock = (): SelectorQueryMock => {
-  const callbacks: ((result: unknown) => void)[] = [];
+  const nodes: { callback?: (result: unknown) => void }[] = [];
+  let current: { callback?: (result: unknown) => void } | undefined;
 
   const query: SelectorQueryMock = {
     in(): SelectorQueryMock {
       return query;
     },
     select(): SelectorQueryMock {
+      current = {};
+      nodes.push(current);
+
       return query;
     },
     selectAll(): SelectorQueryMock {
+      current = {};
+      nodes.push(current);
+
       return query;
     },
     selectViewport(): SelectorQueryMock {
+      current = {};
+      nodes.push(current);
+
       return query;
     },
     boundingClientRect(callback?: (result: unknown) => void): SelectorQueryMock {
-      if (callback) callbacks.push(callback);
+      if (current && callback) current.callback = callback;
 
       return query;
     },
     scrollOffset(callback?: (result: unknown) => void): SelectorQueryMock {
-      if (callback) callbacks.push(callback);
+      if (current && callback) current.callback = callback;
 
       return query;
     },
     fields(_fields: unknown, callback?: (result: unknown) => void): SelectorQueryMock {
-      if (callback) callbacks.push(callback);
+      if (current && callback) current.callback = callback;
 
       return query;
     },
     exec(callback?: (result: unknown[]) => void): void {
-      const result = callbacks.map(() => null);
+      const result = nodes.map((node) => {
+        node.callback?.(null);
+
+        return null;
+      });
 
       if (callback) callback(result);
     },
