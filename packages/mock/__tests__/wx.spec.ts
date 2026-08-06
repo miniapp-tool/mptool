@@ -33,6 +33,23 @@ describe("wx mock", () => {
         });
       }));
 
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        wx.setStorageSync("complete-key", "value");
+        let successCalled = false;
+        wx.getStorage({
+          key: "complete-key",
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
+            resolve();
+          },
+        });
+      }));
+
     it("should return promise without callbacks", async () => {
       wx.setStorageSync("promise-key", 12345);
       const result = await wx.getStorage({ key: "promise-key" });
@@ -82,6 +99,24 @@ describe("wx mock", () => {
         });
       }));
 
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        let successCalled = false;
+        wx.setStorage({
+          key: "complete-set-key",
+          data: "value",
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
+            expect(wx.getStorageSync("complete-set-key")).toBe("value");
+            resolve();
+          },
+        });
+      }));
+
     it("should overwrite existing value", () => {
       wx.setStorageSync("overwrite", "first");
       wx.setStorageSync("overwrite", "second");
@@ -118,8 +153,6 @@ describe("wx mock", () => {
   });
 
   describe("removeStorage", () => {
-    // Note: The mock's promise-style removeStorage has a bug - it doesn't call storage.delete
-    // Using callback style to test the actual deletion behavior
     it("should remove key with callback style", () =>
       new Promise<void>((resolve) => {
         wx.setStorageSync("to-remove", "value");
@@ -140,6 +173,24 @@ describe("wx mock", () => {
           success: (res) => {
             expect(res.errMsg).toBe("");
             expect(wx.getStorageSync("cb-remove")).toBeUndefined();
+            resolve();
+          },
+        });
+      }));
+
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        wx.setStorageSync("complete-remove-key", "value");
+        let successCalled = false;
+        wx.removeStorage({
+          key: "complete-remove-key",
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
+            expect(wx.getStorageSync("complete-remove-key")).toBeUndefined();
             resolve();
           },
         });
@@ -190,6 +241,22 @@ describe("wx mock", () => {
         });
       }));
 
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        wx.setStorageSync("complete-clear-key", "value");
+        let successCalled = false;
+        wx.clearStorage({
+          success: () => {
+            successCalled = true;
+          },
+          complete: () => {
+            expect(successCalled).toBe(true);
+            expect(wx.getStorageSync("complete-clear-key")).toBeUndefined();
+            resolve();
+          },
+        });
+      }));
+
     it("should clear storage with promise", async () => {
       wx.setStorageSync("promise-clear-key", "promise-clear-value");
       await wx.clearStorage();
@@ -206,6 +273,23 @@ describe("wx mock", () => {
           keyList: ["batch-key-1", "batch-key-2"],
           success: (res) => {
             expect(res.data).toStrictEqual(["value1", "value2"]);
+            resolve();
+          },
+        });
+      }));
+
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        wx.setStorageSync("complete-batch-key", "value");
+        let successCalled = false;
+        wx.batchGetStorage({
+          keyList: ["complete-batch-key"],
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
             resolve();
           },
         });
@@ -240,6 +324,23 @@ describe("wx mock", () => {
             expect(res.errMsg).toBe("");
             expect(wx.getStorageSync("batch-set-1")).toBe("value1");
             expect(wx.getStorageSync("batch-set-2")).toBe("value2");
+            resolve();
+          },
+        });
+      }));
+
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        let successCalled = false;
+        wx.batchSetStorage({
+          kvList: [{ key: "complete-batch-set-key", value: "value" }],
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
+            expect(wx.getStorageSync("complete-batch-set-key")).toBe("value");
             resolve();
           },
         });
@@ -319,6 +420,21 @@ describe("wx mock", () => {
             expect(result.keys).toContain("info-key-2");
             expect(result.currentSize).toBeGreaterThan(0);
             expect(result.limitSize).toBe(1024 * 10);
+            resolve();
+          },
+        });
+      }));
+
+    it("should call complete after success", () =>
+      new Promise<void>((resolve) => {
+        let successCalled = false;
+        wx.getStorageInfo({
+          success: () => {
+            successCalled = true;
+          },
+          complete: (res) => {
+            expect(successCalled).toBe(true);
+            expect(res.errMsg).toBe("");
             resolve();
           },
         });

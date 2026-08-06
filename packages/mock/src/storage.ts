@@ -226,6 +226,7 @@ export const storageApi = {
 
     setTimeout(() => {
       if (option.success) option.success({ data: value, errMsg: "" });
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
 
@@ -315,6 +316,7 @@ export const storageApi = {
 
     setTimeout(() => {
       if (option.success) option.success(result);
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
 
@@ -397,6 +399,7 @@ export const storageApi = {
     setTimeout(() => {
       storage.set(option.key, option.data);
       if (option.success) option.success({ errMsg: "" });
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
 
@@ -448,6 +451,7 @@ export const storageApi = {
     setTimeout(() => {
       storage.delete(option.key);
       if (option.success) option.success({ errMsg: "" });
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
 
@@ -518,6 +522,7 @@ export const storageApi = {
     setTimeout(() => {
       storage.clear();
       if (option.success) option.success();
+      if (option.complete) option.complete();
     }, 0);
   },
 
@@ -581,6 +586,7 @@ export const storageApi = {
 
     setTimeout(() => {
       if (option.success) option.success(result);
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
   /**
@@ -632,6 +638,7 @@ export const storageApi = {
 
     setTimeout(() => {
       if (option.success) option.success({ errMsg: "" });
+      if (option.complete) option.complete({ errMsg: "" });
     }, 0);
   },
   /**
