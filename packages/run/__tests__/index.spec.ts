@@ -20,6 +20,28 @@ describe(run, () => {
     expect(run("answer * 2", { globals: { answer: 21 } })).toBe(42);
   });
 
+  it("should expose host global properties with global: true", () => {
+    // temporarily attach a value to the host global object to prove the injection
+    // 临时挂载一个宿主全局属性以验证注入
+    (globalThis as Record<string, unknown>).__runTestGlobal = 42;
+
+    try {
+      expect(run("__runTestGlobal + 1", { global: true })).toBe(43);
+
+      // without `global: true` the same name is unreachable
+      // 未开启 `global: true` 时同名不可访问
+      expect(() => run("__runTestGlobal")).toThrow(Error);
+    } finally {
+      delete (globalThis as Record<string, unknown>).__runTestGlobal;
+    }
+  });
+
+  it("should not override builtins when exposing the host global", () => {
+    expect(run("Object.keys({a: 1})", { global: true })).toStrictEqual(["a"]);
+    expect(run("typeof Promise", { global: true })).toBe("function");
+    expect(run("Math.max(1, 2)", { global: true })).toBe(2);
+  });
+
   it("should enforce maxSteps", () => {
     expect(() => run("while (true) {}", { maxSteps: 100 })).toThrow(Error);
   });

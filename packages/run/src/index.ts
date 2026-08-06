@@ -15,6 +15,14 @@ export interface RunOptions {
   globals?: Record<string, unknown>;
 
   /**
+   * Whether to automatically expose every own property of the host global object (`globalThis`) to
+   * the sandbox, `false` by default
+   *
+   * 是否自动将宿主全局对象（`globalThis`）的全部自有属性暴露到沙箱，默认 `false`
+   */
+  global?: boolean;
+
+  /**
    * Max steps count, `1e6` by default
    *
    * 步数上限，默认 `1e6`

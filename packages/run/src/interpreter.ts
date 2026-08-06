@@ -78,6 +78,14 @@ export interface RuntimeOptions {
   /** Host capabilities to inject into the sandbox global / 注入沙箱全局的宿主能力 */
   globals?: Record<string, unknown>;
 
+  /**
+   * Whether to automatically expose every own property of the host global object (`globalThis`) to
+   * the sandbox, `false` by default
+   *
+   * 是否自动将宿主全局对象（`globalThis`）的全部自有属性暴露到沙箱，默认 `false`
+   */
+  global?: boolean;
+
   /** Max steps before aborting, `1e6` by default / 步数上限，默认 `1e6` */
   maxSteps?: number;
 
@@ -582,6 +590,23 @@ export class Runtime {
     if (options.globals != null) {
       for (const [name, value] of Object.entries(options.globals))
         this.globalEnv.define(name, value);
+    }
+
+    // `global: true` exposes every own property of the host global object
+    // `global: true` 将宿主全局对象（globalThis）的全部自有属性暴露到沙箱
+    if (options.global) {
+      const hostGlobal = globalThis as Record<string, unknown>;
+
+      for (const name of Object.getOwnPropertyNames(hostGlobal)) {
+        if (this.globalEnv.has(name)) continue;
+
+        try {
+          this.globalEnv.define(name, hostGlobal[name]);
+        } catch {
+          // skip properties whose accessor throws
+          // 跳过访问即抛错的属性
+        }
+      }
     }
 
     this.invokeHandler = (meta, args, thisArg, constructed): unknown =>
