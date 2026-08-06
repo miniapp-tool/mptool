@@ -28,7 +28,12 @@ export function getTrigger(
   // oxlint-disable-next-line typescript/no-explicit-any
 ): (pageNameWithArg: string) => any {
   // oxlint-disable-next-line typescript/no-explicit-any
-  return (pageNameWithArg: string): any =>
+  return (pageNameWithArg: string): any => {
+    const fullPath = getFullPath(pageNameWithArg);
+    // wx.switchTab does not allow query parameters, only the path is used
+    const url = type === "switchTab" ? fullPath.split("?")[0] : fullPath;
+
     // @ts-expect-error: argument can not union
-    wx[type]({ url: getFullPath(pageNameWithArg) });
+    return wx[type]({ url });
+  };
 }

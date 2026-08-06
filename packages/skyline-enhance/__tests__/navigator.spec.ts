@@ -61,6 +61,18 @@ describe(getTrigger, () => {
     expect(switchTab).toHaveBeenCalledWith({ url: "/pages/index" });
   });
 
+  it("should call wx.switchTab without query", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const switchTab = vi.fn<() => void>();
+
+    wx.switchTab = switchTab as unknown as typeof wx.switchTab;
+
+    await getTrigger("switchTab")("index?a=1&b=2");
+
+    expect(switchTab).toHaveBeenCalledWith({ url: "/pages/index" });
+  });
+
   it("should call wx.reLaunch with full path", async () => {
     $Config({ defaultPage: "/pages/$name" });
 

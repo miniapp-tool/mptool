@@ -5,6 +5,7 @@ import { $Config } from "../src/config/index.js";
 import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../src/constant.js";
 import { appEmitter, routeEmitter } from "../src/emitter/index.js";
 import { getTrigger } from "../src/navigator/index.js";
+import type { PageQuery } from "../src/page/index.js";
 
 describe("navigator", () => {
   // 模拟目标页加载完成 (ON_PAGE_READY)，在 minInterval 后释放导航锁
@@ -187,5 +188,26 @@ describe("navigator", () => {
     // 锁已释放：第二次导航应正常执行
     await expect(go("main")).resolves.toBeUndefined();
     expect(navigateTo).toHaveBeenCalledTimes(2);
+  });
+
+  it("should not pass query to wx.switchTab", async () => {
+    await setup({ defaultPage: "/pages/$name" });
+
+    const switchTab = vi.fn<() => void>();
+
+    wx.switchTab = switchTab as unknown as typeof wx.switchTab;
+
+    const handler = vi.fn<(query: PageQuery) => void>();
+
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:/pages/main`, handler);
+
+    const go = getTrigger("switchTab");
+
+    await expect(go("main?user=mrhope")).resolves.toBeUndefined();
+
+    // query 只用于触发 onNavigate
+    expect(handler).toHaveBeenCalledWith({ user: "mrhope" });
+    // wx.switchTab 不允许带参数，仅传路径
+    expect(switchTab).toHaveBeenCalledWith({ url: "/pages/main" });
   });
 });

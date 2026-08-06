@@ -75,8 +75,9 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
       // Keep the navigate lock until the target page is ready (ON_PAGE_READY)
       // to block repeated navigation from rapid taps. Release it on failure.
       try {
+        // wx.switchTab does not allow query parameters, only the path is used
         // @ts-expect-error: argument can not union
-        return await wx[type]({ url });
+        return await wx[type]({ url: type === "switchTab" ? path : url });
       } catch (err) {
         // release navigate lock on navigation failure to avoid a dead lock
         canNavigate = true;
