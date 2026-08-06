@@ -1,0 +1,53 @@
+{
+  "name": "@mptool/run",
+  "version": "0.16.0",
+  "description": "JS interpreter (custom eval) for QQ/Wechat miniapp",
+  "keywords": [
+    "eval",
+    "interpreter",
+    "javascript",
+    "miniapp",
+    "miniprogram"
+  ],
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/run#readme",
+  "bugs": {
+    "url": "https://github.com/miniapp-tool/mptool/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Mr.Hope",
+    "email": "mister-hope@outlook.com",
+    "url": "https://mister-hope.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
+    "directory": "packages/run"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown --config-loader unrun",
+    "clean": "rimraf ./dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@mptool/mock": "workspace:*",
+    "miniprogram-api-typings": "5.2.2"
+  },
+  "peerDependencies": {
+    "miniprogram-api-typings": "^5.0.0"
+  }
+}
