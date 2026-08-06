@@ -20,6 +20,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+// oxlint-disable no-bitwise
 const ENCODE_MAP: Record<string, string> = {
   "!": "%21",
   "'": "%27",
@@ -33,7 +34,133 @@ const ENCODE_MAP: Record<string, string> = {
 const encode = (str: string): string =>
   encodeURIComponent(str).replace(/[!'()~]|%20|%00/gu, (match) => ENCODE_MAP[match]);
 
-const decode = (str: string): string => decodeURIComponent(str.replace(/\+/gu, " "));
+/**
+ * Decodes a byte sequence as UTF-8 into a string, replacing malformed sequences with U+FFFD,
+ * matching the native behavior.
+ *
+ * @param bytes - The UTF-8 byte sequence
+ * @returns The decoded string
+ */
+// oxlint-disable-next-line max-statements, complexity
+const decodeUtf8 = (bytes: number[]): string => {
+  let result = "";
+  let index = 0;
+
+  while (index < bytes.length) {
+    const byte = bytes[index];
+
+    // ASCII byte
+    if (byte < 0x80) {
+      result += String.fromCharCode(byte);
+      index += 1;
+      continue;
+    }
+
+    let length = 0;
+    let codePoint = 0;
+
+    if (byte >= 0xc2 && byte <= 0xdf) {
+      length = 2;
+      codePoint = byte & 0x1f;
+    } else if (byte >= 0xe0 && byte <= 0xef) {
+      length = 3;
+      codePoint = byte & 0x0f;
+    } else if (byte >= 0xf0 && byte <= 0xf4) {
+      length = 4;
+      codePoint = byte & 0x07;
+    } else {
+      // Invalid leading byte (0x80-0xC1 or 0xF5-0xFF)
+      result += "\uFFFD";
+      index += 1;
+      continue;
+    }
+
+    let consumed = 0;
+
+    for (let i = 1; i < length; i += 1) {
+      const next = bytes[index + i];
+
+      // oxlint-disable-next-line no-undefined
+      if (next === undefined || (next & 0xc0) !== 0x80) break;
+      codePoint = (codePoint << 6) | (next & 0x3f);
+      consumed = i;
+    }
+
+    // Not enough continuation bytes: emit a single U+FFFD, skip the leading byte and
+    // the consumed continuation bytes
+    if (consumed !== length - 1) {
+      result += "\uFFFD";
+      index += consumed + 1;
+      continue;
+    }
+
+    // Reject overlong encodings, surrogate code points and code points beyond U+10FFFF
+    if (
+      (length === 2 && codePoint < 0x80) ||
+      (length === 3 && codePoint < 0x800) ||
+      (length === 4 && codePoint < 0x10000) ||
+      codePoint > 0x10ffff ||
+      (codePoint >= 0xd800 && codePoint <= 0xdfff)
+    ) {
+      result += "\uFFFD";
+      index += length;
+      continue;
+    }
+
+    result += String.fromCodePoint(codePoint);
+    index += length;
+  }
+
+  return result;
+};
+
+/**
+ * Leniently decodes the input, matching the native `URLSearchParams` behavior:
+ *
+ * - `+` decodes to a space
+ * - Valid `%XX` sequences decode to bytes, which are then decoded as UTF-8
+ * - Invalid `%` (non-hexadecimal or lone) is kept as-is
+ *
+ * @param str - The string to decode
+ * @returns The decoded string
+ */
+const decode = (str: string): string => {
+  let result = "";
+  let bytes: number[] = [];
+
+  const flush = (): void => {
+    if (bytes.length) {
+      result += decodeUtf8(bytes);
+      bytes = [];
+    }
+  };
+
+  for (let i = 0; i < str.length; i += 1) {
+    const char = str[i];
+
+    if (char === "+") {
+      flush();
+      result += " ";
+    } else if (char === "%") {
+      const hex = str.slice(i + 1, i + 3);
+
+      if (/^[0-9a-f]{2}$/iu.test(hex)) {
+        bytes.push(Number.parseInt(hex, 16));
+        i += 2;
+      } else {
+        flush();
+        result += "%";
+      }
+    } else {
+      flush();
+      result += char;
+    }
+  }
+
+  flush();
+
+  return result;
+};
 
 export class URLSearchParams {
   private params: [name: string, value: string][];
@@ -154,7 +281,7 @@ export class URLSearchParams {
     callbackfn: (value: string, key: string, iterable: URLSearchParams) => void,
     thisArg?: unknown,
   ): void {
-    // 只绑定一次 thisArg，避免每次迭代都生成新函数
+    // Bind thisArg once to avoid creating a new function on every iteration
     // oxlint-disable-next-line no-undefined
     const bound = thisArg === undefined ? callbackfn : callbackfn.bind(thisArg);
 

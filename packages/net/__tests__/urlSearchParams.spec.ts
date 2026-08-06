@@ -395,4 +395,42 @@ describe(URLSearchParams, () => {
       expect(result).toStrictEqual(testObj);
     });
   });
+
+  describe("decode tolerates malformed percent-encoding", () => {
+    it("keeps a trailing percent sign", () => {
+      const a = new URLSearchParams("p=%");
+
+      expect(a.get("p")).toBe("%");
+    });
+
+    it("keeps a percent sign without hex digits", () => {
+      const a = new URLSearchParams("p=%zz");
+
+      expect(a.get("p")).toBe("%zz");
+    });
+
+    it("keeps a lone percent sign", () => {
+      const a = new URLSearchParams("p=100%");
+
+      expect(a.get("p")).toBe("100%");
+    });
+
+    it("decodes valid UTF-8 sequences", () => {
+      const a = new URLSearchParams("p=%E4%B8%AD");
+
+      expect(a.get("p")).toBe("中");
+    });
+
+    it("replaces a truncated UTF-8 sequence with U+FFFD", () => {
+      const a = new URLSearchParams("p=%E4%B8");
+
+      expect(a.get("p")).toBe("\uFFFD");
+    });
+
+    it("mixes decoded and replacement characters", () => {
+      const a = new URLSearchParams("p=%E4%B8%AD%E4%B8");
+
+      expect(a.get("p")).toBe("中\uFFFD");
+    });
+  });
 });
