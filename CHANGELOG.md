@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.2](https://github.com/miniapp-tool/mptool/compare/v0.16.1...v0.16.2) (2026-08-06)
+
+### Build System
+
+- lower tsdown target from es2021 to es2018 ([#1413](https://github.com/miniapp-tool/mptool/issues/1413)) ([137ca82](https://github.com/miniapp-tool/mptool/commit/137ca8224b92664dde170609b15dcb2540b1eba3)), references [#1412](https://github.com/miniapp-tool/mptool/issues/1412)
+
 ## [0.16.1](https://github.com/miniapp-tool/mptool/compare/v0.16.0...v0.16.1) (2026-08-06)
 
 ### Code Refactoring
