@@ -594,7 +594,15 @@ export class Runtime {
 
     // `global: true` exposes every own property of the host global object
     // `global: true` 将宿主全局对象（globalThis）的全部自有属性暴露到沙箱
-    if (options.global) {
+    //
+    // `globalThis` is natively supported by the miniprogram base library 3.8.2 logic layer
+    // (iOS 14 JSCore + Chrome 86 V8 — per miniprogram-compat, no `es.global-this` polyfill is
+    // required from 3.6.1 on). The `typeof` guard is a cheap safety net for non-standard hosts;
+    // when absent the option simply injects nothing.
+    // `globalThis` 在微信基础库 3.8.2 逻辑层为原生支持（iOS 14 JSCore + Chrome 86 V8——
+    // 见 miniprogram-compat，3.6.1 起无需 `es.global-this` polyfill）。typeof 守卫为非标准宿主
+    // 兜底；不存在时该选项不注入任何内容。
+    if (options.global && typeof globalThis !== "undefined") {
       const hostGlobal = globalThis as Record<string, unknown>;
 
       for (const name of Object.getOwnPropertyNames(hostGlobal)) {
