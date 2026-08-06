@@ -14,9 +14,11 @@ import { decoderError, encoderError } from "./utils.js";
  * @returns The code point corresponding to |pointer| in |index|, or null if |code point| is not in
  *   |index|.
  */
-const indexCodePointFor = (pointer: number, index: number[] | undefined): number | null => {
+const indexCodePointFor = (pointer: number, index: Uint16Array | undefined): number | null => {
   if (!index) return null;
 
+  // the gb18030 index holds no falsy values (min 164), so `|| null` only
+  // kicks in for out-of-range pointers.
   return index[pointer] || null;
 };
 
@@ -26,7 +28,7 @@ const indexCodePointFor = (pointer: number, index: number[] | undefined): number
  * @returns The first pointer corresponding to |code point| in |index|, or null if |code point| is
  *   not in |index|.
  */
-const indexPointerFor = (codePoint: number, index: number[]): number | null => {
+const indexPointerFor = (codePoint: number, index: Uint16Array): number | null => {
   const pointer = index.indexOf(codePoint);
 
   return pointer === -1 ? null : pointer;
