@@ -1274,6 +1274,11 @@ describe("template literals", () => {
       expressions: [],
     });
   });
+
+  it("should reject empty template substitutions", () => {
+    expectError("`${}`");
+    expectError("`a${}`");
+  });
 });
 
 describe("statements", () => {

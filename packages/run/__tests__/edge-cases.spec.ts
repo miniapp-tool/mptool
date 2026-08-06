@@ -435,3 +435,75 @@ describe("error propagation edge cases", () => {
     runBoth("const o = { m: function() {} }; new o.m() instanceof o.m");
   });
 });
+
+describe("do-while and for-of error paths", () => {
+  it("should break out of do-while loops", () => {
+    runBoth("let s = 0; do { s += 1; break; s += 2; } while (true); s");
+    runBoth(
+      "let s = 0; let i = 0; do { i += 1; if (i === 2) break; s += i; } while (i < 5); [s, i]",
+    );
+  });
+
+  it("should propagate errors thrown from do-while bodies", () => {
+    runBoth(
+      "(function() { try { do { throw new Error('x'); } while (true); } catch (e) { return e.message; } })()",
+    );
+  });
+
+  it("should propagate errors thrown from for-of bodies", () => {
+    runBoth(
+      "(function() { try { for (const x of [1]) { throw new Error('boom'); } } catch (e) { return e.message; } })()",
+    );
+    runBoth(
+      "(function() { try { for (const x of [1, 2]) { if (x === 2) throw 'raw'; } } catch (e) { return e; } })()",
+    );
+  });
+});
+
+describe("super keyword error paths (both engines throw)", () => {
+  it("should reject bare super expressions", () => {
+    expectError("const x = super; x");
+    expectError("true ? super : 1");
+  });
+
+  it("should reject super reads, writes and updates outside a super base", () => {
+    expectError("super.x");
+    expectError("super.x = 1");
+    expectError("super.x += 1");
+    expectError("super.x++");
+  });
+
+  it("should reject super calls and construction outside a super base", () => {
+    expectError("super()");
+    expectError("super.m()");
+    expectError("new super()");
+  });
+
+  it("should reject delete over super", () => {
+    expectError("delete super.x");
+  });
+
+  it("should reject super() with a non-function parent", () => {
+    expectError("class B extends (0) {} new B()");
+    expectError("class B extends ('s') {} new B()");
+  });
+
+  it("should propagate raw values thrown by base constructors through super()", () => {
+    expectError(
+      "class A { constructor() { throw new Error('boom'); } } class B extends A {} new B()",
+    );
+    // raw (non-Error) throw values propagate as-is on both engines — assert via a wrapper
+    // 裸（非 Error）抛出值在两侧原样传播——用包装函数断言
+    runBoth(
+      "(function() { try { class A { constructor() { throw 42; } } class B extends A {} new B(); } catch (e) { return e; } })()",
+    );
+  });
+
+  it("should rethrow non-signal errors from base constructors through super()", () => {
+    // a raw interpreter error (not a user `throw`) is not a ThrowSignalError; super() must
+    // rethrow it unchanged
+    // 原始解释器错误（非用户 `throw`）不是 ThrowSignalError；super() 必须原样重抛
+    expectError("class A { constructor() { null.x; } } class B extends A {} new B()");
+    expectError("class A { constructor() { missingName; } } class B extends A {} new B()");
+  });
+});

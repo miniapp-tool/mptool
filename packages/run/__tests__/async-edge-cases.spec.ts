@@ -390,3 +390,158 @@ describe("async expression edge cases", () => {
     );
   });
 });
+
+describe("async evaluator deep paths (await-forced)", () => {
+  it("should handle var declarations with mixed initialized and uninitialized bindings", async () => {
+    await runBoth(
+      "const f = async () => { var a = await Promise.resolve(1), b; return [a, b]; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { var a = await Promise.resolve(1), b = 2, c; return [a, b, c]; }; f()",
+    );
+  });
+
+  it("should handle async for heads with var declarations missing initializers", async () => {
+    await runBoth(
+      "const f = async () => { let s = 0; for (var a = await Promise.resolve(1), b; s < 1; s += 1) { await Promise.resolve(); } return [a, b, s]; }; f()",
+    );
+  });
+
+  it("should support async for loops with a let binding and no update clause", async () => {
+    await runBoth(
+      "const f = async () => { let s = 0; for (let i = 0; i < 3;) { s += await Promise.resolve(i); i += 1; } return s; }; f()",
+    );
+  });
+
+  it("should treat async for-in over awaited null/undefined as a no-op", async () => {
+    await runBoth(
+      "const f = async () => { let s = 0; for (const k in await Promise.resolve(null)) s += 1; return s; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { let s = 0; for (const k in await Promise.resolve(undefined)) s += 1; return s; }; f()",
+    );
+  });
+
+  it("should read async super members through awaited expressions", async () => {
+    await runBoth(
+      "class A { get x() { return 7; } } class B extends A { async m() { return super[await Promise.resolve('x')]; } } new B().m()",
+    );
+    await runBoth(
+      "class A { m() { return 5; } } class B extends A { async m() { return super[await Promise.resolve('m')]() + 1; } } new B().m()",
+    );
+  });
+
+  it("should reject super reads and calls outside a super base in async functions", async () => {
+    await expectRejectBoth("const f = async () => super.x; f()");
+    await expectRejectBoth("const f = async () => super.m(); f()");
+    await expectRejectBoth("const f = async () => super[await Promise.resolve('x')]; f()");
+  });
+
+  it("should reject super() calls and delete in async functions", async () => {
+    await expectRejectBoth("const f = async () => super(); f()");
+    await expectRejectBoth("const f = async () => { delete super.x; }; f()");
+    await expectRejectBoth("const f = async () => { super[await Promise.resolve('x')] = 1; }; f()");
+  });
+
+  it("should write async super members through awaited computed keys", async () => {
+    await runBoth(
+      "class A { constructor() { this._x = 1; } } class B extends A { async m() { super[await Promise.resolve('_x')] = 5; return this._x; } } new B().m()",
+    );
+  });
+
+  it("should construct with awaited spread arguments in async", async () => {
+    await runBoth(
+      "const f = async () => new (class { constructor(a, b) { this.v = a + b; } })(...await Promise.resolve([1, 2])).v; f()",
+    );
+    await runBoth(
+      "const f = async () => new (class { constructor(...xs) { this.v = xs.length; } })(...(await Promise.resolve([1, 2, 3]))).v; f()",
+    );
+  });
+
+  it("should delete properties of awaited objects in async", async () => {
+    await runBoth(
+      "const f = async () => { const o = { a: 1 }; delete (await Promise.resolve(o)).a; return o.a; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const o = { a: { b: 1 } }; delete (await Promise.resolve(o)).a.b; return o.a; }; f()",
+    );
+  });
+
+  it("should short-circuit async delete over awaited optional chains", async () => {
+    await runBoth(
+      "const f = async () => { const o = null; return delete (await Promise.resolve(o))?.a; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const o = null; return delete (await Promise.resolve(o))?.a.b; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const o = null; return delete (await Promise.resolve(o))?.a.b.c; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const o = { a: { b: 1 } }; return delete (await Promise.resolve(o))?.a.b; }; f()",
+    );
+  });
+
+  it("should update identifiers in awaited sequences in async", async () => {
+    await runBoth(
+      "const f = async () => { let x = 5; return (await Promise.resolve(0), ++x); }; f()",
+    );
+    await runBoth(
+      "const f = async () => { let x = 5; return (await Promise.resolve(0), x++); }; f()",
+    );
+  });
+
+  it("should destructure awaited values with awaited defaults and elisions", async () => {
+    await runBoth(
+      "const f = async () => { const [a = await Promise.resolve(1), , c] = [1, 2, 3]; return [a, c]; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const [a = await Promise.resolve(1), , c = await Promise.resolve(9)] = [1, 2, void 0]; return [a, c]; }; f()",
+    );
+  });
+
+  it("should destructure awaited values with awaited defaults and rest", async () => {
+    await runBoth(
+      "const f = async () => { const [a = await Promise.resolve(1), ...rest] = [1, 2, 3, 4]; return [a, rest]; }; f()",
+    );
+    await runBoth(
+      "const f = async () => { const {x = await Promise.resolve(1), ...rest} = {x: 1, y: 2, z: 3}; return [x, rest]; }; f()",
+    );
+  });
+
+  it("should assign to rest patterns inside awaited expressions in async", async () => {
+    await runBoth(
+      "const f = async () => { let a, rest; [a = await Promise.resolve(1), ...rest] = [1, 2, 3]; return [a, rest]; }; f()",
+    );
+  });
+
+  it("should reject destructuring non-iterable or null awaited values in async", async () => {
+    await expectRejectBoth(
+      "const f = async () => { const [a = await Promise.resolve(1)] = await Promise.resolve(null); return a; }; f()",
+    );
+    await expectRejectBoth(
+      "const f = async () => { const {x = await Promise.resolve(1)} = await Promise.resolve(null); return x; }; f()",
+    );
+  });
+
+  it("should propagate errors thrown from async for-in bodies", async () => {
+    await expectRejectBoth(
+      "const f = async () => { for (const k in {a: 1}) { await Promise.resolve(); throw new Error('v'); } }; f()",
+    );
+  });
+
+  it("should propagate errors thrown from async for, do-while and labeled bodies", async () => {
+    await expectRejectBoth(
+      "const f = async () => { for (let i = 0; i < 2; i += 1) { await Promise.resolve(); throw new Error('e'); } }; f()",
+    );
+    await expectRejectBoth(
+      "const f = async () => { do { await Promise.resolve(); throw new Error('d'); } while (true); }; f()",
+    );
+  });
+
+  it("should rethrow unmatched labels through async labeled blocks", async () => {
+    await runBoth(
+      "const f = async () => { let s = 0; outer: { inner: { await Promise.resolve(); break outer; s += 1; } } return s; }; f()",
+    );
+  });
+});
