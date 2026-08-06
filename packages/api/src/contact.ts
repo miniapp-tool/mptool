@@ -1,75 +1,29 @@
-import { MpError, env } from "@mptool/shared";
+import { MpError } from "@mptool/shared";
 
-import { showModal } from "./ui/index.js";
+import { withScope } from "./private/withScope.js";
 
 /**
  * 保存联系人到通讯录
  *
  * @param config 联系人信息
+ * @returns 保存结果
  */
 export const addContact = (
   config: Omit<WechatMiniprogram.AddPhoneContactOption, "success" | "fail" | "complete">,
 ): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (env === "donut") {
-      wx.addPhoneContact({
-        ...config,
-        success: () => {
-          resolve();
-        },
-        fail: ({ errMsg }) => {
-          reject(new MpError({ message: errMsg }));
-        },
-      });
-      return;
-    }
-
-    wx.getSetting({
-      success: ({ authSetting }) => {
-        // 如果已经授权直接写入联系人
-        if (authSetting["scope.addPhoneContact"]) {
-          wx.addPhoneContact({
-            ...config,
-            success: () => {
-              resolve();
-            },
-            fail: ({ errMsg }) => {
-              reject(new MpError({ message: errMsg }));
-            },
-          });
-        }
-        // 没有授权 —> 提示用户授权
-        else {
-          wx.authorize({
-            scope: "scope.addPhoneContact",
-            success: () => {
-              wx.addPhoneContact({
-                ...config,
-                success: () => {
-                  resolve();
-                },
-                fail: ({ errMsg }) => {
-                  reject(new MpError({ message: errMsg }));
-                },
-              });
-            },
-
-            // 用户拒绝权限，提示用户开启权限
-            fail: () => {
-              showModal(
-                "权限被拒",
-                "如果想要保存联系人，请在“权限设置”允许添加到联系人权限",
-                () => {
-                  void wx.openSetting();
-                  reject(new MpError({ message: "用户拒绝权限" }));
-                },
-              );
-            },
-          });
-        }
-      },
-      fail: ({ errMsg }) => {
-        reject(new MpError({ message: errMsg }));
-      },
-    });
-  });
+  withScope(
+    "scope.addPhoneContact",
+    () =>
+      new Promise<void>((resolve, reject) => {
+        wx.addPhoneContact({
+          ...config,
+          success: () => {
+            resolve();
+          },
+          fail: ({ errMsg }) => {
+            reject(new MpError({ message: errMsg }));
+          },
+        });
+      }),
+    "如果想要保存联系人，请在“权限设置”允许添加到联系人权限",
+  );
