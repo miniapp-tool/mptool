@@ -75,6 +75,12 @@ describe(URLSearchParams, () => {
       expect(a.toString()).toBe("=v");
     });
 
+    it("serializes a NUL character as %00", () => {
+      const a = new URLSearchParams([["a", "\u0000"]]);
+
+      expect(a.toString()).toBe("a=%00");
+    });
+
     it("construct ignoring empty pairs", () => {
       const a = new URLSearchParams("a&&b");
 

@@ -28,11 +28,10 @@ const ENCODE_MAP: Record<string, string> = {
   ")": "%29",
   "~": "%7E",
   "%20": "+",
-  "%00": "\u0000",
 };
 
 const encode = (str: string): string =>
-  encodeURIComponent(str).replace(/[!'()~]|%20|%00/gu, (match) => ENCODE_MAP[match]);
+  encodeURIComponent(str).replace(/[!'()~]|%20/gu, (match) => ENCODE_MAP[match]);
 
 /**
  * Decodes a byte sequence as UTF-8 into a string, replacing malformed sequences with U+FFFD,
