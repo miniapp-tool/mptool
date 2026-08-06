@@ -752,6 +752,12 @@ export class Runtime {
       ["decodeURI", decodeURI],
       ["encodeURIComponent", encodeURIComponent],
       ["decodeURIComponent", decodeURIComponent],
+      // legacy globals required by the ES5 builtins list (design doc §5.2)
+      // ES5 内建清单要求的遗留全局（设计文档 §5.2）
+      /* oxlint-disable-next-line typescript/no-deprecated -- legacy global required by ES5 */
+      ["escape", escape],
+      /* oxlint-disable-next-line typescript/no-deprecated -- legacy global required by ES5 */
+      ["unescape", unescape],
       ["ArrayBuffer", ArrayBuffer],
       ["DataView", DataView],
       ["Int8Array", Int8Array],
