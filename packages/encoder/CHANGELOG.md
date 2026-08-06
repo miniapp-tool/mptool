@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/miniapp-tool/mptool/compare/v0.16.0...v0.16.1) (2026-08-06)
+
+### Code Refactoring
+
+- **encoder:** pack the gb18030 index table as base64 Uint16Array ([#1408](https://github.com/miniapp-tool/mptool/issues/1408)) ([5ee2057](https://github.com/miniapp-tool/mptool/commit/5ee20571c39bcecfe0f8e87c81575c905cb76781))
+
 ## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
 
 ### 🐛 Bug Fixes

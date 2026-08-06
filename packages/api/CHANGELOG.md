@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/miniapp-tool/mptool/compare/v0.16.0...v0.16.1) (2026-08-06)
+
+### Code Refactoring
+
+- **api:** extract the shared permission flow into withScope ([#1410](https://github.com/miniapp-tool/mptool/issues/1410)) ([bb9bfd6](https://github.com/miniapp-tool/mptool/commit/bb9bfd653a1067edd6aff262d1aa2ba2b063bff2))
+
 ## [0.16.0](https://github.com/miniapp-tool/mptool/compare/v0.15.0...v0.16.0) (2026-08-06)
 
 ### 🐛 Bug Fixes
