@@ -102,10 +102,6 @@ export class CookieStore {
    */
   delete(name: string, domain = ""): void {
     if (domain) {
-      const exactCookieMap = this.store.get(domain);
-
-      if (exactCookieMap) exactCookieMap.delete(name);
-
       const domainCookieMap = this.store.get(normalizeDomain(domain));
 
       if (domainCookieMap) domainCookieMap.delete(name);
@@ -210,14 +206,15 @@ export class CookieStore {
     if (domain) {
       const normalizedDomain = normalizeDomain(domain);
 
-      // 兼容旧数据（无前导点键）与归一化键，两键分别清理（与 delete 一致）
-      this.store.get(domain)?.clear();
+      // store 键统一为归一化域名（带前导点）
       this.store.get(normalizedDomain)?.clear();
 
+      // 同时清除子域名 cookies
       if (!exact) {
-        const domainCookieMap = this.store.get(normalizedDomain);
-
-        if (domainCookieMap) domainCookieMap.clear();
+        for (const key of this.store.keys()) {
+          if (key !== normalizedDomain && key.endsWith(normalizedDomain))
+            this.store.get(key)?.clear();
+        }
       }
     } else {
       this.store.clear();

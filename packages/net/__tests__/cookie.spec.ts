@@ -122,24 +122,18 @@ describe(CookieStore, () => {
     expect(cookieStore.getAllCookies()).toHaveLength(0);
   });
 
-  it("clear should clean both legacy and normalized keys", () => {
-    const cookieStore = new CookieStore("cookie-clear-both");
-    const { store } = cookieStore as unknown as { store: Map<string, Map<string, Cookie>> };
+  it("clear should clean subdomain cookies when not exact", () => {
+    const cookieStore = new CookieStore("cookie-clear-sub");
 
-    // 模拟迁移期：同时存在无前导点的旧键与归一化新键
-    store.set(
-      "baidu.com",
-      new Map([["a", new Cookie({ name: "a", value: "1", domain: "baidu.com" })]]),
-    );
-    store.set(
-      ".baidu.com",
-      new Map([["b", new Cookie({ name: "b", value: "2", domain: "baidu.com" })]]),
-    );
+    cookieStore.set({ name: "a", value: "1", domain: "baidu.com", path: "/" });
+    cookieStore.set({ name: "b", value: "2", domain: "sub.baidu.com", path: "/" });
+    cookieStore.set({ name: "c", value: "3", domain: "example.com", path: "/" });
 
-    cookieStore.clear("baidu.com", true);
+    cookieStore.clear("baidu.com");
 
-    expect(store.get("baidu.com")?.size).toBe(0);
-    expect(store.get(".baidu.com")?.size).toBe(0);
+    expect(cookieStore.get("a", { domain: "baidu.com", path: "/" })).toBeNull();
+    expect(cookieStore.get("b", { domain: "sub.baidu.com", path: "/" })).toBeNull();
+    expect(cookieStore.get("c", { domain: "example.com", path: "/" })).not.toBeNull();
   });
 });
 
