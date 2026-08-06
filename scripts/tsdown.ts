@@ -97,11 +97,13 @@ export const tsdownConfig = (
     dts,
     minify: isProduction,
     // The lowest supported base library version is 3.8.2, which maps to
-    // iOS 14 / Chrome 86 (Safari 14.0 does not support native class fields).
-    // es2021 keeps `?.`/`??`/logical assignment native while transpiling
-    // class fields, so the output runs on base library 3.8.2 without
-    // transformation while still dropping most downlevel helpers.
-    target: "es2021",
+    // iOS 14 / Chrome 86. Verified in WeChat DevTools that ES2020 optional
+    // chaining / nullish coalescing (`?.`/`??`) fails to parse on upload
+    // (SyntaxError: Unexpected token ?), so the target cannot exceed es2019.
+    // es2018 is chosen: it keeps object rest/spread native (the main ~1.2KB
+    // saving over es2017) while es2019 would only save ~12B more while
+    // introducing an extra syntax (`catch {}`).
+    target: "es2018",
     platform,
     treeshake,
     deps: {
