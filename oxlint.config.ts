@@ -21,6 +21,8 @@ export default defineHopeConfig(
       "unicorn/prefer-string-replace-all": "off",
 
       "vitest/consistent-test-it": "off",
+      // Helper-based assertions (e.g. `expectError`) are intentional in specs.
+      "vitest/expect-expect": "off",
     },
   },
   {
@@ -31,6 +33,21 @@ export default defineHopeConfig(
       "typescript/no-unsafe-assignment": "off",
       "typescript/no-unsafe-member-access": "off",
       "typescript/unbound-method": "off",
+      // Test fixtures legitimately contain template-literal syntax as strings.
+      "no-template-curly-in-string": "off",
+    },
+  },
+  {
+    // Interpreter code (lexer/parser/interpreter) legitimately exceeds generic
+    // structural limits (file length, method complexity, classes per file).
+    // 解释器代码（lexer/parser/interpreter）天然超出通用结构性限制。
+    files: ["packages/run/src/**/*.ts"],
+    rules: {
+      complexity: "off",
+      "max-classes-per-file": "off",
+      "max-lines": "off",
+      "max-lines-per-function": "off",
+      "max-statements": "off",
     },
   },
   {
