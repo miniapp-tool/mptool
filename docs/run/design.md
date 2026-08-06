@@ -269,6 +269,8 @@ graph TD
 - 路线 A 把成本前置到 Phase 2，但**总成本更小**、语义更接近标准（帧挂起恢复对 `try/catch` 包 `await`、循环内 `await` 天然正确）。
 - 附带收益：性能、栈安全、未来 generator。
 
+> **实现注记（2026-08，Round 8 落地）**：采用"生成器 + await 提升 + 显式执行上下文栈保存/恢复"实现。挂起期间 async 调用的 `contextStack` 帧与 `stackDepth` 会临时移除/扣减，结算后恢复，因此并发挂起任务不占 `maxStack`、穿插的宿主回调看到干净栈。另含一处**有意扩展**：async 函数内的**非 async 箭头**继承 async 上下文（`async function f(){ const g = () => await p; }`），即 `() => await p` 在 async 体内合法——这是标准引擎（V8/JSCore）会拒绝的语法（属语法错误），但解释器按"箭头继承外层 async 上下文"实现；对合法代码零影响。
+
 ### 7.4 API 影响
 
 含 async 的代码会让 `run()` 从同步返回变为可能返回 Promise：

@@ -752,9 +752,12 @@ describe("error paths", () => {
     expect(() => run("const f = () => { throw 99; }; f()")).toThrow(99);
   });
 
-  it("should throw on async code (not implemented yet)", () => {
-    expectError("async function f() {} f()");
-    expectError("(async () => { await 1; })()");
+  it("should run async code via the interpreter", () => {
+    // async functions are implemented: they return a host Promise rather than throwing
+    // async 函数已实现：返回宿主 Promise 而非抛错
+    const p = run("async function f() { return 1; } f()");
+
+    expect(p).toBeInstanceOf(Promise);
   });
 
   it("should abort on exceeding maxSteps", () => {

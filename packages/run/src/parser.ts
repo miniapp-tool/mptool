@@ -2427,7 +2427,9 @@ export class Parser {
   private parseArrowBody(isAsync: boolean, allowIn: boolean): Expression | BlockStatement {
     const saved = this.inAsyncFunction;
 
-    this.inAsyncFunction = isAsync;
+    // a non-async arrow inherits the enclosing async context, so `await` stays legal
+    // 非 async 箭头继承外层 async 上下文，因此 `await` 仍然合法
+    this.inAsyncFunction = saved || isAsync;
 
     try {
       if (this.match("{")) return this.parseBlock();

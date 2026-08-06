@@ -108,6 +108,96 @@ const UNINITIALIZED = Symbol("uninitialized this");
 const EMPTY_BLOCK: BlockStatement = { type: "block", body: [], start: 0, end: 0 };
 
 /**
+ * Generic AST walk: whether any node in the subtree has a `type` matching the predicate.
+ *
+ * 通用 AST 遍历：子树中是否存在 `type` 匹配谓词的节点。
+ *
+ * @param node - The node or value / 节点或值
+ * @param pred - Type predicate / 类型谓词
+ * @returns Whether any node matches / 是否存在匹配节点
+ */
+const walkContains = (node: unknown, pred: (type: string) => boolean): boolean => {
+  if (Array.isArray(node)) return node.some((item) => walkContains(item, pred));
+
+  if (node != null && typeof node === "object") {
+    const record = node as Record<string, unknown>;
+
+    if (typeof record.type === "string" && pred(record.type)) return true;
+
+    for (const key of Object.keys(record)) {
+      if (key === "start" || key === "end") continue;
+      if (walkContains(record[key], pred)) return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Whether a node subtree contains an `await` expression / 子树是否含 `await` 表达式
+ *
+ * @param node - The node or value / 节点或值
+ * @returns Whether it contains `await` / 是否含 `await`
+ */
+const containsAwait = (node: unknown): boolean => walkContains(node, (type) => type === "await");
+
+/**
+ * Whether a node subtree contains a call or `new` / 子树是否含调用或 `new`
+ *
+ * @param node - The node or value / 节点或值
+ * @returns Whether it contains a call or `new` / 是否含调用或 `new`
+ */
+const containsCall = (node: unknown): boolean =>
+  walkContains(node, (type) => type === "call" || type === "new");
+
+/**
+ * Whether a node subtree contains control-flow altering statements / 子树是否含改变控制流的语句
+ *
+ * @param node - The node or value / 节点或值
+ * @returns Whether it contains control flow / 是否含控制流
+ */
+const containsControlFlow = (node: unknown): boolean =>
+  walkContains(
+    node,
+    (type) =>
+      type === "return" ||
+      type === "break" ||
+      type === "continue" ||
+      type === "throw" ||
+      type === "try" ||
+      type === "labeled",
+  );
+
+/**
+ * Whether a statement can be evaluated synchronously inside an async body / 语句是否可在 async 体内同步求值
+ *
+ * @param stmt - The statement / 语句
+ * @returns Whether it is safe to evaluate synchronously / 是否可安全同步求值
+ */
+const isSafeSyncStatement = (stmt: Statement): boolean =>
+  !containsAwait(stmt) && !containsCall(stmt) && !containsControlFlow(stmt);
+
+/**
+ * Whether an expression can be evaluated synchronously inside an async body / 表达式是否可在 async 体内同步求值
+ *
+ * @param expr - The expression / 表达式
+ * @returns Whether it is safe to evaluate synchronously / 是否可安全同步求值
+ */
+const isSafeSyncExpression = (expr: Expression): boolean =>
+  !containsAwait(expr) && !containsCall(expr);
+
+/**
+ * Whether a value is a thenable (promise-like) / 值是否为 thenable（类 Promise）
+ *
+ * @param value - The value / 值
+ * @returns Whether it is thenable / 是否为 thenable
+ */
+const isThenable = (value: unknown): boolean =>
+  value != null &&
+  (typeof value === "object" || typeof value === "function") &&
+  typeof (value as { then?: unknown }).then === "function";
+
+/**
  * Read a property, throwing the host-like `TypeError` on `null`/`undefined` receivers.
  *
  * 读取属性，对 `null`/`undefined` 接收者抛出宿主风格 `TypeError`。
@@ -2411,6 +2501,7 @@ export class Runtime {
         hasArguments: !isArrow && !simpleParamNames.includes("arguments"),
         simpleParamNames,
         implicitDerived: false,
+        containsAwait: containsAwait(body),
         lexicalThis: isArrow ? (ctx?.thisRef ?? { value: this.globalObject }) : null,
         lexicalSuperBase: isArrow ? (ctx?.superBase ?? null) : null,
         lexicalSuperClass: isArrow ? (ctx?.superClass ?? null) : null,
@@ -2438,14 +2529,17 @@ export class Runtime {
     isConstruct: boolean,
   ): unknown {
     this.step();
+
+    // async functions always return a host Promise (driven by the async runner)
+    // async 函数总是返回宿主 Promise（由 async 运行器驱动）
+    if (meta.isAsync) return this.asyncInvoke(meta, args, thisArg, isConstruct);
+
     this.stackDepth += 1;
 
     if (this.stackDepth > this.maxStack)
       throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
 
     try {
-      if (meta.isAsync) throw new Error("async functions are not implemented yet");
-
       if (meta.thisMode === "arrow") {
         if (isConstruct) throw new TypeError(`${meta.name ?? "function"} is not a constructor`);
 
@@ -2950,6 +3044,7 @@ export class Runtime {
         hasArguments: !simpleParamNames.includes("arguments"),
         simpleParamNames,
         implicitDerived: false,
+        containsAwait: containsAwait(method.body),
         lexicalThis: null,
         lexicalSuperBase: null,
         lexicalSuperClass: null,
@@ -2992,6 +3087,7 @@ export class Runtime {
         hasArguments: false,
         simpleParamNames: [],
         implicitDerived: superClass != null,
+        containsAwait: false,
         lexicalThis: null,
         lexicalSuperBase: null,
         lexicalSuperClass: null,
@@ -2999,5 +3095,1445 @@ export class Runtime {
       },
       this.invokeHandler,
     );
+  }
+
+  // -------------------------------------------------------------------------
+  // Async functions (async/await)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Invoke an async function, returning a host `Promise` driven by a resumable generator.
+   *
+   * 调用 async 函数，返回由可恢复生成器驱动的宿主 `Promise`。
+   *
+   * The async body runs inside a generator: `await` yields the pending promise, and the driver
+   * resumes the generator once it settles. While suspended, the `contextStack` frames owned by this
+   * async call are temporarily removed so interleaved host callbacks see a clean stack.
+   *
+   * Async 函数体在生成器内运行：`await` 挂起当前 promise，结算后驱动恢复生成器。挂起期间本 async 调用 持有的 `contextStack`
+   * 帧会被临时移除，使穿插的宿主回调看到干净的栈。
+   *
+   * @param meta - Function metadata / 函数元数据
+   * @param args - Call arguments / 调用参数
+   * @param thisArg - The `this` value / `this` 值
+   * @param isConstruct - Whether this is a `new` call / 是否为 `new` 调用
+   * @returns A host Promise / 宿主 Promise
+   */
+  private async asyncInvoke(
+    meta: InterpreterFunctionMeta,
+    args: unknown[],
+    thisArg: unknown,
+    isConstruct: boolean,
+  ): Promise<unknown> {
+    if (isConstruct) throw new TypeError(`${meta.name ?? "function"} is not a constructor`);
+
+    this.stackDepth += 1;
+
+    if (this.stackDepth > this.maxStack) {
+      // undo the increment before throwing, so the guard does not leak depth
+      // 抛出前先撤销递增，避免守卫泄漏深度
+      this.stackDepth -= 1;
+
+      throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
+    }
+
+    const baseDepth = this.contextStack.length;
+    const gen = this.asyncBodyGenerator(meta, args, thisArg);
+    let savedFrames: RuntimeContext[] = [];
+
+    return new Promise<unknown>((resolve, reject) => {
+      const settle = (): void => {
+        this.stackDepth -= 1;
+      };
+
+      const step = (method: "next" | "throw", arg: unknown): void => {
+        // restore the async frames and depth before resuming the generator
+        // 恢复生成器前还原 async 帧与深度
+        if (savedFrames.length > 0) {
+          this.contextStack.push(...savedFrames);
+          this.stackDepth += 1;
+          savedFrames = [];
+        }
+
+        let result: IteratorResult<unknown, unknown>;
+
+        try {
+          result = method === "next" ? gen.next(arg) : gen.throw(arg);
+        } catch (err) {
+          settle();
+
+          // user code may throw/reject with any value, not just Errors
+          // 用户代码可能抛出/拒绝任意值，不限于 Error
+          /* oxlint-disable-next-line typescript/prefer-promise-reject-errors -- rejections may be arbitrary values */
+          reject(err);
+
+          return;
+        }
+
+        if (result.done) {
+          settle();
+
+          resolve(result.value);
+
+          return;
+        }
+
+        // suspended: remove the async frames and depth, so suspended tasks do not count
+        // toward maxStack (they occupy no host stack while waiting)
+        // 挂起：移除 async 帧与深度，使挂起任务不计入 maxStack（等待期间不占宿主栈）
+        savedFrames = this.contextStack.splice(baseDepth);
+        this.stackDepth -= 1;
+
+        /* oxlint-disable promise/catch-or-return, promise/prefer-catch, promise/prefer-await-to-callbacks -- recursive promise driver */
+        Promise.resolve(result.value).then(
+          (value) => {
+            step("next", value);
+          },
+          (err: unknown) => {
+            step("throw", err);
+          },
+        );
+        /* oxlint-enable promise/catch-or-return, promise/prefer-catch, promise/prefer-await-to-callbacks */
+      };
+
+      step("next", void 0);
+    });
+  }
+
+  /**
+   * The resumable generator of an async function body (or an async-context arrow).
+   *
+   * Async 函数体（或 async 上下文箭头）的可恢复生成器。
+   *
+   * @param meta - Function metadata / 函数元数据
+   * @param args - Call arguments / 调用参数
+   * @param thisArg - The `this` value / `this` 值
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the function result / 生成器，完成值为函数结果
+   */
+  private *asyncBodyGenerator(
+    meta: InterpreterFunctionMeta,
+    args: unknown[],
+    thisArg: unknown,
+  ): Generator<unknown, unknown, unknown> {
+    let thisValue: unknown = thisArg;
+
+    if (meta.thisMode === "sloppy" && thisValue == null) thisValue = this.globalObject;
+
+    const env = new Environment(meta.closure, true);
+
+    this.bindParams(meta.params, args, env);
+    this.hoistFunctionBody(meta.body, env);
+    if (meta.hasArguments) bindArguments(meta, args, env);
+
+    const thisRef: { value: unknown } = { value: thisValue };
+    let superBase: object | null = meta.superBase;
+    let superClass: unknown = meta.superClass;
+
+    if (meta.thisMode === "arrow") {
+      thisRef.value = meta.lexicalThis?.value ?? this.globalObject;
+      superBase = meta.lexicalSuperBase;
+      superClass = meta.lexicalSuperClass;
+    }
+
+    this.contextStack.push({
+      thisRef,
+      superBase,
+      superClass,
+      newTargetMeta: null,
+      isConstruct: false,
+    });
+
+    try {
+      if (meta.body.type === "block") {
+        yield* this.evalAsyncBody(meta.body.body, env);
+
+        return void 0;
+      }
+
+      // expression-bodied async arrow: `async x => expr`
+      // 表达式体 async 箭头：`async x => expr`
+      return yield* this.evalAsyncExpr(meta.body, env);
+    } catch (err) {
+      if (err instanceof ReturnSignalError) return err.value;
+
+      throw err;
+    } finally {
+      this.contextStack.pop();
+    }
+  }
+
+  /**
+   * Evaluate an async statement list, resuming after each suspension.
+   *
+   * 求值 async 语句列表，每次挂起后恢复。
+   *
+   * @param stmts - Statements / 语句
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncBody(
+    stmts: readonly Statement[],
+    env: Environment,
+  ): Generator<unknown, void, unknown> {
+    for (const stmt of stmts) yield* this.evalAsyncStatement(stmt, env);
+  }
+
+  /**
+   * Evaluate an async statement natively, suspending at `await`.
+   *
+   * 原生求值 async 语句，在 `await` 处挂起。
+   *
+   * Statements without await, calls or control flow are delegated to the sync evaluator. Control
+   * signals (`return`/`break`/`continue`) are exceptions; the native `try`/`finally` of this
+   * generator preserves their interaction with the user's `try`/`finally` blocks.
+   *
+   * 不含 await/调用/控制流的语句委托给同步求值器。控制信号（`return`/`break`/`continue`）以异常形式 传递；本生成器内的原生 `try`/`finally`
+   * 保留它们与用户 `try`/`finally` 块的交互。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label for loops / 循环的外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncStatement(
+    stmt: Statement,
+    env: Environment,
+    label: string | null = null,
+  ): Generator<unknown, unknown, unknown> {
+    if (isSafeSyncStatement(stmt)) return this.evalStatement(stmt, env);
+
+    this.step();
+
+    switch (stmt.type) {
+      case "expression": {
+        return yield* this.evalAsyncExpr(stmt.expression, env);
+      }
+      case "block": {
+        const blockEnv = new Environment(env, false);
+
+        yield* this.evalAsyncBody(stmt.body, blockEnv);
+
+        return void 0;
+      }
+      case "variable": {
+        yield* this.evalAsyncVariable(stmt, env);
+
+        return void 0;
+      }
+      case "if": {
+        if (toBoolean(yield* this.evalAsyncExpr(stmt.test, env)))
+          yield* this.evalAsyncStatement(stmt.consequent, env);
+        else if (stmt.alternate != null) yield* this.evalAsyncStatement(stmt.alternate, env);
+
+        return void 0;
+      }
+      case "while": {
+        yield* this.evalAsyncWhile(stmt, env, label);
+
+        return void 0;
+      }
+      case "doWhile": {
+        yield* this.evalAsyncDoWhile(stmt, env, label);
+
+        return void 0;
+      }
+      case "for": {
+        yield* this.evalAsyncFor(stmt, env, label);
+
+        return void 0;
+      }
+      case "forIn": {
+        yield* this.evalAsyncForIn(stmt, env, label);
+
+        return void 0;
+      }
+      case "forOf": {
+        yield* this.evalAsyncForOf(stmt, env, label);
+
+        return void 0;
+      }
+      case "switch": {
+        yield* this.evalAsyncSwitch(stmt, env);
+
+        return void 0;
+      }
+      case "try": {
+        yield* this.evalAsyncTry(stmt, env);
+
+        return void 0;
+      }
+      case "return": {
+        throw new ReturnSignalError(
+          stmt.argument == null ? void 0 : yield* this.evalAsyncExpr(stmt.argument, env),
+        );
+      }
+      case "break": {
+        throw new BreakSignalError(stmt.label);
+      }
+      case "continue": {
+        throw new ContinueSignalError(stmt.label);
+      }
+      case "throw": {
+        // the raw value is thrown natively, so native `try`/`catch` sees it directly
+        // 原生抛出原始值，使原生 `try`/`catch` 直接捕获
+        throw yield* this.evalAsyncExpr(stmt.argument, env);
+      }
+      case "labeled": {
+        try {
+          yield* this.evalAsyncStatement(stmt.body, env, stmt.label);
+        } catch (err) {
+          if (err instanceof BreakSignalError && err.label === stmt.label) return void 0;
+
+          throw err;
+        }
+
+        return void 0;
+      }
+      default: {
+        return this.evalStatement(stmt, env);
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `while` loop.
+   *
+   * 求值 async `while` 循环。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label / 外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncWhile(
+    stmt: WhileStatement,
+    env: Environment,
+    label: string | null,
+  ): Generator<unknown, void, unknown> {
+    while (toBoolean(yield* this.evalAsyncExpr(stmt.test, env))) {
+      try {
+        yield* this.evalAsyncStatement(stmt.body, env);
+      } catch (err) {
+        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+          continue;
+        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `do...while` loop.
+   *
+   * 求值 async `do...while` 循环。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label / 外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncDoWhile(
+    stmt: DoWhileStatement,
+    env: Environment,
+    label: string | null,
+  ): Generator<unknown, void, unknown> {
+    for (;;) {
+      try {
+        yield* this.evalAsyncStatement(stmt.body, env);
+      } catch (err) {
+        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+          // continue: re-check the test below
+          // continue：重新检查下方的 test
+        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+          return;
+        } else {
+          throw err;
+        }
+      }
+
+      if (!toBoolean(yield* this.evalAsyncExpr(stmt.test, env))) return;
+    }
+  }
+
+  /**
+   * Evaluate an async variable declaration (`var`/`let`/`const`).
+   *
+   * 求值 async 变量声明（`var`/`let`/`const`）。
+   *
+   * @param stmt - The declaration / 声明
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncVariable(
+    stmt: VariableDeclaration,
+    env: Environment,
+  ): Generator<unknown, void, unknown> {
+    if (stmt.kind === "var") {
+      for (const decl of stmt.declarations) {
+        if (decl.init == null) continue;
+
+        const value = yield* this.evalAsyncExpr(decl.init, env);
+
+        this.assignTo(decl.id, value, env);
+      }
+
+      return;
+    }
+
+    for (const decl of stmt.declarations) this.declarePattern(decl.id, env, stmt.kind);
+
+    for (const decl of stmt.declarations) {
+      const value = decl.init == null ? void 0 : yield* this.evalAsyncExpr(decl.init, env);
+
+      this.assignTo(decl.id, value, env, true);
+    }
+  }
+
+  /**
+   * Evaluate the `var` initializers of an async `for` head (names are hoisted).
+   *
+   * 求值 async `for` 头部的 `var` 初始化器（名称已提升）。
+   *
+   * @param init - The `var` declaration / `var` 声明
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncForVarInit(
+    init: VariableDeclaration,
+    env: Environment,
+  ): Generator<unknown, void, unknown> {
+    for (const decl of init.declarations) {
+      if (decl.init == null) continue;
+
+      const value = yield* this.evalAsyncExpr(decl.init, env);
+
+      this.assignTo(decl.id, value, env);
+    }
+  }
+
+  /**
+   * Evaluate an async classic `for` loop with per-iteration `let` semantics.
+   *
+   * 求值 async 经典 `for` 循环，带逐迭代 `let` 语义。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label / 外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncFor(
+    stmt: ForStatement,
+    env: Environment,
+    label: string | null,
+  ): Generator<unknown, void, unknown> {
+    let baseEnv = env;
+    let hasBinding = false;
+
+    if (stmt.init != null) {
+      if (stmt.init.type === "variable") {
+        if (stmt.init.kind === "var") {
+          yield* this.evalAsyncForVarInit(stmt.init, env);
+        } else {
+          baseEnv = new Environment(env, false);
+          hasBinding = true;
+          yield* this.evalAsyncVariable(stmt.init, baseEnv);
+        }
+      } else {
+        yield* this.evalAsyncExpr(stmt.init, env);
+      }
+    }
+
+    let previous: Environment | null = null;
+
+    for (;;) {
+      const iterEnv: Environment = hasBinding ? freshIterationEnv(baseEnv, previous) : baseEnv;
+
+      if (stmt.test != null && !toBoolean(yield* this.evalAsyncExpr(stmt.test, iterEnv))) return;
+
+      try {
+        yield* this.evalAsyncStatement(stmt.body, iterEnv);
+      } catch (err) {
+        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+          // continue: run the update below
+          // continue：执行下方的 update
+        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+          return;
+        } else {
+          throw err;
+        }
+      }
+
+      if (stmt.update == null) {
+        previous = hasBinding ? iterEnv : null;
+      } else if (hasBinding) {
+        const nextEnv = freshIterationEnv(baseEnv, iterEnv);
+
+        previous = nextEnv;
+        yield* this.evalAsyncExpr(stmt.update, nextEnv);
+      } else {
+        yield* this.evalAsyncExpr(stmt.update, iterEnv);
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `for...in` loop.
+   *
+   * 求值 async `for...in` 循环。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label / 外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncForIn(
+    stmt: ForInStatement,
+    env: Environment,
+    label: string | null,
+  ): Generator<unknown, void, unknown> {
+    const right = yield* this.evalAsyncExpr(stmt.right, env);
+
+    if (right == null) throw new TypeError("Cannot convert undefined or null to object");
+
+    // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
+    const obj = Object(right) as Record<PropertyKey, unknown>;
+
+    let baseEnv = env;
+    let hasBinding = false;
+
+    if (stmt.left.type === "variable" && stmt.left.kind !== "var") {
+      baseEnv = new Environment(env, false);
+      hasBinding = true;
+      this.declareForLoopBinding(stmt.left.declarations[0].id, baseEnv, stmt.left.kind);
+    }
+
+    const keys: string[] = [];
+
+    // oxlint-disable-next-line guard-for-in -- for...in intentionally includes inherited keys
+    for (const key in obj) keys.push(key);
+
+    let previous: Environment | null = null;
+
+    for (const key of keys) {
+      const iterEnv: Environment = hasBinding ? freshIterationEnv(baseEnv, previous) : env;
+      previous = hasBinding ? iterEnv : null;
+
+      if (stmt.left.type === "variable") {
+        if (stmt.left.kind === "var") this.assignTo(stmt.left.declarations[0].id, key, iterEnv);
+        else this.assignTo(stmt.left.declarations[0].id, key, iterEnv, true);
+      } else {
+        this.assignTo(stmt.left, key, iterEnv);
+      }
+
+      try {
+        yield* this.evalAsyncStatement(stmt.body, iterEnv);
+      } catch (err) {
+        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+          continue;
+        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `for...of` loop (host iterator protocol).
+   *
+   * 求值 async `for...of` 循环（宿主迭代协议）。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @param label - Enclosing label / 外层标签
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncForOf(
+    stmt: ForOfStatement,
+    env: Environment,
+    label: string | null,
+  ): Generator<unknown, void, unknown> {
+    const iterator = iterate(yield* this.evalAsyncExpr(stmt.right, env));
+
+    let baseEnv = env;
+    let hasBinding = false;
+
+    if (stmt.left.type === "variable" && stmt.left.kind !== "var") {
+      baseEnv = new Environment(env, false);
+      hasBinding = true;
+      this.declareForLoopBinding(stmt.left.declarations[0].id, baseEnv, stmt.left.kind);
+    }
+
+    let previous: Environment | null = null;
+
+    for (;;) {
+      const step = iterator.next();
+
+      if (step.done) return;
+
+      const iterEnv: Environment = hasBinding ? freshIterationEnv(baseEnv, previous) : env;
+      previous = hasBinding ? iterEnv : null;
+
+      if (stmt.left.type === "variable") {
+        if (stmt.left.kind === "var")
+          this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv);
+        else this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv, true);
+      } else {
+        this.assignTo(stmt.left, step.value, iterEnv);
+      }
+
+      try {
+        yield* this.evalAsyncStatement(stmt.body, iterEnv);
+      } catch (err) {
+        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+          continue;
+        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `switch` statement with fall-through.
+   *
+   * 求值带 fall-through 的 async `switch` 语句。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncSwitch(
+    stmt: SwitchStatement,
+    env: Environment,
+  ): Generator<unknown, void, unknown> {
+    const discriminant = yield* this.evalAsyncExpr(stmt.discriminant, env);
+    let index = -1;
+
+    for (let i = 0; i < stmt.cases.length; i += 1) {
+      const caseNode = stmt.cases[i];
+
+      if (caseNode.test == null) continue;
+
+      if ((yield* this.evalAsyncExpr(caseNode.test, env)) === discriminant) {
+        index = i;
+        break;
+      }
+    }
+
+    if (index < 0) {
+      for (let i = 0; i < stmt.cases.length; i += 1) {
+        if (stmt.cases[i].test == null) {
+          index = i;
+          break;
+        }
+      }
+    }
+
+    if (index < 0) return;
+
+    for (let i = index; i < stmt.cases.length; i += 1) {
+      try {
+        for (const st of stmt.cases[i].body) yield* this.evalAsyncStatement(st, env);
+      } catch (err) {
+        if (err instanceof BreakSignalError && err.label == null) return;
+
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Evaluate an async `try`/`catch`/`finally` statement.
+   *
+   * 求值 async `try`/`catch`/`finally` 语句。
+   *
+   * @param stmt - The statement / 语句
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncTry(stmt: TryStatement, env: Environment): Generator<unknown, void, unknown> {
+    let pending: unknown = null;
+
+    try {
+      try {
+        const blockEnv = new Environment(env, false);
+
+        yield* this.evalAsyncBody(stmt.block.body, blockEnv);
+      } catch (err) {
+        if (
+          err instanceof ReturnSignalError ||
+          err instanceof BreakSignalError ||
+          err instanceof ContinueSignalError
+        )
+          throw err;
+
+        if (stmt.handler == null) {
+          throw err;
+        } else {
+          const catchEnv = new Environment(env, false);
+
+          if (stmt.handler.param != null) {
+            // the value is thrown natively (unwrapped), bind it directly
+            // 值以原生方式抛出（未包装），直接绑定
+            this.declarePattern(stmt.handler.param, catchEnv, "let");
+            this.assignTo(stmt.handler.param, err, catchEnv, true);
+          }
+
+          yield* this.evalAsyncBody(stmt.handler.body.body, catchEnv);
+        }
+      }
+    } catch (err) {
+      pending = err;
+    }
+
+    if (stmt.finalizer != null) {
+      const finEnv = new Environment(env, false);
+
+      yield* this.evalAsyncBody(stmt.finalizer.body, finEnv);
+    }
+
+    if (pending != null) throw pending as Error;
+  }
+
+  /**
+   * Evaluate an async expression, suspending at `await`.
+   *
+   * 求值 async 表达式，在 `await` 处挂起。
+   *
+   * Await-free, call-free expressions delegate to the sync evaluator. Every expression type is
+   * otherwise walked natively, so `await` keeps the correct left-to-right evaluation and
+   * short-circuit order (`&&`/`||`/`??`/ternary).
+   *
+   * 无 await、无调用的表达式委托给同步求值器。其余表达式类型全部原生遍历，保证 `await` 保持正确的 从左到右求值顺序与短路顺序（`&&`/`||`/`??`/三元）。
+   *
+   * @param expr - The expression / 表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncExpr(expr: Expression, env: Environment): Generator<unknown, unknown, unknown> {
+    if (isSafeSyncExpression(expr)) return this.evalExpression(expr, env);
+
+    this.step();
+
+    switch (expr.type) {
+      case "array": {
+        const arr: unknown[] = [];
+        let index = 0;
+
+        for (const element of expr.elements) {
+          if (element == null) {
+            arr.length += 1;
+            index += 1;
+            continue;
+          }
+
+          if (element.type === "spread") {
+            for (const item of iterate(yield* this.evalAsyncExpr(element.argument, env))) {
+              arr[index] = item;
+              index += 1;
+            }
+            continue;
+          }
+
+          arr[index] = yield* this.evalAsyncExpr(element, env);
+          index += 1;
+        }
+
+        return arr;
+      }
+      case "object": {
+        return yield* this.evalAsyncObject(expr, env);
+      }
+      case "member": {
+        if (expr.object.type === "super") {
+          const ctx = this.currentContext();
+
+          if (ctx == null || ctx.superBase == null)
+            throw new ReferenceError("'super' keyword unexpected here");
+
+          const key = expr.computed
+            ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
+            : (expr.property as string);
+
+          return getProperty(ctx.superBase, key);
+        }
+
+        const object = yield* this.evalAsyncExpr(expr.object, env);
+
+        if (expr.optional && object == null) return void 0;
+
+        const key = expr.computed
+          ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
+          : (expr.property as string);
+
+        return getProperty(object, key);
+      }
+      case "call": {
+        const args: unknown[] = [];
+
+        for (const arg of expr.args) {
+          if (arg.type === "spread") {
+            for (const item of iterate(yield* this.evalAsyncExpr(arg.argument, env)))
+              args.push(item);
+          } else {
+            args.push(yield* this.evalAsyncExpr(arg, env));
+          }
+        }
+
+        if (expr.callee.type === "super") return this.evalSuperCall(args);
+
+        let callee: unknown;
+        let thisArg: unknown;
+        const calleeExpr = expr.callee;
+
+        if (calleeExpr.type === "member") {
+          if (calleeExpr.object.type === "super") {
+            const ctx = this.currentContext();
+
+            if (ctx == null || ctx.superBase == null)
+              throw new ReferenceError("'super' keyword unexpected here");
+
+            const key = calleeExpr.computed
+              ? toPropertyKey(yield* this.evalAsyncExpr(calleeExpr.property as Expression, env))
+              : (calleeExpr.property as string);
+
+            callee = getProperty(ctx.superBase, key);
+            thisArg = ctx.thisRef.value;
+          } else {
+            const object = yield* this.evalAsyncExpr(calleeExpr.object, env);
+
+            if (calleeExpr.optional && object == null) return void 0;
+
+            const key = calleeExpr.computed
+              ? toPropertyKey(yield* this.evalAsyncExpr(calleeExpr.property as Expression, env))
+              : (calleeExpr.property as string);
+
+            callee = getProperty(object, key);
+            thisArg = object;
+          }
+        } else {
+          callee = yield* this.evalAsyncExpr(calleeExpr, env);
+          thisArg = void 0;
+        }
+
+        if (expr.optional && callee == null) return void 0;
+
+        return yield* this.evalAsyncCallValue(callee, args, thisArg);
+      }
+      case "new": {
+        const ctor = yield* this.evalAsyncExpr(expr.callee, env);
+        const args: unknown[] = [];
+
+        for (const arg of expr.args) {
+          if (arg.type === "spread") {
+            for (const item of iterate(yield* this.evalAsyncExpr(arg.argument, env)))
+              args.push(item);
+          } else {
+            args.push(yield* this.evalAsyncExpr(arg, env));
+          }
+        }
+
+        return this.constructValue(ctor, args);
+      }
+      case "unary": {
+        const { op } = expr;
+
+        if (op === "typeof") {
+          const { argument } = expr;
+
+          if (argument.type === "identifier") {
+            if (!env.has(argument.name)) return "undefined";
+
+            return typeOf(env.get(argument.name));
+          }
+
+          return typeOf(yield* this.evalAsyncExpr(argument, env));
+        }
+
+        if (op === "delete") {
+          const { argument } = expr;
+
+          if (argument.type === "member") {
+            if (argument.object.type === "super")
+              throw new ReferenceError("'super' keyword unexpected here");
+
+            const object = yield* this.evalAsyncExpr(argument.object, env);
+
+            if (argument.optional && object == null) return true;
+
+            const key = argument.computed
+              ? toPropertyKey(yield* this.evalAsyncExpr(argument.property as Expression, env))
+              : (argument.property as string);
+
+            // oxlint-disable-next-line typescript/no-dynamic-delete -- `delete` operator semantics
+            return delete (object as Record<PropertyKey, unknown>)[key];
+          }
+
+          if (argument.type === "identifier") {
+            if (this.strict)
+              throw new TypeError(`Cannot delete unqualified property '${argument.name}'`);
+
+            return !env.has(argument.name);
+          }
+
+          yield* this.evalAsyncExpr(argument, env);
+
+          return true;
+        }
+
+        if (op === "void") {
+          yield* this.evalAsyncExpr(expr.argument, env);
+
+          return void 0;
+        }
+
+        const value = yield* this.evalAsyncExpr(expr.argument, env);
+
+        if (op === "+") {
+          if (typeof value === "bigint")
+            throw new TypeError("Cannot convert a BigInt value to a number");
+
+          return toNumber(value);
+        }
+
+        if (op === "-") {
+          if (typeof value === "bigint") return -value;
+
+          return -toNumber(value);
+        }
+
+        if (op === "~") {
+          if (typeof value === "bigint") {
+            // eslint-disable-next-line no-bitwise -- bitwise NOT is the operator semantics
+            return ~value;
+          }
+
+          // eslint-disable-next-line no-bitwise -- bitwise NOT is the operator semantics
+          return ~toNumber(value);
+        }
+
+        return !toBoolean(value);
+      }
+      case "update": {
+        const delta = (value: unknown): unknown => {
+          if (typeof value === "bigint") return expr.op === "++" ? value + 1n : value - 1n;
+
+          const num = toNumber(value);
+
+          return expr.op === "++" ? num + 1 : num - 1;
+        };
+        const target = expr.argument;
+
+        if (target.type === "identifier") {
+          const old = env.get(target.name);
+          const value = delta(old);
+
+          env.set(target.name, value);
+
+          return expr.prefix ? value : old;
+        }
+
+        if (target.type === "member") {
+          const { object, key } = yield* this.evalAsyncMemberRef(target, env);
+          const old = getProperty(object, key);
+          const value = delta(old);
+
+          setProperty(object, key, value);
+
+          return expr.prefix ? value : old;
+        }
+
+        throw new TypeError("Invalid assignment target");
+      }
+      case "binary": {
+        const left = yield* this.evalAsyncExpr(expr.left, env);
+        const right = yield* this.evalAsyncExpr(expr.right, env);
+
+        return binaryOp(expr.op, left, right);
+      }
+      case "logical": {
+        const left = yield* this.evalAsyncExpr(expr.left, env);
+
+        if (expr.op === "&&")
+          return toBoolean(left) ? yield* this.evalAsyncExpr(expr.right, env) : left;
+        if (expr.op === "||")
+          return toBoolean(left) ? left : yield* this.evalAsyncExpr(expr.right, env);
+
+        return left ?? (yield* this.evalAsyncExpr(expr.right, env));
+      }
+      case "conditional": {
+        const test = yield* this.evalAsyncExpr(expr.test, env);
+
+        return toBoolean(test)
+          ? yield* this.evalAsyncExpr(expr.consequent, env)
+          : yield* this.evalAsyncExpr(expr.alternate, env);
+      }
+      case "assignment": {
+        return yield* this.evalAsyncAssignment(expr, env);
+      }
+      case "sequence": {
+        let value: unknown = void 0;
+
+        for (const item of expr.expressions) value = yield* this.evalAsyncExpr(item, env);
+
+        return value;
+      }
+      case "arrow":
+      case "functionExpr": {
+        return this.makeFunction(expr, env);
+      }
+      case "classExpr": {
+        return this.evalClass(expr.name, expr.superClass, expr.body, env);
+      }
+      case "template": {
+        let result = expr.quasis[0].cooked;
+
+        for (let i = 0; i < expr.expressions.length; i += 1) {
+          result += toString(yield* this.evalAsyncExpr(expr.expressions[i], env));
+          result += expr.quasis[i + 1].cooked;
+        }
+
+        return result;
+      }
+      case "await": {
+        return yield* this.evalAwait(expr.argument, env);
+      }
+      default: {
+        return this.evalExpression(expr, env);
+      }
+    }
+  }
+
+  /**
+   * Evaluate an `await` expression: evaluate the operand, then suspend on thenables.
+   *
+   * 求值 `await` 表达式：求值操作数，遇 thenable 则挂起。
+   *
+   * @param operand - The awaited expression / 被等待的表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAwait(operand: Expression, env: Environment): Generator<unknown, unknown, unknown> {
+    const value = yield* this.evalAsyncExpr(operand, env);
+
+    if (isThenable(value)) return yield value;
+
+    return value;
+  }
+
+  /**
+   * Evaluate an async assignment expression (simple, compound and logical compound).
+   *
+   * 求值 async 赋值表达式（简单、复合与逻辑复合赋值）。
+   *
+   * @param expr - The assignment / 赋值
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncAssignment(
+    expr: AssignmentExpr,
+    env: Environment,
+  ): Generator<unknown, unknown, unknown> {
+    const { op, target, value: valueExpr } = expr;
+
+    if (op === "=") {
+      const value = yield* this.evalAsyncExpr(valueExpr, env);
+
+      yield* this.evalAsyncAssignTo(target, value, env);
+
+      return value;
+    }
+
+    if (op === "&&=" || op === "||=" || op === "??=") {
+      const old = yield* this.evalAsyncReadTarget(target, env);
+
+      if (op === "&&=") {
+        if (!toBoolean(old)) return old;
+      } else if (op === "||=") {
+        if (toBoolean(old)) return old;
+      } else if (old != null) {
+        return old;
+      }
+
+      const value = yield* this.evalAsyncExpr(valueExpr, env);
+
+      yield* this.evalAsyncAssignTo(target, value, env);
+
+      return value;
+    }
+
+    const old = yield* this.evalAsyncReadTarget(target, env);
+    const value = yield* this.evalAsyncExpr(valueExpr, env);
+    const result = binaryOp(op.slice(0, -1) as BinaryOperator, old, value);
+
+    yield* this.evalAsyncAssignTo(target, result, env);
+
+    return result;
+  }
+
+  /**
+   * Read the current value of an assignment target (async-aware member refs).
+   *
+   * 读取赋值目标的当前值（成员引用支持 async）。
+   *
+   * @param target - The target / 目标
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncReadTarget(
+    target: AssignmentTarget,
+    env: Environment,
+  ): Generator<unknown, unknown, unknown> {
+    if (target.type === "identifier") return env.get(target.name);
+
+    if (target.type === "member") {
+      const { object, key } = yield* this.evalAsyncMemberRef(target, env);
+
+      return getProperty(object, key);
+    }
+
+    throw new TypeError("Invalid assignment target");
+  }
+
+  /**
+   * Assign to an assignment target with async-aware member refs.
+   *
+   * 赋值到赋值目标（成员引用支持 async）。
+   *
+   * @param target - The target / 目标
+   * @param env - Current environment / 当前环境
+   * @param value - The value / 值
+   * @param initialize - Whether this is a `let`/`const` initializer / 是否为 `let`/`const` 初始化
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncAssignTo(
+    target: AssignmentTarget,
+    value: unknown,
+    env: Environment,
+    initialize = false,
+  ): Generator<unknown, void, unknown> {
+    // ordinary targets have no `await`; delegate to the sync assigner
+    // 普通目标不含 `await`，委托给同步赋值器
+    if (!containsAwait(target)) {
+      this.assignTo(target, value, env, initialize);
+
+      return;
+    }
+
+    switch (target.type) {
+      case "member": {
+        const { object, key } = yield* this.evalAsyncMemberRef(target, env);
+
+        setProperty(object, key, value);
+        break;
+      }
+      case "objectPattern": {
+        yield* this.evalAsyncAssignToObject(target, value, env, initialize);
+        break;
+      }
+      case "arrayPattern": {
+        yield* this.evalAsyncAssignToArray(target, value, env, initialize);
+        break;
+      }
+      case "assignmentPattern": {
+        if (isUndefined(value)) {
+          yield* this.evalAsyncAssignTo(
+            target.left,
+            yield* this.evalAsyncExpr(target.right, env),
+            env,
+            initialize,
+          );
+        } else {
+          yield* this.evalAsyncAssignTo(target.left, value, env, initialize);
+        }
+        break;
+      }
+      case "rest": {
+        yield* this.evalAsyncAssignTo(target.argument, value, env, initialize);
+        break;
+      }
+      default: {
+        throw new Error("Unreachable pattern");
+      }
+    }
+  }
+
+  /**
+   * Resolve a member reference with async-aware object/key evaluation.
+   *
+   * 解析成员引用（object/key 支持 async 求值）。
+   *
+   * @param node - The member expression / 成员表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the object and key / 生成器，完成值为对象与键
+   */
+  private *evalAsyncMemberRef(
+    node: MemberExpr,
+    env: Environment,
+  ): Generator<unknown, { object: unknown; key: PropertyKey }, unknown> {
+    if (node.object.type === "super") {
+      const ctx = this.currentContext();
+
+      if (ctx == null || ctx.superBase == null)
+        throw new ReferenceError("'super' keyword unexpected here");
+
+      const key = node.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
+        : (node.property as string);
+
+      return { object: ctx.thisRef.value, key };
+    }
+
+    const object = yield* this.evalAsyncExpr(node.object, env);
+    const key = node.computed
+      ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
+      : (node.property as string);
+
+    return { object, key };
+  }
+
+  /**
+   * Evaluate an async object literal (shorthand, computed keys, methods, spread, `__proto__`).
+   *
+   * 求值 async 对象字面量（简写、计算键、方法、展开、`__proto__`）。
+   *
+   * @param node - The object / 对象
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncObject(
+    node: ObjectExpr,
+    env: Environment,
+  ): Generator<unknown, Record<PropertyKey, unknown>, unknown> {
+    const obj: Record<PropertyKey, unknown> = {};
+
+    for (const prop of node.props) {
+      if (prop.type === "spreadProperty") {
+        const source = yield* this.evalAsyncExpr(prop.argument, env);
+
+        if (source != null && (typeof source === "object" || typeof source === "function")) {
+          for (const key of Object.keys(source))
+            obj[key] = (source as Record<string, unknown>)[key];
+        }
+
+        continue;
+      }
+
+      const key = prop.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(prop.key as Expression, env))
+        : (prop.key as string);
+
+      if (prop.kind === "get" || prop.kind === "set") {
+        const fn = this.makeFunction(prop.value as FunctionExpr, env, {
+          superBase: Object.getPrototypeOf(obj) as object | null,
+        });
+        const descriptor: PropertyDescriptor = { enumerable: true, configurable: true };
+
+        if (prop.kind === "get") descriptor.get = fn;
+        else descriptor.set = fn as (value: unknown) => void;
+
+        Object.defineProperty(obj, key, descriptor);
+        continue;
+      }
+
+      const { value } = prop;
+
+      if (value.type === "functionExpr" || value.type === "arrow") {
+        // method shorthand: home object is `obj`
+        // 方法简写：home object 为 `obj`
+        const fn = this.makeFunction(value, env, {
+          superBase: Object.getPrototypeOf(obj) as object | null,
+        });
+
+        Object.defineProperty(obj, key, {
+          value: fn,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+        continue;
+      }
+
+      const propValue = yield* this.evalAsyncExpr(value, env);
+
+      if (key === "__proto__" && !prop.computed) {
+        if (propValue != null && (typeof propValue === "object" || typeof propValue === "function"))
+          Object.setPrototypeOf(obj, propValue);
+        continue;
+      }
+
+      obj[key] = propValue;
+    }
+
+    return obj;
+  }
+
+  /**
+   * Destructure an async array pattern (with elisions, defaults and rest).
+   *
+   * 解构 async 数组模式（含空位、默认值与 rest）。
+   *
+   * @param target - The array pattern / 数组模式
+   * @param value - The iterable value / 可迭代值
+   * @param env - Current environment / 当前环境
+   * @param initialize - Whether this is a `let`/`const` initializer / 是否为 `let`/`const` 初始化
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncAssignToArray(
+    target: ArrayPattern,
+    value: unknown,
+    env: Environment,
+    initialize: boolean,
+  ): Generator<unknown, void, unknown> {
+    if (value == null) {
+      throw new TypeError(
+        `Cannot destructure '${typeof value === "object" ? "null" : "undefined"}'`,
+      );
+    }
+
+    const iterator = iterate(value);
+
+    for (const element of target.elements) {
+      if (element == null) {
+        iterator.next();
+        continue;
+      }
+
+      if (element.type === "rest") {
+        const rest: unknown[] = [];
+
+        for (;;) {
+          const step = iterator.next();
+
+          if (step.done) break;
+          rest.push(step.value);
+        }
+
+        yield* this.evalAsyncAssignTo(element.argument, rest, env, initialize);
+        break;
+      }
+
+      const step = iterator.next();
+
+      yield* this.evalAsyncAssignTo(element, step.done ? void 0 : step.value, env, initialize);
+    }
+  }
+
+  /**
+   * Destructure an async object pattern (with computed keys, defaults and rest).
+   *
+   * 解构 async 对象模式（含计算键、默认值与 rest）。
+   *
+   * @param target - The object pattern / 对象模式
+   * @param value - The source value / 源值
+   * @param env - Current environment / 当前环境
+   * @param initialize - Whether this is a `let`/`const` initializer / 是否为 `let`/`const` 初始化
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncAssignToObject(
+    target: ObjectPattern,
+    value: unknown,
+    env: Environment,
+    initialize: boolean,
+  ): Generator<unknown, void, unknown> {
+    if (value == null) {
+      throw new TypeError(
+        `Cannot destructure '${typeof value === "object" ? "null" : "undefined"}'`,
+      );
+    }
+
+    // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
+    const source = Object(value) as Record<PropertyKey, unknown>;
+    const taken = new Set<string>();
+
+    for (const prop of target.props) {
+      const key = prop.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(prop.key as Expression, env))
+        : (prop.key as string);
+
+      if (typeof key === "string") taken.add(key);
+      if (prop.value != null)
+        yield* this.evalAsyncAssignTo(prop.value, source[key], env, initialize);
+    }
+
+    if (target.rest != null) {
+      const rest: Record<string, unknown> = {};
+
+      for (const key of Object.keys(source)) if (!taken.has(key)) rest[key] = source[key];
+
+      yield* this.evalAsyncAssignTo(target.rest.argument, rest, env, initialize);
+    }
+  }
+
+  /**
+   * Call any callable value from an async context (host or interpreter function).
+   *
+   * 在 async 上下文中调用任意可调用值（宿主或解释器函数）。
+   *
+   * @param callee - The callable / 可调用值
+   * @param args - Arguments / 参数
+   * @param thisArg - The `this` value / `this` 值
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator / 生成器
+   */
+  private *evalAsyncCallValue(
+    callee: unknown,
+    args: unknown[],
+    thisArg: unknown,
+  ): Generator<unknown, unknown, unknown> {
+    if (typeof callee !== "function") throw new TypeError(`${typeOf(callee)} is not a function`);
+
+    const meta = getInterpreterMeta(callee);
+
+    if (meta == null) return Reflect.apply(callee, thisArg, args) as unknown;
+
+    // async functions return a host Promise; async-context arrows run inline
+    // async 函数返回宿主 Promise；async 上下文箭头内联运行
+    if (meta.isAsync) return this.invokeFunction(meta, args, thisArg, false);
+
+    if (meta.containsAwait) return yield* this.asyncBodyGenerator(meta, args, thisArg);
+
+    return this.invokeFunction(meta, args, thisArg, false);
   }
 }

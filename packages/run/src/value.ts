@@ -39,6 +39,12 @@ export interface InterpreterFunctionMeta {
   /** Whether this is an async function / 是否为 async 函数 */
   readonly isAsync: boolean;
 
+  /**
+   * Whether the body contains an `await` expression (async-stepped when invoked) / 函数体是否含 `await`
+   * 表达式
+   */
+  readonly containsAwait: boolean;
+
   /** Whether this is a class constructor / 是否为类构造器 */
   readonly isClassConstructor: boolean;
 
