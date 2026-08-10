@@ -42,7 +42,7 @@
     "clean": "rimraf ./dist"
   },
   "dependencies": {
-    "miniprogram-api-typings": "^5.2.2"
+    "miniprogram-api-typings": "^5.2.3"
   },
   "miniprogram": "dist"
 }
