@@ -192,10 +192,14 @@ installMptoolGlobals(); // 可选
 建议让该地址永远返回 200：文件存在时返回内容，不存在时返回空响应体。框架在 `success` 回调中会通过「响应体为空」判断该页面没有热更新文件并静默跳过（空响应不会写入缓存，之后部署了新文件、再次进入页面仍会重新拉取）。
 
 ```nginx
-# 热更新文件直接放在网站根目录（如 <site root>/hot-reload/<page>），继承 server 级 root
 location /hot-reload/ {
-    try_files $uri =200;                        # 存在→返回文件内容；不存在→200 空响应体
+    try_files $uri @empty200;  # 存在 → 返回文件内容；不存在 → 走空响应
+    add_header Cache-Control "no-store" always;
+}
+
+location @empty200 {
     add_header Cache-Control "no-store" always; # 防止空 200 被缓存，新文件部署后能立即生效
+    return 200 "";
 }
 ```
 
