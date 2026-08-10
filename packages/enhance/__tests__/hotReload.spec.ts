@@ -177,4 +177,30 @@ describe("page hot reload", () => {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
   });
+
+  it("should ignore empty responses and retry on the next registration", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const spy = { calls: 0 };
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (option: {
+      success?: (result: { statusCode: number; data: unknown }) => void;
+    }): void => {
+      spy.calls += 1;
+      option.success?.({ statusCode: 200, data: "" });
+    };
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    try {
+      $Page("hotEmpty", {});
+      $Page("hotEmpty", {});
+
+      // 200 空响应体（文件不存在）被忽略且不写入缓存，再次注册同一页面会重新拉取
+      expect(spy.calls).toBe(2);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
 });

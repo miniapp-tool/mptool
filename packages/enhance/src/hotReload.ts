@@ -93,9 +93,11 @@ export const fetchHotReload = (name: string, pattern: string): void => {
     url: pattern.replace(/\$name/gu, name),
     success: ({ statusCode, data }) => {
       // in wx.request, `success` fires for any completed response regardless of the HTTP status
-      // code, so the status code must be checked explicitly
-      // wx.request 中 `success` 表示请求已完成（无论 HTTP 状态码），需自行校验状态码
-      if (statusCode !== 200 || typeof data !== "string") return;
+      // code, so the status code must be checked explicitly. When no hot-reload file exists, the
+      // nginx config serves a 200 response with an empty body, so empty bodies are skipped too.
+      // wx.request 中 `success` 表示请求已完成（无论 HTTP 状态码），需自行校验状态码；
+      // nginx 对不存在的热更新文件返回 200 空响应体，因此空字符串同样跳过
+      if (statusCode !== 200 || typeof data !== "string" || data.length === 0) return;
 
       try {
         const fn = createFunction([], data, { global: true });
