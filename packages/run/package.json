@@ -49,5 +49,6 @@
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
-  }
+  },
+  "miniprogram": "dist"
 }
