@@ -3,6 +3,7 @@ export * from "../../enhance/src/index.js";
 export * from "../../file/src/index.js";
 export * from "../../net/src/index.js";
 export * from "../../parser/src/index.js";
+export { installMptoolGlobals, mptoolGlobals } from "./global.js";
 
 // `@mptool/enhance` 已 re-export shared 的 `Emitter`，若此处再整体透传 shared 会触发
 // TS2308 重复导出，故改为显式列出 shared 的其余值/类型导出，保持 `@mptool/all` 全量导出面。

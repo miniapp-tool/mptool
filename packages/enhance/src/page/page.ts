@@ -12,6 +12,7 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
+import { applyHotReload, fetchHotReload } from "../hotReload.js";
 import type { PageConstructor, PageInstance, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
@@ -19,6 +20,7 @@ let shouldBeFirstPage = true;
 /** 页面实例到其 onAwake 监听器的映射，按实例隔离，避免多实例共享闭包 */
 const onAwakeHandlers = new WeakMap<object, (time: number) => void>();
 
+// oxlint-disable-next-line eslint/max-statements -- hot reload integration adds two statements to $Page
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
@@ -26,9 +28,13 @@ export const $Page: PageConstructor = <
   name: string,
   options: PageOptions<Data, Custom>,
 ): void => {
-  const { getPath: getRoute, extendPage, injectPage } = getConfig();
+  const { getPath: getRoute, extendPage, injectPage, hotReloadPattern } = getConfig();
   // 统一为带前导斜杠的路径，保证与导航触发端的事件 key 一致
   const route = `/${getRoute(name).replace(/^\//u, "")}`;
+
+  // 启动页面热更新拉取（异步，不阻塞注册）
+  // start the async hot-reload fetch (does not block registration)
+  if (hotReloadPattern) fetchHotReload(name, hotReloadPattern);
 
   const callLog = (lifeCycle: string, args?: unknown): void => {
     logger.debug(`Page ${name}: ${lifeCycle} has been invoked`, args);
@@ -94,6 +100,10 @@ export const $Page: PageConstructor = <
   options.onLoad = wrapFunction(
     options.onLoad,
     function handleOnLoad(this: PageInstance<Data, Custom>): void {
+      // 将已就绪的热更新方法挂到实例（未就绪时登记，拉取完成后补挂）
+      // apply hot-reload methods to the instance (register when not ready, patch on resolve)
+      if (hotReloadPattern) applyHotReload(name, this);
+
       // After onLoad, onAwake is valid if defined
       if (options.onAwake) {
         const onAwakeHandler = (time: number): void => {
