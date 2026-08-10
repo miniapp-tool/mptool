@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.0](https://github.com/miniapp-tool/mptool/compare/v0.16.3...v0.17.0) (2026-08-10)
+
+### ✨ Features
+
+- **run:** add @mptool/run package ([#1415](https://github.com/miniapp-tool/mptool/issues/1415)) ([0c284fb](https://github.com/miniapp-tool/mptool/commit/0c284fbe4cc4271c6d6e31d52cb4e3336b6df05c))
+- **skyline-enhance:** sync hot reload and global helpers ([f9af895](https://github.com/miniapp-tool/mptool/commit/f9af895786e58a692aec6881cd52d8e50dcf8aed))
+
+### Documentation
+
+- update CLAUDE ([948a4cb](https://github.com/miniapp-tool/mptool/commit/948a4cb27ddb1e7b9a91142acc324012736a53d1))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency vue to v3.5.41 ([#1418](https://github.com/miniapp-tool/mptool/issues/1418)) ([1026ab1](https://github.com/miniapp-tool/mptool/commit/1026ab1793a58eb95549e84f043c78bbe4ef83d7))
+
+### Build System
+
+- bump deps ([66737b6](https://github.com/miniapp-tool/mptool/commit/66737b6c01a164bbf5597cb7a01db44460df20d6))
+
 ## [0.16.3](https://github.com/miniapp-tool/mptool/compare/v0.16.2...v0.16.3) (2026-08-06)
 
 ### 🐛 Bug Fixes
