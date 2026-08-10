@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2](https://github.com/miniapp-tool/mptool/compare/v0.17.1...v0.17.2) (2026-08-10)
+
+### 🐛 Bug Fixes
+
+- **enhance:** skip empty hot reload responses ([14cdff7](https://github.com/miniapp-tool/mptool/commit/14cdff74da86258d9a82a6c51c662481feb7e15f))
+
+### Documentation
+
+- **enhance:** add hot reload nginx deployment note ([d22921b](https://github.com/miniapp-tool/mptool/commit/d22921b7ab2d3c0eba937a06e7fc267e651c0750))
+
 ## [0.17.1](https://github.com/miniapp-tool/mptool/compare/v0.17.0...v0.17.1) (2026-08-10)
 
 ### 🐛 Bug Fixes
