@@ -17,6 +17,7 @@ const sharedFiles = [
   "config/index.ts",
   "emitter/index.ts",
   "emitter/typings.ts",
+  "hotReload.ts",
   "navigator/index.ts",
   "navigator/typings.ts",
   "page/index.ts",
