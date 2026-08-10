@@ -41,7 +41,7 @@
     "conventional-changelog-conventionalcommits": "10.2.1",
     "cross-env": "10.1.0",
     "husky": "9.1.7",
-    "miniprogram-api-typings": "5.2.2",
+    "miniprogram-api-typings": "5.2.3",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.12",
     "oxfmt": "0.62.0",
