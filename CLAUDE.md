@@ -84,13 +84,13 @@ flowchart LR
     A -->|installMptoolGlobals| C[globalThis.mptool helper namespace]
     D[$Config hotReloadPattern] --> E[$Page registration]
     E -->|fetchHotReload| F[wx.request fetch remote code]
-    F -->|createFunction runs| G["{ func } methods object"]
+    F -->|createFunction runs| G["methods object"]
     G -->|applyHotReload| H[page instance]
 ```
 
 - The host calls `installGlobal()` (from `@mptool/run`) in `app.js` to mount `createFunction`; if hot-reload code needs helpers, it also calls `installMptoolGlobals()` (from `@mptool/all` / `@mptool/skyline`) to mount `globalThis.mptool`
 - Once `$Config` sets `hotReloadPattern` (the `$name` placeholder is replaced with the page name), `$Page` fetches the remote code asynchronously via `wx.request` at registration
-- The fetched code is executed with `createFunction` and expected to return `{ func: { ...methods } }` (or a plain methods object)
+- The fetched code is executed with `createFunction` and expected to return a methods object
 - `applyHotReload` merges the methods onto the page instance; if the remote code is not ready yet, the instance is registered and patched once the fetch resolves
 - Hot reload is best-effort: it never blocks registration/loading, all fetch/parse/run failures are silent, and non-200 status codes are ignored
 

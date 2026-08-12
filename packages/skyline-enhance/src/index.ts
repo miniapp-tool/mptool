@@ -4,7 +4,13 @@ export { go, reLaunch, redirect, switchTab } from "./bridge.js";
 export { $Config } from "./config/index.js";
 export { $Component } from "./component/index.js";
 export { userEmitter as emitter } from "./emitter/index.js";
-export { HOT_RELOAD_FUNCTION_KEY, applyHotReload, fetchHotReload } from "./hotReload.js";
+export {
+  HOT_RELOAD_FUNCTION_KEY,
+  HOT_RELOAD_ON_READY_KEY,
+  applyHotReload,
+  fetchHotReload,
+  markHotReloadReady,
+} from "./hotReload.js";
 export { $Page } from "./page/index.js";
 
 export type * from "./app/index.js";

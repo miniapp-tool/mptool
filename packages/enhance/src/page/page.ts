@@ -12,7 +12,7 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
-import { applyHotReload, fetchHotReload } from "../hotReload.js";
+import { applyHotReload, fetchHotReload, markHotReloadReady } from "../hotReload.js";
 import type { PageConstructor, PageInstance, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
@@ -128,10 +128,18 @@ export const $Page: PageConstructor = <
   );
   /* oxlint-enable typescript/no-misused-promises */
 
-  // oxlint-disable-next-line typescript/no-misused-promises
-  options.onReady = wrapFunction(options.onReady, () => {
-    appEmitter.emit(ON_PAGE_READY);
-  });
+  /* oxlint-disable typescript/no-misused-promises */
+  options.onReady = wrapFunction(
+    options.onReady,
+    function handleOnReady(this: PageInstance<Data, Custom>): void {
+      // 标记页面已 ready，触发待执行的热更新 onHotReload 钩子
+      // mark the page as ready and flush the pending hot-reload hook
+      if (hotReloadPattern) markHotReloadReady(this);
+
+      appEmitter.emit(ON_PAGE_READY);
+    },
+  );
+  /* oxlint-enable typescript/no-misused-promises */
 
   /* oxlint-disable typescript/no-misused-promises */
   options.onUnload = wrapFunction(

@@ -155,20 +155,36 @@ $Config({
 
 1. 页面注册时，框架检测 `globalThis` 上是否挂载了 `createFunction`（见下方「挂载 `createFunction`」）。
 2. 若已挂载，框架异步请求 `hotReloadPattern` 对应的地址（不阻塞页面注册与加载）。
-3. 使用 `createFunction` 以 `global: true` 执行返回的代码，将结果（`{ func: { ... } }` 形式）合并到页面实例上。
+3. 使用 `createFunction` 以 `global: true` 执行返回的代码，将返回的方法对象合并到页面实例上。
 
 ```js
 // 服务端返回的代码（函数体）
 return {
-  func: {
-    onLoad() {
-      this.setData({ count: this.data.count + 1 });
-    },
+  onLoad() {
+    this.setData({ count: this.data.count + 1 });
   },
 };
 ```
 
 热更新是尽力而为的：拉取或执行失败时静默跳过；若页面加载时热更新尚未就绪，实例会被登记并在拉取完成后补挂。合并的方法以页面实例作为 `this` 调用，可访问 `this.data`、`this.setData` 与页面方法。
+
+::: tip 热更新应用后自动触发 `onHotReload`
+
+在热更新方法对象中声明 `onHotReload` 方法后，框架会在热更新应用时自动触发它（以页面实例作为 `this`），可用于自动更新页面数据或执行初始化逻辑：
+
+- 若热更新应用时页面尚未完成渲染，`onHotReload` 会在页面 `onReady` 时触发（首次渲染完成后）；
+- 若应用时页面已经过 `onReady`，则立即触发。
+
+```js
+// 服务端返回的代码（函数体）
+return {
+  onHotReload() {
+    this.setData({ count: this.data.count + 1 });
+  },
+};
+```
+
+:::
 
 ::: caution 需要挂载 `createFunction`
 

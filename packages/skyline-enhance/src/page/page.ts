@@ -4,7 +4,7 @@ import { mount } from "../bridge.js";
 import { getConfig } from "../config/index.js";
 import { ON_APP_AWAKE } from "../constant.js";
 import { appEmitter } from "../emitter/index.js";
-import { applyHotReload, fetchHotReload } from "../hotReload.js";
+import { applyHotReload, fetchHotReload, markHotReloadReady } from "../hotReload.js";
 import type { PageConstructor, PageInstance, PageOptions } from "./typings.js";
 
 let shouldBeFirstPage = true;
@@ -70,6 +70,17 @@ export const $Page: PageConstructor = <
         // oxlint-disable-next-line typescript/no-non-null-assertion
         options.$state!.firstOpen = true;
       }
+    },
+  );
+  /* oxlint-enable typescript/no-misused-promises */
+
+  /* oxlint-disable typescript/no-misused-promises */
+  // 标记页面已 ready，触发待执行的热更新 onHotReload 钩子
+  // mark the page as ready and flush the pending hot-reload hook
+  options.onReady = wrapFunction(
+    options.onReady,
+    function handleOnReady(this: PageInstance<Data, Custom>): void {
+      if (hotReloadPattern) markHotReloadReady(this);
     },
   );
   /* oxlint-enable typescript/no-misused-promises */
