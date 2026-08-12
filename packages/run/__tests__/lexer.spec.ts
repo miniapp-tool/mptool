@@ -90,12 +90,11 @@ describe("identifier and keyword", () => {
     ]);
   });
 
-  it("should support unicode identifiers", () => {
-    expect(lex("变量 名")).toStrictEqual([
-      ["identifier", "变量"],
-      ["identifier", "名"],
-      ["eof", undefined],
-    ]);
+  it("should reject non-ASCII identifier characters", () => {
+    // Only strict ASCII identifiers are supported; non-ASCII chars are not
+    // valid identifier starts and surface as unexpected characters.
+    expectError("变量");
+    expectError("foo变量");
   });
 
   it("should tokenize keywords", () => {

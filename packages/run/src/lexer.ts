@@ -216,14 +216,61 @@ const PUNCTS = [
 
 const REGEXP_FLAGS = new Set(["g", "i", "m", "s", "u", "y"]);
 
-const IDENTIFIER_START_REGEX = /[$_\p{ID_Start}]/u;
-const IDENTIFIER_PART_REGEX = /[$_\u200C\u200D\p{ID_Continue}]/u;
 const HEX_STRING_REGEX = /^[0-9a-fA-F]+$/u;
 
-const isIdentifierStart = (ch: string | undefined): boolean =>
-  typeof ch === "string" && IDENTIFIER_START_REGEX.test(ch);
-const isIdentifierPart = (ch: string | undefined): boolean =>
-  typeof ch === "string" && IDENTIFIER_PART_REGEX.test(ch);
+/**
+ * Whether a character can start an identifier.
+ *
+ * 判断字符是否可作为标识符（变量名）的起始字符。
+ *
+ * Only strict ASCII names (`a-z`, `A-Z`, `$`, `_`) are accepted. This deliberately drops Unicode
+ * identifier support so the lexer runs on mini-program devices whose engines do not support
+ * `\p{ID_Start}` / `\p{ID_Continue}` Unicode property escapes in regular expressions.
+ *
+ * 只允许严格 ASCII 变量名（`a-z`、`A-Z`、`$`、`_`）。这是有意为之：弃用 Unicode 标识符支持，以保证在不支持正则 Unicode
+ * 属性转义（`\p{ID_Start}` / `\p{ID_Continue}`）的小程序真机环境也能正常运行。
+ *
+ * @param ch - Character to test / 待判断的字符
+ * @returns Whether the character can start an identifier / 是否可作为标识符起始字符
+ */
+const isIdentifierStart = (ch: string | undefined): boolean => {
+  if (typeof ch !== "string") return false;
+
+  const code = ch.charCodeAt(0);
+
+  return (
+    (code >= 0x61 && code <= 0x7a) || // a-z
+    (code >= 0x41 && code <= 0x5a) || // A-Z
+    code === 0x24 || // $
+    code === 0x5f // _
+  );
+};
+
+/**
+ * Whether a character can continue an identifier.
+ *
+ * 判断字符是否可作为标识符（变量名）的后续字符。
+ *
+ * Strict ASCII names only (`a-z`, `A-Z`, `0-9`, `$`, `_`), see `isIdentifierStart`.
+ *
+ * 只允许严格 ASCII 变量名（`a-z`、`A-Z`、`0-9`、`$`、`_`），见 `isIdentifierStart`。
+ *
+ * @param ch - Character to test / 待判断的字符
+ * @returns Whether the character can continue an identifier / 是否可作为标识符后续字符
+ */
+const isIdentifierPart = (ch: string | undefined): boolean => {
+  if (typeof ch !== "string") return false;
+
+  const code = ch.charCodeAt(0);
+
+  return (
+    (code >= 0x61 && code <= 0x7a) || // a-z
+    (code >= 0x41 && code <= 0x5a) || // A-Z
+    (code >= 0x30 && code <= 0x39) || // 0-9
+    code === 0x24 || // $
+    code === 0x5f // _
+  );
+};
 const isDigit = (ch: string): boolean => ch >= "0" && ch <= "9";
 const isOctalDigit = (ch: string): boolean => ch >= "0" && ch <= "7";
 const isBinaryDigit = (ch: string): boolean => ch === "0" || ch === "1";
