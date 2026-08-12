@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1](https://github.com/miniapp-tool/mptool/compare/v0.18.0...v0.18.1) (2026-08-12)
+
+### 🐛 Bug Fixes
+
+- **run:** use strict ASCII identifier names for device compatibility ([728a3b5](https://github.com/miniapp-tool/mptool/commit/728a3b53ddbd275846b82824e88ba36d4756691c))
+
+### Build System
+
+- fix sync scripts ([cf4c613](https://github.com/miniapp-tool/mptool/commit/cf4c6135b37eecc11a7016ca07a4f0237a6fd224))
+
 ## [0.18.0](https://github.com/miniapp-tool/mptool/compare/v0.17.2...v0.18.0) (2026-08-12)
 
 ### ✨ Features
