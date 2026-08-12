@@ -22,10 +22,6 @@
     "lint:check": "oxlint --deny-warnings --report-unused-disable-directives && oxfmt --check",
     "packages:update": "pnpm dlx npm-check-updates -u --deep",
     "postinstall": "husky",
-    "release": "pnpm run clean && pnpm run build && pnpm run release:version && pnpm run release:publish && pnpm run release:sync",
-    "release:publish": "lerna publish from-package --yes",
-    "release:sync": " unrun scripts/sync.ts",
-    "release:version": "lerna version",
     "test": "vitest run --coverage"
   },
   "devDependencies": {
