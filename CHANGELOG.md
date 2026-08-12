@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.0](https://github.com/miniapp-tool/mptool/compare/v0.17.2...v0.18.0) (2026-08-12)
+
+### ✨ Features
+
+- **enhance:** add onHotReload hook to page hot reload ([16a8691](https://github.com/miniapp-tool/mptool/commit/16a86915a57b75a833d280989022ae4cb09c8c1b))
+
+### Documentation
+
+- correct nginx ([b906563](https://github.com/miniapp-tool/mptool/commit/b90656353a21aae4ccd3e0579899bf0208ab5e73))
+
+### Miscellaneous Chores
+
+- **release:** update publish workflow and fix npmmirror sync ([02a39fc](https://github.com/miniapp-tool/mptool/commit/02a39fc4f4f4adcd9c241055d4b208c5daa7d44e))
+
 ## [0.17.2](https://github.com/miniapp-tool/mptool/compare/v0.17.1...v0.17.2) (2026-08-10)
 
 ### 🐛 Bug Fixes
