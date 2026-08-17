@@ -1,6 +1,6 @@
 import { MpError, env } from "@mptool/shared";
 
-import { showModal } from "../ui/index.js";
+import { showModal } from "./ui/index.js";
 
 /**
  * 权限申请流程

@@ -1,7 +1,7 @@
 import { MpError } from "@mptool/shared";
 
 import { download } from "../network/index.js";
-import { withScope } from "../private/withScope.js";
+import { withScope } from "../permission.js";
 
 /**
  * 保存图片到相册

@@ -1,6 +1,6 @@
 import { MpError } from "@mptool/shared";
 
-import { withScope } from "./private/withScope.js";
+import { withScope } from "./permission.js";
 
 /**
  * 保存联系人到通讯录
