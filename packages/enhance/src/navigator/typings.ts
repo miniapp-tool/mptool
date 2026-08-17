@@ -100,7 +100,9 @@ export interface NavigatorMethods {
    * 示例：
    *
    * ```html
-   * <button catch:tap="$bindGo" data-url="/pages/play" data-before="onClickBefore">click go</button>
+   * <button catch:tap="$bindGo" data-url="/pages/play" data-before="onClickBefore">
+   *   click go
+   * </button>
    * ```
    */
   $bindGo: (event: WechatMiniprogram.Touch) => void | Promise<void>;
@@ -168,7 +170,9 @@ export interface NavigatorMethods {
    * 示例:
    *
    * ```html
-   * <button catch:tap="$bindBack" data-delta="1" data-before="onClickBefore">click relaunch</button>
+   * <button catch:tap="$bindBack" data-delta="1" data-before="onClickBefore">
+   *   click relaunch
+   * </button>
    * ```
    */
   $bindBack: () => Promise<void> | void;
