@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
+
+### Styles
+
+- fix linter ([0a59cdd](https://github.com/miniapp-tool/mptool/commit/0a59cdd1a0e7ba763d307986e8e68da3379b1878))
+
 ## [0.18.1](https://github.com/miniapp-tool/mptool/compare/v0.18.0...v0.18.1) (2026-08-12)
 
 **Note:** Version bump only for package @mptool/skyline-enhance

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
+
+### ✨ Features
+
+- **api:** export withScope permission helper ([987bc86](https://github.com/miniapp-tool/mptool/commit/987bc86890576a84bff27d514ae394487767892d))
+
+### 🐛 Bug Fixes
+
+- **shared:** remove misplaced pure annotation in env ([c35138e](https://github.com/miniapp-tool/mptool/commit/c35138e527e1d1870d21203225acac8299c783ea))
+
+### Styles
+
+- fix linter ([0a59cdd](https://github.com/miniapp-tool/mptool/commit/0a59cdd1a0e7ba763d307986e8e68da3379b1878))
+
+### Miscellaneous Chores
+
+- **deps:** update commitlint monorepo to v21.2.2 ([#1420](https://github.com/miniapp-tool/mptool/issues/1420)) ([ea2738a](https://github.com/miniapp-tool/mptool/commit/ea2738ad6c101d2585a1b4d62d36d4264deb92cb))
+- **deps:** update dependency conventional-changelog-conventionalcommits to v10.3.0 ([#1422](https://github.com/miniapp-tool/mptool/issues/1422)) ([dacee9a](https://github.com/miniapp-tool/mptool/commit/dacee9a3b63f73293ba97d9c5bfdbbf79bcbc82f))
+- **deps:** update dependency oxfmt to v0.63.0 ([#1423](https://github.com/miniapp-tool/mptool/issues/1423)) ([e48b0fc](https://github.com/miniapp-tool/mptool/commit/e48b0fcae9fe6a89bb567ac69b95f6a597afa6b8))
+- **deps:** update dependency sass-embedded to v1.102.0 ([#1425](https://github.com/miniapp-tool/mptool/issues/1425)) ([50e081f](https://github.com/miniapp-tool/mptool/commit/50e081fae82a2572d9e00b2f24b0acd1e63d12a8))
+- **deps:** update lerna-lite monorepo to v5.5.0 ([#1426](https://github.com/miniapp-tool/mptool/issues/1426)) ([20fdfb9](https://github.com/miniapp-tool/mptool/commit/20fdfb97b3546f595a2bfdc607755e74e1a02f19))
+
 ## [0.18.1](https://github.com/miniapp-tool/mptool/compare/v0.18.0...v0.18.1) (2026-08-12)
 
 ### 🐛 Bug Fixes
