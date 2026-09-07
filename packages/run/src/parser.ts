@@ -1,3 +1,5 @@
+// oxlint-disable max-statements complexity max-lines-per-function max-lines
+// oxlint-disable-next-line max-classes-per-file
 import type {
   ArrayExpr,
   ArrayPattern,

@@ -274,8 +274,8 @@ describe(URLSearchParams, () => {
 
   describe("iterator", () => {
     it("entries", () => {
-      const obj = getSimpleObj(),
-        ret: string[] = [];
+      const obj = getSimpleObj();
+      const ret: string[] = [];
 
       for (const p of obj.entries()) ret.push(`${p[0]},${p[1]}`);
 
@@ -283,8 +283,8 @@ describe(URLSearchParams, () => {
     });
 
     it("for...of", () => {
-      const obj = getSimpleObj(),
-        ret: string[] = [];
+      const obj = getSimpleObj();
+      const ret: string[] = [];
 
       for (const p of obj) ret.push(`${p[0]},${p[1]}`);
 
@@ -292,8 +292,8 @@ describe(URLSearchParams, () => {
     });
 
     it("keys", () => {
-      const obj = getSimpleObj(),
-        ret: string[] = [];
+      const obj = getSimpleObj();
+      const ret: string[] = [];
 
       for (const key of obj.keys()) ret.push(key);
 
@@ -320,8 +320,8 @@ describe(URLSearchParams, () => {
     });
 
     it("values", () => {
-      const obj = getSimpleObj(),
-        ret: string[] = [];
+      const obj = getSimpleObj();
+      const ret: string[] = [];
 
       for (const value of obj.values()) ret.push(value);
 

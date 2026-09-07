@@ -13,8 +13,7 @@ describe(updateApp, () => {
   });
 
   it("should apply update when update is ready", () => {
-    let readyCallback: (() => void) | undefined;
-    let applyUpdate: (() => void) | undefined;
+    let applyUpdate: (() => void) | undefined, readyCallback: (() => void) | undefined;
     let applied = false;
 
     const mockGetUpdateManager = wx as unknown as {

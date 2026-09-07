@@ -10,11 +10,15 @@ allowBuilds:
 enableGlobalVirtualStore: true
 
 minimumReleaseAgeExclude:
+  - "@mdit/*"
   - "@oxfmt/*"
   - "@oxlint/*"
+  - "@vuepress/*"
   - oxc-config-hope
   - oxfmt
   - oxlint
+  - vuepress
+  - vuepress-*
 
 packageExtensions:
   "@lerna-lite/version":

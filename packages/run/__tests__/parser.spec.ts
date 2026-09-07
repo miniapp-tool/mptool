@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LexerError } from "../src/lexer.js";
+import { LexerError } from "../src/lexerError.js";
 import { parse, ParseError, Parser } from "../src/parser.js";
 
 /**

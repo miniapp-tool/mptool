@@ -1,3 +1,4 @@
+// oxlint-disable complexity max-lines-per-function max-statements max-lines
 /**
  * Tree-walking interpreter (evaluator core) for `@mptool/run`.
  *
@@ -59,8 +60,12 @@ import type {
   VariableDeclaration,
   WhileStatement,
 } from "./ast.js";
+import { BreakSignalError } from "./breakSignalError.js";
+import { ContinueSignalError } from "./continueSignalError.js";
 import { Environment } from "./environment.js";
 import type { FeatureOptions } from "./parser.js";
+import { ReturnSignalError } from "./returnSignalError.js";
+import { ThrowSignalError } from "./throwSignalError.js";
 import {
   getInterpreterMeta,
   isUndefined,
@@ -467,38 +472,6 @@ const getAccessorGroup = (groups: AccessorGroups, target: object): AccessorMap =
 
   return group;
 };
-
-/** Signal thrown by `return` / `return` 抛出的信号 */
-class ReturnSignalError extends Error {
-  constructor(public readonly value: unknown) {
-    super("return");
-    this.name = "ReturnSignalError";
-  }
-}
-
-/** Signal thrown by `break` / `break` 抛出的信号 */
-class BreakSignalError extends Error {
-  constructor(public readonly label: string | null) {
-    super("break");
-    this.name = "BreakSignalError";
-  }
-}
-
-/** Signal thrown by `continue` / `continue` 抛出的信号 */
-class ContinueSignalError extends Error {
-  constructor(public readonly label: string | null) {
-    super("continue");
-    this.name = "ContinueSignalError";
-  }
-}
-
-/** Signal wrapping a user `throw` value / 包装用户 `throw` 值的信号 */
-class ThrowSignalError extends Error {
-  constructor(public readonly value: unknown) {
-    super("throw");
-    this.name = "ThrowSignalError";
-  }
-}
 
 /** A single execution context (per function call) / 单个执行上下文（每次函数调用一个） */
 interface RuntimeContext {
@@ -4073,8 +4046,7 @@ export class Runtime {
 
         if (expr.callee.type === "super") return this.evalSuperCall(args);
 
-        let callee: unknown;
-        let thisArg: unknown;
+        let callee: unknown, thisArg: unknown;
         const calleeExpr = expr.callee;
 
         if (calleeExpr.type === "member") {

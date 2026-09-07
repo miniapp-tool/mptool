@@ -104,6 +104,7 @@ export const $Component: ComponentConstructor = <
     function attached(
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
     ) {
+      // oxlint-disable-next-line no-multi-assign
       const id = (componentIndex += 1);
 
       this.$id = id;

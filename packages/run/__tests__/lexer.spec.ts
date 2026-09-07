@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { Lexer, LexerError } from "../src/lexer.js";
+import { Lexer } from "../src/lexer.js";
 import type { Token } from "../src/lexer.js";
+import { LexerError } from "../src/lexerError.js";
 
 /**
  * Tokenize a full source, mimicking the parser's template flow: after a `}` that closes a `${...}`

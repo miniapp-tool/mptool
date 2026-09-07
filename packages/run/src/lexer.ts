@@ -1,3 +1,4 @@
+// oxlint-disable complexity max-statements
 /**
  * Lexer for the `@mptool/run` interpreter.
  *
@@ -9,6 +10,21 @@
  *
  * 词法分析器将源码字符串切分为 Token 流，支持 ES5 全量 + 计划内的 ES6 子集 （模板字符串、BigInt 字面量、可选链、幂运算、逻辑赋值等）。
  */
+
+import { LexerError } from "./lexerError.js";
+import {
+  isBinaryDigit,
+  isDigit,
+  isHexDigit,
+  isHexString,
+  isIdentifierPart,
+  isIdentifierStart,
+  isOctalDigit,
+  isWhitespace,
+  KEYWORDS,
+  PUNCTS,
+  REGEXP_FLAGS,
+} from "./lexerUtils.js";
 
 /**
  * A lexical token.
@@ -53,246 +69,6 @@ export type Token =
   | { type: "templateTail"; value: string; cooked: string; start: number; end: number } // }...`
   | { type: "punct"; value: string; start: number; end: number }
   | { type: "eof"; start: number; end: number };
-
-const getLineColumn = (source: string, offset: number): { line: number; column: number } => {
-  let line = 1;
-  let column = 1;
-
-  for (let i = 0; i < offset; i += 1) {
-    if (source[i] === "\n") {
-      line += 1;
-      column = 1;
-    } else {
-      column += 1;
-    }
-  }
-
-  return { line, column };
-};
-
-/**
- * Error thrown by the `Lexer` on illegal input, carrying source positions.
- *
- * 词法分析器在遇到非法输入时抛出的错误，包含源码位置信息。
- */
-export class LexerError extends Error {
-  /** Start offset of the offending range / 出错范围的起始偏移 */
-  readonly start: number;
-
-  /** End offset of the offending range / 出错范围的结束偏移 */
-  readonly end: number;
-
-  /** 1-based line number / 从 1 开始的行号 */
-  readonly line: number;
-
-  /** 1-based column number / 从 1 开始的列号 */
-  readonly column: number;
-
-  /**
-   * @param message - Error message / 错误信息
-   * @param source - Full source string / 完整源码
-   * @param start - Start offset / 起始偏移
-   * @param end - End offset / 结束偏移
-   */
-  constructor(message: string, source: string, start: number, end: number) {
-    const { line, column } = getLineColumn(source, start);
-
-    super(`${message} (line ${line}, column ${column})`);
-
-    this.name = "LexerError";
-    this.start = start;
-    this.end = end;
-    this.line = line;
-    this.column = column;
-  }
-}
-
-const KEYWORDS = new Set([
-  "break",
-  "case",
-  "catch",
-  "class",
-  "const",
-  "continue",
-  "debugger",
-  "default",
-  "delete",
-  "do",
-  "else",
-  "enum",
-  "export",
-  "extends",
-  "false",
-  "finally",
-  "for",
-  "function",
-  "if",
-  "import",
-  "in",
-  "instanceof",
-  "new",
-  "null",
-  "return",
-  "super",
-  "switch",
-  "this",
-  "throw",
-  "true",
-  "try",
-  "typeof",
-  "var",
-  "void",
-  "while",
-  "with",
-  "yield",
-  "let",
-  "static",
-]);
-
-/**
- * Punctuators, sorted by length in descending order for longest-match.
- *
- * 标点/运算符表，按长度降序排列以实现最长匹配。
- */
-const PUNCTS = [
-  ">>>=",
-  "...",
-  "===",
-  "!==",
-  "**=",
-  "<<=",
-  ">>=",
-  ">>>",
-  "&&=",
-  "||=",
-  "??=",
-  "==",
-  "!=",
-  "<=",
-  ">=",
-  "++",
-  "--",
-  "<<",
-  ">>",
-  "**",
-  "&&",
-  "||",
-  "??",
-  "=>",
-  "+=",
-  "-=",
-  "*=",
-  "/=",
-  "%=",
-  "&=",
-  "|=",
-  "^=",
-  "?.",
-  "{",
-  "}",
-  "(",
-  ")",
-  "[",
-  "]",
-  ";",
-  ",",
-  "<",
-  ">",
-  "+",
-  "-",
-  "*",
-  "/",
-  "%",
-  "&",
-  "|",
-  "^",
-  "!",
-  "~",
-  "?",
-  ":",
-  "=",
-  ".",
-] as const;
-
-const REGEXP_FLAGS = new Set(["g", "i", "m", "s", "u", "y"]);
-
-const HEX_STRING_REGEX = /^[0-9a-fA-F]+$/u;
-
-/**
- * Whether a character can start an identifier.
- *
- * 判断字符是否可作为标识符（变量名）的起始字符。
- *
- * Only strict ASCII names (`a-z`, `A-Z`, `$`, `_`) are accepted. This deliberately drops Unicode
- * identifier support so the lexer runs on mini-program devices whose engines do not support
- * `\p{ID_Start}` / `\p{ID_Continue}` Unicode property escapes in regular expressions.
- *
- * 只允许严格 ASCII 变量名（`a-z`、`A-Z`、`$`、`_`）。这是有意为之：弃用 Unicode 标识符支持，以保证在不支持正则 Unicode
- * 属性转义（`\p{ID_Start}` / `\p{ID_Continue}`）的小程序真机环境也能正常运行。
- *
- * @param ch - Character to test / 待判断的字符
- * @returns Whether the character can start an identifier / 是否可作为标识符起始字符
- */
-const isIdentifierStart = (ch: string | undefined): boolean => {
-  if (typeof ch !== "string") return false;
-
-  const code = ch.charCodeAt(0);
-
-  return (
-    (code >= 0x61 && code <= 0x7a) || // a-z
-    (code >= 0x41 && code <= 0x5a) || // A-Z
-    code === 0x24 || // $
-    code === 0x5f // _
-  );
-};
-
-/**
- * Whether a character can continue an identifier.
- *
- * 判断字符是否可作为标识符（变量名）的后续字符。
- *
- * Strict ASCII names only (`a-z`, `A-Z`, `0-9`, `$`, `_`), see `isIdentifierStart`.
- *
- * 只允许严格 ASCII 变量名（`a-z`、`A-Z`、`0-9`、`$`、`_`），见 `isIdentifierStart`。
- *
- * @param ch - Character to test / 待判断的字符
- * @returns Whether the character can continue an identifier / 是否可作为标识符后续字符
- */
-const isIdentifierPart = (ch: string | undefined): boolean => {
-  if (typeof ch !== "string") return false;
-
-  const code = ch.charCodeAt(0);
-
-  return (
-    (code >= 0x61 && code <= 0x7a) || // a-z
-    (code >= 0x41 && code <= 0x5a) || // A-Z
-    (code >= 0x30 && code <= 0x39) || // 0-9
-    code === 0x24 || // $
-    code === 0x5f // _
-  );
-};
-const isDigit = (ch: string): boolean => ch >= "0" && ch <= "9";
-const isOctalDigit = (ch: string): boolean => ch >= "0" && ch <= "7";
-const isBinaryDigit = (ch: string): boolean => ch === "0" || ch === "1";
-const isHexDigit = (ch: string): boolean =>
-  (ch >= "0" && ch <= "9") || (ch >= "a" && ch <= "f") || (ch >= "A" && ch <= "F");
-const isHexString = (str: string): boolean => HEX_STRING_REGEX.test(str);
-const isWhitespace = (ch: string): boolean =>
-  ch === " " ||
-  ch === "\t" ||
-  ch === "\n" ||
-  ch === "\r" ||
-  ch === "\v" ||
-  ch === "\f" ||
-  ch === "\u00A0" ||
-  ch === "\uFEFF" ||
-  ch === "\u2028" ||
-  ch === "\u2029" ||
-  ch === "\u1680" ||
-  (ch >= "\u2000" && ch <= "\u200A") ||
-  ch === "\u202F" ||
-  ch === "\u205F" ||
-  ch === "\u3000";
 
 /**
  * Whether a token can be the end of a complete expression, used to decide whether a following `/`

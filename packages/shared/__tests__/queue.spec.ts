@@ -1,4 +1,3 @@
-// oxlint-disable promise/no-multiple-resolved
 import { describe, expect, it, vi } from "vitest";
 
 import { Queue, funcQueue } from "../src";
