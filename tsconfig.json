@@ -2,7 +2,8 @@
   "extends": "@mr-hope/tsconfig/bundler.json",
   "compilerOptions": {
     "types": ["miniprogram-api-typings"],
-    "importHelpers": false
+    "importHelpers": false,
+    "isolatedDeclarations": true
   },
   "include": ["**/*.ts", "**/*.mts", "docs/.vuepress/**/*.ts"]
 }
