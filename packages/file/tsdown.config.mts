@@ -1,3 +1,9 @@
+import type { UserConfig } from "tsdown";
+
 import { tsdownConfig } from "../../scripts/tsdown.js";
 
-export default tsdownConfig("index", { alwaysBundle: [/^@mptool\//u] });
+const config: UserConfig = tsdownConfig("index", {
+  alwaysBundle: [/^@mptool\//u],
+});
+
+export default config;

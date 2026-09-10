@@ -4,7 +4,7 @@
  *
  * `Lexer` 的低层词法辅助：token 表（关键字 / 标点 / 正则标志）与字符分类谓词。
  */
-export const KEYWORDS = new Set([
+export const KEYWORDS: Set<string> = new Set<string>([
   "break",
   "case",
   "catch",
@@ -111,7 +111,7 @@ export const PUNCTS = [
   ".",
 ] as const;
 
-export const REGEXP_FLAGS = new Set(["g", "i", "m", "s", "u", "y"]);
+export const REGEXP_FLAGS: Set<string> = new Set<string>(["g", "i", "m", "s", "u", "y"]);
 
 const HEX_STRING_REGEX = /^[0-9a-fA-F]+$/u;
 

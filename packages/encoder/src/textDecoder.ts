@@ -32,7 +32,10 @@ export class TextDecoder {
   readonly #fatal: boolean = false;
   #doNotFlush = false;
 
-  constructor(label = DEFAULT_ENCODING, options: { fatal?: boolean; ignoreBOM?: boolean } = {}) {
+  constructor(
+    label: string = DEFAULT_ENCODING,
+    options: { fatal?: boolean; ignoreBOM?: boolean } = {},
+  ) {
     // 1. Let encoding be the result of getting an encoding from
     // label.
     const encoding = getEncoding(label);

@@ -76,7 +76,9 @@ export const tsdownConfig = (
   fileInfo: string | string[],
   {
     platform = "browser",
-    dts = true,
+    dts = {
+      generator: "oxc",
+    },
     alwaysBundle = [],
     neverBundle = [],
     onlyBundle = false,

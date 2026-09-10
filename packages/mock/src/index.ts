@@ -25,7 +25,37 @@ const downloadTask = (): MockDownloadTask => ({
   abort: (): void => void 0,
 });
 
-const wxMock = {
+const wxMock: {
+  version: string;
+  env: {
+    USER_DATA_PATH: string;
+  };
+  getRealtimeLogManager: () => Pick<
+    Console,
+    "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
+  >;
+  getLogManager: (options?: {
+    level?: number;
+  }) => Pick<Console, "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn">;
+  getFileSystemManager: typeof getFileSystemManager;
+  downloadFile: (option?: {
+    url: string;
+    filePath?: string;
+    header?: Record<string, string>;
+    success?: (result: { statusCode: number; tempFilePath?: string; filePath?: string }) => void;
+    fail?: (result: { errMsg: string; statusCode?: number }) => void;
+    complete?: (result: { errMsg: string }) => void;
+  }) =>
+    | void
+    | Promise<{ statusCode: number; tempFilePath?: string; filePath?: string }>
+    | MockDownloadTask;
+} & typeof storageApi &
+  typeof networkApi &
+  typeof uiApi &
+  typeof deviceApi &
+  typeof wxmlApi &
+  typeof fileApi &
+  typeof frameworkApiMethods = {
   version: "test",
   env: {
     USER_DATA_PATH: "wxfile://",
@@ -94,6 +124,6 @@ const wxMock = {
 
 (globalThis as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
 
-export const wx = wxMock;
+export const wx: typeof wxMock = wxMock;
 export { frameworkApi } from "./framework.js";
 export { emitEvent } from "./ui.js";

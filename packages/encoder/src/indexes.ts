@@ -53,7 +53,11 @@ const decodeIndex = (base64: string): Uint16Array => {
   return result;
 };
 
-export const encodingIndex = {
+export const encodingIndex: {
+  /** Gb18030 index: maps pointer to code point (values 164 ~ 65509). */
+  gb18030: Uint16Array;
+  "gb18030-ranges": [number, number][];
+} = {
   /** Gb18030 index: maps pointer to code point (values 164 ~ 65509). */
   gb18030: decodeIndex(GB18030_INDEX_BASE64),
   "gb18030-ranges": [

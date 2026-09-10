@@ -8,7 +8,7 @@ export interface AppEventType {
   [ON_APP_AWAKE]: number;
 }
 
-export const appEmitter = Emitter<AppEventType>();
+export const appEmitter: EmitterInstance<AppEventType> = Emitter<AppEventType>();
 
 export type UserEmitter = EmitterInstance<WechatMiniprogram.IAnyObject>;
 

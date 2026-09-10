@@ -13,9 +13,9 @@ export interface AppEventType {
 
 export type RouteEventType = Record<string, PageQuery>;
 
-export const appEmitter = Emitter<AppEventType>();
+export const appEmitter: EmitterInstance<AppEventType> = Emitter<AppEventType>();
 
-export const routeEmitter = Emitter<RouteEventType>();
+export const routeEmitter: EmitterInstance<RouteEventType> = Emitter<RouteEventType>();
 
 export type UserEmitter = EmitterInstance<WechatMiniprogram.IAnyObject>;
 

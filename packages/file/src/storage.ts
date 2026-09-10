@@ -13,7 +13,7 @@ logger.debug(`Current sessionId is ${sessionId}`);
 const CACHE_PREFIX = "_cache_";
 
 /** 存储 */
-export const storage = new Map<string, unknown>();
+export const storage: Map<string, unknown> = new Map<string, unknown>();
 
 /**
  * 存放数据

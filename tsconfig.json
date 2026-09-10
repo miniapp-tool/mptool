@@ -1,8 +1,10 @@
 {
-  "extends": "@mr-hope/tsconfig/bundler.json",
+  "extends": "@mr-hope/tsconfig/check.json",
   "compilerOptions": {
-    "types": ["miniprogram-api-typings"],
-    "importHelpers": false
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "isolatedDeclarations": true,
+    "types": ["miniprogram-api-typings"]
   },
   "include": ["**/*.ts", "**/*.mts", "docs/.vuepress/**/*.ts"]
 }

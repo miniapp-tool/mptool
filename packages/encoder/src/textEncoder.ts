@@ -29,7 +29,7 @@ export class TextEncoder {
   readonly #fatal: boolean = false;
 
   constructor(
-    label = DEFAULT_ENCODING,
+    label: string = DEFAULT_ENCODING,
     options: {
       fatal?: boolean;
     } = {},

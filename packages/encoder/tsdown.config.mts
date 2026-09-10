@@ -1,6 +1,8 @@
+import type { UserConfig } from "tsdown";
+
 import { tsdownConfig } from "../../scripts/tsdown.js";
 
-export default tsdownConfig("index", {
+const config: UserConfig = tsdownConfig("index", {
   alwaysBundle: [/^@mptool\//u],
   treeshake: {
     // Keep `src/implements/` modules which register `decoders`/`encoders`
@@ -8,3 +10,5 @@ export default tsdownConfig("index", {
     moduleSideEffects: (id) => id.includes("/implements/"),
   },
 });
+
+export default config;

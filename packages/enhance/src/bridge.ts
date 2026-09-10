@@ -26,10 +26,14 @@ export type NavigatorOptionsType =
   | WechatMiniprogram.RedirectToOption
   | WechatMiniprogram.SwitchTabOption;
 
-export const go = getTrigger("navigateTo");
-export const redirect = getTrigger("redirectTo");
-export const switchTab = getTrigger("switchTab");
-export const reLaunch = getTrigger("reLaunch");
+export const go: (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult> =
+  getTrigger("navigateTo");
+export const redirect: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
+  getTrigger("redirectTo");
+export const switchTab: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
+  getTrigger("switchTab");
+export const reLaunch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
+  getTrigger("reLaunch");
 
 const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,

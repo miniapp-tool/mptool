@@ -1,8 +1,9 @@
 import { viteBundler } from "@vuepress/bundler-vite";
+import type { UserConfig } from "vuepress";
 import { defineUserConfig } from "vuepress";
 import { hopeTheme } from "vuepress-theme-hope";
 
-export default defineUserConfig({
+const config: UserConfig = defineUserConfig({
   lang: "zh-CN",
   title: "MP Tool",
   description: "极其轻量的小程序框架",
@@ -51,3 +52,5 @@ export default defineUserConfig({
     },
   }),
 });
+
+export default config;

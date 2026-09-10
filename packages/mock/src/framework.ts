@@ -72,7 +72,10 @@ export const setFrameworkMock = (): void => {
 };
 
 /** Wx 导航方法 */
-export const frameworkApiMethods = {
+export const frameworkApiMethods: Record<
+  "navigateTo" | "navigateBack" | "redirectTo" | "switchTab" | "reLaunch",
+  (option?: NavigationOption) => unknown
+> = {
   navigateTo: createNavigator("navigateTo"),
   navigateBack: createNavigator("navigateBack"),
   redirectTo: createNavigator("redirectTo"),

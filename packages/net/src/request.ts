@@ -4,7 +4,7 @@ import { CookieStore } from "./cookieStore.js";
 import { Headers } from "./headers.js";
 import { URLSearchParams } from "./urlSearchParams.js";
 
-export const requestCookieStore = new CookieStore("__request_cookie__");
+export const requestCookieStore: CookieStore = new CookieStore("__request_cookie__");
 
 export type RequestBody =
   | WechatMiniprogram.IAnyObject

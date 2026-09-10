@@ -1,6 +1,7 @@
+import type { OxlintConfig } from "oxc-config-hope/oxlint";
 import { defineHopeConfig } from "oxc-config-hope/oxlint";
 
-export default defineHopeConfig(
+const config: OxlintConfig = defineHopeConfig(
   {
     ignore: ["demo/**/*.js"],
     rules: {
@@ -69,3 +70,5 @@ export default defineHopeConfig(
     },
   },
 );
+
+export default config;
