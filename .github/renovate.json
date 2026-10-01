@@ -21,5 +21,7 @@
   },
   "vulnerabilityAlerts": {
     "enabled": true
-  }
+  },
+  "minimumReleaseAge": "1 day",
+  "timezone": "Asia/Shanghai"
 }

@@ -14,6 +14,11 @@ const config: OxlintConfig = defineHopeConfig(
       "prefer-named-capture-group": "off",
 
       "import/no-unassigned-import": ["warn", { allow: ["@mptool/mock"] }],
+      // `Record<never, never>` is our deliberate "empty object" type: it is part of the
+      // documented public generics (see `docs/net/api/request.md`) and acts as the
+      // identity type for the component/page instance intersections. This rule only
+      // accepts `{}` — which the preset already forbids — and is not configurable.
+      "typescript/no-generated-empty-object-type": "off",
       "typescript/no-unnecessary-type-parameters": "off",
       "unicorn/text-encoding-identifier-case": "off",
       "unicorn/prefer-code-point": "off",

@@ -1,5 +1,15 @@
 export default {
-  cooldown: 1,
+  cooldown: (pkg) => {
+    if (
+      ["@mdit/", "@mptool/", "@mr-hope/", "@oxfmt/", "@oxlint/", "@vuepress/", "vuepress-"].some(
+        (prefix) => pkg.startsWith(prefix),
+      ) ||
+      ["oxc-config-hope", "oxfmt", "oxlint", "vuepress"].includes(pkg)
+    )
+      return 0;
+
+    return 1;
+  },
   peer: true,
   upgrade: true,
   timeout: 360000,
