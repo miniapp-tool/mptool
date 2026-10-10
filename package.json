@@ -32,7 +32,7 @@
     "@types/node": "^24.19.0",
     "@vitest/coverage-istanbul": "5.0.3",
     "buffer": "6.0.3",
-    "conventional-changelog-conventionalcommits": "10.4.0",
+    "conventional-changelog-conventionalcommits": "10.4.1",
     "cross-env": "10.1.0",
     "husky": "9.1.7",
     "miniprogram-api-typings": "5.2.3",
