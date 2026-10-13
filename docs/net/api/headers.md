@@ -10,35 +10,24 @@ export class Headers {
   private [RAW_HEADER_NAMES];
   constructor(init?: HeadersInit);
   /**
-   * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   * Appends a new value onto an existing header inside a `Headers` object, or adds the header if it
+   * does not already exist.
    */
   append(name: string, value: string): void;
-  /**
-   * Deletes a header from the `Headers` object.
-   */
+  /** Deletes a header from the `Headers` object. */
   delete(name: string): void;
-  /**
-   * Returns a `ByteString` sequence of all the values of a header with a given name.
-   */
+  /** Returns a `ByteString` sequence of all the values of a header with a given name. */
   get(name: string): string | null;
-  /**
-   * Returns an array containing the values
-   * of all Set-Cookie headers associated
-   * with a response
-   */
+  /** Returns an array containing the values of all Set-Cookie headers associated with a response */
   getSetCookie(): string[];
-  /**
-   * Returns a boolean stating whether a `Headers` object contains a certain header.
-   */
+  /** Returns a boolean stating whether a `Headers` object contains a certain header. */
   has(name: string): boolean;
   /**
-   * Sets a new value for an existing header inside a `Headers` object, or adds the header if it does not already exist.
+   * Sets a new value for an existing header inside a `Headers` object, or adds the header if it
+   * does not already exist.
    */
   set(name: string, value: string): void;
-  /**
-   * Traverses the `Headers` object,
-   * calling the given callback for each header.
-   */
+  /** Traverses the `Headers` object, calling the given callback for each header. */
   forEach<ThisArg = this>(
     callback: (this: ThisArg, value: string, name: string, parent: this) => void,
     thisArg?: ThisArg,
@@ -47,9 +36,7 @@ export class Headers {
   values(): IterableIterator<string>;
   entries(): IterableIterator<[string, string]>;
   [Symbol.iterator](): IterableIterator<[string, string]>;
-  /**
-   * 将 Headers 转换为普通对象。
-   */
+  /** 将 Headers 转换为普通对象。 */
   toObject(): Record<string, string>;
 }
 ```

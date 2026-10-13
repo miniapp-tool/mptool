@@ -191,9 +191,9 @@ return {
 热更新依赖 `createFunction`。小程序中 `app.js` 一定最先运行，请在 `app.js` 中引入 `@mptool/run` 并调用 `installGlobal()`（或手动 `globalThis.createFunction = createFunction`），先于任何页面注册：
 
 ```ts
+import { installMptoolGlobals } from "@mptool/all"; // 可选：把 api/file/net 挂到 globalThis.mptool
 // app.js
 import { installGlobal } from "@mptool/run";
-import { installMptoolGlobals } from "@mptool/all"; // 可选：把 api/file/net 挂到 globalThis.mptool
 
 installGlobal();
 installMptoolGlobals(); // 可选

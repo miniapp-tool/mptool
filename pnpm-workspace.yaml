@@ -5,9 +5,13 @@ packages:
 
 allowBuilds:
   "@parcel/watcher": true
-  esbuild: true
 
 virtualStoreType: global
+
+packageExtensions:
+  "@lerna-lite/version":
+    peerDependencies:
+      conventional-changelog-conventionalcommits: ^10.2.0
 
 minimumReleaseAgeExclude:
   - "@mdit/*"
@@ -16,16 +20,11 @@ minimumReleaseAgeExclude:
   - "@oxfmt/*"
   - "@oxlint/*"
   - "@vuepress/*"
-  - "oxc-config-hope"
-  - "oxfmt"
-  - "oxlint"
-  - "vuepress"
-  - "vuepress-*"
-
-packageExtensions:
-  "@lerna-lite/version":
-    peerDependencies:
-      conventional-changelog-conventionalcommits: ^10.2.0
+  - oxc-config-hope
+  - oxfmt
+  - oxlint
+  - vuepress
+  - vuepress-*
 minimumReleaseAgeExcludePrune: true
 trustPolicy: no-downgrade
 trustPolicyExcludePrune: true

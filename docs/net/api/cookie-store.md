@@ -28,7 +28,7 @@ class CookieStore {
    *
    * @param name Cookie 名称
    * @param options Cookie 选项
-   * @returns cookie 对象
+   * @returns Cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null;
   /**
@@ -47,20 +47,16 @@ class CookieStore {
    * @returns 是否存在
    */
   has(name: string, options: CookieOptions): boolean;
-  /**
-   * 设置 cookie
-   */
+  /** 设置 cookie */
   set(cookieOptions: SetCookieOptions): Cookie;
   /**
    * 删除 cookie
    *
-   * @param name cookie 名称
+   * @param name Cookie 名称
    * @param domain 域名
    */
   delete(name: string, domain?: string): void;
-  /**
-   * 获取所有域名和 cookies 结构
-   */
+  /** 获取所有域名和 cookies 结构 */
   list(): Record<string, Record<string, string>>;
   /**
    * 获取 cookies 对象数组
@@ -111,7 +107,7 @@ class CookieStore {
    * 获取 request cookie header
    *
    * @param options Cookie 选项
-   * @returns request cookie header
+   * @returns Request cookie header
    */
   getHeader(options: CookieOptions): string;
 }
