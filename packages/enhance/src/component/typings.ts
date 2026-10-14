@@ -186,12 +186,14 @@ export type ComponentInstance<
   ComponentProps extends PropsOptions,
   Method extends Partial<WechatMiniprogram.Component.MethodOption>,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = WechatMiniprogram.Component.InstanceProperties &
   WechatMiniprogram.Component.InstanceMethods<Data> &
   ExtendedComponentMethods &
   Method &
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>) &
   InstanceProps &
   ExtendedComponentProperty &
@@ -200,6 +202,7 @@ export type ComponentInstance<
     InstanceProps &
       Method &
       WechatMiniprogram.Component.MixinMethods<Behavior> &
+      // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
       (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>)
   > & {
     /** 组件数据，**包括内部数据和属性值** */
@@ -217,6 +220,7 @@ export type ComponentOptions<
   ComponentProps extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 > = Partial<WechatMiniprogram.Component.Data<Data>> &
@@ -235,6 +239,7 @@ export type ComponentConstructor = <
   ComponentProps extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(

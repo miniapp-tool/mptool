@@ -190,6 +190,7 @@ export function mount<
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
@@ -199,6 +200,7 @@ export function mount<
         Data & InferPropTypes<Property>,
         InstanceProps &
           Method &
+          // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
           (IsPage extends true ? WechatMiniprogram.Page.ILifetime : Record<never, never>)
       >
     >,

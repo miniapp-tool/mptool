@@ -13,13 +13,13 @@ export type RequestBody =
   | string
   | null;
 
-export interface RequestOptions<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    any
-  >,
-> extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
+/** 请求参数与响应数据的通用类型 */
+type RequestData = WechatMiniprogram.IAnyObject | unknown[] | string | ArrayBuffer;
+
+export interface RequestOptions<T extends RequestData = WechatMiniprogram.IAnyObject> extends Omit<
+  WechatMiniprogram.RequestOption<T>,
+  "url" | "method" | "header" | "data"
+> {
   /** 请求方法 */
   method?:
     | "options"
@@ -53,13 +53,7 @@ export interface RequestOptions<
   cookieStore?: CookieStore;
 }
 
-export interface RequestResponse<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    any
-  >,
-> {
+export interface RequestResponse<T extends RequestData = WechatMiniprogram.IAnyObject> {
   /** Status Code */
   status: number;
   /** Response headers */
@@ -68,24 +62,12 @@ export interface RequestResponse<
   data: T;
 }
 
-export type RequestType = <
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    any
-  >,
->(
+export type RequestType = <T extends RequestData = WechatMiniprogram.IAnyObject>(
   url: string,
   options?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 
-export const request = <
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-    string,
-    // oxlint-disable-next-line typescript/no-explicit-any
-    any
-  >,
->(
+export const request = <T extends RequestData = WechatMiniprogram.IAnyObject>(
   /** 接口地址 */
   url: string,
   {
@@ -189,13 +171,7 @@ export interface RequestInitOptions extends Pick<
   cookieStore?: CookieStore | string;
 
   /** 请求选项处理器 */
-  requestHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      any
-    >,
-  >(
+  requestHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 请求地址 */
     url: string,
     /** 请求配置 */
@@ -207,13 +183,7 @@ export interface RequestInitOptions extends Pick<
    *
    * @throws {MpError} 自定义的错误数据
    */
-  responseHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      any
-    >,
-  >(
+  responseHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 响应数据 */
     response: RequestResponse<T>,
     /** 请求地址 */
@@ -227,13 +197,7 @@ export interface RequestInitOptions extends Pick<
    *
    * @throws {MpError} 自定义的错误数据
    */
-  errorHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      any
-    >,
-  >(
+  errorHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 错误信息 */
     error: MpError,
     /** 请求地址 */
@@ -258,13 +222,7 @@ export const createRequest = ({
   cookieStore,
   server,
   requestHandler,
-  responseHandler = <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      any
-    >,
-  >(
+  responseHandler = <T extends RequestData = WechatMiniprogram.IAnyObject>(
     response: RequestResponse<T>,
   ): RequestResponse<T> => response,
   errorHandler,

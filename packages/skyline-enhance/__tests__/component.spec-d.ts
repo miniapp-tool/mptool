@@ -301,6 +301,7 @@ describe($Component, () => {
       },
     });
 
+    // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
     $Component<Record<never, never>, Record<never, never>, { fn: () => void }, []>({
       methods: {
         fn() {
@@ -329,6 +330,7 @@ describe($Component, () => {
         typeof props,
         /* methods= */ { fn: () => string },
         /* behaviors= */ [],
+        // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
         /* customProperties= */ Record<never, never>,
         /* isPage= */ true
       >({
@@ -385,8 +387,11 @@ describe($Component, () => {
     }
 
     $Component<
+      // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
       Record<never, never>,
+      // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
       Record<never, never>,
+      // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
       Record<never, never>,
       [],
       CustomProperties

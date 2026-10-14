@@ -75,6 +75,7 @@ export const $Component: ComponentConstructor = <
   Property extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
+  // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(

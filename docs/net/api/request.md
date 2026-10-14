@@ -8,9 +8,11 @@ title: request
 export type RequestBody =
   WechatMiniprogram.IAnyObject | ArrayBuffer | URLSearchParams | string | null;
 
-export interface RequestOptions<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
-> extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
+/** 请求参数与响应数据的通用类型 */
+type RequestData = WechatMiniprogram.IAnyObject | unknown[] | string | ArrayBuffer;
+
+export interface RequestOptions<T extends RequestData = WechatMiniprogram.IAnyObject>
+  extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
   /**
    * 请求方法
    */
@@ -50,9 +52,7 @@ export interface RequestOptions<
   cookieStore?: CookieStore;
 }
 
-export interface RequestResponse<
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
-> {
+export interface RequestResponse<T extends RequestData = WechatMiniprogram.IAnyObject> {
   /** Status Code */
   status: number;
   /** Response headers */
@@ -66,16 +66,12 @@ export interface MpError extends Error {
   code: number | null;
 }
 
-export type RequestType = <
-  T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
->(
+export type RequestType = <T extends RequestData = WechatMiniprogram.IAnyObject>(
   url: string,
   options?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 
-export const request: <
-  T extends string | ArrayBuffer | Record<never, never> | unknown[] = Record<string, any>,
->(
+export const request: <T extends RequestData = WechatMiniprogram.IAnyObject>(
   url: string,
   { method, headers, body, cookieScope, cookieStore, ...options }?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
@@ -107,13 +103,7 @@ export interface RequestInitOptions extends Pick<
   /**
    * 请求选项处理器
    */
-  requestHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<
-      string,
-      // oxlint-disable-next-line typescript/no-explicit-any
-      any
-    >,
-  >(
+  requestHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 请求地址 */
     url: string,
     /** 请求配置 */
@@ -124,9 +114,7 @@ export interface RequestInitOptions extends Pick<
    *
    * @throws {MpError} 自定义的错误数据
    */
-  responseHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
-  >(
+  responseHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 响应数据 */
     response: RequestResponse<T>,
     /** 请求地址 */
@@ -139,9 +127,7 @@ export interface RequestInitOptions extends Pick<
    *
    * @throws {MpError} 自定义的错误数据
    */
-  errorHandler?: <
-    T extends Record<never, never> | unknown[] | string | ArrayBuffer = Record<string, any>,
-  >(
+  errorHandler?: <T extends RequestData = WechatMiniprogram.IAnyObject>(
     /** 错误信息 */
     error: MpError,
     /** 请求地址 */

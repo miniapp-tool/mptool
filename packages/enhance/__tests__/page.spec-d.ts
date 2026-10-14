@@ -181,6 +181,7 @@ describe($Page, () => {
     $Page("example", {
       data: {},
       f() {
+        // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
         expectTypeOf(this.data).toEqualTypeOf<Record<never, never>>();
         this.setData({ a: 1 });
       },
