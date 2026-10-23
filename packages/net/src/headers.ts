@@ -2,7 +2,6 @@ import { parseSetCookie, splitCookiesString } from "set-cookie-parser";
 
 import { Cookie } from "./cookie.js";
 import type { CookieType } from "./typings.js";
-import { normalizeDomain } from "./utils.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/iu;
 const REMOVED_CHARS = String.fromCharCode(0x0a, 0x0d, 0x09, 0x20);
@@ -70,14 +69,58 @@ const isValidHeaderValue = (value: unknown): boolean => {
 const normalizeHeaderValue = (value: string): string =>
   value.replace(HEADER_VALUE_REMOVE_REGEXP, "");
 
+const IP_ADDRESS_REGEXP = /^\d{1,3}(?:\.\d{1,3}){3}$/u;
+
+/**
+ * Whether a `Domain` attribute is acceptable for the given response host.
+ *
+ * @param cookieDomain - The `Domain` attribute value, a leading dot is allowed
+ * @param host - The host that served the response
+ * @returns Whether the cookie domain may be set
+ * @see https://www.rfc-editor.org/rfc/rfc6265#section-5.3
+ */
+const isDomainAcceptable = (cookieDomain: string, host: string): boolean => {
+  const domain = cookieDomain.replace(/^\.+/u, "").toLowerCase();
+  const targetHost = host.replace(/^\.+/u, "").toLowerCase();
+
+  if (!domain || !targetHost) return false;
+
+  // An IP address host may only be matched exactly
+  if (IP_ADDRESS_REGEXP.test(targetHost)) return domain === targetHost;
+
+  // A cookie may be scoped to its own host or a parent domain, never a sibling
+  if (domain === targetHost) return true;
+
+  // RFC 6265 §5.1.3: the host must be a subdomain of the cookie domain
+  if (!targetHost.endsWith(`.${domain}`)) return false;
+
+  // Reject public suffixes such as `Domain=com`: a cookie scope needs at least two labels.
+  // A full public suffix list is out of scope here, so this stays a conservative check.
+  return domain.includes(".");
+};
+
+/**
+ * Parse `Set-Cookie` header(s) into cookies.
+ *
+ * Cookies whose `Domain` attribute does not cover the response host are dropped, and cookies
+ * without a `Domain` attribute are marked as host-only.
+ *
+ * @param setCookieHeader - The `Set-Cookie` header value
+ * @param domain - The host that served the response
+ * @returns The accepted cookies
+ */
 export const parseCookieHeader = (setCookieHeader: string, domain: string): Cookie[] =>
-  parseSetCookie(setCookieHeader).map(
-    (item) =>
-      new Cookie({
-        ...(item as CookieType),
-        domain: normalizeDomain(item.domain) || domain,
-      }),
-  );
+  parseSetCookie(setCookieHeader).flatMap((item) => {
+    const { domain: cookieDomain } = item;
+
+    // No `Domain` attribute: host-only cookie (RFC 6265 §5.3 step 6)
+    if (!cookieDomain) return [new Cookie({ ...(item as CookieType), domain, hostOnly: true })];
+
+    // Never let a response set a cookie for a domain it does not control
+    if (!isDomainAcceptable(cookieDomain, domain)) return [];
+
+    return [new Cookie({ ...(item as CookieType), hostOnly: false })];
+  });
 
 export type HeadersInit = [string, string][] | Record<string, string> | Headers;
 
