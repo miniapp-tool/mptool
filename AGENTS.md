@@ -22,20 +22,21 @@ Install with `pnpm install` (the root `postinstall` script runs `husky` to insta
 
 The table lists **every** script defined in the root `package.json`; the "Implementation" column quotes the script verbatim.
 
-| Script | Implementation | Purpose |
-| --- | --- | --- |
-| `pnpm run build` | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run build` | Regenerate the shared `enhance` → `skyline-enhance` files, then build all packages (production: minify + publint) |
-| `pnpm run dev` | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run dev` | Same sync, then recursive `dev`. **No package defines a `dev` script** (only `build` / `clean`), so this currently builds nothing — use `build` |
-| `pnpm run clean` | `pnpm --stream -r run clean` | Remove every package's `dist/` (`rimraf ./dist`) |
-| `pnpm run copy` | `unrun scripts/copy-package.ts` | Copy `packages/all/dist` + `package.json` into `demo/node_modules/@mptool/all` for the demo |
-| `pnpm run test` | `vitest run --coverage` | Full test suite with coverage (see [Testing](#testing)) |
-| `pnpm run lint` | `oxlint --fix && oxfmt` | Lint + format with auto-fix |
-| `pnpm run lint:check` | `oxlint && oxfmt --check` | Read-only lint/format check (CI gate) |
-| `pnpm run changelog` | `conventional-changelog -p angular -i CHANGELOG.md -s -r 2` | Append the last 2 releases to the root `CHANGELOG.md` |
-| `pnpm run docs:build` | `pnpm --dir=docs run docs:build` | VuePress production build (`vuepress build .`) |
-| `pnpm run docs:dev` | `pnpm --dir=docs run docs:dev` | VuePress dev server |
-| `pnpm run packages:update` | `pnpm dlx npm-check-updates -u --workspaces` | Interactive dependency upgrade (root `.ncurc.js` sets `workspaces: true`; npm-check-updates rejects `--deep` together with `--workspaces`, so do not add `--deep` back) |
-| `pnpm run postinstall` | `husky` | Install git hooks (runs automatically after install) |
+| Script                     | Implementation                                                                              | Purpose                                                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm run build`           | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run build` | Regenerate the shared `enhance` → `skyline-enhance` files, then build all packages (production: minify + publint)                                                       |
+| `pnpm run dev`             | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run dev`   | Same sync, then recursive `dev`. **No package defines a `dev` script** (only `build` / `clean`), so this currently builds nothing — use `build`                         |
+| `pnpm run clean`           | `pnpm --stream -r run clean`                                                                | Remove every package's `dist/` (`rimraf ./dist`)                                                                                                                        |
+| `pnpm run copy`            | `unrun scripts/copy-package.ts`                                                             | Copy `packages/all/dist` + `package.json` into `demo/node_modules/@mptool/all` for the demo                                                                             |
+| `pnpm run test`            | `vitest run --coverage`                                                                     | Full test suite with coverage (see [Testing](#testing))                                                                                                                 |
+| `pnpm run lint`            | `oxlint --fix && oxfmt`                                                                     | Lint + format with auto-fix                                                                                                                                             |
+| `pnpm run lint:check`      | `oxlint && oxfmt --check`                                                                   | Read-only lint/format check (CI gate)                                                                                                                                   |
+| `pnpm run changelog`       | `conventional-changelog -p angular -i CHANGELOG.md -s -r 2`                                 | Append the last 2 releases to the root `CHANGELOG.md`                                                                                                                   |
+| `pnpm run docs:build`      | `pnpm --dir=docs run docs:build`                                                            | VuePress production build (`vuepress build .`)                                                                                                                          |
+| `pnpm run docs:check`      | `tsc -p docs/tsconfig.json --noEmit`                                                        | Type-check the VuePress docs project (`docs/tsconfig.json`, extends `@mr-hope/tsconfig/web.json`)                                                                       |
+| `pnpm run docs:dev`        | `pnpm --dir=docs run docs:dev`                                                              | VuePress dev server                                                                                                                                                     |
+| `pnpm run packages:update` | `pnpm dlx npm-check-updates -u --workspaces`                                                | Interactive dependency upgrade (root `.ncurc.js` sets `workspaces: true`; npm-check-updates rejects `--deep` together with `--workspaces`, so do not add `--deep` back) |
+| `pnpm run postinstall`     | `husky`                                                                                     | Install git hooks (runs automatically after install)                                                                                                                    |
 
 There is **no `release` script**. Releases are cut by a maintainer through the `workflow_dispatch` workflow `.github/workflows/publish.yml` (lerna-lite `version` → `publish from-package` → `unrun scripts/sync.ts` to mirror to npmmirror).
 
@@ -118,20 +119,20 @@ flowchart LR
 
 ## Package Map
 
-| Package | Responsibility |
-| --- | --- |
-| `@mptool/enhance` | Enhancement framework: `$App` / `$Page` / `$Component`, extra lifecycles, emitter, lock-guarded navigation, page hot reload |
+| Package                   | Responsibility                                                                                                                                                                                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@mptool/enhance`         | Enhancement framework: `$App` / `$Page` / `$Component`, extra lifecycles, emitter, lock-guarded navigation, page hot reload                                                                                                                                                   |
 | `@mptool/skyline-enhance` | Slim variant of `enhance` for WeChat "dist 3.0": same wrappers / `$Config` / emitter / hot reload, but page lifecycles are limited to `onRegister` + `onAwake` (no `onAppLaunch` / `onNavigate` / `onPreload`) and navigation has no lock (`getFullPath` + `getTrigger` only) |
-| `@mptool/run` | Self-built JS interpreter replacing `eval` / `new Function`; powers page hot reload |
-| `@mptool/all` | Single-file full bundle (api + enhance + file + net + parser + selected shared exports + `installMptoolGlobals`) |
-| `@mptool/skyline` | Single-file bundle for dist 3.0 (net + skyline-enhance + file + parser + `installMptoolGlobals`) |
-| `@mptool/api` | wx API wrappers: clipboard, contact, permission (`withScope`), `compareVersion`, page info (`getCurrentPage` / `getCurrentRoute`), media (document / photo), network (download / report), UI (toast / modal / confirm / retry / window), update |
-| `@mptool/file` | File operations (`readFile` / `writeFile` / `readJSON` / `writeJSON` / `ls` / `mkdir` / `rm` / `unzip` / `saveFile` / `saveOnlineFile`) and expiring storage (`set` / `get` / `remove` / `check`, sync + async) |
-| `@mptool/net` | Networking: fetch-style `request` / `createRequest`, `Headers`, `URLSearchParams`, `Cookie` and `CookieStore` |
-| `@mptool/parser` | HTML → rich-text node parsing, plus `svg` / `text` helpers and an allowed-tag list |
-| `@mptool/encoder` | `TextEncoder` / `TextDecoder` polyfills for UTF-8, GBK and GB18030 (GB2312 is supported through the GBK labels) |
-| `@mptool/shared` | Shared utilities: `Emitter`, `logger`, `query`, `env`, errors, `lock` / `once` / queues, base64 helpers |
-| `@mptool/mock` | `wx` API mock for tests / dev; installs `globalThis.wx` plus `Page` / `App` / `Component` / `Behavior` / `getCurrentPages` mocks |
+| `@mptool/run`             | Self-built JS interpreter replacing `eval` / `new Function`; powers page hot reload                                                                                                                                                                                           |
+| `@mptool/all`             | Single-file full bundle (api + enhance + file + net + parser + selected shared exports + `installMptoolGlobals`)                                                                                                                                                              |
+| `@mptool/skyline`         | Single-file bundle for dist 3.0 (net + skyline-enhance + file + parser + `installMptoolGlobals`)                                                                                                                                                                              |
+| `@mptool/api`             | wx API wrappers: clipboard, contact, permission (`withScope`), `compareVersion`, page info (`getCurrentPage` / `getCurrentRoute`), media (document / photo), network (download / report), UI (toast / modal / confirm / retry / window), update                               |
+| `@mptool/file`            | File operations (`readFile` / `writeFile` / `readJSON` / `writeJSON` / `ls` / `mkdir` / `rm` / `unzip` / `saveFile` / `saveOnlineFile`) and expiring storage (`set` / `get` / `remove` / `check`, sync + async)                                                               |
+| `@mptool/net`             | Networking: fetch-style `request` / `createRequest`, `Headers`, `URLSearchParams`, `Cookie` and `CookieStore`                                                                                                                                                                 |
+| `@mptool/parser`          | HTML → rich-text node parsing, plus `svg` / `text` helpers and an allowed-tag list                                                                                                                                                                                            |
+| `@mptool/encoder`         | `TextEncoder` / `TextDecoder` polyfills for UTF-8, GBK and GB18030 (GB2312 is supported through the GBK labels)                                                                                                                                                               |
+| `@mptool/shared`          | Shared utilities: `Emitter`, `logger`, `query`, `env`, errors, `lock` / `once` / queues, base64 helpers                                                                                                                                                                       |
+| `@mptool/mock`            | `wx` API mock for tests / dev; installs `globalThis.wx` plus `Page` / `App` / `Component` / `Behavior` / `getCurrentPages` mocks                                                                                                                                              |
 
 ## Inter-package Dependencies
 
@@ -201,6 +202,6 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - **Branches**: lerna `version` only allows the `main` branch.
 - **Releases**: maintainer-only `workflow_dispatch` in `.github/workflows/publish.yml` (requires `Mister-Hope`): build + `lint:check` + tests → `lerna version` → `lerna publish from-package` → `scripts/sync.ts`. There is no local release command.
 - **CI**: `test.yml` (build / lint / test + Codecov), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
-- **Docs**: `pnpm run docs:dev` for local preview; the site config is `docs/.vuepress/config.ts` (navbar sections: enhance, net, file, api, parser, run, mock; guide is the landing section).
+- **Docs**: `pnpm run docs:dev` for local preview, `pnpm run docs:check` to type-check the site project (its own `docs/tsconfig.json`, which gives the docs DOM libs that the root `tsconfig.json` does not). The site config is `docs/.vuepress/config.ts` (navbar sections: enhance, net, file, api, parser, run, mock; guide is the landing section). `.vue` SFCs are **not** type-checked: `vue-tsc` currently fails to start against the repository's TypeScript version (`ERR_PACKAGE_PATH_NOT_EXPORTED`), so keep docs logic in `.ts` files until it supports the installed TypeScript.
 - **Adding a package**: create `packages/<name>/` with `package.json`, `tsdown.config.mts`, `src/index.ts`, `__tests__/` (lerna and the pnpm workspace pick up `packages/*` automatically); if it belongs in a bundle, update `packages/all` and/or `packages/skyline`; add a docs section.
 - **Fixing a bug**: write a failing test first, fix the code, run `pnpm run build` + `pnpm run test`, then check dependent packages for side effects.

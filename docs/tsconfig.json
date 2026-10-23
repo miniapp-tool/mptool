@@ -1,0 +1,4 @@
+{
+  "extends": "@mr-hope/tsconfig/web.json",
+  "include": [".vuepress/**/*.ts"]
+}

@@ -17,6 +17,7 @@
     "copy": "unrun scripts/copy-package.ts",
     "dev": "unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run dev",
     "docs:build": "pnpm --dir=docs run docs:build",
+    "docs:check": "tsc -p docs/tsconfig.json --noEmit",
     "docs:dev": "pnpm --dir=docs run docs:dev",
     "lint": "oxlint --fix && oxfmt",
     "lint:check": "oxlint && oxfmt --check",
