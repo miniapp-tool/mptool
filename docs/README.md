@@ -65,7 +65,7 @@ highlights:
     description: 通用 API 封装
 
   - header: "@mptool/encoder"
-    description: 支持 GBK 和 GB2312 的编码器
+    description: 支持 UTF-8 / GBK / GB18030 的编码器
 
   - header: "@mptool/run"
     description: 自定义 JS 解释器
