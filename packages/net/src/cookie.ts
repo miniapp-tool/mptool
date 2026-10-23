@@ -14,6 +14,13 @@ export class Cookie {
   name: string;
   value: string;
   domain: string;
+  /**
+   * Whether this cookie is host-only
+   *
+   * Host-only cookies (received without a `Domain` attribute) are only sent to the exact host that
+   * set them.
+   */
+  hostOnly: boolean;
   path: string;
   expires: Date | "session" | "outdate" = "session";
   httpOnly: boolean;
@@ -22,6 +29,7 @@ export class Cookie {
     this.name = cookie.name || "";
     this.value = cookie.value || "";
     this.domain = normalizeDomain(cookie.domain ?? "");
+    this.hostOnly = Boolean(cookie.hostOnly);
     this.path = cookie.path ?? "/";
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
@@ -55,6 +63,13 @@ export class Cookie {
    * @returns 是否匹配
    */
   isDomainMatched(domain: string): boolean {
+    // Host-only cookies (no `Domain` attribute) are only sent to the exact host that set them
+    if (this.hostOnly) {
+      return (
+        this.domain.replace(/^\.+/u, "").toLowerCase() === domain.replace(/^\.+/u, "").toLowerCase()
+      );
+    }
+
     return getCookieScopeDomain(domain).includes(this.domain);
   }
 
@@ -84,6 +99,7 @@ export class Cookie {
     };
 
     if (this.path !== "/") cookieType.path = this.path;
+    if (this.hostOnly) cookieType.hostOnly = this.hostOnly;
     if (this.httpOnly) cookieType.httpOnly = this.httpOnly;
     if (this.expires instanceof Date) cookieType.expires = this.expires;
 

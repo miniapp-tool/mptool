@@ -269,3 +269,60 @@ describe("cookie store extras", () => {
     expect(store.get("a", { domain: "other.com", path: "/" })).toBeNull();
   });
 });
+
+describe("cookie domain validation", () => {
+  it("should reject a Domain attribute that does not cover the response host", () => {
+    const store = new CookieStore("domain-tossing");
+
+    store.applyHeader(
+      // 一个来自 bank.com 的响应试图把 cookie 写到 evil.com，甚至写到公共后缀 com
+      { "Set-Cookie": "sid=1; Domain=evil.com; Path=/, attack=1; Domain=com; Path=/" },
+      "bank.com",
+    );
+
+    expect(store.getHeader("bank.com")).toBe("");
+    expect(store.getHeader("evil.com")).toBe("");
+  });
+
+  it("should accept a parent domain and scope the cookie to it", () => {
+    const store = new CookieStore("parent-domain");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Domain=example.com; Path=/" }, "sub.example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1");
+    expect(store.getHeader("www.example.com")).toBe("a=1");
+    // 必须是标签边界上的后缀匹配
+    expect(store.getHeader("notexample.com")).toBe("");
+  });
+
+  it("should treat cookies without a Domain attribute as host-only", () => {
+    const store = new CookieStore("host-only");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Path=/" }, "api.example.com");
+
+    expect(store.getHeader("api.example.com")).toBe("a=1");
+    // host-only cookie 不得泄漏到子域名或父域名
+    expect(store.getHeader("www.api.example.com")).toBe("");
+    expect(store.getHeader("example.com")).toBe("");
+  });
+
+  it("should keep host-only cookies host-only after a storage round trip", () => {
+    const store = new CookieStore("host-only-persist");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Path=/; Max-Age=3600" }, "api.example.com");
+
+    const restored = new CookieStore("host-only-persist");
+
+    expect(restored.getHeader("api.example.com")).toBe("a=1");
+    expect(restored.getHeader("www.api.example.com")).toBe("");
+  });
+
+  it("should only accept an exact match for IP address hosts", () => {
+    const store = new CookieStore("ip-domain");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Domain=example.com; Path=/" }, "127.0.0.1");
+    store.applyHeader({ "Set-Cookie": "b=2; Domain=127.0.0.1; Path=/" }, "127.0.0.1");
+
+    expect(store.getHeader("127.0.0.1")).toBe("b=2");
+  });
+});
