@@ -20,7 +20,7 @@
     "docs:dev": "pnpm --dir=docs run docs:dev",
     "lint": "oxlint --fix && oxfmt",
     "lint:check": "oxlint && oxfmt --check",
-    "packages:update": "pnpm dlx npm-check-updates -u --deep",
+    "packages:update": "pnpm dlx npm-check-updates -u --workspaces",
     "postinstall": "husky",
     "test": "vitest run --coverage"
   },
