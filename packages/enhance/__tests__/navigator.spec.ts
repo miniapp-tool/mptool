@@ -210,4 +210,49 @@ describe("navigator", () => {
     // wx.switchTab 不允许带参数，仅传路径
     expect(switchTab).toHaveBeenCalledWith({ url: "/pages/main" });
   });
+
+  it("should release the navigate lock after switchTab to an already loaded tab page", async () => {
+    await setup({ defaultPage: "/pages/$name", minInterval: 0 });
+
+    const switchTab = vi.fn<() => void>();
+
+    wx.switchTab = switchTab as unknown as typeof wx.switchTab;
+
+    const go = getTrigger("switchTab");
+
+    await expect(go("main")).resolves.toBeUndefined();
+    expect(switchTab).toHaveBeenCalledTimes(1);
+
+    // 目标 tab 页已加载：切回时不会再触发 onReady / onUnload，
+    // 锁应在 switchTab 成功后由自身释放，否则后续导航会永久失效
+    await expect(go("main")).resolves.toBeUndefined();
+    expect(switchTab).toHaveBeenCalledTimes(2);
+  });
+
+  it("should force release the navigate lock when the target page never becomes ready", async () => {
+    await setup({ defaultPage: "/pages/$name", minInterval: 0, maxDelay: 0 });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    vi.useFakeTimers();
+
+    try {
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+
+      // 页面一直不触发 onReady / onUnload：超时兜底释放锁
+      await vi.advanceTimersByTimeAsync(5000);
+
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+      // 清理可能残留的锁，避免影响后续用例
+      appEmitter.emit(ON_PAGE_UNLOAD);
+    }
+  });
 });
