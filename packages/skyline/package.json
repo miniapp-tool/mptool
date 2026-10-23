@@ -6,7 +6,7 @@
     "miniapp",
     "miniprogram"
   ],
-  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/all#readme",
+  "homepage": "https://github.com/miniapp-tool/mptool/tree/main/packages/skyline#readme",
   "bugs": {
     "url": "https://github.com/miniapp-tool/mptool/issues"
   },
@@ -19,7 +19,7 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/miniapp-tool/mptool.git",
-    "directory": "packages/all"
+    "directory": "packages/skyline"
   },
   "files": [
     "dist"
@@ -48,5 +48,6 @@
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
-  }
+  },
+  "miniprogram": "dist"
 }
