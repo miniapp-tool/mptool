@@ -1,6 +1,6 @@
 # miniapp tool
 
-[![Author: Mr.Hope](https://img.shields.io/badge/作者-Mr.Hope-blue.svg?style=for-the-badge)](https://mister-hope.com) [![License](https://img.shields.io/npm/l/@mptool/enhance.svg?style=for-the-badge)](https://github.com/@mptool/enhance/@mptool/enhance/blob/main/LICENSE)
+[![Author: Mr.Hope](https://img.shields.io/badge/作者-Mr.Hope-blue.svg?style=for-the-badge)](https://mister-hope.com) [![License](https://img.shields.io/npm/l/@mptool/enhance.svg?style=for-the-badge)](https://github.com/miniapp-tool/mptool/blob/main/LICENSE)
 
 <!-- markdownlint-restore -->
 
@@ -13,29 +13,35 @@
 
 轻量的小程序增强框架。
 
-- [x] @mptool/mock: wx API 模拟 <Badge text="W.I.P" type="warning" />
-- [x] @mptool/enhance: 通信框架 <Badge text="Stable" />
+- [x] @mptool/mock: wx API 模拟（W.I.P）
+- [x] @mptool/enhance: 通信框架（稳定）
   - 打通任意页面和组件之间的通信
   - 额外的生命周期，支持页面间互相调用进行预加载处理
   - 组件与页面之间的相互引用
-  - 支持热更新页面逻辑 (TODO)
+  - 支持热更新页面逻辑（配合 `@mptool/run` 与 `@mptool/all` 使用）
 
-- [x] @mptool/file: 文件与存储 API <Badge text="Stable" />
+- [x] @mptool/file: 文件与存储 API（稳定）
   - 为缓存数据设置有效期
   - Node.js 风格的创建文件夹
   - 解压文件接口
   - 保存在线文件
 
-- [x] @mptool/encoder: GBK 和 GB2312 的编码支持 <Badge text="Stable" />
+- [x] @mptool/api: 通用 API 封装（稳定）
 
-- [x] @mptool/net: 小程序网络 API <Badge text="Stable" />
+- [x] @mptool/encoder: UTF-8 / GBK / GB18030 的编码支持（稳定）
+
+- [x] @mptool/net: 小程序网络 API（稳定）
   - Headers
   - URLSearchParams
   - 自动解析并携带 Cookie
 
-- [x] @mptool/parser: HTML 解析器 <Badge text="Stable" />
+- [x] @mptool/parser: HTML 解析器（稳定）
 
-- [ ] @mptool/eval: 为小程序添加 eval <Badge text="Building" type="danger" />
+- [x] @mptool/run: 自定义 JS 解释器，替代被禁用的 `eval` 与 `new Function`（稳定）
+  - 不包含在 `@mptool/all` / `@mptool/skyline` 全量包中，需单独引入
+
+- [x] @mptool/all: 全量包（api + enhance + file + net + parser）
+- [x] @mptool/skyline: 微信 dist 3.0 全量包（net + skyline-enhance + file + parser）
 
 ## 感谢
 
