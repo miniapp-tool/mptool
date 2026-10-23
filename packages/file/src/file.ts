@@ -49,14 +49,57 @@ const getUserPath = (): string => {
 export const dirname = (path: string): string => path.split("/").slice(0, -1).join("/");
 
 /**
+ * Normalize a user-relative path and reject paths that escape the user data directory.
+ *
+ * Leading slashes are stripped (every API is documented as taking a path relative to
+ * `wx.env.USER_DATA_PATH`), `.` segments are dropped and `..` segments are resolved. A path that
+ * would climb above the user directory (e.g. `../other-file` or `a/../../b`) throws instead of
+ * touching files outside the app sandbox.
+ *
+ * @param path User-relative path
+ * @returns Normalized relative path
+ */
+const normalizePath = (path: string): string => {
+  const segments = path.replace(/^\/+/u, "").split("/");
+  const normalized: string[] = [];
+
+  for (const segment of segments) {
+    if (segment === "" || segment === ".") continue;
+
+    if (segment === "..") {
+      if (normalized.length === 0)
+        throw new MpError({ message: `Path "${path}" escapes the user data directory` });
+
+      normalized.pop();
+      continue;
+    }
+
+    normalized.push(segment);
+  }
+
+  return normalized.join("/");
+};
+
+/**
+ * Resolve a user-relative path to a file system path inside the user data directory.
+ *
+ * @param path User-relative path
+ * @returns Absolute path inside the user data directory
+ */
+const resolvePath = (path: string): string => `${getUserPath()}/${normalizePath(path)}`;
+
+/**
  * 判断文件或文件夹是否存在
  *
  * @param path 文件或文件夹路径
  * @returns 是否存在
  */
 export const exists = (path: string): boolean => {
+  // Resolve outside the try block: an escaping path must throw, not be reported as "missing"
+  const target = resolvePath(path);
+
   try {
-    getFileManager().statSync(`${getUserPath()}/${path}`, false);
+    getFileManager().statSync(target, false);
 
     return true;
   } catch {
@@ -72,7 +115,7 @@ export const exists = (path: string): boolean => {
  */
 export const isFile = (path: string): boolean =>
   exists(path) &&
-  (getFileManager().statSync(`${getUserPath()}/${path}`) as WechatMiniprogram.Stats).isFile();
+  (getFileManager().statSync(resolvePath(path)) as WechatMiniprogram.Stats).isFile();
 
 /**
  * 是否是文件夹
@@ -82,7 +125,7 @@ export const isFile = (path: string): boolean =>
  */
 export const isDir = (path: string): boolean =>
   exists(path) &&
-  (getFileManager().statSync(`${getUserPath()}/${path}`) as WechatMiniprogram.Stats).isDirectory();
+  (getFileManager().statSync(resolvePath(path)) as WechatMiniprogram.Stats).isDirectory();
 
 /**
  * 删除文件或文件夹
@@ -93,6 +136,7 @@ export const isDir = (path: string): boolean =>
  * @param type 要删除的类型
  */
 export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "file"): void => {
+  const target = resolvePath(path);
   const deleteLog = (): void => {
     logger.debug(`Deleted ${path}`);
   };
@@ -102,14 +146,14 @@ export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "f
 
   if (type === "dir") {
     try {
-      getFileManager().rmdirSync(`${getUserPath()}/${path}`, true);
+      getFileManager().rmdirSync(target, true);
       deleteLog();
     } catch (err) {
       errorLog(err);
     }
   } else {
     try {
-      getFileManager().unlinkSync(`${getUserPath()}/${path}`);
+      getFileManager().unlinkSync(target);
       deleteLog();
     } catch (err) {
       errorLog(err);
@@ -124,8 +168,10 @@ export const rm = (path: string, type: "dir" | "file" = isDir(path) ? "dir" : "f
  * @returns 目录下的文件和文件夹列表，若目录不存在则返回空数组
  */
 export const ls = (path: string): string[] => {
+  const target = resolvePath(path);
+
   try {
-    const fileList = getFileManager().readdirSync(`${getUserPath()}/${path}`);
+    const fileList = getFileManager().readdirSync(target);
 
     logger.debug(`Listing ${path} folder:`, fileList);
 
@@ -156,8 +202,10 @@ export const readFile = (<T extends FileEncoding>(
   path: string,
   encoding: T = "utf-8" as T,
 ): (T extends "binary" ? ArrayBuffer : string) | undefined => {
+  const target = resolvePath(path);
+
   try {
-    return getFileManager().readFileSync(`${getUserPath()}/${path}`, encoding) as
+    return getFileManager().readFileSync(target, encoding) as
       | (T extends "binary" ? ArrayBuffer : string)
       | undefined;
   } catch (err) {
@@ -182,8 +230,10 @@ export const readJSON = <T = unknown>(
   // oxlint-disable-next-line no-undefined
   let data = undefined;
 
+  const target = `${resolvePath(path)}.json`;
+
   try {
-    const fileContent = getFileManager().readFileSync(`${getUserPath()}/${path}.json`, encoding);
+    const fileContent = getFileManager().readFileSync(target, encoding);
 
     try {
       data = JSON.parse(fileContent as string) as T;
@@ -207,8 +257,10 @@ export const readJSON = <T = unknown>(
  * @param recursive 是否递归
  */
 export const mkdir = (path: string, recursive = true): void => {
+  const target = resolvePath(path);
+
   try {
-    getFileManager().mkdirSync(`${getUserPath()}/${path}`, recursive);
+    getFileManager().mkdirSync(target, recursive);
   } catch (err) {
     // 调试
     logger.debug(`Cannot create folder ${path}`, err);
@@ -222,10 +274,12 @@ export const mkdir = (path: string, recursive = true): void => {
  * @param path 保存文件路径
  */
 export const saveFile = (tempFilePath: string, path: string): void => {
+  const target = resolvePath(path);
+
   mkdir(dirname(path));
 
   try {
-    getFileManager().saveFileSync(tempFilePath, `${getUserPath()}/${path}`);
+    getFileManager().saveFileSync(tempFilePath, target);
   } catch (err) {
     logger.error(`Saving to ${path} failed:`, err);
   }
@@ -239,12 +293,14 @@ export const saveFile = (tempFilePath: string, path: string): void => {
  * @returns 本地文件路径
  */
 export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<string> => {
+  const target = resolvePath(localPath);
+
   mkdir(dirname(localPath));
 
   return new Promise((resolve, reject) => {
     wx.downloadFile({
       url: onlinePath,
-      filePath: `${getUserPath()}/${localPath}`,
+      filePath: target,
       // 传入 filePath 时微信返回 filePath 字段，未传入时返回 tempFilePath
       success: ({ statusCode, filePath, tempFilePath }) => {
         if (statusCode === 200) {
@@ -312,7 +368,7 @@ export const writeFile = <T = unknown>(
             (JSON.stringify(data) ?? "");
 
   mkdir(dirname(path));
-  getFileManager().writeFileSync(`${getUserPath()}/${path}`, content, encoding);
+  getFileManager().writeFileSync(resolvePath(path), content, encoding);
 };
 
 /**
@@ -330,7 +386,7 @@ export const writeJSON = <T = unknown>(
   const jsonString = JSON.stringify(data);
 
   mkdir(dirname(path));
-  getFileManager().writeFileSync(`${getUserPath()}/${path}.json`, jsonString, encoding);
+  getFileManager().writeFileSync(`${resolvePath(path)}.json`, jsonString, encoding);
 };
 
 /**
@@ -343,8 +399,8 @@ export const writeJSON = <T = unknown>(
 export const unzip = (zipFilePath: string, targetPath: string): Promise<void> =>
   new Promise((resolve, reject) => {
     getFileManager().unzip({
-      zipFilePath: `${getUserPath()}/${zipFilePath}`,
-      targetPath: `${getUserPath()}/${targetPath}`,
+      zipFilePath: resolvePath(zipFilePath),
+      targetPath: resolvePath(targetPath),
       success: () => {
         resolve();
       },
