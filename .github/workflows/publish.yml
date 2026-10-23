@@ -31,6 +31,12 @@ jobs:
           echo "You are not allowed to push new release."
           exit 1
 
+      - name: Ensure publish-only retries run from main
+        if: ${{ inputs.publish_only == true && inputs.dryrun != true && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::publish_only skips 'lerna version', the only step that enforces the 'allowBranch: main' rule, and publishes whatever was built from the dispatched ref. Dispatch it from the main branch (a dry run is still allowed anywhere)."
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v7
         with:
