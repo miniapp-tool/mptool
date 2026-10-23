@@ -45,7 +45,13 @@ export class CookieStore {
       if (domain && !scopeDomains.includes(key)) continue;
       const cookie = cookies.get(name);
 
-      if (cookie && cookie.isPathMatched(path) && !cookie.isExpired()) return cookie;
+      if (
+        cookie &&
+        cookie.isPathMatched(path) &&
+        cookie.isDomainMatched(domain) &&
+        !cookie.isExpired()
+      )
+        return cookie;
     }
 
     return null;
@@ -139,8 +145,10 @@ export class CookieStore {
     for (const [key, cookieMap] of this.store.entries()) {
       if (domain && !scopeDomains.includes(key)) continue;
 
-      for (const cookie of cookieMap.values())
-        if (cookie.isPathMatched(path) && !cookie.isExpired()) cookies.push(cookie);
+      for (const cookie of cookieMap.values()) {
+        if (cookie.isPathMatched(path) && cookie.isDomainMatched(domain) && !cookie.isExpired())
+          cookies.push(cookie);
+      }
     }
 
     return cookies;
