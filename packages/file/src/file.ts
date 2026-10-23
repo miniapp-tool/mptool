@@ -268,23 +268,51 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<s
 };
 
 /**
+ * 是否是二进制数据（`ArrayBuffer` 或 `ArrayBuffer` 视图）
+ *
+ * @param data 待判断的数据
+ * @returns 是否是二进制数据
+ */
+const isBinaryData = (data: unknown): data is ArrayBuffer | ArrayBufferView =>
+  data instanceof ArrayBuffer || ArrayBuffer.isView(data);
+
+/**
+ * 转为 `ArrayBuffer`，并保留视图的偏移与长度
+ *
+ * @param data 待转换的视图
+ * @returns 只包含该视图可见字节的 `ArrayBuffer`
+ */
+const toArrayBuffer = (data: ArrayBufferView): ArrayBuffer =>
+  data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+
+/**
  * 写入文件
  *
+ * - 字符串按原样写入，不会 JSON 序列化（`"a"` 不会变成 `"\"a\""`）
+ * - `ArrayBuffer` / `TypedArray` / `DataView` 按二进制原样写入
+ * - 其他数据按 JSON 序列化写入（与旧版本行为一致），无法序列化时写入空字符串
+ *
  * @param path 写入文件的路径，若父文件夹不存在会自动创建
- * @param data 写入文件的数据，可接受任意可序列化的数据或 Buffer
- * @param encoding 文件编码选项，默认 `utf-8` (数据) 或 `binary` (Buffer)
+ * @param data 写入文件的数据，可接受字符串、二进制数据或任意可序列化的数据
+ * @param encoding 文件编码选项，二进制数据默认 `binary`，其余默认 `utf-8`
  */
 export const writeFile = <T = unknown>(
   path: string,
   data: T,
-  encoding: FileEncoding = data instanceof ArrayBuffer ? "binary" : "utf-8",
+  encoding: FileEncoding = isBinaryData(data) ? "binary" : "utf-8",
 ): void => {
+  const content: string | ArrayBuffer =
+    typeof data === "string"
+      ? data
+      : data instanceof ArrayBuffer
+        ? data
+        : ArrayBuffer.isView(data)
+          ? toArrayBuffer(data)
+          : // JSON.stringify() may return undefined (e.g. for functions), keep the write valid
+            (JSON.stringify(data) ?? "");
+
   mkdir(dirname(path));
-  getFileManager().writeFileSync(
-    `${getUserPath()}/${path}`,
-    data instanceof ArrayBuffer ? data : JSON.stringify(data),
-    encoding,
-  );
+  getFileManager().writeFileSync(`${getUserPath()}/${path}`, content, encoding);
 };
 
 /**
