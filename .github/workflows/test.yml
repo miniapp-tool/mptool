@@ -30,8 +30,8 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      - name: Linter test
-        run: pnpm run lint
+      - name: Linter check
+        run: pnpm run lint:check
 
       - name: Unit test
         run: pnpm run test
