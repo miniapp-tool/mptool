@@ -125,7 +125,7 @@ describe("literals", () => {
     expect(exprOf("/ab+c/gi")).toStrictEqual({ type: "regexp", pattern: "ab+c", flags: "gi" });
     expect(exprOf(String.raw`/a\/b/`)).toStrictEqual({
       type: "regexp",
-      pattern: "a\\/b",
+      pattern: String.raw`a\/b`,
       flags: "",
     });
   });
@@ -1270,7 +1270,7 @@ describe("template literals", () => {
   it("should handle escapes in template", () => {
     expect(exprOf("`a\\nb`")).toStrictEqual({
       type: "template",
-      quasis: [{ raw: "a\\nb", cooked: "a\nb" }],
+      quasis: [{ raw: String.raw`a\nb`, cooked: "a\nb" }],
       expressions: [],
     });
   });
