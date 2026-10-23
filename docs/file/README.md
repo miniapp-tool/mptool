@@ -65,8 +65,8 @@ icon: folder
 
   写入文件
   - `path`: 待写入的文件路径，若文件或其父文件夹不存在会自动创建
-  - `data`: 待写入的数据，可接受任意可序列化的数据或 Buffer
-  - `encoding`: 文件编码选项，可选，默认 `utf-8` (数据) 或 `binary` (Buffer)
+  - `data`: 待写入的数据。字符串按原样写入（不会被 JSON 序列化），`ArrayBuffer` / `TypedArray` / `DataView` 按二进制原样写入，其他数据按 JSON 序列化
+  - `encoding`: 文件编码选项，可选，二进制数据默认 `binary`，其余默认 `utf-8`
 
 - `writeJSON(path: string, data: any, encoding = 'utf-8'): void`
 

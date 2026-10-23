@@ -49,6 +49,28 @@ describe("file operations", () => {
     expect(readFile("tmp/file.txt")).toBe('{"a":1}');
   });
 
+  it("should write a string as-is instead of JSON quoting it", () => {
+    writeFile("tmp/string.txt", "hello");
+
+    expect(readFile("tmp/string.txt")).toBe("hello");
+  });
+
+  it("should write a typed array as raw bytes", () => {
+    writeFile("tmp/typed-array.bin", new Uint8Array([1, 2, 3]));
+
+    const result = readFile("tmp/typed-array.bin", "binary")!;
+
+    expect([...new Uint8Array(result)]).toStrictEqual([1, 2, 3]);
+  });
+
+  it("should respect the offset of an ArrayBuffer view", () => {
+    writeFile("tmp/view.bin", new Uint8Array([9, 2, 3, 9]).subarray(1, 3));
+
+    const result = readFile("tmp/view.bin", "binary")!;
+
+    expect([...new Uint8Array(result)]).toStrictEqual([2, 3]);
+  });
+
   it("should return undefined for missing file", () => {
     expect(readFile("tmp/missing.txt")).toBeUndefined();
   });
