@@ -19,6 +19,10 @@ export const encoders: Record<string, (options: { fatal: boolean }) => Encoder> 
 /**
  * A TextEncoder object has an associated encoding and encoder.
  *
+ * Unlike the WHATWG `TextEncoder` (which always encodes UTF-8), this polyfill accepts a
+ * non-standard encoding label so callers can encode legacy encodings, e.g. `new
+ * TextEncoder("gbk").encode("中文")`.
+ *
  * @param label The label of the encoding. NONSTANDARD.
  * @param options NONSTANDARD.
  */
@@ -42,11 +46,15 @@ export class TextEncoder {
     this.#doNotFlush = false;
     if (options.fatal) this.#fatal = true;
 
-    // oxlint-disable-next-line typescript/no-non-null-assertion
-    this.#encoding = getEncoding("utf-8")!;
+    // 1. Let encoding be the result of getting an encoding from label.
+    const encoding = getEncoding(label);
 
-    if (label !== DEFAULT_ENCODING && "console" in globalThis)
-      console.warn("TextEncoder constructor called with encoding label, which is ignored.");
+    // 2. If encoding is failure or replacement, throw a RangeError.
+    if (encoding == null || encoding.name === "replacement")
+      throw new RangeError(`Unknown encoding: ${label}`);
+    if (!(encoding.name in encoders)) throw new Error("Encoder not present.");
+
+    this.#encoding = encoding;
   }
 
   get encoding(): string {
