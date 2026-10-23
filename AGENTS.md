@@ -136,16 +136,16 @@ flowchart LR
 
 ## Inter-package Dependencies
 
-All workspace packages are **inlined at build time** (`tsdown` `alwaysBundle: [/^@mptool\//]`), so cross-package references are mostly devDependencies and published packages stay small.
+All workspace packages are **inlined at build time** (`tsdown` `alwaysBundle: [/^@mptool\//]`, and `@mptool/parser` also bundles `htmlparser2` / `dom-serializer` / `domhandler`). Everything below is therefore a **devDependency**: published packages ship no `dependencies`, and consumers install nothing extra.
 
 ```text
 @mptool/all             → api, enhance, file, net, parser, shared   (dev)
 @mptool/api             → shared, mock                              (dev)
 @mptool/enhance         → run, shared, mock                         (dev)
 @mptool/file            → shared, mock                              (dev)
-@mptool/net             → shared (runtime dependency), mock, set-cookie-parser (dev)
-@mptool/parser          → htmlparser2, dom-serializer, domhandler   (runtime), mock (dev)
-@mptool/run             → mock                                      (dev); no runtime deps
+@mptool/net             → shared, mock, set-cookie-parser           (dev)
+@mptool/parser          → htmlparser2, dom-serializer, domhandler, mock (dev)
+@mptool/run             → mock                                      (dev)
 @mptool/shared          → base64-arraybuffer, mock                  (dev)
 @mptool/skyline         → file, net, parser, skyline-enhance        (dev)
 @mptool/skyline-enhance → run, shared, mock                         (dev)

@@ -41,11 +41,9 @@
     "build": "tsdown --config-loader unrun",
     "clean": "rimraf ./dist"
   },
-  "dependencies": {
-    "@mptool/shared": "workspace:*"
-  },
   "devDependencies": {
     "@mptool/mock": "workspace:*",
+    "@mptool/shared": "workspace:*",
     "miniprogram-api-typings": "5.2.3",
     "set-cookie-parser": "3.2.1"
   },
