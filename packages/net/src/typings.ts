@@ -5,6 +5,13 @@ export interface CookieType {
   value: string;
   /** Cookie path */
   path?: string | undefined;
+  /**
+   * Creation time of the cookie as a millisecond timestamp
+   *
+   * Used to order cookies that share the same path length (RFC 6265 §5.4). It is kept when a stored
+   * cookie is updated, and persisted so the order survives a restart.
+   */
+  createdAt?: number | undefined;
   /** Absolute expiration date for the cookie */
   expires?: Date | undefined;
   /**

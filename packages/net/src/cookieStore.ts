@@ -9,6 +9,19 @@ import { getCookieScopeDomain, getDomain, getUrlInfo, normalizeDomain } from "./
 export type CookieMap = Map<string, Cookie>;
 export type CookieStoreType = Map<string, CookieMap>;
 
+/**
+ * Order cookies by RFC 6265 §5.4: a longer path comes first, cookies with the same path length keep
+ * their creation order (earlier first).
+ *
+ * 按 RFC 6265 §5.4 排序：path 更长者优先；path 长度相同时创建时间更早者优先。
+ *
+ * @param a - First cookie / 第一个 Cookie
+ * @param b - Second cookie / 第二个 Cookie
+ * @returns The comparison result / 比较结果
+ */
+const compareCookiePriority = (a: Cookie, b: Cookie): number =>
+  b.path.length - a.path.length || a.createdAt - b.createdAt;
+
 export interface SetCookieOptions {
   name: string;
   value: string;
@@ -38,23 +51,7 @@ export class CookieStore {
    * @returns Cookie 对象
    */
   get(name: string, options: CookieOptions): Cookie | null {
-    const { domain, path } = getUrlInfo(options);
-    const scopeDomains = getCookieScopeDomain(domain);
-
-    for (const [key, cookies] of this.store.entries()) {
-      if (domain && !scopeDomains.includes(key)) continue;
-      const cookie = cookies.get(name);
-
-      if (
-        cookie &&
-        cookie.isPathMatched(path) &&
-        cookie.isDomainMatched(domain) &&
-        !cookie.isExpired()
-      )
-        return cookie;
-    }
-
-    return null;
+    return this.getCookies(options).find((cookie) => cookie.name === name) ?? null;
   }
 
   /**
@@ -91,6 +88,11 @@ export class CookieStore {
     const cookie = new Cookie(cookieOptions);
 
     const cookies = this.store.get(cookie.domain) ?? new Map<string, Cookie>();
+
+    // RFC 6265 §5.3: updating a stored cookie keeps its original creation time
+    const existing = cookies.get(name);
+
+    if (existing) cookie.createdAt = existing.createdAt;
 
     cookies.set(name, cookie);
     this.store.set(cookie.domain, cookies);
@@ -140,18 +142,25 @@ export class CookieStore {
   getCookies(options: CookieOptions): Cookie[] {
     const { domain, path } = getUrlInfo(options);
     const scopeDomains = getCookieScopeDomain(domain);
-    const cookies = [];
+    const cookies: { cookie: Cookie; index: number }[] = [];
+    let index = 0;
 
     for (const [key, cookieMap] of this.store.entries()) {
       if (domain && !scopeDomains.includes(key)) continue;
 
       for (const cookie of cookieMap.values()) {
-        if (cookie.isPathMatched(path) && cookie.isDomainMatched(domain) && !cookie.isExpired())
-          cookies.push(cookie);
+        if (cookie.isPathMatched(path) && cookie.isDomainMatched(domain) && !cookie.isExpired()) {
+          cookies.push({ cookie, index });
+          index += 1;
+        }
       }
     }
 
-    return cookies;
+    // RFC 6265 §5.4: longer paths first, then earlier creation time. The index keeps the order
+    // deterministic when several cookies were created in the same millisecond.
+    return cookies
+      .sort((a, b) => compareCookiePriority(a.cookie, b.cookie) || a.index - b.index)
+      .map(({ cookie }) => cookie);
   }
 
   /**
@@ -177,8 +186,9 @@ export class CookieStore {
   getCookiesMap(options: CookieOptions): Record<string, string> {
     // 将 cookie 值添加到对象
     const map: Record<string, string> = {};
+    // getCookies() is already ordered by RFC 6265 §5.4, so the most specific cookie wins
     this.getCookies(options).forEach(({ name, value }) => {
-      map[name] = value;
+      map[name] ??= value;
     });
     return map;
   }
@@ -197,6 +207,12 @@ export class CookieStore {
         cookieMap = new Map();
         this.store.set(cookie.domain, cookieMap);
       }
+
+      // RFC 6265 §5.3: updating a stored cookie keeps its original creation time
+      const existing = cookieMap.get(cookie.name);
+
+      if (existing) cookie.createdAt = existing.createdAt;
+
       cookieMap.set(cookie.name, cookie);
     });
 

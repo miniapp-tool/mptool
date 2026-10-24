@@ -326,3 +326,81 @@ describe("cookie domain validation", () => {
     expect(store.getHeader("127.0.0.1")).toBe("b=2");
   });
 });
+
+describe("cookie ordering", () => {
+  it("should order cookies by path length", () => {
+    const store = new CookieStore("cookie-order-path");
+
+    store.set({ name: "a", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "a", value: "admin", domain: "sub.example.com", path: "/admin" });
+
+    // 两个 Cookie 都匹配 https://sub.example.com/admin/panel
+    expect(
+      store
+        .getCookies({ domain: "sub.example.com", path: "/admin/panel" })
+        .map(({ value }) => value),
+    ).toStrictEqual(["admin", "root"]);
+    expect(store.getHeader("https://sub.example.com/admin/panel")).toBe("a=admin; a=root");
+    expect(store.getValue("a", { domain: "sub.example.com", path: "/admin/panel" })).toBe("admin");
+    expect(store.getCookiesMap({ domain: "sub.example.com", path: "/admin/panel" })).toStrictEqual({
+      a: "admin",
+    });
+  });
+
+  it("should order cookies with the same path length by creation time", () => {
+    const store = new CookieStore("cookie-order-created");
+
+    store.apply([
+      new Cookie({
+        name: "a",
+        value: "newer",
+        domain: "sub.example.com",
+        path: "/",
+        createdAt: 2000,
+      }),
+      new Cookie({ name: "a", value: "older", domain: "example.com", path: "/", createdAt: 1000 }),
+    ]);
+
+    expect(store.getHeader("sub.example.com")).toBe("a=older; a=newer");
+    expect(store.getValue("a", { domain: "sub.example.com", path: "/" })).toBe("older");
+  });
+
+  it("should keep the creation time when a cookie is updated", () => {
+    const store = new CookieStore("cookie-order-update");
+
+    store.apply([
+      new Cookie({ name: "a", value: "1", domain: "example.com", path: "/", createdAt: 1000 }),
+    ]);
+    store.set({ name: "a", value: "2", domain: "example.com", path: "/" });
+
+    expect(store.getValue("a", { domain: "example.com", path: "/" })).toBe("2");
+    expect(store.get("a", { domain: "example.com", path: "/" })?.createdAt).toBe(1000);
+  });
+
+  it("should keep the order after a storage round trip", () => {
+    const store = new CookieStore("cookie-order-persist");
+
+    store.apply([
+      new Cookie({
+        name: "a",
+        value: "newer",
+        domain: "sub.example.com",
+        path: "/",
+        createdAt: 2000,
+        maxAge: 100,
+      }),
+      new Cookie({
+        name: "a",
+        value: "older",
+        domain: "example.com",
+        path: "/",
+        createdAt: 1000,
+        maxAge: 100,
+      }),
+    ]);
+
+    const restored = new CookieStore("cookie-order-persist");
+
+    expect(restored.getHeader("sub.example.com")).toBe("a=older; a=newer");
+  });
+});
