@@ -2,6 +2,8 @@
 
 Cookie 以 `(name, domain, path)` 三元组存储，同名但路径不同的 Cookie 可以共存。`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先；`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
 
+Storage 读写经过优化：首次读写时才加载持久化 Cookie，同一 microtask 内的多次变更只写一次 Storage；单条 Cookie 超过 4096 字节会被丢弃，单域名上限 50 条、总量上限 3000 条（RFC 6265 §6.1），超出时淘汰创建时间最早的 Cookie。
+
 ```ts
 type CookieOptions =
   | string
