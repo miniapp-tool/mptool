@@ -653,3 +653,42 @@ describe("cookie storage", () => {
     expect(store.get("a", { domain: "example.com" })).toBeNull();
   });
 });
+
+describe("cookie security", () => {
+  it("should keep response cookies without the Secure attribute", () => {
+    const store = new CookieStore("cookie-security-non-secure");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Path=/" }, "example.com");
+
+    // 标准语义：没有 Secure 只是不限制传输协议，HTTPS 正常携带
+    expect(store.getHeader("https://example.com/")).toBe("a=1");
+    expect(store.getHeader("http://example.com/")).toBe("a=1");
+  });
+
+  it("should persist Secure and SameSite attributes across a storage round trip", async () => {
+    const store = new CookieStore("cookie-security-roundtrip");
+
+    store.applyHeader(
+      { "Set-Cookie": "sid=1; Path=/; Max-Age=3600; Secure; SameSite=Strict" },
+      "example.com",
+    );
+
+    await Promise.resolve();
+
+    const restored = new CookieStore("cookie-security-roundtrip");
+    const cookie = restored.get("sid", { domain: "example.com", path: "/" });
+
+    expect(cookie?.secure).toBe(true);
+    expect(cookie?.sameSite).toBe("strict");
+    expect(restored.getHeader("https://example.com/")).toBe("sid=1");
+  });
+
+  it("should not send Secure cookies over an insecure request", () => {
+    const store = new CookieStore("cookie-security-http");
+
+    store.applyHeader({ "Set-Cookie": "sid=1; Path=/; Secure" }, "example.com");
+
+    expect(store.getHeader("https://example.com/")).toBe("sid=1");
+    expect(store.getHeader("http://example.com/")).toBe("");
+  });
+});

@@ -124,6 +124,8 @@ export interface SetCookieOptions {
   expires?: Date;
   maxAge?: number;
   httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: CookieType["sameSite"];
 }
 
 /**
@@ -259,6 +261,10 @@ export class CookieStore {
 
     const { domain, path } = getUrlInfo(options);
     const scopeDomains = getCookieScopeDomain(domain);
+    // `Secure` cookies are never sent over an insecure scheme. Normal requests are HTTPS; this
+    // guard matters for devtools and for cookies persisted before the attribute was supported.
+    const isSecureRequest =
+      typeof options !== "string" || !options.toLowerCase().startsWith("http://");
     const cookies: { cookie: Cookie; index: number }[] = [];
     let index = 0;
 
@@ -267,7 +273,12 @@ export class CookieStore {
 
       for (const pathCookies of cookieMap.values()) {
         for (const cookie of pathCookies.values()) {
-          if (cookie.isPathMatched(path) && cookie.isDomainMatched(domain) && !cookie.isExpired()) {
+          if (
+            cookie.isPathMatched(path) &&
+            cookie.isDomainMatched(domain) &&
+            !cookie.isExpired() &&
+            (isSecureRequest || !cookie.secure)
+          ) {
             cookies.push({ cookie, index });
             index += 1;
           }

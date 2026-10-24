@@ -33,6 +33,8 @@ export class Cookie {
   createdAt: number;
   expires: Date | "session" | "outdate" = "session";
   httpOnly: boolean;
+  secure: boolean;
+  sameSite: CookieType["sameSite"];
 
   constructor(cookie: CookieType) {
     this.name = cookie.name || "";
@@ -42,6 +44,11 @@ export class Cookie {
     this.path = cookie.path ?? "/";
     this.createdAt = cookie.createdAt ?? Date.now();
     this.httpOnly = Boolean(cookie.httpOnly);
+    this.secure = Boolean(cookie.secure);
+    this.sameSite =
+      typeof cookie.sameSite === "string"
+        ? (cookie.sameSite.toLowerCase() as CookieType["sameSite"])
+        : cookie.sameSite;
     this.expires = Number.isInteger(cookie.maxAge)
       ? // oxlint-disable-next-line typescript/no-non-null-assertion
         cookie.maxAge! > 0
@@ -112,6 +119,8 @@ export class Cookie {
     if (this.path !== "/") cookieType.path = this.path;
     if (this.hostOnly) cookieType.hostOnly = this.hostOnly;
     if (this.httpOnly) cookieType.httpOnly = this.httpOnly;
+    if (this.secure) cookieType.secure = this.secure;
+    if (typeof this.sameSite === "string") cookieType.sameSite = this.sameSite;
     if (this.expires instanceof Date) cookieType.expires = this.expires;
 
     return cookieType;
