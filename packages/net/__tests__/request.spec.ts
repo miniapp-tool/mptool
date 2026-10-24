@@ -542,3 +542,27 @@ describe("request factory cancellation", () => {
     expect(api.pendingCount()).toBe(0);
   });
 });
+
+describe("request response headers", () => {
+  it("should ignore invalid response headers instead of hanging", async () => {
+    (wx as unknown as { request: unknown }).request = (option: {
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): void => {
+      option.success?.({
+        data: {},
+        statusCode: 200,
+        header: { "Bad Name": "x", "X-Good": "yes" },
+      });
+    };
+
+    const res = await request("https://example.com/api");
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("X-Good")).toBe("yes");
+    expect([...res.headers.keys()]).toStrictEqual(["x-good"]);
+  });
+});

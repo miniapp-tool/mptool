@@ -692,3 +692,34 @@ describe("cookie security", () => {
     expect(store.getHeader("http://example.com/")).toBe("");
   });
 });
+
+describe("cookie domain normalization", () => {
+  it("should lowercase the domain and match uppercase request hosts", () => {
+    const store = new CookieStore("cookie-domain-case");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Domain=Example.COM; Path=/" }, "example.com");
+
+    expect(store.getHeader("https://example.com/")).toBe("a=1");
+    expect(store.getHeader("https://EXAMPLE.com/")).toBe("a=1");
+  });
+
+  it("should keep the path when the request host has uppercase letters", () => {
+    const store = new CookieStore("cookie-domain-case-path");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Path=/API; Secure" }, "example.com");
+
+    expect(store.getHeader("https://Example.COM/API")).toBe("a=1");
+    expect(store.getHeader("https://Example.COM/api")).toBe("");
+  });
+
+  it("should reject cookies with control characters", () => {
+    const store = new CookieStore("cookie-invalid-chars");
+
+    store.applyHeader({ "Set-Cookie": "a=bad\u0000value; Path=/" }, "example.com");
+
+    expect(store.getAllCookies()).toHaveLength(0);
+    expect(() => store.set({ name: "a", value: "bad\rvalue", domain: "example.com" })).toThrow(
+      new TypeError("Invalid cookie name or value"),
+    );
+  });
+});

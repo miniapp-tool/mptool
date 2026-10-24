@@ -1,6 +1,22 @@
 import type { CookieType } from "./typings.js";
 import { getCookieScopeDomain, normalizeDomain } from "./utils.js";
 
+// oxlint-disable-next-line no-control-regex -- cookie names / values must reject control characters
+const INVALID_COOKIE_CHAR = /[\u0000-\u001F\u007F;]/u;
+
+/**
+ * @param name - Cookie name / Cookie 名称
+ * @returns Whether the cookie name is valid / 名称是否合法
+ */
+export const isValidCookieName = (name: string): boolean =>
+  name.length > 0 && !INVALID_COOKIE_CHAR.test(name);
+
+/**
+ * @param value - Cookie value / Cookie 值
+ * @returns Whether the cookie value is valid / 值是否合法
+ */
+export const isValidCookieValue = (value: string): boolean => !INVALID_COOKIE_CHAR.test(value);
+
 /**
  * Convert a date, treating an invalid date as a session cookie
  *
@@ -49,6 +65,10 @@ export class Cookie {
       typeof cookie.sameSite === "string"
         ? (cookie.sameSite.toLowerCase() as CookieType["sameSite"])
         : cookie.sameSite;
+
+    if (!isValidCookieName(this.name) || !isValidCookieValue(this.value))
+      throw new TypeError("Invalid cookie name or value");
+
     this.expires = Number.isInteger(cookie.maxAge)
       ? // oxlint-disable-next-line typescript/no-non-null-assertion
         cookie.maxAge! > 0
