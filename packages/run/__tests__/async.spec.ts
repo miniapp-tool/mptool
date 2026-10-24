@@ -178,6 +178,21 @@ describe("async functions", () => {
     );
   });
 
+  it("should evaluate compound-assignment targets once in async code", async () => {
+    await runBoth(
+      "(async () => { let i = 0; const a = [1]; a[i++] += 1; return [i, a[0], a[1]]; })()",
+    );
+    await runBoth(
+      "(async () => { let i = 0; const a = [null]; a[i++] ??= 2; return [i, a[0], a[1]]; })()",
+    );
+    await runBoth(
+      "(async () => { let k = 0; const key = async () => { k += 1; return 0; }; const a = [1]; a[await key()] += 1; return [k, a[0]]; })()",
+    );
+    await runBoth(
+      "(async () => { class A { get x() { return 1; } set x(v) { this._x = v; } } class B extends A { async m() { super.x += 1; return this._x; } } return new B().m(); })()",
+    );
+  });
+
   it("should preserve await in destructuring assignment", async () => {
     await runBoth(
       "async function f() { const [a, b] = await Promise.resolve([1, 2]); return a + b; } f()",
