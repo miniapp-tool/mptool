@@ -364,3 +364,62 @@ describe("$ (bind)", () => {
     ).not.toThrow();
   });
 });
+
+describe("should inject component config", () => {
+  it("should inject before registration and allow overriding framework methods", () => {
+    const calls: string[] = [];
+    const overriddenCall = (): void => {
+      calls.push("override");
+    };
+    let injectedOptions: TrivialComponentOptions | undefined,
+      registeredOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      calls.push("register");
+      registeredOptions = options;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      injectComponent: (options) => {
+        calls.push("inject");
+        injectedOptions = options;
+
+        options.methods = {
+          ...options.methods,
+          injected: (): string => "injected",
+          $call: overriddenCall,
+        };
+      },
+    });
+
+    $Component({});
+
+    // 注入必须发生在组件注册之前，这样才能覆盖框架注入的方法
+    expect(calls).toStrictEqual(["inject", "register"]);
+    expect(injectedOptions).toBe(registeredOptions);
+    expect(registeredOptions?.methods?.injected).toBeTypeOf("function");
+    expect(registeredOptions?.methods?.$call).toBe(overriddenCall);
+  });
+
+  it("should inject only once per registration, not per instance", () => {
+    const injectComponent = vi.fn<() => void>();
+    let registeredOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      registeredOptions = options;
+    };
+
+    $Config({ defaultPage: "/pages/$name", injectComponent });
+
+    $Component({});
+
+    expect(injectComponent).toHaveBeenCalledTimes(1);
+
+    // created 生命周期只负责挂载实例，不再重复执行注入
+    registeredOptions?.lifetimes?.created?.call({});
+    registeredOptions?.lifetimes?.created?.call({});
+
+    expect(injectComponent).toHaveBeenCalledTimes(1);
+  });
+});
