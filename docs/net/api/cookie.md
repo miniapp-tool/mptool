@@ -11,9 +11,9 @@
 - `expires`: 过期时间 (Date 对象)
 - `maxAge`: 最大存活时间 (秒)
 - `domain`: Cookie 域名
-- `secure`: 是否只在 HTTPS 下使用
+- `secure`: 是否只在 HTTPS 下发送（小程序仅支持 HTTPS，真机始终可发送；仅在 `http://` 调试地址下跳过）
 - `httpOnly`: 是否只在 HTTP 下使用
-- `sameSite`: 是否只在同域下使用
+- `sameSite`: SameSite 属性（`lax` / `strict` / `none`），随 Cookie 持久化
 
 其中 `name` 和 `value` 时必须的，其他项是可选的。
 
