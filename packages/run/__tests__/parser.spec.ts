@@ -2664,3 +2664,23 @@ describe("error positions", () => {
     expect(caught?.column).toBe(1);
   });
 });
+
+describe("backtracking budget", () => {
+  it("should abort exponentially nested async covers instead of hanging", () => {
+    // 40 nesting levels of `async(` used to require ~2^40 backtracked parses
+    // 40 层 `async(` 过去需要约 2^40 次回溯解析
+    const source = `async(${"async(".repeat(40)}1${")".repeat(40)})`;
+    const start = Date.now();
+
+    expect(() => parse(source)).toThrow(ParseError);
+    expect(Date.now() - start).toBeLessThan(2000);
+  });
+
+  it("should still parse async arrows and plain async calls", () => {
+    expect(() => parse("async (a) => a")).not.toThrow();
+    expect(() => parse("async x => x")).not.toThrow();
+    expect(() => parse("async(a)")).not.toThrow();
+    expect(() => parse("async(async(async(1)))")).not.toThrow();
+    expect(() => parse("async (a, b) => a + b")).not.toThrow();
+  });
+});
