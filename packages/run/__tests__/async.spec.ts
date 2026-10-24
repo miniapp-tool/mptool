@@ -178,6 +178,17 @@ describe("async functions", () => {
     );
   });
 
+  it("should short-circuit optional chains in async code", async () => {
+    await runBoth("(async () => { const o = null; return o?.a.b; })()");
+    await runBoth("(async () => { const o = null; return o?.a(); })()");
+    await runBoth("(async () => { const o = null; return o?.m(1).b; })()");
+    await runBoth(
+      "(async () => { let calls = 0; const g = () => { calls += 1; return 1; }; const o = null; o?.m(g()); return calls; })()",
+    );
+    await runBoth("(async () => { const o = await Promise.resolve(null); return o?.a.b; })()");
+    await runBoth("(async () => { const o = null; return o?.[await Promise.resolve('a')]; })()");
+  });
+
   it("should preserve await in destructuring assignment", async () => {
     await runBoth(
       "async function f() { const [a, b] = await Promise.resolve([1, 2]); return a + b; } f()",
