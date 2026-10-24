@@ -12,7 +12,12 @@ import {
   ON_PAGE_UNLOAD,
 } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
-import { applyHotReload, fetchHotReload, markHotReloadReady } from "../hotReload.js";
+import {
+  applyHotReload,
+  dropHotReloadInstance,
+  fetchHotReload,
+  markHotReloadReady,
+} from "../hotReload.js";
 import type { PageConstructor, PageInstance, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
@@ -154,6 +159,9 @@ export const $Page: PageConstructor = <
         appEmitter.off(ON_APP_AWAKE, onAwakeHandler);
         onAwakeHandlers.delete(this);
       }
+
+      // 从热更新登记中移除，避免晚到的拉取补挂已卸载页面
+      dropHotReloadInstance(this);
     },
   );
   /* oxlint-enable typescript/no-misused-promises */

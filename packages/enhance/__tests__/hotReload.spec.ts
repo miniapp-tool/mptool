@@ -89,15 +89,18 @@ describe("page hot reload", () => {
   const capturePageOptions = (): (() => {
     onLoad?: (...args: unknown[]) => void;
     onReady?: (...args: unknown[]) => void;
+    onUnload?: (...args: unknown[]) => void;
   }) => {
     let pageOptions: {
       onLoad?: (...args: unknown[]) => void;
       onReady?: (...args: unknown[]) => void;
+      onUnload?: (...args: unknown[]) => void;
     } = {};
 
     (globalThis as unknown as { Page: unknown }).Page = (options: {
       onLoad?: (...args: unknown[]) => void;
       onReady?: (...args: unknown[]) => void;
+      onUnload?: (...args: unknown[]) => void;
     }): void => {
       pageOptions = options;
     };
@@ -536,6 +539,67 @@ describe("page hot reload", () => {
       handlers.success("return { method() { return 1; } };");
       expect(getPendingHotReloadCount()).toBe(0);
       expect((instance as { method?: () => number }).method?.()).toBe(1);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should drop waiting instances when the page unloads", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadUnload", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      // 页面在拉取完成前卸载：实例不得继续等待，否则晚到的方法会补挂到已关闭页面
+      getOptions().onUnload?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(0);
+
+      handlers.success("return { onHotReload() { this.data.applied = true; } };");
+
+      expect((instance.data as { applied?: boolean }).applied).toBeUndefined();
+      expect((instance as { onHotReload?: unknown }).onHotReload).toBeUndefined();
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should not fire a deferred onHotReload after the page unloads", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const resolveRequest = captureRequest();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadUnloadReady", {});
+
+      // 拉取在 onLoad 之后、onReady 之前完成：方法已应用，钩子挂起到 onReady
+      getOptions().onLoad?.call(instance);
+      resolveRequest("return { onHotReload() { this.data.applied = true; } };");
+
+      getOptions().onUnload?.call(instance);
+
+      // 即便随后再触发 onReady，也不得执行已卸载页面的钩子
+      getOptions().onReady?.call(instance);
+
+      expect((instance.data as { applied?: boolean }).applied).toBeUndefined();
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
