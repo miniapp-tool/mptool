@@ -3,30 +3,135 @@ import { describe, expect, it, vi } from "vitest";
 import { emitEvent, wx } from "../src/index.js";
 
 describe("request mock", () => {
-  it("should resolve a successful response", async () => {
-    const res = (await wx.request({ url: "https://example.com/api" })) as {
-      statusCode: number;
-      data: unknown;
-      header: Record<string, string>;
-      cookies: string[];
-    };
+  it("should return a RequestTask instead of a promise", () => {
+    const task = wx.request({ url: "https://example.com/api" });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.data).toStrictEqual({});
-    expect(res.header).toStrictEqual({});
-    expect(res.cookies).toStrictEqual([]);
+    expect(task).not.toBeInstanceOf(Promise);
+    expect(task.abort).toBeTypeOf("function");
+    expect(task.onHeadersReceived).toBeTypeOf("function");
+    expect(task.offHeadersReceived).toBeTypeOf("function");
+    expect(task.onChunkReceived).toBeTypeOf("function");
+    expect(task.offChunkReceived).toBeTypeOf("function");
   });
+
+  it("should call success with the mocked response", () =>
+    new Promise<void>((resolve) => {
+      wx.request({
+        url: "https://example.com/api",
+        success: (res: {
+          statusCode: number;
+          data: unknown;
+          header: Record<string, string>;
+          cookies: string[];
+        }): void => {
+          expect(res.statusCode).toBe(200);
+          expect(res.data).toStrictEqual({});
+          expect(res.header).toStrictEqual({});
+          expect(res.cookies).toStrictEqual([]);
+          resolve();
+        },
+      });
+    }));
 
   it("should call success and complete callbacks", () =>
     new Promise<void>((resolve) => {
-      void wx.request({
+      let successCalled = false;
+
+      wx.request({
         url: "https://example.com/api",
-        success: (res: { statusCode: number }): void => {
-          expect(res.statusCode).toBe(200);
+        success: (): void => {
+          successCalled = true;
         },
         complete: (res: { errMsg: string }): void => {
+          expect(successCalled).toBe(true);
           expect(res.errMsg).toBe("request:ok");
           resolve();
+        },
+      });
+    }));
+
+  it("should notify headersReceived listeners before success", () =>
+    new Promise<void>((resolve) => {
+      const order: string[] = [];
+      const task = wx.request({
+        url: "https://example.com/api",
+        success: (): void => {
+          order.push("success");
+        },
+        complete: (): void => {
+          expect(order).toStrictEqual(["headersReceived", "success"]);
+          resolve();
+        },
+      });
+
+      task.onHeadersReceived(({ header, statusCode, cookies }): void => {
+        order.push("headersReceived");
+        expect(header).toStrictEqual({});
+        expect(statusCode).toBe(200);
+        expect(cookies).toStrictEqual([]);
+      });
+    }));
+
+  it("should remove headersReceived listeners", () =>
+    new Promise<void>((resolve) => {
+      const listener = vi.fn<(result: unknown) => void>();
+      const task = wx.request({
+        url: "https://example.com/api",
+        success: (): void => resolve(),
+      });
+
+      task.onHeadersReceived(listener);
+      task.offHeadersReceived(listener);
+    }));
+
+  it("should abort an in-flight request", () =>
+    new Promise<void>((resolve) => {
+      const success = vi.fn<() => void>();
+      const fail = vi.fn<(res: { errMsg: string }) => void>();
+
+      const task = wx.request({
+        url: "https://example.com/api",
+        success,
+        fail,
+      });
+
+      task.abort();
+
+      setTimeout(() => {
+        expect(success).not.toHaveBeenCalled();
+        expect(fail).toHaveBeenCalledTimes(1);
+        expect(fail).toHaveBeenCalledWith({ errMsg: "request:fail abort" });
+        resolve();
+      }, 5);
+    }));
+
+  it("should ignore repeated abort calls", () =>
+    new Promise<void>((resolve) => {
+      const fail = vi.fn<(res: { errMsg: string }) => void>();
+      const task = wx.request({ url: "https://example.com/api", fail });
+
+      task.abort();
+      task.abort();
+
+      setTimeout(() => {
+        expect(fail).toHaveBeenCalledTimes(1);
+        resolve();
+      }, 5);
+    }));
+
+  it("should not fail when aborting a finished request", () =>
+    new Promise<void>((resolve) => {
+      const fail = vi.fn<(res: { errMsg: string }) => void>();
+      const task = wx.request({
+        url: "https://example.com/api",
+        fail,
+        success: (): void => {
+          task.abort();
+
+          setTimeout(() => {
+            expect(fail).not.toHaveBeenCalled();
+            resolve();
+          }, 5);
         },
       });
     }));

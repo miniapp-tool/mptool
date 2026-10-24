@@ -1,36 +1,150 @@
+// oxlint-disable promise/prefer-await-to-callbacks
+
 import { callCallback, offEvent, onEvent } from "./ui.js";
 
+/** Result passed to `wx.request` success callbacks. */
+interface RequestSuccessResult {
+  statusCode: number;
+  data: unknown;
+  header: Record<string, string>;
+  cookies: string[];
+}
+
+/** Listener registered with `RequestTask.onHeadersReceived`. */
+type HeadersReceivedCallback = (result: {
+  header: Record<string, string>;
+  statusCode: number;
+  cookies: string[];
+}) => void;
+
+/** Listener registered with `RequestTask.onChunkReceived`. */
+type ChunkReceivedCallback = (result: { data: ArrayBuffer }) => void;
+
 interface RequestOption {
-  success?: (result: {
-    statusCode: number;
-    data: unknown;
-    header: Record<string, string>;
-    cookies: string[];
-  }) => void;
+  url?: string;
+  success?: (result: RequestSuccessResult) => void;
   fail?: (result: { errMsg: string }) => void;
   complete?: (result: { errMsg: string }) => void;
 }
 
+/** The `RequestTask` returned by `wx.request`, mirroring the real contract. */
+export interface MockRequestTask {
+  abort: () => void;
+  offChunkReceived: (callback?: ChunkReceivedCallback) => void;
+  offHeadersReceived: (callback?: HeadersReceivedCallback) => void;
+  onChunkReceived: (callback: ChunkReceivedCallback) => void;
+  onHeadersReceived: (callback: HeadersReceivedCallback) => void;
+}
+
+interface RequestTaskController {
+  task: MockRequestTask;
+  fail: (errMsg: string) => void;
+  start: () => void;
+}
+
+/**
+ * Create the `RequestTask` returned by `wx.request`.
+ *
+ * The mock follows the real runtime contract: `wx.request` always returns a task and never a
+ * promise. Failures (`abort` / `timeout`) are delivered asynchronously to `fail`, then `complete`;
+ * `onHeadersReceived` listeners fire right before `success`.
+ */
+const createRequestTask = (option: RequestOption | undefined): RequestTaskController => {
+  const headersReceivedCallbacks = new Set<HeadersReceivedCallback>();
+  const chunkReceivedCallbacks = new Set<ChunkReceivedCallback>();
+  const result: RequestSuccessResult = {
+    statusCode: 200,
+    data: {},
+    header: {},
+    cookies: [],
+  };
+
+  let settled = false;
+  let successTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const clearSuccessTimer = (): void => {
+    if (successTimer != null) clearTimeout(successTimer);
+  };
+
+  const succeed = (): void => {
+    if (settled) return;
+    settled = true;
+    clearSuccessTimer();
+
+    // The real runtime emits the response headers before the success callback.
+    headersReceivedCallbacks.forEach((callback) => {
+      callback({ header: result.header, statusCode: result.statusCode, cookies: result.cookies });
+    });
+    option?.success?.(result);
+    option?.complete?.({ errMsg: "request:ok" });
+  };
+
+  const fail = (errMsg: string): void => {
+    if (settled) return;
+    settled = true;
+    clearSuccessTimer();
+
+    option?.fail?.({ errMsg });
+    option?.complete?.({ errMsg });
+  };
+
+  const task: MockRequestTask = {
+    abort(): void {
+      if (settled) return;
+
+      // The real runtime reports the abort asynchronously, after cancelling the request.
+      settled = true;
+      clearSuccessTimer();
+
+      setTimeout(() => {
+        option?.fail?.({ errMsg: "request:fail abort" });
+        option?.complete?.({ errMsg: "request:fail abort" });
+      }, 0);
+    },
+    offChunkReceived(callback?: ChunkReceivedCallback): void {
+      if (callback) chunkReceivedCallbacks.delete(callback);
+      else chunkReceivedCallbacks.clear();
+    },
+    offHeadersReceived(callback?: HeadersReceivedCallback): void {
+      if (callback) headersReceivedCallbacks.delete(callback);
+      else headersReceivedCallbacks.clear();
+    },
+    onChunkReceived(callback: ChunkReceivedCallback): void {
+      chunkReceivedCallbacks.add(callback);
+    },
+    onHeadersReceived(callback: HeadersReceivedCallback): void {
+      headersReceivedCallbacks.add(callback);
+    },
+  };
+
+  const start = (): void => {
+    successTimer = setTimeout(succeed, 0);
+  };
+
+  return { fail, start, task };
+};
+
 /** 网络相关 wx API mock */
 export const networkApi = {
-  request(option: unknown): unknown {
-    const result = {
-      statusCode: 200,
-      data: {},
-      header: {} as Record<string, string>,
-      cookies: [] as string[],
-    };
-    const realOption = option as RequestOption | undefined;
+  /**
+   * Mock of `wx.request`.
+   *
+   * Real devices always return a `RequestTask`; `wx.request` does not support the promise-style
+   * call. Returning a task lets cancellation (`abort`) be tested.
+   */
+  request(option: unknown): MockRequestTask {
+    const requestOption = option as RequestOption | undefined;
+    const { fail, start, task } = createRequestTask(requestOption);
 
-    if (!realOption) return Promise.resolve(result);
+    if (!requestOption) {
+      setTimeout(() => {
+        fail("request:fail");
+      }, 0);
+      return task;
+    }
 
-    if (!realOption.success && !realOption.fail && !realOption.complete)
-      return Promise.resolve(result);
-
-    return setTimeout(() => {
-      if (realOption.success) realOption.success(result);
-      if (realOption.complete) realOption.complete({ errMsg: "request:ok" });
-    }, 0);
+    start();
+    return task;
   },
 
   uploadFile(option: unknown): unknown {
