@@ -12,7 +12,10 @@ export type RequestBody =
 type RequestData = WechatMiniprogram.IAnyObject | unknown[] | string | ArrayBuffer;
 
 export interface RequestOptions<T extends RequestData = WechatMiniprogram.IAnyObject>
-  extends Omit<WechatMiniprogram.RequestOption<T>, "url" | "method" | "header" | "data"> {
+  extends Omit<
+    WechatMiniprogram.RequestOption<T>,
+    "url" | "method" | "header" | "data" | "success" | "fail"
+  > {
   /**
    * 请求方法
    */
@@ -76,6 +79,8 @@ export const request: <T extends RequestData = WechatMiniprogram.IAnyObject>(
   { method, headers, body, cookieScope, cookieStore, ...options }?: RequestOptions<T>,
 ) => Promise<RequestResponse<T>>;
 ```
+
+`success` / `fail` 不允许通过 `RequestOptions` 传入：内部回调需要独占它们来 resolve / reject Promise，并写回响应中的 Cookie。即使运行时强行传入，也会被内部回调覆盖。
 
 ## createRequest
 
