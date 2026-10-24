@@ -127,7 +127,7 @@ const cookieStore = new CookieStore(key);
 - `getValue(name, options)`: 获取 Cookie 值
 - `has(name, options)`: 是否有 Cookie
 - `set(options)`: 设置 Cookie
-- `delete(name, domain?)`: 删除指定 Cookie
+- `delete(name, domain?, path?)`: 删除指定 Cookie，省略 `path` 时删除该名称下所有路径的 Cookie
 - `list()`: 按 domain 结构获取全部 Cookie
 - `getCookies(options)`: 获取满足条件的 Cookie
 - `getAllCookies()`: 获取全部 Cookies
@@ -138,7 +138,7 @@ const cookieStore = new CookieStore(key);
 - `applyResponse(response, domainOrURL)`: 应用 response 中的 cookies，其中 response 为 `wx.request` 的 `success` 回调对象
 - `getHeader(options)`: 获取 cookie header
 
-`getCookies()` 会按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先。`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
+Cookie 以 `(name, domain, path)` 三元组存储，同名但路径不同的 Cookie 可以共存。`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先；`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
 
 其中 `options` 为可选参数，支持以下选项:
 

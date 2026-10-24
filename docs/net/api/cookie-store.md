@@ -1,6 +1,6 @@
 # CookieStore
 
-`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先。`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
+Cookie 以 `(name, domain, path)` 三元组存储，同名但路径不同的 Cookie 可以共存。`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先；`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
 
 ```ts
 type CookieOptions =
@@ -56,8 +56,9 @@ class CookieStore {
    *
    * @param name Cookie 名称
    * @param domain 域名
+   * @param path 路径，不填则删除该名称下所有路径的 Cookie
    */
-  delete(name: string, domain?: string): void;
+  delete(name: string, domain?: string, path?: string): void;
   /** 获取所有域名和 cookies 结构 */
   list(): Record<string, Record<string, string>>;
   /**

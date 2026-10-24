@@ -404,3 +404,108 @@ describe("cookie ordering", () => {
     expect(restored.getHeader("sub.example.com")).toBe("a=older; a=newer");
   });
 });
+
+describe("cookie path keys", () => {
+  it("should keep cookies with the same name on different paths", () => {
+    const store = new CookieStore("cookie-path-keys");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+
+    expect(store.getAllCookies()).toHaveLength(2);
+    expect(store.getCookies({ domain: "example.com", path: "/admin/panel" })).toHaveLength(2);
+    // 请求路径同时匹配多个 path 时，返回 path 更具体的那条
+    expect(store.getValue("sid", { domain: "example.com", path: "/admin/panel" })).toBe("admin");
+    expect(store.getValue("sid", { domain: "example.com", path: "/" })).toBe("root");
+    expect(store.getValue("sid", { domain: "example.com", path: "/other" })).toBe("root");
+    // 请求头按 path 长度降序拼接
+    expect(store.getHeader({ domain: "example.com", path: "/admin/panel" })).toBe(
+      "sid=admin; sid=root",
+    );
+  });
+
+  it("should overwrite only the same name and path", () => {
+    const store = new CookieStore("cookie-path-overwrite");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+    store.set({ name: "sid", value: "root-2", domain: "example.com", path: "/" });
+
+    expect(store.getAllCookies()).toHaveLength(2);
+    expect(store.getValue("sid", { domain: "example.com", path: "/" })).toBe("root-2");
+    expect(store.getValue("sid", { domain: "example.com", path: "/admin/panel" })).toBe("admin");
+  });
+
+  it("should apply Set-Cookie entries with the same name and different paths", () => {
+    const store = new CookieStore("cookie-path-header");
+
+    store.applyHeader({ "Set-Cookie": "sid=root; Path=/, sid=admin; Path=/admin" }, "example.com");
+
+    expect(
+      store
+        .getCookies({ domain: "example.com", path: "/admin/panel" })
+        .map((cookie) => cookie.value)
+        .sort(),
+    ).toStrictEqual(["admin", "root"]);
+  });
+
+  it("should delete a single path", () => {
+    const store = new CookieStore("cookie-path-delete");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+
+    store.delete("sid", "example.com", "/admin");
+
+    expect(store.getAllCookies()).toHaveLength(1);
+    expect(store.getValue("sid", { domain: "example.com", path: "/admin/panel" })).toBe("root");
+  });
+
+  it("should delete every path when no path is given", () => {
+    const store = new CookieStore("cookie-path-delete-all");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+
+    store.delete("sid", "example.com");
+
+    expect(store.getAllCookies()).toHaveLength(0);
+  });
+
+  it("should clear every path of a domain", () => {
+    const store = new CookieStore("cookie-path-clear");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/" });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+
+    store.clear("example.com", true);
+
+    expect(store.getAllCookies()).toHaveLength(0);
+    expect(store.list()).toStrictEqual({});
+  });
+
+  it("should keep every path after a storage round trip", () => {
+    const store = new CookieStore("cookie-path-persist");
+
+    store.set({ name: "sid", value: "root", domain: "example.com", path: "/", maxAge: 100 });
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin", maxAge: 100 });
+
+    const restored = new CookieStore("cookie-path-persist");
+
+    expect(restored.getAllCookies()).toHaveLength(2);
+    expect(restored.getValue("sid", { domain: "example.com", path: "/admin/panel" })).toBe("admin");
+    expect(restored.getHeader({ domain: "example.com", path: "/admin/panel" })).toBe(
+      "sid=admin; sid=root",
+    );
+  });
+
+  it("should restore legacy storage entries without a path as root cookies", () => {
+    wx.setStorageSync("cookie-path-legacy", [
+      { name: "legacy", value: "1", domain: "example.com" },
+    ]);
+
+    const store = new CookieStore("cookie-path-legacy");
+
+    expect(store.getValue("legacy", { domain: "example.com", path: "/" })).toBe("1");
+  });
+});
