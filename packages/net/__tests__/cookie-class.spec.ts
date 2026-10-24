@@ -93,6 +93,7 @@ describe(Cookie, () => {
       domain: "example.com",
       path: "/x",
       httpOnly: true,
+      createdAt: 1234,
       expires: new Date(Date.now() + 1000),
     });
     const json = cookie.toJSON();
@@ -100,6 +101,7 @@ describe(Cookie, () => {
     expect(json.name).toBe("a");
     expect(json.path).toBe("/x");
     expect(json.httpOnly).toBe(true);
+    expect(json.createdAt).toBe(1234);
     expect(json.expires).toBeInstanceOf(Date);
   });
 
@@ -109,5 +111,19 @@ describe(Cookie, () => {
 
     expect(json.path).toBeUndefined();
     expect(json.httpOnly).toBeUndefined();
+  });
+
+  it("should default createdAt to the current time", () => {
+    const before = Date.now();
+    const cookie = new Cookie({ name: "a", value: "b", domain: "example.com" });
+
+    expect(cookie.createdAt).toBeGreaterThanOrEqual(before);
+    expect(cookie.createdAt).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("should keep the given createdAt", () => {
+    const cookie = new Cookie({ name: "a", value: "b", domain: "example.com", createdAt: 1234 });
+
+    expect(cookie.createdAt).toBe(1234);
   });
 });

@@ -1,5 +1,7 @@
 # CookieStore
 
+`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先。`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
+
 ```ts
 type CookieOptions =
   | string
@@ -60,6 +62,8 @@ class CookieStore {
   list(): Record<string, Record<string, string>>;
   /**
    * 获取 cookies 对象数组
+   *
+   * 返回结果按 RFC 6265 §5.4 排序。
    *
    * @param options Cookie 选项
    * @returns Cookie 对象数组

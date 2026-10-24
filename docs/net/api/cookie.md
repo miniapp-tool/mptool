@@ -7,6 +7,7 @@
 - `name`: Cookie 名称
 - `value`: Cookie 值
 - `path`: Cookie 路径
+- `createdAt`: 创建时间（毫秒时间戳）
 - `expires`: 过期时间 (Date 对象)
 - `maxAge`: 最大存活时间 (秒)
 - `domain`: Cookie 域名
@@ -31,6 +32,7 @@
 - `value: string`: Cookie 值
 - `domain: string`: Cookie 域名
 - `path: string`: Cookie 路径
+- `createdAt: number`: 创建时间（毫秒时间戳），用于 RFC 6265 的 Cookie 排序
 - `expires: number | "session" | "outdate"`: 过期时间
 - `httpOnly: boolean`: 是否只在 HTTP 下使用
 

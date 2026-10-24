@@ -22,6 +22,15 @@ export class Cookie {
    */
   hostOnly: boolean;
   path: string;
+  /**
+   * Creation time as a millisecond timestamp
+   *
+   * RFC 6265 §5.4 orders cookies with the same path length by creation time. The timestamp is
+   * persisted together with the cookie, so the order is stable across restarts.
+   *
+   * 创建时间（毫秒时间戳）。RFC 6265 §5.4 要求 path 长度相同时按创建时间排序，该时间会随 Cookie 一同持久化。
+   */
+  createdAt: number;
   expires: Date | "session" | "outdate" = "session";
   httpOnly: boolean;
 
@@ -31,6 +40,7 @@ export class Cookie {
     this.domain = normalizeDomain(cookie.domain ?? "");
     this.hostOnly = Boolean(cookie.hostOnly);
     this.path = cookie.path ?? "/";
+    this.createdAt = cookie.createdAt ?? Date.now();
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
       ? // oxlint-disable-next-line typescript/no-non-null-assertion
@@ -96,6 +106,7 @@ export class Cookie {
       name: this.name,
       value: this.value,
       domain: this.domain,
+      createdAt: this.createdAt,
     };
 
     if (this.path !== "/") cookieType.path = this.path;

@@ -72,6 +72,7 @@ Cookie 类有如下内容:
 - `value: string`: Cookie 值
 - `domain: string`: Cookie 域名
 - `path: string`: Cookie 路径
+- `createdAt: number`: 创建时间（毫秒时间戳），用于 RFC 6265 的 Cookie 排序
 - `expires: Date | "session" | "outdate"`: 过期时间
 - `httpOnly: boolean`: 是否只在 HTTP 下使用
 
@@ -96,6 +97,7 @@ Cookie 类有如下内容:
 - `name`: Cookie 名称
 - `value`: Cookie 值
 - `path`: Cookie 路径
+- `createdAt`: 创建时间（毫秒时间戳）
 - `expires`: 过期时间 (Date 对象)
 - `maxAge`: 最大存活时间 (秒)
 - `domain`: Cookie 域名
@@ -135,6 +137,8 @@ const cookieStore = new CookieStore(key);
 - `applyHeader(header, domainOrURL)`: 应用 header 中的 cookies
 - `applyResponse(response, domainOrURL)`: 应用 response 中的 cookies，其中 response 为 `wx.request` 的 `success` 回调对象
 - `getHeader(options)`: 获取 cookie header
+
+`getCookies()` 会按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先。`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
 
 其中 `options` 为可选参数，支持以下选项:
 
