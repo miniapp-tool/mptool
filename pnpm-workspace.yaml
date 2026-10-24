@@ -9,6 +9,10 @@ allowBuilds:
 virtualStoreType: global
 
 packageExtensions:
+  "@codecov/rollup-plugin":
+    peerDependenciesMeta:
+      rollup:
+        optional: true
   "@lerna-lite/version":
     peerDependencies:
       conventional-changelog-conventionalcommits: ^10.2.0

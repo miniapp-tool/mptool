@@ -51,7 +51,7 @@ mptool/
 │   ├── sync-enhance.ts  # Copy the 12 shared enhance files into skyline-enhance (run by build/dev)
 │   ├── copy-package.ts  # Copy @mptool/all dist into demo/node_modules
 │   ├── copy.ts          # Recursive copy / mkdir helpers used by the scripts above
-│   ├── tsdown.ts        # Shared tsdown config factory (es2018, single-file ESM, dts via oxc, atob injection)
+│   ├── tsdown.ts        # Shared tsdown config factory (es2018, single-file ESM, dts via oxc, atob injection, Codecov bundle analysis)
 │   ├── atob.ts          # atob polyfill injected into bundles (htmlparser2's `entities` needs it)
 │   └── sync.ts          # Mirror published packages to the npmmirror registry (release only)
 ├── demo/                # Demo mini-app (workspace dep on @mptool/all, TypeScript compiled by `tsc`)
@@ -177,6 +177,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - The tsdown config targets **ES2018** on purpose (WeChat base library 3.8.2 ≈ iOS 14 / Chrome 86; `?.` / `??` fail to parse on upload). Do not raise `target` without checking the mini-program runtime.
 - `scripts/atob.ts` is injected into bundles because `htmlparser2`'s `entities` uses a global `atob`, which mini-program environments lack. Keep this injection when adding bundling config.
 - `tsdown.config.mts` files are thin wrappers over `scripts/tsdown.ts`; put shared build behavior there, not in each package.
+- CI builds with `BUNDLE_ANALYSIS=true`: `scripts/tsdown.ts` then registers `@codecov/rollup-plugin`, which uploads per-package bundle stats to Codecov through GitHub OIDC (hence the `id-token: write` permission on `test.yml`). Leave the env unset for normal local builds.
 
 ### Other conventions
 

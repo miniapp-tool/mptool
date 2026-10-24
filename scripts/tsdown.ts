@@ -1,10 +1,34 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
+import { codecovRollupPlugin } from "@codecov/rollup-plugin";
 import type { UserConfig, CopyEntry } from "tsdown";
 import { defineConfig } from "tsdown";
 
 const isProduction = process.env.NODE_ENV === "production";
 const __dirname = import.meta.dirname;
+
+/**
+ * Package name used as the Codecov bundle name.
+ *
+ * The tsdown config is loaded from each package directory (pnpm runs `build` there), so the nearest
+ * `package.json` is the package being built.
+ *
+ * @returns Package name / 包名
+ */
+const getPackageName = (): string => {
+  try {
+    const packageJsonPath = path.resolve(process.cwd(), "package.json");
+    const packageJsonContent = readFileSync(packageJsonPath, "utf8");
+    const packageJson = JSON.parse(packageJsonContent) as { name?: string };
+
+    if (packageJson.name) return packageJson.name;
+  } catch {
+    // fall back to the pnpm-provided name below
+  }
+
+  return process.env.npm_package_name ?? "unknown";
+};
 
 /**
  * Tsdown options
@@ -134,5 +158,17 @@ export const tsdownConfig = (
     }),
     publint,
     ...rest,
+    plugins: [
+      ...(Array.isArray(rest.plugins) ? rest.plugins : []),
+      // Bundle analysis uploads are opt-in through `BUNDLE_ANALYSIS`, which CI sets when building.
+      codecovRollupPlugin({
+        enableBundleAnalysis: Boolean(process.env.BUNDLE_ANALYSIS),
+        bundleName: getPackageName(),
+        oidc: {
+          useGitHubOIDC: true,
+        },
+        telemetry: false,
+      }),
+    ],
   });
 };
