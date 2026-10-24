@@ -50,7 +50,6 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
   if (appOptions.onAwake) {
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
-
       // oxlint-disable-next-line typescript/no-non-null-assertion
       appOptions.onAwake!(time);
     });

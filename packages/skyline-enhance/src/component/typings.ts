@@ -236,14 +236,14 @@ export type ComponentOptions<
 
 export type ComponentConstructor = <
   Data extends WechatMiniprogram.Component.DataOption,
-  Props extends PropsOptions,
+  ComponentProps extends PropsOptions,
   Method extends WechatMiniprogram.Component.MethodOption,
   Behavior extends WechatMiniprogram.Component.BehaviorOption,
   // oxlint-disable-next-line typescript/no-generated-empty-object-type -- deliberate empty-object type
   InstanceProps extends WechatMiniprogram.IAnyObject = Record<never, never>,
   IsPage extends boolean = false,
 >(
-  options: ComponentOptions<Data, Props, Method, Behavior, InstanceProps, IsPage>,
+  options: ComponentOptions<Data, ComponentProps, Method, Behavior, InstanceProps, IsPage>,
 ) => string;
 
 export type TrivialComponentInstance = ComponentInstance<

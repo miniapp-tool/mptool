@@ -48,8 +48,6 @@ export const $Page: PageConstructor = <
     logger.debug(`Page ${name}: registered ${lifeCycle}`);
   };
 
-  /** OnAwake 监听器，用于在页面卸载时注销 */
-
   // extend page config
   if (extendPage) extendPage(name, options);
 
