@@ -24,9 +24,9 @@ icon: network-wired
 - `forceCellularNetwork`: 强制使用蜂窝网络发送请求
 - `timeout`: 超时时间，单位为毫秒。默认值为 60000
 
-默认的 `request` 和 `createRequest` 生成的 `request` 支持两个参数，第一个参数为请求的地址，第二个参数为 `RequestOptions`，支持 `wx.request` 的全部选项。
+默认的 `request` 和 `createRequest` 生成的 `request` 支持两个参数，第一个参数为请求的地址，第二个参数为 `RequestOptions`，支持 `wx.request` 的选项（`url` / `method` / `header` / `data` / `success` / `fail` 除外）。
 
-在使用时，你应该避免使用 `url` `data` 和 `header` 选项。前者已经作为第一个参数提供，后两者的的替代选项是 `body` 和 `headers`。
+在使用时，你应该避免使用 `url` `data` `header` 选项，也不应传入 `success` / `fail`。前者已经作为第一个参数提供，后两者的的替代选项是 `body` 和 `headers`；`success` / `fail` 由框架内部接管，用于 resolve / reject Promise 并写回响应中的 Cookie，即使运行时强行传入也会被覆盖。
 
 `request` 会自动保存响应的 Cookie，并在请求时附加对应的 Cookie，同时完善了以下选项:
 

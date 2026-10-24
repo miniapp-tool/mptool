@@ -6,7 +6,13 @@
 export const normalizeDomain = (domain = ""): string =>
   domain.replace(/^(\.*)?(?=\S)/giu, ".").replace(/\.+$/u, "");
 
-const removeHashAndQuery = (url: string): string => url.replace(/[#?].*$/u, "");
+// Strip the hash and the query string. `search()` with a single character class keeps this linear
+// (the previous `/[#?].*$/u` replace was reported as a polynomial regular expression by CodeQL).
+const removeHashAndQuery = (url: string): string => {
+  const index = url.search(/[#?]/u);
+
+  return index === -1 ? url : url.slice(0, index);
+};
 
 export const getDomain = (domainOrURL: string): string =>
   // oxlint-disable-next-line typescript/no-non-null-assertion

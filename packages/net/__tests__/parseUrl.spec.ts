@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getUrlInfo, parseUrl } from "../src/utils.js";
+import { getUrlInfo, getDomain, parseUrl } from "../src/utils.js";
 
 describe(parseUrl, () => {
   it("should parse root url", () => {
@@ -111,6 +111,16 @@ describe(parseUrl, () => {
       domain: "sub.example.com",
       path: "/",
     });
+  });
+});
+
+describe(getDomain, () => {
+  it("should strip the hash and the query string", () => {
+    expect(getDomain("https://example.com/a?b=1#c")).toBe("example.com");
+    expect(getDomain("https://example.com:8080/a#c")).toBe("example.com");
+    expect(getDomain("example.com#c?a=1")).toBe("example.com");
+    expect(getDomain("example.com#")).toBe("example.com");
+    expect(getDomain("#fragment")).toBe("");
   });
 });
 

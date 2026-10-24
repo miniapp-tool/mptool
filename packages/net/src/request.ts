@@ -18,7 +18,7 @@ type RequestData = WechatMiniprogram.IAnyObject | unknown[] | string | ArrayBuff
 
 export interface RequestOptions<T extends RequestData = WechatMiniprogram.IAnyObject> extends Omit<
   WechatMiniprogram.RequestOption<T>,
-  "url" | "method" | "header" | "data"
+  "url" | "method" | "header" | "data" | "success" | "fail"
 > {
   /** 请求方法 */
   method?:
@@ -127,7 +127,10 @@ Options:
 
       enableHttp2: true,
       useHighPerformanceMode: true,
+      ...options,
 
+      // The internal callbacks must win: they settle the promise and persist response cookies.
+      // 内部回调必须覆盖调用方传入的 success / fail：Promise 的 settle 与 cookie 写回依赖它们。
       success: ({ data: responseData, statusCode, header }) => {
         logger.debug(
           `Request ends with ${statusCode}`,
@@ -148,7 +151,6 @@ Options:
         logger.warn(`Request ${url} failed: ${errMsg}`);
         reject(new MpError({ code: errno, message: errMsg }));
       },
-      ...options,
     });
   });
 
@@ -236,7 +238,10 @@ export const createRequest = ({
         ? new CookieStore(cookieStore)
         : requestCookieStore;
 
-  const newRequest: RequestType = (url: string, requestOptions = {}) => {
+  const newRequest: RequestType = <T extends RequestData = WechatMiniprogram.IAnyObject>(
+    url: string,
+    requestOptions: RequestOptions<T> = {},
+  ) => {
     if (url.startsWith("/") && !domain) throw new Error("No server provided");
 
     const link = url.startsWith("/")
@@ -245,16 +250,16 @@ export const createRequest = ({
         ? url
         : `https://${url}`;
 
-    const mergedOptions = {
+    const mergedOptions: RequestOptions<T> = {
       cookieStore: defaultCookieStore,
       ...defaultOptions,
       ...requestOptions,
     };
-    const options = requestHandler?.(link, mergedOptions) ?? mergedOptions;
+    const options = requestHandler?.<T>(link, mergedOptions) ?? mergedOptions;
 
     return (
-      request(link, options)
-        .then((response) => responseHandler(response, url, options))
+      request<T>(link, options)
+        .then((response) => responseHandler<T>(response, url, options))
         // oxlint-disable-next-line promise/prefer-await-to-callbacks
         .catch((err: unknown) => {
           if (errorHandler && err instanceof MpError) return errorHandler(err, url, options);

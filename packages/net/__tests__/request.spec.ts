@@ -2,6 +2,7 @@ import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
 import { CookieStore } from "../src/cookieStore.js";
+import type { RequestOptions } from "../src/index.js";
 import { Headers, URLSearchParams, createRequest, request } from "../src/index.js";
 
 interface MockRequestCall {
@@ -118,6 +119,58 @@ describe(request, () => {
     mockRequest(true);
 
     await expect(request("https://example.com/api")).rejects.toThrow("request fail");
+  });
+
+  it("should ignore a caller-provided success callback", async () => {
+    const calls = mockRequest();
+    const onSuccess = vi.fn<() => void>();
+
+    const res = await request("https://example.com/api", {
+      success: onSuccess,
+    } as unknown as RequestOptions);
+
+    expect(res.status).toBe(200);
+    expect(calls).toHaveLength(1);
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a caller-provided fail callback", async () => {
+    mockRequest(true);
+    const onFail = vi.fn<() => void>();
+
+    await expect(
+      request("https://example.com/api", { fail: onFail } as unknown as RequestOptions),
+    ).rejects.toThrow("request fail");
+    expect(onFail).not.toHaveBeenCalled();
+  });
+
+  it("should persist response cookies even when success is provided", async () => {
+    const mockRequestApi = wx as unknown as {
+      request: (option: {
+        success?: (result: {
+          data: unknown;
+          statusCode: number;
+          header: Record<string, string>;
+        }) => void;
+      }) => void;
+    };
+
+    mockRequestApi.request = (option): void => {
+      option.success?.({
+        data: {},
+        statusCode: 200,
+        header: { "Set-Cookie": "session=abc; Path=/" },
+      });
+    };
+
+    const cookieStore = new CookieStore("request-callback-cookie");
+
+    await request("https://example.com/api", {
+      cookieStore,
+      success: vi.fn<() => void>(),
+    } as unknown as RequestOptions);
+
+    expect(cookieStore.getValue("session", { domain: "example.com", path: "/" })).toBe("abc");
   });
 });
 
