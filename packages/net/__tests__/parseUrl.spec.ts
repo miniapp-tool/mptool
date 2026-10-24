@@ -138,4 +138,23 @@ describe(getUrlInfo, () => {
       path: "/",
     });
   });
+
+  it("should reject inputs without a domain", () => {
+    for (const input of ["", "/", "/api", "api/x", "https://"]) {
+      expect(() => parseUrl(input)).toThrow(
+        new TypeError(`Cookie scope must include a domain: "${input}"`),
+      );
+    }
+  });
+
+  it("should accept bare domains and localhost", () => {
+    expect(parseUrl("example.com:8080/api")).toStrictEqual({
+      domain: "example.com",
+      path: "/api",
+    });
+    expect(parseUrl("localhost:8080/api")).toStrictEqual({
+      domain: "localhost",
+      path: "/api",
+    });
+  });
 });

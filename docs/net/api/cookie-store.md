@@ -12,6 +12,10 @@ type CookieOptions =
       path?: string;
     };
 
+// 字符串形式必须是绝对 URL 或域名（如 "https://example.com/api"、"example.com"）；
+// `"/"`、`"/api"` 这类不含域名的纯路径会抛 TypeError。
+// 只知道路径时使用对象形式 `{ path: "/api" }`：domain 留空表示不限制域名。
+
 interface SetCookieOptions {
   name: string;
   value: string;

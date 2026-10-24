@@ -566,3 +566,25 @@ describe("request response headers", () => {
     expect([...res.headers.keys()]).toStrictEqual(["x-good"]);
   });
 });
+
+describe("request url validation", () => {
+  it("should reject a relative url before calling wx.request", () => {
+    const requestSpy = vi.fn<() => void>();
+    const defaultRequest = (wx as unknown as { request: unknown }).request;
+
+    (wx as unknown as { request: unknown }).request = requestSpy;
+
+    try {
+      expect(() => request("/api")).toThrow(new TypeError('request url must be absolute: "/api"'));
+      expect(requestSpy).not.toHaveBeenCalled();
+    } finally {
+      (wx as unknown as { request: unknown }).request = defaultRequest;
+    }
+  });
+
+  it("should reject a cookieScope without a domain", () => {
+    expect(() => request("https://example.com/api", { cookieScope: "/api" })).toThrow(
+      new TypeError('Cookie scope must include a domain: "/api"'),
+    );
+  });
+});

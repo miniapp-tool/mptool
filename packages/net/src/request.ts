@@ -7,6 +7,7 @@ import { MpError, logger } from "@mptool/shared";
 import { CookieStore } from "./cookieStore.js";
 import { Headers } from "./headers.js";
 import { URLSearchParams } from "./urlSearchParams.js";
+import { parseUrl } from "./utils.js";
 
 export const requestCookieStore: CookieStore = new CookieStore("__request_cookie__");
 
@@ -569,6 +570,11 @@ export const request = <T extends RequestData = WechatMiniprogram.IAnyObject>(
     ...options
   }: RequestOptions<T> = {},
 ): RequestPromise<T> => {
+  if (!/^[a-z][a-z-]*:\/\//iu.test(url) && !url.startsWith("//"))
+    throw new TypeError(`request url must be absolute: "${url}"`);
+
+  if (cookieScope) parseUrl(cookieScope);
+
   const retryOptions = normalizeRetryOptions<T>(retry);
   const upperMethod = method.toUpperCase();
   const execution = new RequestExecution<T>({

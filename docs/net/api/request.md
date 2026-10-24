@@ -4,6 +4,8 @@ title: request
 
 ## request
 
+第一个参数 `url` 必须是绝对地址（`https://example.com/api` 或 `//example.com/api`）；相对地址属于错误调用，会在发请求前抛 `TypeError`。
+
 ```ts
 export type RequestBody =
   WechatMiniprogram.IAnyObject | ArrayBuffer | URLSearchParams | string | null;
@@ -46,7 +48,7 @@ export interface RequestOptions<T extends RequestData = WechatMiniprogram.IAnyOb
    */
   body?: RequestBody;
   /**
-   * Cookie 作用域
+   * Cookie 作用域，必须包含域名（绝对 URL 或域名；`"/api"` 这类纯路径会抛 `TypeError`）
    */
   cookieScope?: string;
   /**
