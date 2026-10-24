@@ -164,7 +164,7 @@ $Config({
 ```js
 // 服务端返回的代码（函数体）
 return {
-  onLoad() {
+  onHotReload() {
     this.setData({ count: this.data.count + 1 });
   },
 };
@@ -174,19 +174,16 @@ return {
 
 ::: tip 热更新应用后自动触发 `onHotReload`
 
-在热更新方法对象中声明 `onHotReload` 方法后，框架会在热更新应用时自动触发它（以页面实例作为 `this`），可用于自动更新页面数据或执行初始化逻辑：
+框架会在热更新应用时自动触发方法对象中的 `onHotReload`（以页面实例作为 `this`），可用于自动更新页面数据或执行初始化逻辑：
 
 - 若热更新应用时页面尚未完成渲染，`onHotReload` 会在页面 `onReady` 时触发（首次渲染完成后）；
 - 若应用时页面已经过 `onReady`，则立即触发。
 
-```js
-// 服务端返回的代码（函数体）
-return {
-  onHotReload() {
-    this.setData({ count: this.data.count + 1 });
-  },
-};
-```
+:::
+
+::: warning 其他生命周期方法不会被执行
+
+返回对象里的 `onLoad`、`onShow`、`onReady` 等小程序生命周期方法不会被再次执行：应用热更新时，这些生命周期已经由小程序派发过，框架只是把方法挂到页面实例上。需要自动执行的逻辑请写进 `onHotReload`。
 
 :::
 
