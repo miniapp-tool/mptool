@@ -34,8 +34,10 @@ icon: network-wired
 - `method` 额外支持小写的方法名
 - `body` 额外支持 `URLSearchParams` 和 `null`
 - `headers` 额外支持 `Headers` 实例与数组格式的 Headers
-- 新增 `cookieScope` 控制附带的 Cookie 范围 (默认为 `url`)
+- 新增 `cookieScope` 控制附带的 Cookie 范围 (默认为 `url`)；它必须包含域名（绝对 URL 或域名，不能是 `"/api"` 这种纯路径）
 - 新增 `cookieStore` 控制请求时读取和响应时写入的 CookieStore 实例 (默认为内置全局实例)
+
+请求地址必须是绝对地址（`https://example.com/api` 或 `//example.com/api`）；相对地址属于错误调用，会在发请求前抛 `TypeError`。使用 `createRequest()` 工厂时可以直接传 `"/api"`，工厂会自动拼上 `server`。
 
 ::: info
 
@@ -53,7 +55,7 @@ icon: network-wired
 - `task`: 当前尝试对应的底层 `RequestTask`
 
 ```ts
-const req = request("/api/user");
+const req = request("https://example.com/api/user");
 
 req.abort(); // 取消请求
 await req; // 仍然可以当作普通 Promise 使用

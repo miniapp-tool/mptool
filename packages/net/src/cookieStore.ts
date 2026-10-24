@@ -6,6 +6,18 @@ import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
 import { getCookieScopeDomain, getDomain, getUrlInfo, normalizeDomain } from "./utils.js";
 
+/**
+ * @param domainOrURL - URL or domain / URL 或域名
+ * @returns Domain, throws when the input has no domain / 域名；输入不含域名时抛错
+ */
+const getRequiredDomain = (domainOrURL: string): string => {
+  const domain = getDomain(domainOrURL);
+
+  if (!domain) throw new TypeError(`Cookie scope must include a domain: "${domainOrURL}"`);
+
+  return domain;
+};
+
 /** Cookies of one name, keyed by path / 同一名称的 Cookie，按路径存储 */
 export type CookiePathMap = Map<string, Cookie>;
 /** Cookies of one domain, keyed by name / 同一域名的 Cookie，按名称存储 */
@@ -275,7 +287,9 @@ export class CookieStore {
         for (const cookie of pathCookies.values()) {
           if (
             cookie.isPathMatched(path) &&
-            cookie.isDomainMatched(domain) &&
+            // An empty domain means "any domain": callers that only know the path can pass
+            // `{ path }` and still read cookies across domains.
+            (!domain || cookie.isDomainMatched(domain)) &&
             !cookie.isExpired() &&
             (isSecureRequest || !cookie.secure)
           ) {
@@ -388,7 +402,10 @@ export class CookieStore {
   applyHeader(header: unknown, domainOrURL: string): void {
     if (env === "js") {
       this.apply(
-        parseCookieHeader((header as Headers).getSetCookie().join(","), getDomain(domainOrURL)),
+        parseCookieHeader(
+          (header as Headers).getSetCookie().join(","),
+          getRequiredDomain(domainOrURL),
+        ),
       );
       return;
     }
@@ -403,7 +420,7 @@ export class CookieStore {
       ? setCookieHeader.filter(Boolean).join(",")
       : setCookieHeader;
 
-    this.apply(parseCookieHeader(realHeader, getDomain(domainOrURL)));
+    this.apply(parseCookieHeader(realHeader, getRequiredDomain(domainOrURL)));
   }
 
   /**

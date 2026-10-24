@@ -50,17 +50,44 @@ export interface UrlInfo {
   path: string;
 }
 
+const ABSOLUTE_URL = /^[a-z][a-z-]*:\/\//iu;
+
+/**
+ * @param host - Host name / 主机名
+ * @returns Whether the host looks like a domain / 是否像域名
+ */
+const isLikelyDomain = (host: string): boolean =>
+  host === "localhost" || host.includes(".") || host.startsWith("[");
+
+/**
+ * Parse an absolute URL or a bare domain into `{ domain, path }`.
+ *
+ * Path-only strings (e.g. `"/"`, `"/api"`) are invalid here: a Cookie scope must contain a domain.
+ * Use `{ path: "/api" }` with `getUrlInfo()` when only the path is known.
+ *
+ * 解析绝对 URL 或裸域名。`"/"`、`"/api"` 这类不含域名的字符串视为错误调用（Cookie 作用域必须带域名）； 只知道路径时请使用 `getUrlInfo({ path:
+ * "/api" })`。
+ *
+ * @param url - Absolute URL or bare domain / 绝对 URL 或裸域名
+ * @returns Parsed URL info / 解析后的 URL 信息
+ * @throws {TypeError} When the input does not contain a domain / 输入不包含域名时抛错
+ */
 export const parseUrl = (url: string): UrlInfo => {
-  const cleanUrl = removeHashAndQuery(url);
-  const domain = getDomain(url);
-  // `getDomain()` lowercases the host, so locate it case-insensitively and keep the path as-is
-  const index = cleanUrl.toLowerCase().indexOf(domain);
-  const path =
-    index === -1 ? "/" : cleanUrl.slice(index + domain.length).replace(/^:\d+/u, "") || "/";
+  const value = url.trim();
+  const hasScheme = ABSOLUTE_URL.test(value);
+  const withoutScheme = value.replace(ABSOLUTE_URL, "").replace(/^\/\//u, "");
+  const authorityEnd = withoutScheme.search(/[/?#]/u);
+  const authority = authorityEnd === -1 ? withoutScheme : withoutScheme.slice(0, authorityEnd);
+  const host = authority.replace(/:\d+$/u, "").toLowerCase();
+
+  if (!host || (!hasScheme && !isLikelyDomain(host)))
+    throw new TypeError(`Cookie scope must include a domain: "${url}"`);
+
+  const rest = authorityEnd === -1 ? "" : withoutScheme.slice(authorityEnd);
 
   return {
-    domain,
-    path,
+    domain: host,
+    path: removeHashAndQuery(rest) || "/",
   };
 };
 

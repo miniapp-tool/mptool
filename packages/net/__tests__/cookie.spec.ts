@@ -723,3 +723,20 @@ describe("cookie domain normalization", () => {
     );
   });
 });
+
+describe("cookie scope validation", () => {
+  it("should reject path-only scopes but accept the object form", () => {
+    const store = new CookieStore("cookie-path-only");
+
+    store.applyHeader({ "Set-Cookie": "a=1; Path=/" }, "example.com");
+
+    expect(() => store.getHeader("/")).toThrow(
+      new TypeError('Cookie scope must include a domain: "/"'),
+    );
+    expect(() => store.getCookies("/api")).toThrow(TypeError);
+    expect(() => store.applyHeader({ "Set-Cookie": "b=2; Path=/" }, "/")).toThrow(TypeError);
+
+    // 只知道路径时使用对象形式
+    expect(store.getHeader({ path: "/" })).toBe("a=1");
+  });
+});
