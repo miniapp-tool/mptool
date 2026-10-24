@@ -103,8 +103,8 @@ const handleNode = async (
   node: AnyNode,
   { appendClass, transform }: Required<ParserOptions>,
 ): Promise<RichTextNode | null> => {
-  // remove \r in text node
-  if (node.type === "text") return { type: "text", text: node.data.replace(/\r/gu, "") };
+  // HTML preprocessing normalizes CRLF / CR to LF in text nodes
+  if (node.type === "text") return { type: "text", text: node.data.replace(/\r\n?/gu, "\n") };
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);

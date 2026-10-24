@@ -4,6 +4,17 @@ import type { RichTextNode } from "../src/index.js";
 import { getRichTextNodes } from "../src/index.js";
 
 describe(getRichTextNodes, () => {
+  it("normalizes CRLF and CR in text nodes to LF", async () => {
+    await expect(getRichTextNodes("<p>a\rb\r\nc</p>")).resolves.toStrictEqual([
+      {
+        attrs: { class: "p" },
+        children: [{ text: "a\nb\nc", type: "text" }],
+        name: "p",
+        type: "node",
+      },
+    ]);
+  });
+
   it("parses simple text nodes", async () => {
     const cases: [content: string, nodes: RichTextNode[]][] = [
       [
