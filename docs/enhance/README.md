@@ -7,6 +7,12 @@ icon: toolbox
 
 跨组件、页面通信，页面组件间引用，生命周期扩展和 TypeScript 支持。
 
+::: tip 使用 Skyline 渲染引擎？
+
+如果你使用微信 Skyline 渲染引擎（基础库 3.0+），请使用 slim 版本 [`@mptool/skyline-enhance`](/skyline-enhance/)。它没有 `onAppLaunch` / `onNavigate` / `onPreload` 生命周期与 `$preload` 方法，导航也没有锁。
+
+:::
+
 ## 使用
 
 框架要求你使用 `@mptool/enhance` 导出的 `$App`，`$Component` 和 `$Page` 进行应用、页面与组件注册。

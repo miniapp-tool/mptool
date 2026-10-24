@@ -24,6 +24,7 @@ const config: UserConfig = defineUserConfig({
 
     navbar: [
       { text: "enhance", link: "/enhance/" },
+      { text: "skyline-enhance", link: "/skyline-enhance/" },
       { text: "net", link: "/net/" },
       { text: "file", link: "/file/" },
       { text: "api", link: "/api/" },

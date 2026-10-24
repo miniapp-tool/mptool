@@ -11,6 +11,7 @@ icon: lightbulb
   - 额外的生命周期，支持页面间互相调用进行预加载处理
   - 组件与页面之间的相互引用
   - 支持热更新页面逻辑（配合 `@mptool/run` 与 `@mptool/all` 使用）
+  - Skyline 渲染引擎请使用 slim 版本：`@mptool/skyline-enhance`（见 [文档](/skyline-enhance/)）
 
 - [x] @mptool/file: 文件与存储 API <Badge text="Stable" />
   - 为缓存数据设置有效期
