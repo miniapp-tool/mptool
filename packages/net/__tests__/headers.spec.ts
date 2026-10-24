@@ -286,29 +286,29 @@ describe(Headers, () => {
   });
 
   describe(".set()", () => {
-    it("returns if given an invalid header name", () => {
+    it("throws for an invalid header name", () => {
       const headers = new Headers();
 
-      expect(
+      expect(() =>
         headers.set(
           // @ts-expect-error
           123,
           "value",
         ),
-      ).toBeUndefined();
+      ).toThrow(new TypeError("Invalid character in header field name"));
       expect(Object.fromEntries(headers.entries())).toStrictEqual({});
     });
 
-    it("returns if given an invalid header value", () => {
+    it("throws for an invalid header value", () => {
       const headers = new Headers();
 
-      expect(
+      expect(() =>
         headers.set(
           "foo",
           // @ts-expect-error
           123,
         ),
-      ).toBeUndefined();
+      ).toThrow(new TypeError("Invalid character in header field value"));
       expect(Object.fromEntries(headers.entries())).toStrictEqual({});
     });
 
@@ -371,15 +371,15 @@ describe(Headers, () => {
   });
 
   describe(".delete()", () => {
-    it("returns if given an invalid header name", () => {
+    it("throws for an invalid header name", () => {
       const headers = new Headers({ accept: "*/*" });
 
-      expect(
+      expect(() =>
         headers.delete(
           // @ts-expect-error
           123,
         ),
-      ).toBeUndefined();
+      ).toThrow(new TypeError("Invalid character in header field name"));
       expect(Object.fromEntries(headers.entries())).toStrictEqual({
         accept: "*/*",
       });
@@ -470,8 +470,6 @@ describe(Headers, () => {
   });
 
   describe("invalid header normalization", () => {
-    // 注意：此处对引号类字符抛错是当前实现的刻意行为；
-    // 与 WHATWG Fetch 规范（append/set 对非法名静默忽略）不同，空格名走静默忽略。
     it("throws for a name with an invalid character", () => {
       const headers = new Headers();
 
@@ -480,17 +478,21 @@ describe(Headers, () => {
       );
     });
 
-    it("ignores a value containing a NUL byte", () => {
+    it("throws for a value containing a NUL byte", () => {
       const headers = new Headers();
 
-      expect(headers.append("foo", "bar\u0000baz")).toBeUndefined();
+      expect(() => headers.append("foo", "bar\u0000baz")).toThrow(
+        new TypeError("Invalid character in header field value"),
+      );
       expect(headers.has("foo")).toBe(false);
     });
 
-    it("ignores a name with a space", () => {
+    it("throws for a name with a space", () => {
       const headers = new Headers();
 
-      expect(headers.append("foo bar", "value")).toBeUndefined();
+      expect(() => headers.append("foo bar", "value")).toThrow(
+        new TypeError("Invalid character in header field name"),
+      );
       expect(Object.fromEntries(headers.entries())).toStrictEqual({});
     });
 
@@ -500,6 +502,18 @@ describe(Headers, () => {
       } as never);
 
       expect(headers.get("accept")).toBe("application/json, image/png");
+    });
+  });
+
+  describe(".toObject()", () => {
+    it("returns a copy instead of the internal object", () => {
+      const headers = new Headers({ accept: "*/*" });
+      const object = headers.toObject();
+
+      object.accept = "text/plain";
+
+      expect(headers.get("accept")).toBe("*/*");
+      expect(object.accept).toBe("text/plain");
     });
   });
 });

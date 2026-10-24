@@ -4,7 +4,10 @@
  * @see RFC 6265
  */
 export const normalizeDomain = (domain = ""): string =>
-  domain.replace(/^(\.*)?(?=\S)/giu, ".").replace(/\.+$/u, "");
+  domain
+    .toLowerCase()
+    .replace(/^(\.*)?(?=\S)/giu, ".")
+    .replace(/\.+$/u, "");
 
 // Strip the hash and the query string. `search()` with a single character class keeps this linear
 // (the previous `/[#?].*$/u` replace was reported as a polynomial regular expression by CodeQL).
@@ -20,7 +23,8 @@ export const getDomain = (domainOrURL: string): string =>
     .replace(/^https?:\/\/|^\/\//u, "")
     .split("/")
     .shift()!
-    .replace(/:\d+$/u, "");
+    .replace(/:\d+$/u, "")
+    .toLowerCase();
 
 export const getCookieScopeDomain = (domain = ""): string[] => {
   if (!domain) return [];
@@ -47,8 +51,12 @@ export interface UrlInfo {
 }
 
 export const parseUrl = (url: string): UrlInfo => {
+  const cleanUrl = removeHashAndQuery(url);
   const domain = getDomain(url);
-  const path = removeHashAndQuery(url).split(domain)[1].replace(/^:\d+/u, "") || "/";
+  // `getDomain()` lowercases the host, so locate it case-insensitively and keep the path as-is
+  const index = cleanUrl.toLowerCase().indexOf(domain);
+  const path =
+    index === -1 ? "/" : cleanUrl.slice(index + domain.length).replace(/^:\d+/u, "") || "/";
 
   return {
     domain,

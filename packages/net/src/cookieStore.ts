@@ -1,6 +1,6 @@
 import { env } from "@mptool/shared";
 
-import { Cookie } from "./cookie.js";
+import { Cookie, isValidCookieName, isValidCookieValue } from "./cookie.js";
 import { parseCookieHeader } from "./headers.js";
 import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
@@ -510,6 +510,8 @@ export class CookieStore {
 
       // Restore without scheduling a write: reading the storage must not write it back
       for (const item of cookiesData) {
+        if (!isValidCookieName(item.name ?? "") || !isValidCookieValue(item.value ?? "")) continue;
+
         const cookie = new Cookie(item);
 
         if (!cookie.isExpired()) this.#storeCookie(cookie);

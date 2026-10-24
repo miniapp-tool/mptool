@@ -1,6 +1,6 @@
 import { parseSetCookie, splitCookiesString } from "set-cookie-parser";
 
-import { Cookie } from "./cookie.js";
+import { Cookie, isValidCookieName, isValidCookieValue } from "./cookie.js";
 import type { CookieType } from "./typings.js";
 
 const HEADERS_INVALID_CHARACTERS = /[^a-z0-9\-#$%&'*+.^_`|~]/iu;
@@ -113,6 +113,10 @@ export const parseCookieHeader = (setCookieHeader: string, domain: string): Cook
   parseSetCookie(setCookieHeader).flatMap((item) => {
     const { domain: cookieDomain } = item;
 
+    // Invalid names / values would make `Headers.append("Cookie", …)` throw and drop the whole
+    // cookie header, so reject the single bad cookie at the response boundary.
+    if (!isValidCookieName(item.name) || !isValidCookieValue(item.value)) return [];
+
     // No `Domain` attribute: host-only cookie (RFC 6265 §5.3 step 6)
     if (!cookieDomain) return [new Cookie({ ...(item as CookieType), domain, hostOnly: true })];
 
@@ -161,7 +165,8 @@ export class Headers {
    * @param value - The value to append
    */
   append(name: string, value: string): void {
-    if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;
+    if (!isValidHeaderName(name)) throw new TypeError("Invalid character in header field name");
+    if (!isValidHeaderValue(value)) throw new TypeError("Invalid character in header field value");
 
     const normalizedName = normalizeHeaderName(name);
     const normalizedValue = normalizeHeaderValue(value);
@@ -179,7 +184,8 @@ export class Headers {
    * @param name - The name of the header to delete
    */
   delete(name: string): void {
-    if (!isValidHeaderName(name) || !this.has(name)) return;
+    if (!isValidHeaderName(name)) throw new TypeError("Invalid character in header field name");
+    if (!this.has(name)) return;
 
     const normalizedName = normalizeHeaderName(name);
 
@@ -237,7 +243,8 @@ export class Headers {
    * @param value - The value to set
    */
   set(name: string, value: string): void {
-    if (!isValidHeaderName(name) || !isValidHeaderValue(value)) return;
+    if (!isValidHeaderName(name)) throw new TypeError("Invalid character in header field name");
+    if (!isValidHeaderValue(value)) throw new TypeError("Invalid character in header field value");
 
     const normalizedName = normalizeHeaderName(name);
     const normalizedValue = normalizeHeaderValue(value);
@@ -272,7 +279,7 @@ export class Headers {
 
   *entries(): IterableIterator<[string, string]> {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
-    const sortedKeys = Object.keys(this.headers).sort((a, b) => a.localeCompare(b));
+    const sortedKeys = Object.keys(this.headers).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
     for (const name of sortedKeys) {
       if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];
@@ -282,7 +289,7 @@ export class Headers {
   }
 
   toObject(): Record<string, string> {
-    return this.headers;
+    return { ...this.headers };
   }
 
   [Symbol.iterator](): IterableIterator<[string, string]> {

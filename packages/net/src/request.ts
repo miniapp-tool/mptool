@@ -249,6 +249,26 @@ export type RequestType = <T extends RequestData = WechatMiniprogram.IAnyObject>
   options?: RequestOptions<T>,
 ) => RequestPromise<T>;
 
+/**
+ * Build response headers, skipping invalid entries instead of throwing from the success callback.
+ *
+ * @param header - Raw response headers / 原始响应头
+ * @returns Response Headers / 响应 Headers
+ */
+const createResponseHeaders = (header: Record<string, string>): Headers => {
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(header)) {
+    try {
+      headers.set(name, value);
+    } catch {
+      logger.warn(`Ignored invalid response header "${name}"`);
+    }
+  }
+
+  return headers;
+};
+
 /** Wx.request 失败结果 / wx.request fail result */
 interface WxFailResult {
   errMsg: string;
@@ -417,7 +437,7 @@ class RequestExecution<T extends RequestData> {
 
     const response: RequestResponse<T> = {
       data,
-      headers: new Headers(header),
+      headers: createResponseHeaders(header),
       status: statusCode,
     };
 
