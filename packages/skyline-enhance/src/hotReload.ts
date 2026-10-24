@@ -1,14 +1,14 @@
 /**
  * Page hot reload
  *
- * 页面热更新：从 `globalThis` 获取 `@mptool/run` 提供的 `createFunction`（由 `@mptool/all` 挂载），按 `$Config` 的
- * `hotReloadPattern` 拉取远程代码并执行，将返回的方法对象合并到页面实例上。
+ * 页面热更新：从 `globalThis` 获取 `@mptool/run` 提供的 `createFunction`（由 `@mptool/run` 的 `installGlobal()`
+ * 挂载）， 按 `$Config` 的 `hotReloadPattern` 拉取远程代码并执行，将返回的方法对象合并到页面实例上。
  *
  * The hot reload is best-effort: it never blocks page registration or loading. If the remote code
  * is not ready when a page loads, the instance is registered and the methods are applied as soon as
  * the fetch resolves.
  *
- * 热更新是尽力而为的：不阻塞页面注册与加载。若页面加载时远程代码尚未就绪，实例会被登记， 拉取完成后立即补挂方法。
+ * 热更新是尽力而为的：不阻塞页面注册与加载。若页面加载时远程代码尚未就绪，实例会被登记，拉取完成后立即补挂方法。
  */
 
 /**

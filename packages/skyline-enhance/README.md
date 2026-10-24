@@ -14,8 +14,11 @@
 一套完整的通信框架 ![Alpha](https://img.shields.io/badge/-Alpha-yellow)
 
 - 打通任意页面和组件之间的通信
-- 额外的生命周期，支持页面间互相调用进行预加载处理
+- 额外的生命周期 (`onRegister` / `onAwake`)
 - 组件与页面之间的相互引用
-- 支持热更新页面逻辑 (TODO)
+- 支持热更新页面逻辑
+
+> 本包是 `@mptool/enhance` 的 slim 版本，面向微信小程序 Skyline (dist 3.0)：页面在首次跳转时才现场注册，因此不提供
+> `onAppLaunch` / `onNavigate` / `onPreload` 生命周期，也没有 `$preload` 方法与导航锁；需要这些能力请使用 `@mptool/enhance`。
 
 ## [文档地址](https://miniapp-tool.github.io)
