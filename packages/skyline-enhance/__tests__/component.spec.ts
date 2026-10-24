@@ -5,7 +5,7 @@ import { $Component, handleProperties } from "../src/component/index.js";
 import type { TrivialComponentOptions } from "../src/component/index.js";
 import { $Config } from "../src/config/index.js";
 
-describe(handleProperties, () => {
+describe("should handle properties", () => {
   it("should handle empty properties", () => {
     expect(handleProperties()).toStrictEqual({ ref: { type: String, value: "" } });
   });
@@ -175,6 +175,7 @@ describe("should handle component lifetimes", () => {
     componentOptions?.lifetimes?.attached?.call(firstInstance);
     componentOptions?.lifetimes?.attached?.call(secondInstance);
 
+    // id 自增
     expect(secondInstance.$id).toBe(firstInstance.$id + 1);
     expect(firstInstance.$refID).toBe("myRef");
     expect(triggerEvent).toHaveBeenNthCalledWith(1, "ing", {
@@ -332,6 +333,7 @@ describe("$ (bind)", () => {
       $attached: vi.fn<(parent: unknown) => void>(),
     };
 
+    // 通过 attached 生命周期注册 ref
     getAttached(componentOptions)?.call(childInstance);
 
     const parent = { $refs: new Map<string, unknown>() };

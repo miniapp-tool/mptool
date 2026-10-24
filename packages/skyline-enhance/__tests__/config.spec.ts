@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { $Config, getConfig } from "../src/config/index.js";
 
-describe($Config, () => {
+describe("$Config Test", () => {
   it("should work when only have 'defaultPage'", () => {
     $Config({ defaultPage: "/pages/$name" });
 

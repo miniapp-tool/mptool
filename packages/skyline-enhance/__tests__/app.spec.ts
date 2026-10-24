@@ -37,4 +37,34 @@ describe($App, () => {
 
     expect(onAwake).toHaveBeenCalledWith(1000);
   });
+
+  it("should record hide timestamp on onHide", () => {
+    $App({});
+
+    const app = frameworkApi.app as WechatMiniprogram.App.Options<WechatMiniprogram.IAnyObject>;
+
+    app.onHide?.();
+
+    expect(appState.hide).toBeGreaterThan(0);
+  });
+
+  it("should emit onAwake when app shows after hide", () => {
+    const onAwake = vi.fn<(time: number) => void>();
+
+    $App({ onAwake });
+
+    const app = frameworkApi.app as WechatMiniprogram.App.Options<WechatMiniprogram.IAnyObject>;
+
+    app.onHide?.();
+    app.onShow?.({
+      path: "/pages/main",
+      query: {},
+      scene: 1001,
+      shareTicket: "",
+      referrerInfo: {},
+    } as WechatMiniprogram.App.LaunchShowOption);
+
+    expect(onAwake).toHaveBeenCalledTimes(1);
+    expect(appState.hide).toBe(0);
+  });
 });

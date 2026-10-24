@@ -115,4 +115,20 @@ describe(getTrigger, () => {
 
     expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/main?from=home" });
   });
+
+  it("should not hold a navigation lock between rapid navigations", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    // skyline-enhance 没有导航锁：连续两次跳转都会执行，无需等待目标页 onReady
+    await go("main");
+    await go("main");
+
+    expect(navigateTo).toHaveBeenCalledTimes(2);
+  });
 });

@@ -46,6 +46,27 @@ describe("$back", () => {
 
     expect(reLaunch).toHaveBeenCalledWith({ url: "/pages/main" });
   });
+
+  it("should not call navigateBack when already at the first page without home", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateBack = vi.fn<() => void>();
+
+    (wx as any).navigateBack = navigateBack;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+
+    let pageOptions: { $back?: (delta?: number) => Promise<unknown> } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    $Page("index", {});
+
+    await pageOptions?.$back?.();
+
+    expect(navigateBack).not.toHaveBeenCalled();
+  });
 });
 
 describe("$bindGo", () => {
