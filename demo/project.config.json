@@ -4,8 +4,6 @@
   "miniprogramRoot": "app/",
   "compileType": "miniprogram",
   "libVersion": "2.21.0",
-  "qqLibVersion": "1.29.0",
-  "qqappid": "1108100302",
   "setting": {
     "urlCheck": true,
     "scopeDataCheck": false,

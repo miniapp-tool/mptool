@@ -1,6 +1,6 @@
 # @mptool/encoder
 
-Encoder/Decoder for QQ and wechat miniapp.
+Encoder/Decoder for Wechat miniapp.
 
 `TextDecoder` supports UTF-8, GBK and GB18030 (GB2312 uses the GBK labels).
 

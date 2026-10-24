@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repository. `CLAUDE.md` only impor
 
 ## Project Overview
 
-**mptool** is a lightweight mini-program (WeChat / QQ) enhancement framework. It provides enhanced app / page / component wrappers and extra lifecycles, a cross-component emitter, file / network / parsing / encoding utilities, and `@mptool/run`, a self-built JavaScript interpreter that replaces the disabled `eval` / `new Function` in mini-program runtimes (it powers server-driven page hot reload).
+**mptool** is a lightweight mini-program (WeChat) enhancement framework. It provides enhanced app / page / component wrappers and extra lifecycles, a cross-component emitter, file / network / parsing / encoding utilities, and `@mptool/run`, a self-built JavaScript interpreter that replaces the disabled `eval` / `new Function` in mini-program runtimes (it powers server-driven page hot reload).
 
 - Repository: [miniapp-tool/mptool](https://github.com/miniapp-tool/mptool) · License: MIT · Author: Mr.Hope
 - Monorepo: pnpm workspace (`packages/*`, `demo/`, `docs/`), **12 packages** in `packages/`, all published to npm
@@ -65,7 +65,7 @@ mptool/
 └── .ncurc.js            # npm-check-updates options
 ```
 
-Each package directory contains: `package.json` (`exports` → `dist/`, `files: ["dist"]`), `tsdown.config.mts` (built on `scripts/tsdown.ts`), `README.md`, `LICENSE`, `CHANGELOG.md`, `src/` (entry `src/index.ts`) and `__tests__/` (`*.spec.ts`; type tests `*.spec-d.ts` exist only in `enhance` and `skyline-enhance`).
+Each package directory contains: `package.json` (`exports` → `dist/`, `files: ["dist"]`), `tsdown.config.mts` (built on `scripts/tsdown.ts`), `README.md`, `LICENSE`, `CHANGELOG.md`, `src/` (entry `src/index.ts`) and `__tests__/` (`*.spec.ts`; type tests `*.spec-d.ts` exist in `shared`, `enhance` and `skyline-enhance`).
 
 Generated / ignored paths: `dist/`, `coverage/`, `docs/.vuepress/{cache,temp,dist}`, `demo/**/*.js` (compiled demo output), `node_modules/`. Do not edit or commit these.
 
@@ -190,7 +190,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 
 - Runner: vitest (`pnpm run test` → `vitest run --coverage`). Config: `vitest.config.ts`; test framework version comes from `package.json`.
 - Coverage: istanbul provider, enabled by default, scope `packages/*/src/**/*.ts`. **No coverage threshold is configured** — coverage is uploaded to Codecov from CI (`.github/workflows/test.yml` on `main`), so do not claim specific coverage percentages in docs.
-- Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
+- Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/shared/__tests__/`, `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
 - Test layout: `packages/<pkg>/__tests__/<name>.spec.ts`. `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
 - `@mptool/mock` is imported for its side effect: it installs `globalThis.wx` and the mini-program framework mocks before tests run.
 - CI gate order in `.github/workflows/test.yml`: install → `pnpm run build` → `pnpm run lint` → `pnpm run test` → Codecov upload.
