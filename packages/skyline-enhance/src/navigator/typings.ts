@@ -76,20 +76,6 @@ export interface NavigatorMethods {
   $back: (delta?: number) => Promise<WechatMiniprogram.GeneralCallbackResult>;
 
   /**
-   * 提前预加载指定页面 (会触发对应页面的 `onPreload` 生命周期)
-   *
-   * @param pageName 页面名称或页面的路径，可以带上 `queryString`
-   *
-   *   示例：
-   *
-   *   ```js
-   *   this.$preload("main?id=xxx&target=xxx");
-   *   this.$preload("/page/main?userName=xxx&action=xxx");
-   *   ```
-   */
-  $preload: (pageName: string) => void | Promise<void>;
-
-  /**
    * 点击代理方法，绑定 `$go` 逻辑
    *
    * 在元素上声明 `data-url` 作为跳转地址，支持切面方法：

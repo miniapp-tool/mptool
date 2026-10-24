@@ -1,8 +1,6 @@
 import type { UserEmitter } from "./emitter.js";
 
 export interface InstanceEmitterMethods {
-  /** 事件名到处理函数的映射 */
-  $all: UserEmitter["all"];
   /**
    * 为特定事件类型注册处理函数
    *

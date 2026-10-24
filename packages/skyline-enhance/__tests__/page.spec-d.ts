@@ -266,5 +266,14 @@ describe($Page, () => {
         return { title: this.data.a, imageUrl: "", path: "" };
       },
     });
+
+    $Page("example", {
+      f() {
+        // $preload relies on onPreload, which skyline-enhance does not support
+        expectTypeOf(this).not.toHaveProperty("$preload");
+        // $all is a raw event map, it is not exposed on instances
+        expectTypeOf(this).not.toHaveProperty("$all");
+      },
+    });
   });
 });

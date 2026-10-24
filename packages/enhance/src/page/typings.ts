@@ -94,6 +94,23 @@ export interface ExtendedPageMethods<
    * @param name 页面简称
    */
   $getPath: (name: string) => string;
+
+  /**
+   * 提前预加载指定页面 (会触发对应页面的 `onPreload` 生命周期)
+   *
+   * 预加载依赖 `onPreload` 生命周期，仅 `@mptool/enhance` 提供；`@mptool/skyline-enhance` 不支持 预加载，因此该成员只声明在
+   * enhance 的页面类型上。
+   *
+   * @param pageName 页面名称或页面的路径，可以带上 `queryString`
+   *
+   *   示例：
+   *
+   *   ```js
+   *   this.$preload("main?id=xxx&target=xxx");
+   *   this.$preload("/page/main?userName=xxx&action=xxx");
+   *   ```
+   */
+  $preload: (pageName: string) => void | Promise<void>;
 }
 
 export type PageInstance<
