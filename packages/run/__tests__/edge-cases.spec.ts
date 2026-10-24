@@ -547,3 +547,28 @@ describe("class prototype semantics", () => {
     runBoth("class A extends null { constructor() { return { a: 1 }; } }; new A().a");
   });
 });
+
+describe("compound assignment target evaluation", () => {
+  it("should evaluate member targets exactly once", () => {
+    runBoth("let i = 0; const a = [1]; a[i++] += 1; [i, a[0], a[1]]");
+    runBoth("let i = 0; const a = [null]; a[i++] ??= 2; [i, a[0], a[1]]");
+    runBoth("let i = 0; const a = [0]; a[i++] ||= 2; [i, a[0], a[1]]");
+    runBoth("let i = 0; const a = [1]; a[i++] &&= 3; [i, a[0], a[1]]");
+    runBoth(
+      "let k = 0; const f = () => { k += 1; return 'a'; }; const o = { a: 1 }; o[f()] += 1; [k, o.a]",
+    );
+  });
+
+  it("should evaluate super member targets exactly once", () => {
+    runBoth(
+      "class A { get x() { return 1; } set x(v) { this._x = v; } } class B extends A { m() { super.x += 1; return this._x; } } new B().m()",
+    );
+    runBoth(
+      "class A { get x() { return null; } set x(v) { this._x = v; } } class B extends A { m() { super.x ??= 5; return this._x; } } new B().m()",
+    );
+  });
+
+  it("should evaluate accessor member targets exactly once", () => {
+    runBoth("let c = 0; const o = { get a() { c += 1; return { b: 1 }; } }; o.a.b += 1; c");
+  });
+});

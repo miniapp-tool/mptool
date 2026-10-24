@@ -250,6 +250,17 @@ const setProperty = (object: unknown, key: PropertyKey, value: unknown): void =>
 };
 
 /**
+ * A resolved assignment target: the member object/key (or binding name) is evaluated exactly once,
+ * then the reference can be read and written without re-evaluating side effects.
+ *
+ * 已解析的赋值目标：成员对象/键（或绑定名）只求值一次，之后可反复读取/写入而不会重复副作用。
+ */
+interface TargetReference {
+  get: () => unknown;
+  set: (value: unknown) => void;
+}
+
+/**
  * Apply a binary operator, delegating to the host operator.
  *
  * 应用二元运算符，委托宿主运算符。
@@ -1562,14 +1573,8 @@ export class Runtime {
   ): void {
     switch (target.type) {
       case "identifier": {
-        if (initialize) {
-          env.initialize(target.name, value);
-        } else if (!env.set(target.name, value)) {
-          // sloppy: writing an undeclared name creates a global; strict: error
-          // sloppy：写入未声明名称创建全局；strict：抛错
-          if (this.strict) throw new ReferenceError(`${target.name} is not defined`);
-          this.globalEnv.define(target.name, value);
-        }
+        if (initialize) env.initialize(target.name, value);
+        else this.writeIdentifier(target.name, value, env);
         break;
       }
       case "member": {
@@ -1700,16 +1705,44 @@ export class Runtime {
   }
 
   /**
-   * Read the current value of an assignment target (for compound/update operators).
+   * Write a binding, creating a global in sloppy mode when the name is undeclared.
    *
-   * 读取赋值目标的当前值（用于复合/更新运算符）。
+   * 写入绑定；sloppy 模式下未声明名称会创建全局变量。
+   *
+   * @param name - Binding name / 绑定名
+   * @param value - New value / 新值
+   * @param env - Current environment / 当前环境
+   */
+  private writeIdentifier(name: string, value: unknown, env: Environment): void {
+    if (!env.set(name, value)) {
+      // sloppy: writing an undeclared name creates a global; strict: error
+      // sloppy：写入未声明名称创建全局；strict：抛错
+      if (this.strict) throw new ReferenceError(`${name} is not defined`);
+
+      this.globalEnv.define(name, value);
+    }
+  }
+
+  /**
+   * Resolve an assignment target to a reference, evaluating the member object/key exactly once.
+   *
+   * 将赋值目标解析为引用，成员的对象/键只求值一次。
    *
    * @param target - The target / 目标
    * @param env - Current environment / 当前环境
-   * @returns The current value / 当前值
+   * @returns The resolved reference / 已解析的引用
    */
-  private readTarget(target: AssignmentTarget, env: Environment): unknown {
-    if (target.type === "identifier") return env.get(target.name);
+  private evalTargetReference(target: AssignmentTarget, env: Environment): TargetReference {
+    if (target.type === "identifier") {
+      const { name } = target;
+
+      return {
+        get: () => env.get(name),
+        set: (value) => {
+          this.writeIdentifier(name, value, env);
+        },
+      };
+    }
 
     if (target.type === "member") {
       if (target.object.type === "super") {
@@ -1718,13 +1751,19 @@ export class Runtime {
         if (ctx == null || ctx.superBase == null)
           throw new ReferenceError("'super' keyword unexpected here");
 
+        const { superBase, thisRef } = ctx;
         const key = target.computed
           ? toPropertyKey(this.evalExpression(target.property as Expression, env))
           : (target.property as string);
 
-        // accessors run with the instance as receiver
-        // accessor 以实例作为接收者运行
-        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+        return {
+          // accessors run with the instance as receiver
+          // accessor 以实例作为接收者运行
+          get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
+          set: (value) => {
+            setProperty(thisRef.value, key, value);
+          },
+        };
       }
 
       const object = this.evalExpression(target.object, env);
@@ -1732,7 +1771,12 @@ export class Runtime {
         ? toPropertyKey(this.evalExpression(target.property as Expression, env))
         : (target.property as string);
 
-      return getProperty(object, key);
+      return {
+        get: () => getProperty(object, key),
+        set: (value) => {
+          setProperty(object, key, value);
+        },
+      };
     }
 
     throw new TypeError("Invalid assignment target");
@@ -2408,8 +2452,12 @@ export class Runtime {
       return value;
     }
 
+    // Resolve the target once: object/computed key must not be evaluated twice
+    // 目标只解析一次：对象/计算键不得重复求值
+    const reference = this.evalTargetReference(target, env);
+
     if (op === "&&=" || op === "||=" || op === "??=") {
-      const old = this.readTarget(target, env);
+      const old = reference.get();
 
       // short-circuit: the RHS is only evaluated when the assignment actually happens
       // 短路：仅在实际发生赋值时才求值 RHS
@@ -2423,16 +2471,16 @@ export class Runtime {
 
       const value = this.evalExpression(valueExpr, env);
 
-      this.assignTo(target, value, env);
+      reference.set(value);
 
       return value;
     }
 
-    const old = this.readTarget(target, env);
+    const old = reference.get();
     const value = this.evalExpression(valueExpr, env);
     const result = binaryOp(op.slice(0, -1) as BinaryOperator, old, value);
 
-    this.assignTo(target, result, env);
+    reference.set(result);
 
     return result;
   }
@@ -4327,8 +4375,12 @@ export class Runtime {
       return value;
     }
 
+    // Resolve the target once: object/computed key must not be evaluated twice
+    // 目标只解析一次：对象/计算键不得重复求值
+    const reference = yield* this.evalAsyncTargetReference(target, env);
+
     if (op === "&&=" || op === "||=" || op === "??=") {
-      const old = yield* this.evalAsyncReadTarget(target, env);
+      const old = reference.get();
 
       if (op === "&&=") {
         if (!toBoolean(old)) return old;
@@ -4340,41 +4392,78 @@ export class Runtime {
 
       const value = yield* this.evalAsyncExpr(valueExpr, env);
 
-      yield* this.evalAsyncAssignTo(target, value, env);
+      reference.set(value);
 
       return value;
     }
 
-    const old = yield* this.evalAsyncReadTarget(target, env);
+    const old = reference.get();
     const value = yield* this.evalAsyncExpr(valueExpr, env);
     const result = binaryOp(op.slice(0, -1) as BinaryOperator, old, value);
 
-    yield* this.evalAsyncAssignTo(target, result, env);
+    reference.set(result);
 
     return result;
   }
 
   /**
-   * Read the current value of an assignment target (async-aware member refs).
+   * Resolve an assignment target to a reference, evaluating the member object/key exactly once
+   * (async-aware, for `await` in the object/computed key).
    *
-   * 读取赋值目标的当前值（成员引用支持 async）。
+   * 将赋值目标解析为引用，成员的对象/键只求值一次（支持 async，对象/计算键中可含 `await`）。
    *
    * @param target - The target / 目标
    * @param env - Current environment / 当前环境
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
-   * @returns The generator / 生成器
+   * @returns The generator, completing with the resolved reference / 生成器，完成值为已解析的引用
    */
-  private *evalAsyncReadTarget(
+  private *evalAsyncTargetReference(
     target: AssignmentTarget,
     env: Environment,
-  ): Generator<unknown, unknown, unknown> {
-    if (target.type === "identifier") return env.get(target.name);
+  ): Generator<unknown, TargetReference, unknown> {
+    if (target.type === "identifier") {
+      const { name } = target;
+
+      return {
+        get: () => env.get(name),
+        set: (value) => {
+          this.writeIdentifier(name, value, env);
+        },
+      };
+    }
 
     if (target.type === "member") {
-      const { object, key } = yield* this.evalAsyncMemberRef(target, env);
+      if (target.object.type === "super") {
+        const ctx = this.currentContext();
 
-      return getProperty(object, key);
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const { superBase, thisRef } = ctx;
+        const key = target.computed
+          ? toPropertyKey(yield* this.evalAsyncExpr(target.property as Expression, env))
+          : (target.property as string);
+
+        return {
+          get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
+          set: (value) => {
+            setProperty(thisRef.value, key, value);
+          },
+        };
+      }
+
+      const object = yield* this.evalAsyncExpr(target.object, env);
+      const key = target.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(target.property as Expression, env))
+        : (target.property as string);
+
+      return {
+        get: () => getProperty(object, key),
+        set: (value) => {
+          setProperty(object, key, value);
+        },
+      };
     }
 
     throw new TypeError("Invalid assignment target");
