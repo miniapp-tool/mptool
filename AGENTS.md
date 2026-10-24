@@ -56,7 +56,7 @@ mptool/
 │   ├── atob.ts          # atob polyfill injected into bundles (htmlparser2's `entities` needs it)
 │   └── sync.ts          # Mirror published packages to the npmmirror registry (release only)
 ├── demo/                # Demo mini-app (workspace dep on @mptool/all, TypeScript compiled by `tsc`)
-├── docs/                # VuePress site (guide / enhance / net / file / api / parser / run / mock)
+├── docs/                # VuePress site (guide / enhance / skyline-enhance / net / file / api / parser / run / mock)
 ├── .github/workflows/   # test.yml, docs.yml, publish.yml, codeql-analysis.yml, scraper.yml
 ├── vitest.config.ts     # Coverage (istanbul) + typecheck
 ├── tsconfig.json        # Extends @mr-hope/tsconfig/check.json, isolatedDeclarations
@@ -205,6 +205,6 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - **Branches**: lerna `version` only allows the `main` branch.
 - **Releases**: maintainer-only `workflow_dispatch` in `.github/workflows/publish.yml` (requires `Mister-Hope`): build + `lint:check` + `typecheck` + tests → `lerna version` → `lerna publish from-package` → `scripts/sync.ts`. There is no local release command.
 - **CI**: `test.yml` (build / lint / typecheck / test + Codecov), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
-- **Docs**: `pnpm run docs:dev` for local preview, `pnpm run docs:check` to type-check the site project (its own `docs/tsconfig.json`, which gives the docs DOM libs that the root `tsconfig.json` does not). The site config is `docs/.vuepress/config.ts` (navbar sections: enhance, net, file, api, parser, run, mock; guide is the landing section). `.vue` SFCs are **not** type-checked: `vue-tsc` currently fails to start against the repository's TypeScript version (`ERR_PACKAGE_PATH_NOT_EXPORTED`), so keep docs logic in `.ts` files until it supports the installed TypeScript.
+- **Docs**: `pnpm run docs:dev` for local preview, `pnpm run docs:check` to type-check the site project (its own `docs/tsconfig.json`, which gives the docs DOM libs that the root `tsconfig.json` does not). The site config is `docs/.vuepress/config.ts` (navbar sections: enhance, skyline-enhance, net, file, api, parser, run, mock; guide is the landing section). `.vue` SFCs are **not** type-checked: `vue-tsc` currently fails to start against the repository's TypeScript version (`ERR_PACKAGE_PATH_NOT_EXPORTED`), so keep docs logic in `.ts` files until it supports the installed TypeScript.
 - **Adding a package**: create `packages/<name>/` with `package.json`, `tsdown.config.mts`, `src/index.ts`, `__tests__/` (lerna and the pnpm workspace pick up `packages/*` automatically); if it belongs in a bundle, update `packages/all` and/or `packages/skyline`; add a docs section.
 - **Fixing a bug**: write a failing test first, fix the code, run `pnpm run build` + `pnpm run test`, then check dependent packages for side effects.
