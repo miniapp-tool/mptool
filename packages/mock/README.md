@@ -1,3 +1,3 @@
 # @mptool/mock
 
-`wx` mock for QQ and wechat miniapp.
+`wx` mock for Wechat miniapp.

@@ -16,8 +16,6 @@ export const showModal = (
     title,
     content,
     showCancel: Boolean(cancelAction),
-    // NOTE: For QQ only
-    theme: "day",
     success: ({ confirm }) => {
       if (confirm) void confirmAction?.();
       else void cancelAction?.();

@@ -1,3 +1,3 @@
 # @mptools/shared
 
-Shared utils for QQ/Wechat miniapp
+Shared utils for Wechat miniapp

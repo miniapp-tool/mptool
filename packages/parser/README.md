@@ -1,3 +1,3 @@
 # @mptool/parser
 
-Rich text parser for QQ and wechat miniapp.
+Rich text parser for Wechat miniapp.

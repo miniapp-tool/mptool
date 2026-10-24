@@ -1,6 +1,6 @@
 # @mptool/net
 
-Network api for QQ and wechat miniapp, including:
+Network api for Wechat miniapp, including:
 
 - Headers
 - URLSearchParams
