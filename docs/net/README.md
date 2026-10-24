@@ -23,6 +23,7 @@ icon: network-wired
 - `enableQuic`: 开启 quic
 - `forceCellularNetwork`: 强制使用蜂窝网络发送请求
 - `timeout`: 超时时间，单位为毫秒。默认值为 60000
+- `retry`: 默认重试配置，结构见下方「取消、超时与重试」
 
 默认的 `request` 和 `createRequest` 生成的 `request` 支持两个参数，第一个参数为请求的地址，第二个参数为 `RequestOptions`，支持 `wx.request` 的选项（`url` / `method` / `header` / `data` / `success` / `fail` 除外）。
 
@@ -45,6 +46,52 @@ icon: network-wired
 :::
 
 `request` 会返回一个 `Promise`，你可以通过 `then` 方法获取响应，或者通过 `catch` 方法捕获错误。
+
+返回值是普通 `Promise`，额外挂载了取消能力：
+
+- `abort()`: 取消本次请求（包括等待中的重试），幂等
+- `task`: 当前尝试对应的底层 `RequestTask`
+
+```ts
+const req = request("/api/user");
+
+req.abort(); // 取消请求
+await req; // 仍然可以当作普通 Promise 使用
+```
+
+请求选项额外支持：
+
+- `cancelKey`: 取消分组键，配合 `createRequest().abort(key)` 批量取消
+- `onTask`: 拿到每次尝试的 `RequestTask`（进度 / headers 事件）
+- `signal`: 取消信号，只需提供 `{ aborted: boolean }`（可选 `addEventListener`）
+- `retry`: 本次请求的重试配置；`false` 关闭
+
+### 取消、超时与重试
+
+```ts
+const api = createRequest({
+  server: "https://example.com",
+  timeout: 15000,
+  retry: {
+    attempts: 3, // 含第一次
+    delay: 300,
+    maxDelay: 3000,
+    methods: ["GET", "HEAD"], // 默认只重试幂等方法
+    statusCodes: [408, 429, 500, 502, 503, 504],
+    rejectOnHttpError: false, // 默认保持「任何状态码都 resolve」
+    onRetry: ({ attempt, delay, error }) => {},
+  },
+});
+
+// 页面卸载时批量取消
+api.request("/user", { cancelKey: "page:user" });
+onUnload(() => api.abort("page:user")); // 或 api.abortAll()
+```
+
+- 未传 `timeout` 时沿用微信 `networkTimeout`（默认 60 秒），不会强加框架默认值；
+- 默认不重试；重试只对 `methods` 内的方法生效，且 `abort` 会立即停止重试；
+- 每次尝试都会重新计算 Cookie header；
+- 失败统一为 `MpError`（`RequestError` 子类），额外提供 `type: "abort" | "timeout" | "network" | "http"` 便于区分；`responseHandler` / `errorHandler` 只在最终结果调用一次。
 
 ::: info
 

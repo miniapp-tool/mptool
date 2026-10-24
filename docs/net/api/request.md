@@ -82,6 +82,32 @@ export const request: <T extends RequestData = WechatMiniprogram.IAnyObject>(
 
 `success` / `fail` 不允许通过 `RequestOptions` 传入：内部回调需要独占它们来 resolve / reject Promise，并写回响应中的 Cookie。即使运行时强行传入，也会被内部回调覆盖。
 
+`request` 返回 `RequestResponse` 的 Promise，并额外提供：
+
+- `abort(): void`：取消当前请求（含重试等待），幂等
+- `task: WechatMiniprogram.RequestTask | undefined`：当前尝试的底层任务
+
+新增可选选项：
+
+- `cancelKey?: string`：配合 `createRequest().abort(key)` 批量取消
+- `onTask?: (task) => void`：每次尝试创建任务后回调
+- `signal?: { aborted: boolean; addEventListener?; removeEventListener? }`：取消信号
+- `retry?: RequestRetryOptions | false`：本次请求的重试配置
+
+```ts
+interface RequestRetryOptions {
+  attempts?: number; // 总尝试次数（含第一次），默认 1
+  delay?: number; // 首次重试延迟，默认 300ms
+  maxDelay?: number; // 最大延迟，默认 3000ms
+  methods?: string[]; // 默认 ["GET", "HEAD", "OPTIONS"]
+  statusCodes?: number[]; // 默认 [408, 429, 500, 502, 503, 504]
+  rejectOnHttpError?: boolean; // 默认 false
+  onRetry?: (info) => void | number; // 返回数字可覆盖延迟
+}
+```
+
+`createRequest` 还提供 `abort(key)` / `abortAll()` / `pendingCount()`；`RequestInitOptions` 新增 `retry`。失败统一为 `RequestError extends MpError`，带 `type: "abort" | "timeout" | "network" | "http"`。
+
 ## createRequest
 
 ```ts
