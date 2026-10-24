@@ -4,7 +4,7 @@ import { createFunction } from "@mptool/run";
 import { describe, expect, it } from "vitest";
 
 import { $Config } from "../src/config/index.js";
-import { HOT_RELOAD_FUNCTION_KEY } from "../src/hotReload.js";
+import { HOT_RELOAD_FUNCTION_KEY, getPendingHotReloadCount } from "../src/hotReload.js";
 import { $Page } from "../src/page/index.js";
 
 describe("page hot reload", () => {
@@ -48,6 +48,36 @@ describe("page hot reload", () => {
 
     return (code: string, statusCode = 200): void => {
       onSuccess?.({ statusCode, data: code });
+    };
+  };
+
+  /**
+   * 捕获 wx.request 的 success / fail 回调，用于手工制造各种终态
+   *
+   * @returns 触发 success / fail 的闭包
+   */
+  const captureRequestHandlers = (): {
+    success: (code: string, statusCode?: number) => void;
+    fail: (errMsg: string) => void;
+  } => {
+    let onFail: ((result: { errMsg: string }) => void) | undefined,
+      onSuccess: ((result: { statusCode: number; data: unknown }) => void) | undefined;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (option: {
+      success?: (result: { statusCode: number; data: unknown }) => void;
+      fail?: (result: { errMsg: string }) => void;
+    }): void => {
+      onSuccess = option.success;
+      onFail = option.fail;
+    };
+
+    return {
+      success: (code: string, statusCode = 200): void => {
+        onSuccess?.({ statusCode, data: code });
+      },
+      fail: (errMsg: string): void => {
+        onFail?.({ errMsg });
+      },
     };
   };
 
@@ -336,6 +366,176 @@ describe("page hot reload", () => {
       // onHotReload 抛异常不应阻断用户 onReady
       expect(() => getOptions().onReady?.call(instance)).not.toThrow();
       expect(userOnReadyCalled).toBe(true);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should not keep page instances waiting when createFunction is not mounted", () => {
+    delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    $Page("hotReloadNoFunction", {});
+
+    getOptions().onLoad?.call(instance);
+
+    // createFunction 未挂载：代码永远无法执行，实例不应被登记 (否则永久泄漏)
+    expect(getPendingHotReloadCount()).toBe(0);
+  });
+
+  it("should release waiting instances when the response body is empty", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPendingEmpty", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      // nginx 对不存在的文件返回 200 空响应体：确定没有热更新，释放实例
+      handlers.success("", 200);
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should release waiting instances on non-200 responses", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPending404", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      handlers.success("return {};", 404);
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should release waiting instances when the payload is not an object", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPendingInvalid", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      handlers.success("return 42;", 200);
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should release waiting instances when the code fails to execute", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPendingThrow", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      handlers.success("return {", 200);
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should release waiting instances when the request fails", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPendingFail", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      handlers.fail("request:fail timeout");
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should clear the pending instance after a successful fetch", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadPendingSuccess", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      handlers.success("return { method() { return 1; } };");
+      expect(getPendingHotReloadCount()).toBe(0);
+      expect((instance as { method?: () => number }).method?.()).toBe(1);
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
