@@ -3,6 +3,23 @@ import { logger } from "@mptool/shared";
 import { download } from "../network/index.js";
 import { showModal, showToast } from "../ui/index.js";
 
+/**
+ * Strip the query and the hash from a URL.
+ *
+ * `search()` with a single character class keeps this linear; the previous `/[?#].*$/u` replace was
+ * reported as a polynomial regular expression by CodeQL.
+ *
+ * 去除 URL 中的 query 与 hash。
+ *
+ * @param url - The URL / URL
+ * @returns The URL without query and hash / 去除 query 与 hash 后的 URL
+ */
+const removeQueryAndHash = (url: string): string => {
+  const index = url.search(/[?#]/u);
+
+  return index === -1 ? url : url.slice(0, index);
+};
+
 export const openDocument = (url: string): void => {
   download(url)
     .then((filePath) => {
@@ -30,7 +47,7 @@ export const saveDocument = (url: string, filename?: string): void => {
   // 首选添加到收藏
   if (wx.canIUse("addFileToFavorites")) {
     // 去除 query 与 hash，避免污染文件名与扩展名
-    const cleanUrl = url.replace(/[?#].*$/u, "");
+    const cleanUrl = removeQueryAndHash(url);
     // 从 URL 末尾提取文件名（含扩展名），如 "doc.pdf"
     const urlName = /\/([^/]+)$/u.exec(cleanUrl)?.[1] ?? "document";
     // 从 URL 文件名提取扩展名，如 "pdf"

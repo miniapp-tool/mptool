@@ -193,6 +193,27 @@ describe(saveDocument, () => {
     expect(saved).toStrictEqual([{ fileName: "doc.pdf", filePath: "mock://temp/doc.pdf" }]);
   });
 
+  it("should strip the hash and fall back to document when nothing remains", async () => {
+    const saved: string[] = [];
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: { fileName: string }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      saved.push(option.fileName);
+    };
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/files/doc.pdf#page=2&x=1");
+    saveDocument("?token=abc");
+    saveDocument("#fragment");
+    saveDocument(`https://example.com/doc.pdf${"#".repeat(1000)}`);
+    await flush();
+
+    expect(saved).toStrictEqual(["doc.pdf", "document", "document", "doc.pdf"]);
+  });
+
   it("should use the full name when the url has no extension", async () => {
     const saved: { fileName: string }[] = [];
     const mockAddFileToFavoritesApi = wx as unknown as {
