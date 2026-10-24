@@ -2995,21 +2995,19 @@ export class Runtime {
     body: ClassBody,
     env: Environment,
   ): InterpreterFunction {
+    // A class is "derived" whenever it has a heritage clause, including `extends null`.
+    // 只要存在 heritage 子句（含 `extends null`），类就是派生类。
+    const hasExtends = superClassExpr != null;
     let parentCtor: unknown = null;
     let parentProto: object | null = null;
-    let isDerived = false;
 
-    if (superClassExpr != null) {
+    if (hasExtends) {
       parentCtor = this.evalExpression(superClassExpr, env);
 
-      if (typeof parentCtor === "function") {
-        isDerived = true;
+      if (typeof parentCtor === "function")
         parentProto = ((parentCtor as { prototype?: unknown }).prototype as object | null) ?? null;
-      } else if (parentCtor == null) {
-        parentProto = null;
-      } else {
+      else if (parentCtor != null)
         throw new TypeError("Class extends value is not a constructor or null");
-      }
     }
 
     // the class name is visible inside the class body
@@ -3021,10 +3019,19 @@ export class Runtime {
       closureEnv.declareLet(name);
     }
 
-    const proto: object =
-      parentProto == null
-        ? (Object.create(null) as object)
-        : (Object.create(parentProto) as object);
+    // Base classes inherit from `Object.prototype` (a class instance is an ordinary object);
+    // only `extends null` keeps the null prototype.
+    // 基类原型继承 `Object.prototype`（class 实例是普通对象）；只有 `extends null` 保持 null 原型。
+    let proto: object;
+
+    if (hasExtends) {
+      proto =
+        parentProto == null
+          ? (Object.create(null) as object)
+          : (Object.create(parentProto) as object);
+    } else {
+      proto = {};
+    }
 
     const ctorMethod = body.methods.find((item) => item.kind === "constructor") ?? null;
     const ctor = ctorMethod
@@ -3033,11 +3040,14 @@ export class Runtime {
           closure: closureEnv,
           name: name ?? (typeof ctorMethod.key === "string" ? ctorMethod.key : null),
           prototype: proto,
-          superClass: isDerived ? parentCtor : null,
+          superClass: hasExtends ? parentCtor : null,
           superBase: parentProto,
           isConstructor: true,
         })
-      : this.createImplicitConstructor(name, closureEnv, proto, isDerived ? parentCtor : null);
+      : this.createImplicitConstructor(name, closureEnv, proto, {
+          superClass: hasExtends ? parentCtor : null,
+          implicitDerived: hasExtends,
+        });
 
     // bind the class name now that the constructor exists
     // 构造器已存在，现在绑定类名
@@ -3054,7 +3064,7 @@ export class Runtime {
 
     // static inheritance: the derived constructor's `[[Prototype]]` is the parent
     // 静态继承：派生构造器的 `[[Prototype]]` 指向父构造器
-    if (isDerived && parentCtor != null) Object.setPrototypeOf(ctor, parentCtor);
+    if (hasExtends && parentCtor != null) Object.setPrototypeOf(ctor, parentCtor);
 
     // define instance/static methods; merge getters/setters per key
     // 定义实例/静态方法；按键合并 getter/setter
@@ -3191,14 +3201,22 @@ export class Runtime {
    * @param name - Class name / 类名
    * @param closure - Closure environment / 闭包环境
    * @param prototype - Instance prototype / 实例原型
-   * @param superClass - Parent constructor, or `null` for a base class / 父构造器，基类为 `null`
+   * @param options - Parent constructor and constructor kind / 父构造器与构造器种类
    * @returns The interpreter function / 解释器函数
    */
   private createImplicitConstructor(
     name: string | null,
     closure: Environment,
     prototype: object,
-    superClass: unknown,
+    options: {
+      /** Parent constructor, or `null` for a base class / 父构造器，基类为 `null` */
+      superClass: unknown;
+      /**
+       * Whether the class has a heritage clause (`extends null` included) / 类是否含 heritage 子句（含
+       * `extends null`）
+       */
+      implicitDerived: boolean;
+    },
   ): InterpreterFunction {
     return makeInterpreterFunction(
       {
@@ -3211,11 +3229,11 @@ export class Runtime {
         isClassConstructor: true,
         constructable: true,
         prototype,
-        superClass,
+        superClass: options.superClass,
         superBase: null,
         hasArguments: false,
         simpleParamNames: [],
-        implicitDerived: superClass != null,
+        implicitDerived: options.implicitDerived,
         containsAwait: false,
         lexicalThis: null,
         lexicalSuperBase: null,

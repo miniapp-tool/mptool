@@ -328,12 +328,13 @@ describe("runtime public methods", () => {
     const ctorMeta = getInterpreterMeta(Ctor);
 
     expect(ctorMeta).not.toBeNull();
-    // interpreter class instances have a null prototype, so `instanceof Object` is false
-    // 解释器类实例原型为 null，因此 `instanceof Object` 为 false
+    // class instances are ordinary objects: their prototype chain reaches `Object.prototype`
+    // class 实例是普通对象：原型链能到达 `Object.prototype`
     const instance = runtime.constructFunction(ctorMeta as never, [42]) as { x: unknown } | null;
 
     expect(instance).not.toBeNull();
     expect(instance?.x).toBe(42);
+    expect(instance).toBeInstanceOf(Object);
   });
 });
 
@@ -524,5 +525,25 @@ describe("legacy octal literals", () => {
   it("should keep prefixed octal literals correct", () => {
     runBoth("0o123");
     runBoth("0O17");
+  });
+});
+
+describe("class prototype semantics", () => {
+  it("should link base class instances to Object.prototype", () => {
+    runBoth("class A {}; String(new A())");
+    runBoth("class A {}; new A() instanceof Object");
+    runBoth("class A { constructor() { this.x = 1; } }; new A().hasOwnProperty('x')");
+    runBoth("class A {}; Object.getPrototypeOf(A.prototype) === Object.prototype");
+  });
+
+  it("should keep extends null prototypes null and reject construction", () => {
+    runBoth("class A extends null {}; Object.getPrototypeOf(A.prototype) === null");
+    // a derived constructor of `extends null` cannot call `super()`; `new A()` must throw
+    // `extends null` 的派生构造器不能调用 `super()`；`new A()` 必须抛错
+    expectError("class A extends null {}; new A()");
+    expectError("class A extends null { constructor() { super(); } }; new A()");
+    // an explicit constructor may return an object without calling super()
+    // 显式构造器可以不调用 super() 直接返回对象
+    runBoth("class A extends null { constructor() { return { a: 1 }; } }; new A().a");
   });
 });
