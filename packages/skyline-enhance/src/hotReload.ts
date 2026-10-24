@@ -188,6 +188,25 @@ export const markHotReloadReady = (instance: object): void => {
 };
 
 /**
+ * Drop a page instance from the hot-reload bookkeeping when the page unloads.
+ *
+ * A late fetch must not patch an unloaded page or fire its `onHotReload` hook, otherwise the hook
+ * would run `setData` / business side effects on a closed page.
+ *
+ * 页面卸载时从热更新登记中移除实例：晚到的拉取不得补挂已卸载页面或触发其 onHotReload。
+ *
+ * @param instance - Page instance / 页面实例
+ * @internal
+ */
+export const dropHotReloadInstance = (instance: object): void => {
+  for (const [name, instances] of pendingInstances)
+    if (instances.delete(instance) && instances.size === 0) pendingInstances.delete(name);
+
+  readyInstances.delete(instance);
+  pendingOnReadyInstances.delete(instance);
+};
+
+/**
  * Fetch and parse the hot-reload code for a page (async, non-blocking).
  *
  * 拉取并解析页面热更新代码（异步，非阻塞）。
