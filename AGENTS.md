@@ -29,6 +29,7 @@ The table lists **every** script defined in the root `package.json`; the "Implem
 | `pnpm run clean`           | `pnpm --stream -r run clean`                                                                | Remove every package's `dist/` (`rimraf ./dist`)                                                                                                                        |
 | `pnpm run copy`            | `unrun scripts/copy-package.ts`                                                             | Copy `packages/all/dist` + `package.json` into `demo/node_modules/@mptool/all` for the demo                                                                             |
 | `pnpm run test`            | `vitest run --coverage`                                                                     | Full test suite with coverage (see [Testing](#testing))                                                                                                                 |
+| `pnpm run typecheck`       | `tsc -p tsconfig.json --noEmit`                                                             | Type-check all sources, tests and type tests (run after `build`, like tests)                                                                                            |
 | `pnpm run lint`            | `oxlint --fix && oxfmt`                                                                     | Lint + format with auto-fix                                                                                                                                             |
 | `pnpm run lint:check`      | `oxlint && oxfmt --check`                                                                   | Read-only lint/format check (CI gate)                                                                                                                                   |
 | `pnpm run changelog`       | `conventional-changelog -p angular -i CHANGELOG.md -s -r 2`                                 | Append the last 2 releases to the root `CHANGELOG.md`                                                                                                                   |
@@ -40,7 +41,7 @@ The table lists **every** script defined in the root `package.json`; the "Implem
 
 There is **no `release` script**. Releases are cut by a maintainer through the `workflow_dispatch` workflow `.github/workflows/publish.yml` (lerna-lite `version` → `publish from-package` → `unrun scripts/sync.ts` to mirror to npmmirror).
 
-Typical agent loop: edit sources → `pnpm run build` (needed before tests, see pitfalls) → `pnpm run lint:check` → `pnpm run test`.
+Typical agent loop: edit sources → `pnpm run build` (needed before tests, see pitfalls) → `pnpm run lint:check` → `pnpm run typecheck` → `pnpm run test`.
 
 ## Repository Layout
 
@@ -190,18 +191,19 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 
 - Runner: vitest (`pnpm run test` → `vitest run --coverage`). Config: `vitest.config.ts`; test framework version comes from `package.json`.
 - Coverage: istanbul provider, enabled by default, scope `packages/*/src/**/*.ts`. **No coverage threshold is configured** — coverage is uploaded to Codecov from CI (`.github/workflows/test.yml` on `main`), so do not claim specific coverage percentages in docs.
+- Type checking: `pnpm run typecheck` runs `tsc -p tsconfig.json --noEmit` over the whole repo (sources, tests and `*.spec-d.ts` type tests). Like the tests it needs a completed `build`, because workspace packages resolve through their generated `dist/`.
 - Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/shared/__tests__/`, `packages/net/__tests__/`, `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
 - Test layout: `packages/<pkg>/__tests__/<name>.spec.ts`. `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
 - `@mptool/mock` is imported for its side effect: it installs `globalThis.wx` and the mini-program framework mocks before tests run.
-- CI gate order in `.github/workflows/test.yml`: install → `pnpm run build` → `pnpm run lint` → `pnpm run test` → Codecov upload.
+- CI gate order in `.github/workflows/test.yml`: install → `pnpm run build` → `pnpm run lint:check` → `pnpm run typecheck` → `pnpm run test` → Codecov upload.
 
 ## Contribution Guidelines
 
 - **Commits**: Conventional Commits. lerna-lite derives versions/changelogs from `feat`, `fix`, `perf`, `revert` (visible sections) and `docs`, `style`, `chore`, `refactor`, `test`, `build`, `ci` (hidden); release commits use `chore(release): publish v%v`.
 - **Pre-commit**: husky runs `nano-staged` (`.husky/pre-commit`): `oxfmt` on all staged files and `oxlint --fix` on staged `*.js` / `*.ts`.
 - **Branches**: lerna `version` only allows the `main` branch.
-- **Releases**: maintainer-only `workflow_dispatch` in `.github/workflows/publish.yml` (requires `Mister-Hope`): build + `lint:check` + tests → `lerna version` → `lerna publish from-package` → `scripts/sync.ts`. There is no local release command.
-- **CI**: `test.yml` (build / lint / test + Codecov), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
+- **Releases**: maintainer-only `workflow_dispatch` in `.github/workflows/publish.yml` (requires `Mister-Hope`): build + `lint:check` + `typecheck` + tests → `lerna version` → `lerna publish from-package` → `scripts/sync.ts`. There is no local release command.
+- **CI**: `test.yml` (build / lint / typecheck / test + Codecov), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
 - **Docs**: `pnpm run docs:dev` for local preview, `pnpm run docs:check` to type-check the site project (its own `docs/tsconfig.json`, which gives the docs DOM libs that the root `tsconfig.json` does not). The site config is `docs/.vuepress/config.ts` (navbar sections: enhance, net, file, api, parser, run, mock; guide is the landing section). `.vue` SFCs are **not** type-checked: `vue-tsc` currently fails to start against the repository's TypeScript version (`ERR_PACKAGE_PATH_NOT_EXPORTED`), so keep docs logic in `.ts` files until it supports the installed TypeScript.
 - **Adding a package**: create `packages/<name>/` with `package.json`, `tsdown.config.mts`, `src/index.ts`, `__tests__/` (lerna and the pnpm workspace pick up `packages/*` automatically); if it belongs in a bundle, update `packages/all` and/or `packages/skyline`; add a docs section.
 - **Fixing a bug**: write a failing test first, fix the code, run `pnpm run build` + `pnpm run test`, then check dependent packages for side effects.
