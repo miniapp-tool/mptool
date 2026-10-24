@@ -48,5 +48,10 @@
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
   },
+  "peerDependenciesMeta": {
+    "miniprogram-api-typings": {
+      "optional": true
+    }
+  },
   "miniprogram": "dist"
 }

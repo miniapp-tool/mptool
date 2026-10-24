@@ -154,7 +154,7 @@ All workspace packages are **inlined at build time** (`tsdown` `alwaysBundle: [/
 @mptool/mock            → miniprogram-api-typings                   (runtime dependency)
 ```
 
-`miniprogram-api-typings` is a **peer dependency** (`^5.0.0`) of every package except `@mptool/encoder` and `@mptool/mock`; `@mptool/mock` depends on it directly.
+`miniprogram-api-typings` is an **optional peer dependency** (`^5.0.0` + `peerDependenciesMeta.optional`) of every package except `@mptool/encoder` and `@mptool/mock`: it only supplies the global mini-program types for `.d.ts`, so consumers do not need to install it. `@mptool/mock` depends on it directly.
 
 ## Conventions & Pitfalls
 
