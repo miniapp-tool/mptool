@@ -13,7 +13,7 @@ Guidance for AI coding agents working in this repository. `CLAUDE.md` only impor
 - Lint / format: oxlint + oxfmt (both configured through `oxc-config-hope` presets)
 - Docs: VuePress 2 site in `docs/`
 - Versioning / publishing: lerna-lite, driven by `.github/workflows/publish.yml`
-- Required toolchain (from `package.json` → `devEngines`): Node `^24.20.0`, pnpm `12.15.0`. CI pins the same Node range.
+- Required toolchain (from `package.json` → `devEngines`): the Node and pnpm versions declared there. CI uses the same Node range through `pnpm/setup`'s `runtime` input.
 - Exact dependency versions (vitest, TypeScript, tsdown, oxlint, …) live in `package.json` / `pnpm-lock.yaml`. **Do not copy version numbers into docs** — point at `package.json` instead.
 
 ## Setup & Commands
