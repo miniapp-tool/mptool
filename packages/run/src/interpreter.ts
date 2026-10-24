@@ -261,6 +261,33 @@ interface TargetReference {
 }
 
 /**
+ * Sentinel returned by optional-chain evaluation when a link short-circuits the whole chain.
+ *
+ * 可选链某一链节短路时由链求值返回的哨兵值。
+ */
+const SHORT_CIRCUIT = Symbol("short-circuit");
+
+/**
+ * Whether a member/call expression belongs to an optional chain (has a `?.` link on its spine).
+ *
+ * 成员/调用表达式是否属于可选链（脊上存在 `?.` 链节）。
+ *
+ * @param node - Member/call expression / 成员或调用表达式
+ * @returns Whether it contains an optional link / 是否含可选链节
+ */
+const containsOptionalChain = (node: MemberExpr | CallExpr): boolean => {
+  let current: Expression = node;
+
+  while (current.type === "member" || current.type === "call") {
+    if (current.optional) return true;
+
+    current = current.type === "member" ? current.object : current.callee;
+  }
+
+  return false;
+};
+
+/**
  * Apply a binary operator, delegating to the host operator.
  *
  * 应用二元运算符，委托宿主运算符。
@@ -1911,11 +1938,15 @@ export class Runtime {
       case "object": {
         return this.evalObject(node, env);
       }
-      case "member": {
-        return this.evalMember(node, env);
-      }
+      case "member":
       case "call": {
-        return this.evalCall(node, env);
+        if (containsOptionalChain(node)) {
+          const value = this.evalChainLink(node, env);
+
+          return value === SHORT_CIRCUIT ? void 0 : value;
+        }
+
+        return node.type === "member" ? this.evalMember(node, env) : this.evalCall(node, env);
       }
       case "new": {
         return this.evalNew(node, env);
@@ -2144,15 +2175,125 @@ export class Runtime {
    * @returns The call result / 调用结果
    */
   private evalCall(node: CallExpr, env: Environment): unknown {
-    const args = this.evalArgs(node.args, env);
+    if (node.callee.type === "super") return this.evalSuperCall(this.evalArgs(node.args, env));
 
-    if (node.callee.type === "super") return this.evalSuperCall(args);
-
+    // callee is evaluated before the arguments (ECMAScript Evaluation order)
+    // callee 先于实参求值（ECMAScript 求值顺序）
     const { callee, thisArg } = this.evalCallee(node.callee, env);
+    const args = this.evalArgs(node.args, env);
 
     if (node.optional && callee == null) return void 0;
 
     return this.callValue(callee, args, thisArg);
+  }
+
+  /**
+   * Evaluate a member/call link of an optional chain, propagating short-circuiting.
+   *
+   * 求值可选链的一个成员/调用链节，并向上传播短路状态。
+   *
+   * The parser discards parentheses, so `(o?.a)()` is indistinguishable from `o?.a()`; both are
+   * treated as one chain (`(o?.a)()` therefore short-circuits instead of throwing).
+   *
+   * 解析器丢弃括号，`(o?.a)()` 与 `o?.a()` 在 AST 上无法区分，二者都按一条可选链处理（因此 `(o?.a)()` 会短路而不是抛错）。
+   *
+   * @param node - Member/call link / 成员或调用链节
+   * @param env - Current environment / 当前环境
+   * @returns The value, or `SHORT_CIRCUIT` / 值或短路哨兵
+   */
+  private evalChainLink(node: MemberExpr | CallExpr, env: Environment): unknown {
+    if (node.type === "member") {
+      if (node.object.type === "super") {
+        const ctx = this.currentContext();
+
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const key = node.computed
+          ? toPropertyKey(this.evalExpression(node.property as Expression, env))
+          : (node.property as string);
+
+        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+      }
+
+      const object = this.evalChainOperand(node.object, env);
+
+      if (object === SHORT_CIRCUIT) return SHORT_CIRCUIT;
+      if (node.optional && object == null) return SHORT_CIRCUIT;
+
+      const key = node.computed
+        ? toPropertyKey(this.evalExpression(node.property as Expression, env))
+        : (node.property as string);
+
+      return getProperty(object, key);
+    }
+
+    if (node.callee.type === "super") return this.evalSuperCall(this.evalArgs(node.args, env));
+
+    const { callee, thisArg } = this.evalChainCallee(node.callee, env);
+
+    if (callee === SHORT_CIRCUIT) return SHORT_CIRCUIT;
+    if (node.optional && callee == null) return SHORT_CIRCUIT;
+
+    return this.callValue(callee, this.evalArgs(node.args, env), thisArg);
+  }
+
+  /**
+   * Evaluate an operand inside an optional chain, keeping the chain state.
+   *
+   * 在可选链内部求值操作数，保留整链短路状态。
+   *
+   * @param expr - The operand / 操作数
+   * @param env - Current environment / 当前环境
+   * @returns The value or `SHORT_CIRCUIT` / 值或短路哨兵
+   */
+  private evalChainOperand(expr: Expression, env: Environment): unknown {
+    if (expr.type === "member" || expr.type === "call") return this.evalChainLink(expr, env);
+
+    return this.evalExpression(expr, env);
+  }
+
+  /**
+   * Evaluate a callee inside an optional chain, keeping the chain state.
+   *
+   * 在可选链内部求值 callee，保留整链短路状态。
+   *
+   * @param callee - Callee expression / callee 表达式
+   * @param env - Current environment / 当前环境
+   * @returns The callee and `this` value; `callee` is `SHORT_CIRCUIT` when the chain short-circuits
+   *   / callee 与 `this` 值；链短路时 `callee` 为短路哨兵
+   */
+  private evalChainCallee(
+    callee: Expression,
+    env: Environment,
+  ): { callee: unknown; thisArg: unknown } {
+    if (callee.type === "member") {
+      if (callee.object.type === "super") {
+        const ctx = this.currentContext();
+
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const key = callee.computed
+          ? toPropertyKey(this.evalExpression(callee.property as Expression, env))
+          : (callee.property as string);
+
+        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+      }
+
+      const object = this.evalChainOperand(callee.object, env);
+
+      if (object === SHORT_CIRCUIT) return { callee: SHORT_CIRCUIT, thisArg: void 0 };
+      if (callee.optional && object == null) return { callee: SHORT_CIRCUIT, thisArg: void 0 };
+
+      const key = callee.computed
+        ? toPropertyKey(this.evalExpression(callee.property as Expression, env))
+        : (callee.property as string);
+
+      return { callee: getProperty(object, key), thisArg: object };
+    }
+
+    return { callee: this.evalChainOperand(callee, env), thisArg: void 0 };
   }
 
   /**
@@ -4073,6 +4214,12 @@ export class Runtime {
         return yield* this.evalAsyncObject(expr, env);
       }
       case "member": {
+        if (containsOptionalChain(expr)) {
+          const value = yield* this.evalAsyncChainLink(expr, env);
+
+          return value === SHORT_CIRCUIT ? void 0 : value;
+        }
+
         if (expr.object.type === "super") {
           const ctx = this.currentContext();
 
@@ -4099,51 +4246,19 @@ export class Runtime {
         return getProperty(object, key);
       }
       case "call": {
-        const args: unknown[] = [];
+        if (containsOptionalChain(expr)) {
+          const value = yield* this.evalAsyncChainLink(expr, env);
 
-        for (const arg of expr.args) {
-          if (arg.type === "spread") {
-            for (const item of iterate(yield* this.evalAsyncExpr(arg.argument, env)))
-              args.push(item);
-          } else {
-            args.push(yield* this.evalAsyncExpr(arg, env));
-          }
+          return value === SHORT_CIRCUIT ? void 0 : value;
         }
 
-        if (expr.callee.type === "super") return this.evalSuperCall(args);
+        if (expr.callee.type === "super")
+          return this.evalSuperCall(yield* this.evalAsyncArgs(expr.args, env));
 
-        let callee: unknown, thisArg: unknown;
-        const calleeExpr = expr.callee;
-
-        if (calleeExpr.type === "member") {
-          if (calleeExpr.object.type === "super") {
-            const ctx = this.currentContext();
-
-            if (ctx == null || ctx.superBase == null)
-              throw new ReferenceError("'super' keyword unexpected here");
-
-            const key = calleeExpr.computed
-              ? toPropertyKey(yield* this.evalAsyncExpr(calleeExpr.property as Expression, env))
-              : (calleeExpr.property as string);
-
-            callee = getProperty(ctx.superBase, key);
-            thisArg = ctx.thisRef.value;
-          } else {
-            const object = yield* this.evalAsyncExpr(calleeExpr.object, env);
-
-            if (calleeExpr.optional && object == null) return void 0;
-
-            const key = calleeExpr.computed
-              ? toPropertyKey(yield* this.evalAsyncExpr(calleeExpr.property as Expression, env))
-              : (calleeExpr.property as string);
-
-            callee = getProperty(object, key);
-            thisArg = object;
-          }
-        } else {
-          callee = yield* this.evalAsyncExpr(calleeExpr, env);
-          thisArg = void 0;
-        }
+        // callee is evaluated before the arguments (ECMAScript Evaluation order)
+        // callee 先于实参求值（ECMAScript 求值顺序）
+        const { callee, thisArg } = yield* this.evalAsyncCallee(expr.callee, env);
+        const args = yield* this.evalAsyncArgs(expr.args, env);
 
         if (expr.optional && callee == null) return void 0;
 
@@ -4809,6 +4924,199 @@ export class Runtime {
 
       yield* this.evalAsyncAssignTo(target.rest.argument, rest, env, initialize);
     }
+  }
+
+  /**
+   * Evaluate call arguments in async code (with spread), suspending on `await`.
+   *
+   * 在 async 代码中求值调用实参（含展开），遇 `await` 挂起。
+   *
+   * @param args - Argument expressions / 实参表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the evaluated arguments / 生成器，完成值为已求值的实参
+   */
+  private *evalAsyncArgs(
+    args: readonly (Expression | SpreadExpr)[],
+    env: Environment,
+  ): Generator<unknown, unknown[], unknown> {
+    const result: unknown[] = [];
+
+    for (const arg of args) {
+      if (arg.type === "spread")
+        for (const item of iterate(yield* this.evalAsyncExpr(arg.argument, env))) result.push(item);
+      else result.push(yield* this.evalAsyncExpr(arg, env));
+    }
+
+    return result;
+  }
+
+  /**
+   * Evaluate a callee in async code together with its `this` value.
+   *
+   * 在 async 代码中求值 callee 及其 `this` 值。
+   *
+   * @param callee - Callee expression / callee 表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the callee and `this` value / 生成器，完成值为 callee 与 `this`
+   *   值
+   */
+  private *evalAsyncCallee(
+    callee: Expression,
+    env: Environment,
+  ): Generator<unknown, { callee: unknown; thisArg: unknown }, unknown> {
+    if (callee.type === "member") {
+      if (callee.object.type === "super") {
+        const ctx = this.currentContext();
+
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const key = callee.computed
+          ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
+          : (callee.property as string);
+
+        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+      }
+
+      const object = yield* this.evalAsyncExpr(callee.object, env);
+
+      if (callee.optional && object == null) return { callee: void 0, thisArg: void 0 };
+
+      const key = callee.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
+        : (callee.property as string);
+
+      return { callee: getProperty(object, key), thisArg: object };
+    }
+
+    return { callee: yield* this.evalAsyncExpr(callee, env), thisArg: void 0 };
+  }
+
+  /**
+   * Evaluate a member/call link of an optional chain in async code, propagating short-circuiting.
+   *
+   * 在 async 代码中求值可选链的一个链节，并向上传播短路状态。
+   *
+   * @param node - Member/call link / 成员或调用链节
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the value or `SHORT_CIRCUIT` / 生成器，完成值为值或短路哨兵
+   */
+  private *evalAsyncChainLink(
+    node: MemberExpr | CallExpr,
+    env: Environment,
+  ): Generator<unknown, unknown, unknown> {
+    if (node.type === "member") {
+      if (node.object.type === "super") {
+        const ctx = this.currentContext();
+
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const key = node.computed
+          ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
+          : (node.property as string);
+
+        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+      }
+
+      const object = yield* this.evalAsyncChainOperand(node.object, env);
+
+      if (object === SHORT_CIRCUIT) return SHORT_CIRCUIT;
+      if (node.optional && object == null) return SHORT_CIRCUIT;
+
+      const key = node.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
+        : (node.property as string);
+
+      return getProperty(object, key);
+    }
+
+    if (node.callee.type === "super")
+      return this.evalSuperCall(yield* this.evalAsyncArgs(node.args, env));
+
+    const { callee, thisArg } = yield* this.evalAsyncChainCallee(node.callee, env);
+
+    if (callee === SHORT_CIRCUIT) return SHORT_CIRCUIT;
+    if (node.optional && callee == null) return SHORT_CIRCUIT;
+
+    return yield* this.evalAsyncCallValue(
+      callee,
+      yield* this.evalAsyncArgs(node.args, env),
+      thisArg,
+    );
+  }
+
+  /**
+   * Evaluate an operand inside an async optional chain, keeping the chain state.
+   *
+   * 在 async 可选链内部求值操作数，保留整链短路状态。
+   *
+   * @param expr - The operand / 操作数
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the value or `SHORT_CIRCUIT` / 生成器，完成值为值或短路哨兵
+   */
+  private *evalAsyncChainOperand(
+    expr: Expression,
+    env: Environment,
+  ): Generator<unknown, unknown, unknown> {
+    if (expr.type === "member" || expr.type === "call")
+      return yield* this.evalAsyncChainLink(expr, env);
+
+    return yield* this.evalAsyncExpr(expr, env);
+  }
+
+  /**
+   * Evaluate a callee inside an async optional chain, keeping the chain state.
+   *
+   * 在 async 可选链内部求值 callee，保留整链短路状态。
+   *
+   * @param callee - Callee expression / callee 表达式
+   * @param env - Current environment / 当前环境
+   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
+   *   promise
+   * @returns The generator, completing with the callee and `this` value; `callee` is
+   *   `SHORT_CIRCUIT` when the chain short-circuits / 生成器，完成值为 callee 与 `this` 值；链短路时 `callee`
+   *   为短路哨兵
+   */
+  private *evalAsyncChainCallee(
+    callee: Expression,
+    env: Environment,
+  ): Generator<unknown, { callee: unknown; thisArg: unknown }, unknown> {
+    if (callee.type === "member") {
+      if (callee.object.type === "super") {
+        const ctx = this.currentContext();
+
+        if (ctx == null || ctx.superBase == null)
+          throw new ReferenceError("'super' keyword unexpected here");
+
+        const key = callee.computed
+          ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
+          : (callee.property as string);
+
+        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+      }
+
+      const object = yield* this.evalAsyncChainOperand(callee.object, env);
+
+      if (object === SHORT_CIRCUIT) return { callee: SHORT_CIRCUIT, thisArg: void 0 };
+      if (callee.optional && object == null) return { callee: SHORT_CIRCUIT, thisArg: void 0 };
+
+      const key = callee.computed
+        ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
+        : (callee.property as string);
+
+      return { callee: getProperty(object, key), thisArg: object };
+    }
+
+    return { callee: yield* this.evalAsyncChainOperand(callee, env), thisArg: void 0 };
   }
 
   /**
