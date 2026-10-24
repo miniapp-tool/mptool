@@ -38,6 +38,27 @@ wx.showToast({
 });
 ```
 
+### 返回任务（Task）的 API
+
+与真机保持一致，`wx.request` **始终返回 `RequestTask`，不支持 Promise 风格调用**（真机上 `wx.request` 不会返回 Promise）。可以通过返回的任务中断请求：
+
+```ts
+const task = wx.request({
+  url: "https://example.com/api",
+  success: (res) => console.log(res.statusCode),
+  fail: ({ errMsg }) => console.error(errMsg),
+});
+
+// 中断请求后，fail 会收到 errMsg "request:fail abort"
+task.abort();
+```
+
+> 网络失败、超时和自定义状态码等响应模拟，会由后续的 `mockWx` 控制面统一提供（`mockWx.fail()` / `mockWx.route()`）；当前版本可以先直接替换 `wx.request` 来构造这些场景。
+
+任务还提供 `onHeadersReceived` / `offHeadersReceived`（在 `success` 之前触发）以及 `onChunkReceived` / `offChunkReceived`（mock 不会产生数据分片，仅保证接口可用）。
+
+> `wx.downloadFile` / `wx.uploadFile` 同样返回任务对象，其 Task 契约（进度、abort、落盘）会在后续版本补齐。
+
 ### 同步 API
 
 `wx.getWindowInfo`、`wx.getStorageSync` 等同步 API 直接返回对象。
