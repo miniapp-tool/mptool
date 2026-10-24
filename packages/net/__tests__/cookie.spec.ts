@@ -1,5 +1,5 @@
 import "@mptool/mock";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { Cookie } from "../src/cookie.js";
 import { CookieStore } from "../src/index.js";
@@ -202,9 +202,12 @@ describe("cookie store extras", () => {
     expect(store.getValue("a", { domain: "example.com", path: "/" })).toBe("2");
   });
 
-  it("should restore persisted cookies from storage", () => {
+  it("should restore persisted cookies from storage", async () => {
     const store = new CookieStore("persist-restore-key");
     store.set({ name: "a", value: "1", domain: "example.com", path: "/", maxAge: 100 });
+
+    // storage writes are batched into a microtask
+    await Promise.resolve();
 
     const restored = new CookieStore("persist-restore-key");
 
@@ -219,7 +222,7 @@ describe("cookie store extras", () => {
     expect(store.get("a", { domain: "other.com" })).toBeNull();
   });
 
-  it("should not throw when writing storage fails", () => {
+  it("should not throw when writing storage fails", async () => {
     const wxAny = wx as unknown as {
       setStorageSync: (key: string, data: unknown) => void;
     };
@@ -230,11 +233,13 @@ describe("cookie store extras", () => {
     };
 
     try {
-      expect(() => {
-        const store = new CookieStore("storage-fail-key");
+      const store = new CookieStore("storage-fail-key");
 
-        store.set({ name: "a", value: "1", domain: "example.com" });
-      }).not.toThrow();
+      store.set({ name: "a", value: "1", domain: "example.com" });
+
+      // the flush happens in a microtask, it must not throw / reject
+      await expect(Promise.resolve()).resolves.toBeUndefined();
+      expect(store.getAllCookies()).toHaveLength(1);
     } finally {
       wxAny.setStorageSync = original;
     }
@@ -251,7 +256,10 @@ describe("cookie store extras", () => {
     };
 
     try {
-      expect(() => new CookieStore("storage-read-fail-key")).not.toThrow();
+      const store = new CookieStore("storage-read-fail-key");
+
+      // storage is only read on the first operation
+      expect(() => store.getAllCookies()).not.toThrow();
     } finally {
       wxAny.getStorageSync = original;
     }
@@ -306,10 +314,12 @@ describe("cookie domain validation", () => {
     expect(store.getHeader("example.com")).toBe("");
   });
 
-  it("should keep host-only cookies host-only after a storage round trip", () => {
+  it("should keep host-only cookies host-only after a storage round trip", async () => {
     const store = new CookieStore("host-only-persist");
 
     store.applyHeader({ "Set-Cookie": "a=1; Path=/; Max-Age=3600" }, "api.example.com");
+
+    await Promise.resolve();
 
     const restored = new CookieStore("host-only-persist");
 
@@ -377,7 +387,7 @@ describe("cookie ordering", () => {
     expect(store.get("a", { domain: "example.com", path: "/" })?.createdAt).toBe(1000);
   });
 
-  it("should keep the order after a storage round trip", () => {
+  it("should keep the order after a storage round trip", async () => {
     const store = new CookieStore("cookie-order-persist");
 
     store.apply([
@@ -398,6 +408,8 @@ describe("cookie ordering", () => {
         maxAge: 100,
       }),
     ]);
+
+    await Promise.resolve();
 
     const restored = new CookieStore("cookie-order-persist");
 
@@ -484,11 +496,13 @@ describe("cookie path keys", () => {
     expect(store.list()).toStrictEqual({});
   });
 
-  it("should keep every path after a storage round trip", () => {
+  it("should keep every path after a storage round trip", async () => {
     const store = new CookieStore("cookie-path-persist");
 
     store.set({ name: "sid", value: "root", domain: "example.com", path: "/", maxAge: 100 });
     store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin", maxAge: 100 });
+
+    await Promise.resolve();
 
     const restored = new CookieStore("cookie-path-persist");
 
@@ -507,5 +521,135 @@ describe("cookie path keys", () => {
     const store = new CookieStore("cookie-path-legacy");
 
     expect(store.getValue("legacy", { domain: "example.com", path: "/" })).toBe("1");
+  });
+});
+
+describe("cookie storage", () => {
+  it("should not read storage before the first operation", () => {
+    const getStorageSync = vi.spyOn(wx, "getStorageSync");
+
+    const store = new CookieStore("storage-lazy-read");
+
+    expect(getStorageSync).not.toHaveBeenCalled();
+
+    // the first read triggers the lazy load
+    expect(store.getAllCookies()).toStrictEqual([]);
+    expect(getStorageSync).toHaveBeenCalledTimes(1);
+
+    getStorageSync.mockRestore();
+  });
+
+  it("should not read storage when the request module is imported", async () => {
+    const getStorageSync = vi.spyOn(wx, "getStorageSync");
+
+    // @ts-expect-error: query suffix for fresh module evaluation
+    await import("../src/request.js?lazy-storage");
+
+    expect(getStorageSync).not.toHaveBeenCalled();
+
+    getStorageSync.mockRestore();
+  });
+
+  it("should batch mutations into a single storage write", async () => {
+    const store = new CookieStore("storage-batch");
+
+    // flush writes from previous tests and load the store before spying
+    await Promise.resolve();
+    store.getAllCookies();
+
+    const setStorageSync = vi.spyOn(wx, "setStorageSync");
+
+    store.set({ name: "a", value: "1", domain: "example.com" });
+    store.set({ name: "b", value: "2", domain: "example.com" });
+    store.delete("missing");
+
+    expect(setStorageSync).not.toHaveBeenCalled();
+
+    await Promise.resolve();
+
+    expect(setStorageSync).toHaveBeenCalledTimes(1);
+
+    setStorageSync.mockRestore();
+  });
+
+  it("should not write storage when there is nothing to apply", async () => {
+    const store = new CookieStore("storage-empty-apply");
+
+    await Promise.resolve();
+    store.getAllCookies();
+
+    const setStorageSync = vi.spyOn(wx, "setStorageSync");
+
+    store.apply([]);
+
+    await Promise.resolve();
+
+    expect(setStorageSync).not.toHaveBeenCalled();
+
+    setStorageSync.mockRestore();
+  });
+
+  it("should drop a cookie that exceeds the size limit", () => {
+    const store = new CookieStore("storage-cookie-size");
+
+    store.set({ name: "big", value: "a".repeat(4096), domain: "example.com" });
+    store.set({ name: "small", value: "a", domain: "example.com" });
+
+    expect(store.getAllCookies()).toHaveLength(1);
+    expect(store.get("big", { domain: "example.com" })).toBeNull();
+    expect(store.get("small", { domain: "example.com" })).not.toBeNull();
+  });
+
+  it("should evict the oldest cookies when a domain exceeds the limit", () => {
+    const store = new CookieStore("storage-domain-limit");
+
+    for (let index = 0; index < 51; index += 1)
+      store.set({ name: `c${index}`, value: `${index}`, domain: "example.com" });
+
+    expect(store.getAllCookies()).toHaveLength(50);
+    expect(store.get("c0", { domain: "example.com" })).toBeNull();
+    expect(store.get("c50", { domain: "example.com" })).not.toBeNull();
+  });
+
+  it("should evict the oldest cookies when the total exceeds the limit", () => {
+    const store = new CookieStore("storage-total-limit");
+
+    // 61 domains x 50 cookies: the per-domain limit stays intact, the total limit kicks in
+    for (let domainIndex = 0; domainIndex < 61; domainIndex += 1) {
+      for (let index = 0; index < 50; index += 1) {
+        store.set({
+          name: `c${index}`,
+          value: `${index}`,
+          domain: `d${domainIndex}.example.com`,
+        });
+      }
+    }
+
+    expect(store.getAllCookies()).toHaveLength(3000);
+    expect(store.get("c0", { domain: "d0.example.com" })).toBeNull();
+    expect(store.get("c49", { domain: "d60.example.com" })).not.toBeNull();
+  });
+
+  it("should remove an expired cookie instead of evicting a live one", () => {
+    const store = new CookieStore("storage-expired-limit");
+
+    for (let index = 0; index < 50; index += 1)
+      store.set({ name: `c${index}`, value: `${index}`, domain: "example.com" });
+
+    // an expired cookie must free its slot instead of evicting the oldest live cookie
+    store.set({ name: "dead", value: "", domain: "example.com", maxAge: -1 });
+
+    expect(store.getAllCookies()).toHaveLength(50);
+    expect(store.get("c0", { domain: "example.com" })).not.toBeNull();
+    expect(store.get("dead", { domain: "example.com" })).toBeNull();
+  });
+
+  it("should delete an existing cookie when an expired one is set", () => {
+    const store = new CookieStore("storage-expired-delete");
+
+    store.set({ name: "a", value: "1", domain: "example.com", maxAge: 100 });
+    store.set({ name: "a", value: "", domain: "example.com", maxAge: 0 });
+
+    expect(store.get("a", { domain: "example.com" })).toBeNull();
   });
 });

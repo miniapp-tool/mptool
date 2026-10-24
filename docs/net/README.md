@@ -140,6 +140,8 @@ const cookieStore = new CookieStore(key);
 
 Cookie 以 `(name, domain, path)` 三元组存储，同名但路径不同的 Cookie 可以共存。`getCookies()` 按 RFC 6265 §5.4 排序：path 更长者优先，path 长度相同时创建时间更早者优先；`get()` / `getValue()` 返回排序后的第一条匹配项，`getHeader()` 也按相同顺序拼接同名 Cookie。
 
+Storage 读写经过优化：首次读写时才会从 Storage 加载 Cookie（导入 `@mptool/net` 不会在启动阶段触发同步读取）；同一 microtask 内的多次 `set` / `delete` / `clear` / `apply` 会合并为一次 `wx.setStorageSync` 写入。为限制异常响应造成的膨胀，单条 Cookie 超过 4096 字节会被丢弃；单个域名最多保留 50 条、总量最多 3000 条（RFC 6265 §6.1 的最小容量建议），超出时淘汰创建时间最早的 Cookie。
+
 其中 `options` 为可选参数，支持以下选项:
 
 - 任意组合以下键值的对象

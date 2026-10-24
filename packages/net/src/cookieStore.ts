@@ -12,6 +12,13 @@ export type CookiePathMap = Map<string, Cookie>;
 export type CookieMap = Map<string, CookiePathMap>;
 export type CookieStoreType = Map<string, CookieMap>;
 
+/** RFC 6265 §6.1 recommends at least 4096 bytes per cookie / 单条 Cookie 的最小容量建议 */
+const MAX_COOKIE_SIZE = 4096;
+/** RFC 6265 §6.1 recommends at least 50 cookies per domain / 每个域名的最小容量建议 */
+const MAX_COOKIES_PER_DOMAIN = 50;
+/** RFC 6265 §6.1 recommends at least 3000 cookies in total / Cookie 总量的最小容量建议 */
+const MAX_COOKIES = 3000;
+
 /**
  * Order cookies by RFC 6265 §5.4: a longer path comes first, cookies with the same path length keep
  * their creation order (earlier first).
@@ -25,6 +32,90 @@ export type CookieStoreType = Map<string, CookieMap>;
 const compareCookiePriority = (a: Cookie, b: Cookie): number =>
   b.path.length - a.path.length || a.createdAt - b.createdAt;
 
+/**
+ * Get the UTF-8 byte length of a string.
+ *
+ * 获取字符串的 UTF-8 字节长度。
+ *
+ * @param value - The string / 字符串
+ * @returns Byte length / 字节长度
+ */
+const getUtf8ByteLength = (value: string): number => {
+  let length = 0;
+
+  for (const char of value) {
+    const codePoint = char.codePointAt(0) ?? 0;
+
+    if (codePoint < 0x80) length += 1;
+    else if (codePoint < 0x800) length += 2;
+    else if (codePoint < 0x10000) length += 3;
+    else length += 4;
+  }
+
+  return length;
+};
+
+/**
+ * Estimate the serialized size of a cookie (name, value, domain and path).
+ *
+ * 估算 Cookie 的序列化大小（名称、值、域名与路径）。
+ *
+ * @param cookie - The cookie / Cookie 对象
+ * @returns Size in bytes / 字节大小
+ */
+const getCookieSize = (cookie: Cookie): number =>
+  getUtf8ByteLength(`${cookie.name}=${cookie.value}; Domain=${cookie.domain}; Path=${cookie.path}`);
+
+/**
+ * Count the cookies of one domain.
+ *
+ * 统计单个域名的 Cookie 数量。
+ *
+ * @param cookieMap - Cookies of one domain / 同一域名的 Cookie
+ * @returns Number of cookies / Cookie 数量
+ */
+const countCookies = (cookieMap: CookieMap): number => {
+  let count = 0;
+
+  for (const pathCookies of cookieMap.values()) count += pathCookies.size;
+
+  return count;
+};
+
+/**
+ * Delete the oldest cookie of one domain.
+ *
+ * 删除单个域名下创建时间最早的 Cookie。
+ *
+ * @param cookieMap - Cookies of one domain / 同一域名的 Cookie
+ * @returns Whether a cookie was removed / 是否删除了 Cookie
+ */
+const deleteOldestInDomain = (cookieMap: CookieMap): boolean => {
+  let oldestName = "";
+  let oldestPath = "";
+  let oldestCookie: Cookie | undefined;
+
+  for (const [name, pathCookies] of cookieMap) {
+    for (const [path, cookie] of pathCookies) {
+      if (!oldestCookie || cookie.createdAt < oldestCookie.createdAt) {
+        oldestName = name;
+        oldestPath = path;
+        oldestCookie = cookie;
+      }
+    }
+  }
+
+  if (!oldestCookie) return false;
+
+  const pathCookies = cookieMap.get(oldestName);
+
+  pathCookies?.delete(oldestPath);
+
+  if (pathCookies?.size === 0) cookieMap.delete(oldestName);
+
+  return true;
+};
+
 export interface SetCookieOptions {
   name: string;
   value: string;
@@ -35,16 +126,29 @@ export interface SetCookieOptions {
   httpOnly?: boolean;
 }
 
-/** CookieStore 类 */
+/**
+ * CookieStore 类
+ *
+ * Storage access is optimized for mini-program runtimes: the persisted cookies are loaded lazily on
+ * the first operation, and all mutations in the same microtask are merged into a single synchronous
+ * storage write. Cookies beyond the RFC 6265 §6.1 capacity minimums are dropped or evicted.
+ *
+ * 针对小程序运行时优化 storage 访问：首次操作时才加载持久化 Cookie，同一 microtask 内的多次变更 合并为一次同步写入；超出 RFC 6265 §6.1 最小容量建议的
+ * Cookie 会被丢弃或淘汰。
+ */
 export class CookieStore {
   private readonly store: CookieStoreType = new Map();
+
+  /** Whether the persisted cookies have been loaded / 是否已加载持久化 Cookie */
+  private initialized = false;
+
+  /** Whether a storage flush is already scheduled / 是否已安排 storage 写入 */
+  private saveScheduled = false;
 
   constructor(
     /** 存储键值 */
     private readonly key = "__cookie_store__",
-  ) {
-    this.#init();
-  }
+  ) {}
 
   /**
    * 获取 Cookie 对象
@@ -87,10 +191,12 @@ export class CookieStore {
    * @returns 设置的 cookie 对象
    */
   set(cookieOptions: SetCookieOptions): Cookie {
+    this.#ensureInitialized();
+
     const cookie = new Cookie(cookieOptions);
 
     this.#storeCookie(cookie);
-    this.#save();
+    this.#scheduleSave();
 
     return cookie;
   }
@@ -103,6 +209,8 @@ export class CookieStore {
    * @param path Cookie 路径，不填则删除该名称下所有路径的 Cookie
    */
   delete(name: string, domain = "", path = ""): void {
+    this.#ensureInitialized();
+
     const deleteFrom = (cookieMap: CookieMap): void => {
       const pathCookies = cookieMap.get(name);
 
@@ -122,7 +230,7 @@ export class CookieStore {
       for (const cookies of this.store.values()) deleteFrom(cookies);
     }
 
-    this.#save();
+    this.#scheduleSave();
   }
 
   /**
@@ -131,6 +239,8 @@ export class CookieStore {
    * @returns 域名和 cookies 结构对象
    */
   list(): Record<string, Record<string, string>> {
+    this.#ensureInitialized();
+
     const dirObj: Record<string, Record<string, string>> = {};
 
     for (const domain of this.store.keys()) dirObj[domain] = this.getCookiesMap(domain);
@@ -145,6 +255,8 @@ export class CookieStore {
    * @returns Cookie 对象数组
    */
   getCookies(options: CookieOptions): Cookie[] {
+    this.#ensureInitialized();
+
     const { domain, path } = getUrlInfo(options);
     const scopeDomains = getCookieScopeDomain(domain);
     const cookies: { cookie: Cookie; index: number }[] = [];
@@ -176,6 +288,8 @@ export class CookieStore {
    * @returns Cookie 对象数组
    */
   getAllCookies(): Cookie[] {
+    this.#ensureInitialized();
+
     const cookies: Cookie[] = [];
 
     this.store.forEach((cookieMap) => {
@@ -211,13 +325,17 @@ export class CookieStore {
    * @param cookies 待设置的 Cookie 数组
    */
   apply(cookies: Cookie[]): void {
+    this.#ensureInitialized();
+
+    // Nothing to apply: avoid scheduling a useless storage write
+    if (cookies.length === 0) return;
+
     // Cookie 数组转换 Map 对象
     cookies.forEach((cookie) => {
       this.#storeCookie(cookie);
     });
 
-    // 保存到 Storage
-    this.#save();
+    this.#scheduleSave();
   }
 
   /**
@@ -227,6 +345,8 @@ export class CookieStore {
    * @param exact 是否仅清除指定域名的 cookies，默认为 false，即同时清除指定域名和其子域名的 cookies
    */
   clear(domain = "", exact = false): void {
+    this.#ensureInitialized();
+
     if (domain) {
       const normalizedDomain = normalizeDomain(domain);
 
@@ -245,8 +365,7 @@ export class CookieStore {
       this.store.clear();
     }
 
-    // 保存到 Storage
-    this.#save();
+    this.#scheduleSave();
   }
 
   /**
@@ -315,6 +434,22 @@ export class CookieStore {
    * @param cookie Cookie 对象
    */
   #storeCookie(cookie: Cookie): void {
+    // RFC 6265 §6.1: drop the new value when a single cookie is too large
+    if (getCookieSize(cookie) > MAX_COOKIE_SIZE) return;
+
+    // An expired cookie removes the stored one instead of occupying a slot / 过期 Cookie 用于删除已有值
+    if (cookie.isExpired()) {
+      const expiredCookieMap = this.store.get(cookie.domain);
+      const expiredPathCookies = expiredCookieMap?.get(cookie.name);
+
+      expiredPathCookies?.delete(cookie.path);
+
+      if (expiredPathCookies?.size === 0) expiredCookieMap?.delete(cookie.name);
+      if (expiredCookieMap?.size === 0) this.store.delete(cookie.domain);
+
+      return;
+    }
+
     let cookieMap = this.store.get(cookie.domain);
 
     if (!cookieMap) {
@@ -335,12 +470,25 @@ export class CookieStore {
     if (existing) cookie.createdAt = existing.createdAt;
 
     pathCookies.set(cookie.path, cookie);
+
+    this.#enforceLimits(cookie.domain);
   }
 
-  /** 从 Storage 读取 cookies */
-  #init(): void {
+  /**
+   * Load the persisted cookies on first use
+   *
+   * Reading lazily means that importing `@mptool/net` (which creates the module level
+   * `requestCookieStore`) does not hit the synchronous mini-program storage at startup.
+   *
+   * 首次使用时才从 Storage 读取 Cookie：这样导入 `@mptool/net`（会创建模块级的 `requestCookieStore`）不会在启动阶段触发同步 storage
+   * 读取。
+   */
+  #ensureInitialized(): void {
+    if (this.initialized) return;
+
+    this.initialized = true;
+
     try {
-      // 从本地存储读取 cookie 数据数组
       let cookiesData: CookieType[] = [];
 
       if (env !== "js") {
@@ -349,11 +497,97 @@ export class CookieStore {
         if (Array.isArray(data)) cookiesData = data;
       }
 
-      // 转化为 cookie map 对象
-      this.apply(cookiesData.map((item) => new Cookie(item)));
+      // Restore without scheduling a write: reading the storage must not write it back
+      for (const item of cookiesData) {
+        const cookie = new Cookie(item);
+
+        if (!cookie.isExpired()) this.#storeCookie(cookie);
+      }
     } catch (err) {
       console.warn("Error applying cookie storage", err);
     }
+  }
+
+  /**
+   * Schedule a batched storage write
+   *
+   * Every mutation in the same microtask is merged into one `wx.setStorageSync` call: a cookie jar
+   * usually changes several times while a response is applied, and synchronous storage writes are a
+   * main source of mini-program jank.
+   *
+   * 同一 microtask 内的所有变更合并为一次 `wx.setStorageSync`：一次响应通常会产生多次 Cookie 变更， 而同步 storage
+   * 写入是小程序卡顿的主要原因之一。
+   */
+  #scheduleSave(): void {
+    if (this.saveScheduled) return;
+
+    this.saveScheduled = true;
+
+    void Promise.resolve().then(() => {
+      this.saveScheduled = false;
+      this.#save();
+    });
+  }
+
+  /**
+   * Enforce the capacity minimums from RFC 6265 §6.1
+   *
+   * The oldest cookies (by creation time) are evicted first when a domain has more than 50 cookies
+   * or the store has more than 3000 cookies.
+   *
+   * 按 RFC 6265 §6.1 的最小容量建议限制：单域名超过 50 条或总量超过 3000 条时，优先淘汰创建时间最早的 Cookie。
+   *
+   * @param domain - Domain that was just written / 刚刚写入的域名
+   */
+  #enforceLimits(domain: string): void {
+    const cookieMap = this.store.get(domain);
+
+    if (cookieMap) {
+      let domainCount = countCookies(cookieMap);
+
+      while (domainCount > MAX_COOKIES_PER_DOMAIN && deleteOldestInDomain(cookieMap))
+        domainCount -= 1;
+    }
+
+    let totalCount = 0;
+
+    this.store.forEach((domainCookieMap) => {
+      totalCount += countCookies(domainCookieMap);
+    });
+
+    while (totalCount > MAX_COOKIES && this.#deleteOldest()) totalCount -= 1;
+  }
+
+  /** @returns Whether a cookie was removed / 是否删除了 Cookie */
+  #deleteOldest(): boolean {
+    let oldestDomain = "";
+    let oldestCookie: Cookie | undefined;
+
+    for (const [domain, cookieMap] of this.store) {
+      for (const pathCookies of cookieMap.values()) {
+        for (const cookie of pathCookies.values()) {
+          if (!oldestCookie || cookie.createdAt < oldestCookie.createdAt) {
+            oldestDomain = domain;
+            oldestCookie = cookie;
+          }
+        }
+      }
+    }
+
+    if (!oldestCookie) return false;
+
+    const cookieMap = this.store.get(oldestDomain);
+
+    if (!cookieMap) return false;
+
+    const pathCookies = cookieMap.get(oldestCookie.name);
+
+    pathCookies?.delete(oldestCookie.path);
+
+    if (pathCookies?.size === 0) cookieMap.delete(oldestCookie.name);
+    if (cookieMap.size === 0) this.store.delete(oldestDomain);
+
+    return true;
   }
 
   /**
