@@ -33,7 +33,7 @@ export interface AppConfigCommonOptions {
   /**
    * 自定义注入组件
    *
-   * 时机在框架执行扩展之后，这意味着你可以覆盖框架的方法
+   * 时机在框架执行扩展之后、组件注册之前，仅执行一次，这意味着你可以覆盖框架的方法
    *
    * @param options 组件选项
    */

@@ -96,7 +96,6 @@ export const $Component: ComponentConstructor = <
       this: ComponentInstance<Data, Property, Method, Behavior, InstanceProps, IsPage>,
     ) {
       mount(this);
-      if (injectComponent) injectComponent(options as unknown as TrivialComponentOptions);
     },
   );
 
@@ -193,6 +192,9 @@ export const $Component: ComponentConstructor = <
   // @ts-expect-error: convert prop config
   options.properties = handleProperties(options.props);
   delete options.props;
+
+  // extend component config after all framework extensions, so it can override them / 与 injectPage 对齐：注册前执行一次
+  if (injectComponent) injectComponent(options as unknown as TrivialComponentOptions);
 
   // we cast properties into syntax that miniprogram can handle
   return Component(
