@@ -34,6 +34,45 @@ const hotReloadCache = new Map<string, Record<string, unknown>>();
 /** Page instances waiting for a hot reload to resolve, per page name / 等待热更新就绪的页面实例 */
 const pendingInstances = new Map<string, Set<object>>();
 
+/**
+ * Page names whose hot-reload fetch finished without usable methods (missing `createFunction`,
+ * empty/non-200 response, invalid payload, parse error or network failure). Instances registered
+ * afterwards must not be kept in `pendingInstances`, they can never be patched.
+ *
+ * 已确定没有可用热更新的页面名（未挂载 createFunction、空/非 200 响应、非法载荷、解析失败或网络失败）。
+ */
+const unavailableHotReload = new Set<string>();
+
+/**
+ * Number of page instances still waiting for a hot reload.
+ *
+ * Exported for diagnostics and tests: an instance that waits forever is a memory leak.
+ *
+ * 仍在等待热更新的页面实例数量（诊断与测试用；数量只增不减说明存在泄漏）。
+ *
+ * @returns Pending page instance count / 等待中的页面实例数量
+ * @internal
+ */
+export const getPendingHotReloadCount = (): number => {
+  let count = 0;
+
+  for (const instances of pendingInstances.values()) count += instances.size;
+
+  return count;
+};
+
+/**
+ * Mark a page as having no usable hot reload, and release its waiting instances.
+ *
+ * 标记页面没有可用的热更新，并释放等待中的页面实例。
+ *
+ * @param name - Page name / 页面名称
+ */
+const markHotReloadUnavailable = (name: string): void => {
+  pendingInstances.delete(name);
+  unavailableHotReload.add(name);
+};
+
 /** Page instances that have fired `onReady` / 已触发 onReady 的页面实例 */
 const readyInstances = new WeakSet<object>();
 
@@ -117,15 +156,21 @@ export const applyHotReload = (name: string, instance: object): void => {
 
   if (func) {
     applyToInstance(instance, func);
-  } else {
-    let instances = pendingInstances.get(name);
-
-    if (!instances) {
-      instances = new Set();
-      pendingInstances.set(name, instances);
-    }
-    instances.add(instance);
+    return;
   }
+
+  // The fetch already finished without usable methods (or `createFunction` is not mounted):
+  // this instance can never be patched, holding it would leak the whole page instance.
+  // 热更新已确定不可用：实例永远不会被补挂，登记会造成内存泄漏。
+  if (unavailableHotReload.has(name)) return;
+
+  let instances = pendingInstances.get(name);
+
+  if (!instances) {
+    instances = new Set();
+    pendingInstances.set(name, instances);
+  }
+  instances.add(instance);
 };
 
 /**
@@ -158,9 +203,21 @@ export const markHotReloadReady = (instance: object): void => {
 export const fetchHotReload = (name: string, pattern: string): void => {
   const createFunction = getCreateFunction();
 
-  // no createFunction mounted, or already fetched for this page
-  // 未挂载 createFunction，或该页面已拉取过
-  if (!createFunction || hotReloadCache.has(name)) return;
+  // a page can be registered again (e.g. the module is evaluated twice): allow a retry
+  // 页面可能被重新注册（例如模块被重新执行）：允许重试
+  unavailableHotReload.delete(name);
+
+  // already fetched for this page
+  // 该页面已拉取过
+  if (hotReloadCache.has(name)) return;
+
+  // No createFunction mounted: the code can never be executed, so no page instance should wait for
+  // it. Without this the page instance registered in `onLoad` leaks forever.
+  // 未挂载 createFunction：代码永远无法执行，不应让页面实例继续等待。
+  if (!createFunction) {
+    markHotReloadUnavailable(name);
+    return;
+  }
 
   wx.request({
     url: pattern.replace(/\$name/gu, name),
@@ -170,13 +227,19 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       // nginx config serves a 200 response with an empty body, so empty bodies are skipped too.
       // wx.request 中 `success` 表示请求已完成（无论 HTTP 状态码），需自行校验状态码；
       // nginx 对不存在的热更新文件返回 200 空响应体，因此空字符串同样跳过
-      if (statusCode !== 200 || typeof data !== "string" || data.length === 0) return;
+      if (statusCode !== 200 || typeof data !== "string" || data.length === 0) {
+        markHotReloadUnavailable(name);
+        return;
+      }
 
       try {
         const fn = createFunction([], data, { global: true });
         const result = fn();
 
-        if (result == null || typeof result !== "object") return;
+        if (result == null || typeof result !== "object") {
+          markHotReloadUnavailable(name);
+          return;
+        }
 
         const func = result as Record<string, unknown>;
 
@@ -193,11 +256,13 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       } catch {
         // silent: parsing or execution failed, keep the page as-is
         // 静默：解析或执行失败，页面保持不变
+        markHotReloadUnavailable(name);
       }
     },
     fail: () => {
-      // silent: fetch failed, keep the page as-is
-      // 静默：拉取失败，页面保持不变
+      // silent: fetch failed, keep the page as-is, but do not keep page instances waiting
+      // 静默：拉取失败，页面保持不变，但不再让页面实例继续等待
+      markHotReloadUnavailable(name);
     },
   });
 };
