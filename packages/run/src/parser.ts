@@ -247,6 +247,18 @@ export class ParseError extends SyntaxError {
 }
 
 /**
+ * Maximum number of tokens consumed while speculatively parsing (backtracking).
+ *
+ * The `async (...) => ...` cover-grammar probe parses a parenthesized group and rewinds when it is
+ * not an arrow. Nested `async(` calls make that work grow exponentially, so speculative token
+ * consumption is bounded and aborted with a `ParseError` instead of blocking the host thread.
+ *
+ * 回溯解析（试探）期间允许消费的最大 token 数。`async (...) => ...` 的 cover 语法探测会先整体解析括号 再回滚；嵌套 `async(`
+ * 会使其指数增长，因此为试探期间的 token 消费设置上限，超限抛出 `ParseError`，避免阻塞宿主线程。
+ */
+const MAX_SPECULATIVE_TOKENS = 5000;
+
+/**
  * Recursive descent parser producing an AST.
  *
  * 递归下降解析器，产出 AST。
@@ -258,6 +270,10 @@ export class Parser {
   private pos = 0;
   private lastEnd = 0;
   private inAsyncFunction = false;
+  /** Nesting depth of speculative (backtracked) parses / 试探（回溯）解析的嵌套深度 */
+  private speculationDepth = 0;
+  /** Tokens consumed while speculating, bounded by `MAX_SPECULATIVE_TOKENS` / 试探期间已消费的 token 数 */
+  private speculativeTokens = 0;
 
   /**
    * @param source - Source code to parse / 待解析的源码
@@ -330,6 +346,13 @@ export class Parser {
 
     this.pos += 1;
     this.lastEnd = token.end;
+
+    if (this.speculationDepth > 0) {
+      this.speculativeTokens += 1;
+
+      if (this.speculativeTokens > MAX_SPECULATIVE_TOKENS)
+        throw this.error("Parser backtracking limit exceeded", token);
+    }
 
     return token;
   }
@@ -1482,41 +1505,49 @@ export class Parser {
     ) {
       const snapshot = this.save();
 
-      this.advance();
-
       let arrow: ArrowFunctionExpr | null = null;
 
-      if (this.match("(")) {
-        const cover = this.parseParenOrArrow(true);
+      // Count the speculative tokens so nested `async(` input cannot blow up exponentially
+      // 统计试探期间的 token 消费，避免嵌套 `async(` 输入指数级放大
+      this.speculationDepth += 1;
 
-        if (cover.kind === "arrow") {
-          const { arrow: coverArrow } = cover;
+      try {
+        this.advance();
 
-          arrow = coverArrow;
+        if (this.match("(")) {
+          const cover = this.parseParenOrArrow(true);
+
+          if (cover.kind === "arrow") {
+            const { arrow: coverArrow } = cover;
+
+            arrow = coverArrow;
+          }
+        } else if (this.current().type === "identifier") {
+          const paramToken = this.advance();
+
+          if (this.match("=>")) {
+            this.advance();
+
+            const param: Pattern = {
+              type: "identifier",
+              name: tokenValue(paramToken),
+              start: paramToken.start,
+              end: paramToken.end,
+            };
+            const body = this.parseArrowBody(true, allowIn);
+
+            arrow = {
+              type: "arrow",
+              params: [param],
+              body,
+              isAsync: true,
+              start: token.start,
+              end: body.end,
+            };
+          }
         }
-      } else if (this.current().type === "identifier") {
-        const paramToken = this.advance();
-
-        if (this.match("=>")) {
-          this.advance();
-
-          const param: Pattern = {
-            type: "identifier",
-            name: tokenValue(paramToken),
-            start: paramToken.start,
-            end: paramToken.end,
-          };
-          const body = this.parseArrowBody(true, allowIn);
-
-          arrow = {
-            type: "arrow",
-            params: [param],
-            body,
-            isAsync: true,
-            start: token.start,
-            end: body.end,
-          };
-        }
+      } finally {
+        this.speculationDepth -= 1;
       }
 
       if (arrow == null) {
