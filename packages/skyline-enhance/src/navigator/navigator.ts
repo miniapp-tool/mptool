@@ -5,7 +5,11 @@ export type NavigatorType = "navigateTo" | "redirectTo" | "switchTab" | "reLaunc
 export const getFullPath = (pageNameWithArg: string): string => {
   const config = getConfig();
   const [pageName, queryString] = pageNameWithArg.split("?");
-  const path = pageName.startsWith("/") ? pageName : config.getPath(pageName);
+  // Keep the same normalization as `@mptool/enhance`: always add a leading slash, so a route
+  // configured without one (e.g. `{ pages: { main: "pages/main" } }`) still navigates absolutely
+  // instead of being resolved relative to the current page.
+  // 与 @mptool/enhance 保持一致：始终补前导斜杠，避免配置为相对路径时按当前页面解析。
+  const path = `/${(pageName.startsWith("/") ? pageName : config.getPath(pageName)).replace(/^\//u, "")}`;
 
   return `${path}${queryString ? `?${queryString}` : ""}`;
 };
