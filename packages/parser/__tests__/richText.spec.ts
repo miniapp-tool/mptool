@@ -15,6 +15,44 @@ describe(getRichTextNodes, () => {
     ]);
   });
 
+  it("should keep whitespace inside inline elements", async () => {
+    await expect(getRichTextNodes("<p>a<b> </b>c</p>")).resolves.toStrictEqual([
+      {
+        attrs: { class: "p" },
+        children: [
+          { text: "a", type: "text" },
+          {
+            attrs: { class: "b" },
+            children: [{ text: " ", type: "text" }],
+            name: "b",
+            type: "node",
+          },
+          { text: "c", type: "text" },
+        ],
+        name: "p",
+        type: "node",
+      },
+    ]);
+  });
+
+  it("should trim whitespace around block containers", async () => {
+    await expect(getRichTextNodes("<div> <p>a</p> </div>")).resolves.toStrictEqual([
+      {
+        attrs: { class: "div" },
+        children: [
+          {
+            attrs: { class: "p" },
+            children: [{ text: "a", type: "text" }],
+            name: "p",
+            type: "node",
+          },
+        ],
+        name: "div",
+        type: "node",
+      },
+    ]);
+  });
+
   it("parses simple text nodes", async () => {
     const cases: [content: string, nodes: RichTextNode[]][] = [
       [

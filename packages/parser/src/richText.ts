@@ -3,6 +3,7 @@ import type { AnyNode, Element } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";
 import { ALLOWED_TAGS } from "./allowedTags.js";
+import { BLOCK_TAGS } from "./blockTags.js";
 import type { ParserOptions } from "./options.js";
 import { getHTML, parseHTML } from "./parser.js";
 import { convertSVGToDataURI } from "./svg.js";
@@ -83,8 +84,23 @@ const handleSVG = (node: Element): RichTextNode => {
   };
 };
 
-const handleNodes = (nodes: (RichTextNode | null)[]): RichTextNode[] => {
+/**
+ * Collect the child nodes of an element.
+ *
+ * Leading / trailing whitespace-only text nodes are only dropped for block containers: trimming
+ * them inside inline elements would remove meaningful spaces (`<p>a<b> </b>c</p>` must stay `a
+ * c`).
+ *
+ * 收集子节点。只有块级容器才丢弃首尾纯空白文本节点；内联元素内裁剪会丢掉有意义的空格。
+ *
+ * @param nodes - Converted child nodes / 已转换的子节点
+ * @param trimEdges - Whether to trim whitespace-only edge text nodes / 是否裁剪首尾空白文本节点
+ * @returns The children to keep / 保留的子节点
+ */
+const handleNodes = (nodes: (RichTextNode | null)[], trimEdges = true): RichTextNode[] => {
   const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => item != null);
+
+  if (!trimEdges) return result;
 
   const [first] = result;
 
@@ -124,6 +140,7 @@ const handleNode = async (
         await Promise.all(
           node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
         ),
+        BLOCK_TAGS.has(node.name) || node.name === "html" || node.name === "body",
       );
 
       // `a` 标签在 rich-text 中无法点击；若 href 是完整链接，以括号形式附加到文本后，方便查看
