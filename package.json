@@ -23,7 +23,8 @@
     "lint:check": "oxlint && oxfmt --check",
     "packages:update": "pnpm dlx npm-check-updates -u --workspaces",
     "postinstall": "husky",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@codecov/rollup-plugin": "2.0.1",
