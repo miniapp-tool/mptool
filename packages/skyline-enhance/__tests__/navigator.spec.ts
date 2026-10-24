@@ -22,6 +22,25 @@ describe(getFullPath, () => {
 
     expect(getFullPath("index?a=1&b=2")).toBe("/pages/index?a=1&b=2");
   });
+
+  it("should add a leading slash for a relative default page", () => {
+    $Config({ defaultPage: "pages/$name" });
+
+    expect(getFullPath("index")).toBe("/pages/index");
+  });
+
+  it("should add a leading slash for a relative pages map", () => {
+    $Config({ defaultPage: "/pages/$name", pages: { main: "pages/main" } });
+
+    expect(getFullPath("main")).toBe("/pages/main");
+    expect(getFullPath("main?a=1&b=2")).toBe("/pages/main?a=1&b=2");
+  });
+
+  it("should not duplicate the leading slash for an absolute pages map", () => {
+    $Config({ defaultPage: "/pages/$name", pages: { main: "/pages/main" } });
+
+    expect(getFullPath("main")).toBe("/pages/main");
+  });
 });
 
 describe(getTrigger, () => {
@@ -83,5 +102,17 @@ describe(getTrigger, () => {
     await getTrigger("reLaunch")("index");
 
     expect(reLaunch).toHaveBeenCalledWith({ url: "/pages/index" });
+  });
+
+  it("should normalize a relative pages map before navigating", async () => {
+    $Config({ defaultPage: "/pages/$name", pages: { main: "pages/main" } });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    await getTrigger("navigateTo")("main?from=home");
+
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/main?from=home" });
   });
 });
