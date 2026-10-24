@@ -33,7 +33,6 @@
     "@mr-hope/tsconfig": "0.0.4",
     "@types/node": "^24.19.2",
     "@vitest/coverage-istanbul": "5.0.5",
-    "buffer": "6.0.3",
     "conventional-changelog-conventionalcommits": "10.4.1",
     "cross-env": "10.1.0",
     "husky": "9.1.7",

@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: read
+  # used by the Codecov bundler plugin (OIDC bundle analysis upload)
+  id-token: write
 
 jobs:
   linter-and-unit:
@@ -28,6 +30,8 @@ jobs:
         run: pnpm ci
 
       - name: Build project
+        env:
+          BUNDLE_ANALYSIS: true
         run: pnpm run build
 
       - name: Linter check
