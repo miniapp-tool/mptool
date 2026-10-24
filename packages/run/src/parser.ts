@@ -1935,7 +1935,12 @@ export class Parser {
       case "number": {
         this.advance();
 
-        return { type: "literal", value: Number(token.value), start: token.start, end: token.end };
+        return {
+          type: "literal",
+          value: token.numericValue ?? Number(token.value),
+          start: token.start,
+          end: token.end,
+        };
       }
       case "bigint": {
         if (!this.features.bigint) throw this.error("BigInt literals are not supported", token);

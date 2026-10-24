@@ -507,3 +507,22 @@ describe("super keyword error paths (both engines throw)", () => {
     expectError("class A { constructor() { missingName; } } class B extends A {} new B()");
   });
 });
+
+describe("legacy octal literals", () => {
+  it("should evaluate legacy octal literals as octal", () => {
+    runBoth("0123");
+    runBoth("0777");
+    runBoth("00");
+  });
+
+  it("should keep non-octal decimal literals decimal", () => {
+    runBoth("08");
+    runBoth("09");
+    runBoth("018");
+  });
+
+  it("should keep prefixed octal literals correct", () => {
+    runBoth("0o123");
+    runBoth("0O17");
+  });
+});
