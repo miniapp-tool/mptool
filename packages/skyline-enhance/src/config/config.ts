@@ -8,14 +8,19 @@ import type {
 } from "./typings.js";
 
 export interface Config extends Omit<AppConfigOptions, "defaultPage" | "pages"> {
-  /** @returns Route */
+  /**
+   * 获得页面路径
+   *
+   * @param pageName 页面简称
+   * @returns 页面路径
+   */
   getPath: (pageName: string) => string;
 }
 
 let appConfig: Config | null;
 
 export const $Config = (config: AppConfigOptions): void => {
-  const { defaultPage, getPath, pages, ...options } = config as Required<
+  const { defaultPage, pages, getPath, ...options } = config as Required<
     AppConfigCommonOptions & RoutePathConfig & RouteCustomConfig
   >;
 

@@ -34,7 +34,8 @@ export interface NavigatorMethods {
   /**
    * 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
    *
-   * 本函数是 `wx.switchTab` 的封装，路径参数只用于触发 `onNavigate`
+   * 本函数是 `wx.switchTab` 的封装。`wx.switchTab` 不支持参数：`@mptool/enhance` 中路径参数只用于触发 `onNavigate`，
+   * `@mptool/skyline-enhance` 中路径参数会被忽略。
    *
    * @param pageName 页面名称或页面的路径
    *

@@ -60,8 +60,8 @@ export interface AppConfigCommonOptions {
   /**
    * 页面热更新代码地址模板，`$name` 会被替换为页面名称
    *
-   * 开启后，框架会在页面注册时检测 `globalThis` 上由 `@mptool/all` 挂载的 `createFunction`； 若存在，则异步拉取该地址的代码并执行，将返回的 `{
-   * func }` 方法对象合并到页面实例上。
+   * 开启后，框架会在页面注册时检测 `globalThis` 上由 `@mptool/run` 的 `installGlobal()` 挂载的 `createFunction`；
+   * 若存在，则异步拉取该地址的代码并执行，将返回的方法对象（对象属性即页面方法）合并到页面实例上。
    *
    * 热更新是尽力而为的，不阻塞页面注册与加载；拉取或执行失败时静默跳过。
    *
@@ -71,6 +71,18 @@ export interface AppConfigCommonOptions {
   hotReloadPattern?: string;
 }
 export interface RoutePathConfig {
+  /**
+   * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
+   *
+   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
+   *
+   * 例子: 你可以填入 `/pages/$name/$name` 来表达:
+   *
+   * - `main': '/pages/main/main`
+   * - `user': '/pages/user/user`
+   */
+  defaultPage: string;
+
   /**
    * 你可以直接以对象形式表示简称到路径的映射。如:
    *
@@ -116,18 +128,6 @@ export interface RoutePathConfig {
    * 无法解析的路径会回退到 `defaultPage`
    */
   pages?: Record<string, string> | [string | string[], string][];
-
-  /**
-   * 当你给出的页面路径或简称无法通过 routeMap 解析时，会回退到此路径
-   *
-   * 填入小程序路径模式，小程序路径模式是一个路径字符串，用 `$name` 表示小程序简称的位置
-   *
-   * 例子: 你可以填入 `/pages/$name/$name` 来表达:
-   *
-   * - `main': '/pages/main/main`
-   * - `user': '/pages/user/user`
-   */
-  defaultPage: string;
 }
 
 export interface RouteCustomConfig {

@@ -41,7 +41,7 @@
   - 不包含在 `@mptool/all` / `@mptool/skyline` 全量包中，需单独引入
 
 - [x] @mptool/all: 全量包（api + enhance + file + net + parser）
-- [x] @mptool/skyline: 微信 dist 3.0 全量包（net + skyline-enhance + file + parser）
+- [x] @mptool/skyline: Skyline（基础库 3.0+）全量包（net + skyline-enhance + file + parser）
 
 ## 感谢
 

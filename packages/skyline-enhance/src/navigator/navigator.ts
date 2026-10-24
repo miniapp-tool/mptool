@@ -24,7 +24,7 @@ export function getTrigger(
 /**
  * Navigation trigger
  *
- * @param type - Navigator type
+ * @param type - Navigation type
  * @returns Navigation trigger function
  */
 export function getTrigger(
