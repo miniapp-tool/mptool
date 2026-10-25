@@ -184,11 +184,16 @@ const handleNode = async (
         if (href && /^https?:\/\//u.test(href)) children.push({ type: "text", text: ` (${href})` });
       }
 
-      if (appendClass) attrs.class = attrs.class ? `${node.name} ${attrs.class}` : node.name;
+      // `html`/`body` are converted to `div`; the class must use the converted tag name so the
+      // generated class and the element name stay consistent
+      // `html`/`body` 会转换为 `div`；class 使用转换后的标签名，保证类名与元素名一致
+      const outputName = ["html", "body"].includes(node.name) ? "div" : node.name;
+
+      if (appendClass) attrs.class = attrs.class ? `${outputName} ${attrs.class}` : outputName;
 
       const convertedNode: ElementNode = {
         type: "node",
-        name: ["html", "body"].includes(node.name) ? "div" : node.name,
+        name: outputName,
         ...(Object.keys(attrs).length ? { attrs } : {}),
         ...(children.length ? { children } : {}),
       };

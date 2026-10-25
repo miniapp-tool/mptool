@@ -25,7 +25,7 @@ console.log(getText(html)); // hello world
 
 - 任何小程序 `<rich-text>` 不支持的标签和属性都会被移除；不支持的**容器**标签会被"解包"，其中的文本与子节点仍会保留。
 - `script` / `style` / `template` / `noscript` / `title` / `head` 等不可见元素会整棵丢弃。
-- 所有节点会默认附加和标签名相同的类名，可以通过 `appendClass: false` 取消
+- 所有节点会默认附加和**输出**标签名相同的类名（`html`/`body` 转换为 `div` 时类名同样为 `div`），可以通过 `appendClass: false` 取消
 - 你可以通过行为选项中的 `transform` 方法对节点进行转换，返回值会被用于替换原节点
 
   transform 方法接收一个对象，键名为节点标签，值是一个读取当前节点对象并返回新对象或 `null` 的函数。

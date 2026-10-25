@@ -231,12 +231,12 @@ describe(getRichTextNodes, () => {
         [
           {
             attrs: {
-              class: "html",
+              class: "div",
             },
             children: [
               {
                 attrs: {
-                  class: "body",
+                  class: "div",
                 },
                 children: [
                   {
@@ -590,6 +590,28 @@ describe("unknown and invisible elements", () => {
         attrs: { class: "p" },
         children: [{ text: "ok", type: "text" }],
         name: "p",
+        type: "node",
+      },
+    ]);
+  });
+});
+
+describe("converted tag names", () => {
+  it("should use the converted tag name for html/body class names", async () => {
+    await expect(
+      getRichTextNodes('<html class="x"><body class="y">a</body></html>'),
+    ).resolves.toStrictEqual([
+      {
+        attrs: { class: "div x" },
+        children: [
+          {
+            attrs: { class: "div y" },
+            children: [{ text: "a", type: "text" }],
+            name: "div",
+            type: "node",
+          },
+        ],
+        name: "div",
         type: "node",
       },
     ]);
