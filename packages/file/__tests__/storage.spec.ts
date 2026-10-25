@@ -401,3 +401,48 @@ describe(checkAsync, () => {
     }
   });
 });
+
+describe("memory storage cleanup", () => {
+  it("should drop the in-memory value on remove", () => {
+    put("memory-remove-key", "value");
+
+    remove("memory-remove-key");
+
+    expect(storage.has("memory-remove-key")).toBe(false);
+    expect(take("memory-remove-key")).toBeUndefined();
+  });
+
+  it("should drop the in-memory value on removeAsync", async () => {
+    put("memory-remove-async-key", "value");
+
+    await removeAsync("memory-remove-async-key");
+
+    expect(storage.has("memory-remove-async-key")).toBe(false);
+  });
+
+  it("should drop the in-memory value when check() drops an expired entry", () =>
+    new Promise<void>((resolve) => {
+      set("memory-check-key", "value", 20);
+      put("memory-check-key", "value");
+
+      setTimeout(() => {
+        check();
+
+        expect(get("memory-check-key")).toBeUndefined();
+        expect(storage.has("memory-check-key")).toBe(false);
+        resolve();
+      }, 60);
+    }));
+
+  it("should drop the in-memory value when checkAsync() drops an expired entry", async () => {
+    await setAsync("memory-check-async-key", "value", 20);
+    put("memory-check-async-key", "value");
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    await checkAsync();
+
+    expect(storage.has("memory-check-async-key")).toBe(false);
+  });
+});
