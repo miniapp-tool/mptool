@@ -17,9 +17,16 @@ jobs:
   linter-and-unit:
     name: Linter and Unit test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Supersede the previous run when a PR is pushed again; the old run can never be useful.
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/setup@v3

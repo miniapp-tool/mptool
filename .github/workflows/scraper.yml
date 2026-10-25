@@ -15,6 +15,7 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     name: re-scrape documentation for MeiliSearch
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
