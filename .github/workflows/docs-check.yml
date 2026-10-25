@@ -1,0 +1,43 @@
+name: Docs check
+
+# `docs.yml` only runs on pushes to main, so documentation breakage was first visible after the
+# merge. Type-check and build the site on pull requests that touch docs or the toolchain.
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - ".github/workflows/docs-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Build and type-check docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/setup@v3
+        with:
+          runtime: node@^24.22.1
+
+      - name: Install deps
+        run: pnpm ci
+
+      - name: Type check docs
+        run: pnpm run docs:check
+
+      - name: Build docs
+        run: pnpm run docs:build
