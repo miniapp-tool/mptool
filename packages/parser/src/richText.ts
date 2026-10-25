@@ -103,11 +103,18 @@ type ConvertedNode = RichTextNode | ConvertedNode[] | null;
  */
 const flattenNodes = (nodes: readonly ConvertedNode[]): RichTextNode[] => {
   const result: RichTextNode[] = [];
+  const stack: ConvertedNode[] = [];
 
-  for (const node of nodes) {
+  // explicit stack: unwrapped fragments mirror the DOM nesting depth
+  // 使用显式栈：解包片段的数量与 DOM 嵌套深度相当
+  for (let i = nodes.length - 1; i >= 0; i -= 1) stack.push(nodes[i]);
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+
     if (node == null) continue;
 
-    if (Array.isArray(node)) result.push(...flattenNodes(node));
+    if (Array.isArray(node)) for (let i = node.length - 1; i >= 0; i -= 1) stack.push(node[i]);
     else result.push(node);
   }
 
@@ -145,10 +152,28 @@ const handleNodes = (nodes: readonly ConvertedNode[], trimEdges = true): RichTex
   return result;
 };
 
+/** Resolved options for one conversion. */
+interface ConversionContext {
+  appendClass: boolean;
+  transform: Required<ParserOptions>["transform"];
+  maxInputLength: number;
+  maxDepth: number;
+}
+
 const handleNode = async (
   node: AnyNode,
-  { appendClass, transform }: Required<ParserOptions>,
+  context: ConversionContext,
+  depth: number,
 ): Promise<ConvertedNode> => {
+  // yield once before descending so deeply nested input cannot overflow the host stack
+  // 下探前先让出一次，避免深嵌套输入撑爆宿主调用栈
+  void 0;
+
+  const { appendClass, transform } = context;
+
+  if (depth > context.maxDepth)
+    throw new RangeError(`Input nesting is too deep (limit ${context.maxDepth} levels)`);
+
   // HTML preprocessing normalizes CRLF / CR to LF in text nodes
   if (node.type === "text") return { type: "text", text: node.data.replace(/\r\n?/gu, "\n") };
 
@@ -172,7 +197,7 @@ const handleNode = async (
 
       const children = handleNodes(
         await Promise.all(
-          node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
+          node.children.map((childNode) => handleNode(childNode, context, depth + 1)),
         ),
         BLOCK_TAGS.has(node.name) || node.name === "html" || node.name === "body",
       );
@@ -205,9 +230,7 @@ const handleNode = async (
 
     // unknown container: unwrap it so its children (text included) are preserved
     // 未知容器：解包该容器，保留其子节点（含文本）
-    return Promise.all(
-      node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
-    );
+    return Promise.all(node.children.map((childNode) => handleNode(childNode, context, depth + 1)));
   }
 
   return null;
@@ -215,12 +238,26 @@ const handleNode = async (
 
 export const getRichTextNodes = async (
   content: string | AnyNode[],
-  { appendClass = true, transform = {} }: ParserOptions = {},
-): Promise<RichTextNode[]> =>
-  handleNodes(
+  {
+    appendClass = true,
+    transform = {},
+    maxInputLength = Number.POSITIVE_INFINITY,
+    maxDepth = Number.POSITIVE_INFINITY,
+  }: ParserOptions = {},
+): Promise<RichTextNode[]> => {
+  if (typeof content === "string" && content.length > maxInputLength) {
+    throw new RangeError(
+      `Input length ${content.length} exceeds the limit of ${maxInputLength} code units`,
+    );
+  }
+
+  const context: ConversionContext = { appendClass, transform, maxInputLength, maxDepth };
+
+  return handleNodes(
     await Promise.all(
       (Array.isArray(content) ? content : parseHTML(content)).map((node) =>
-        handleNode(node, { appendClass, transform }),
+        handleNode(node, context, 1),
       ),
     ),
   );
+};

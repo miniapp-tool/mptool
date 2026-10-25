@@ -51,3 +51,10 @@ import { convertSVGToDataURI } from "@mptool/parser";
 const dataUri = convertSVGToDataURI('<svg viewBox="0 0 100 100"></svg>');
 // data:image/svg+xml,%3Csvg%20viewBox=%220%200%20100%20100%22%3E%3C/svg%3E
 ```
+
+## 输入信任与资源限制
+
+- **不修改入参**：`getRichTextNodes` / `getText` 接收预解析节点时不会改写调用方 DOM（SVG 转换在克隆上完成），可安全重复调用。
+- **输入需可信**：本包**不是净化器**——白名单标签的 `class` / `style` 会原样透传，`style` 内容不做过滤，`img.src` 也不校验协议；请先自行消毒。
+- **资源限制**（默认不限制，按需开启）：`maxInputLength`（UTF-16 code unit）、`maxDepth`（节点嵌套深度），超限抛出 `RangeError`；深嵌套解析与文本提取使用显式栈/异步让出，避免宿主栈溢出。
+- **转换是异步的**：每个节点会产生 Promise，`transform` 在子节点处理完成后（后序）调用。
