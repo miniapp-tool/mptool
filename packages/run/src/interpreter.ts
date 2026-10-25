@@ -562,6 +562,13 @@ interface RuntimeContext {
  *
  * 解释器运行时：持有沙箱全局，求值 `Program` 并管理带 `this`/`new`/`super` 语义的函数调用。
  */
+/**
+ * Host globals that must never be injected by `global: true`.
+ *
+ * `global: true` 绝不注入的宿主全局（`eval` / `Function`）。
+ */
+const HOST_GLOBAL_BLOCKLIST: ReadonlySet<string> = new Set(["eval", "Function"]);
+
 export class Runtime {
   /** Feature toggles / 特性开关 */
   readonly features: FeatureOptions;
@@ -642,6 +649,8 @@ export class Runtime {
       const hostGlobal = globalThis as Record<string, unknown>;
 
       for (const name of Object.getOwnPropertyNames(hostGlobal)) {
+        if (HOST_GLOBAL_BLOCKLIST.has(name)) continue;
+
         if (this.globalEnv.has(name)) continue;
 
         try {
@@ -2625,6 +2634,20 @@ export class Runtime {
   }
 
   /**
+   * Apply sloppy-mode receiver conversion for host function calls.
+   *
+   * 宿主函数调用时的 sloppy 接收者转换。
+   *
+   * @param thisArg - The call-site `this` / 调用点的 `this`
+   * @returns The receiver to pass to the host function / 传给宿主函数的接收者
+   */
+  private hostThis(thisArg: unknown): unknown {
+    if (!this.strict && thisArg == null) return this.globalObject;
+
+    return thisArg;
+  }
+
+  /**
    * Call any callable value (interpreter function or host function).
    *
    * 调用任意可调用值（解释器函数或宿主函数）。
@@ -2640,7 +2663,7 @@ export class Runtime {
 
       if (meta != null) return this.invokeFunction(meta, args, thisArg, false);
 
-      return Reflect.apply(callee, thisArg, args);
+      return Reflect.apply(callee, this.hostThis(thisArg), args);
     }
 
     throw new TypeError(`${typeOf(callee)} is not a function`);
@@ -5467,7 +5490,7 @@ export class Runtime {
 
     const meta = getInterpreterMeta(callee);
 
-    if (meta == null) return Reflect.apply(callee, thisArg, args) as unknown;
+    if (meta == null) return Reflect.apply(callee, this.hostThis(thisArg), args) as unknown;
 
     // async functions return a host Promise; async-context arrows run inline
     // async 函数返回宿主 Promise；async 上下文箭头内联运行
