@@ -193,6 +193,35 @@ describe("cookie store extras", () => {
     expect(store.getHeader("example.com")).toBe("a=1");
   });
 
+  it("applyHeader should match the Set-Cookie header name case-insensitively", () => {
+    const store = new CookieStore("apply-header-casing-test");
+
+    store.applyHeader({ "SET-COOKIE": "a=1; Path=/" }, "example.com");
+    store.applyHeader({ "Set-cookie": "b=2; Path=/" }, "example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1; b=2");
+  });
+
+  it("applyHeader should read a fetch-style Headers instance", () => {
+    const store = new CookieStore("apply-header-headers-test");
+    const headers = new Headers();
+
+    headers.append("Set-Cookie", "a=1; Path=/");
+    headers.append("Set-Cookie", "b=2; Path=/");
+
+    store.applyHeader(headers, "example.com");
+
+    expect(store.getHeader("example.com")).toBe("a=1; b=2");
+  });
+
+  it("applyHeader should ignore an empty or missing header", () => {
+    const store = new CookieStore("apply-header-empty-test");
+
+    expect(() => store.applyHeader(undefined, "example.com")).not.toThrow();
+    expect(() => store.applyHeader({}, "example.com")).not.toThrow();
+    expect(store.getHeader("example.com")).toBe("");
+  });
+
   it("set should overwrite existing cookie", () => {
     const store = new CookieStore("overwrite-test");
 

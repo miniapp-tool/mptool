@@ -24,6 +24,43 @@ export type CookiePathMap = Map<string, Cookie>;
 export type CookieMap = Map<string, CookiePathMap>;
 export type CookieStoreType = Map<string, CookieMap>;
 
+/**
+ * Read the raw `Set-Cookie` header value from a wx header object, a plain object or a fetch-style
+ * `Headers` instance, regardless of the header-name casing.
+ *
+ * 从小程序 header 对象、普通对象或 fetch 风格 `Headers` 实例中读取 `Set-Cookie` 原始值，header 名称大小写不敏感。
+ *
+ * @param header Response header container
+ * @returns The joined `Set-Cookie` values, or an empty string when absent
+ */
+const readSetCookieHeader = (header: unknown): string => {
+  // oxlint-disable-next-line typescript/strict-boolean-expressions -- header may be undefined
+  if (!header) return "";
+
+  if (typeof header === "object") {
+    const headersLike = header as {
+      get?: (name: string) => string | null;
+      getSetCookie?: () => string[];
+    };
+
+    // fetch `Headers` in Node 20+/undici exposes each Set-Cookie value separately
+    if (typeof headersLike.getSetCookie === "function") return headersLike.getSetCookie().join(",");
+
+    if (typeof headersLike.get === "function") return headersLike.get("set-cookie") ?? "";
+
+    const headerRecord = header as Record<string, string | string[] | undefined>;
+    const setCookieKey = Object.keys(headerRecord).find(
+      (name) => name.toLowerCase() === "set-cookie",
+    );
+    // oxlint-disable-next-line no-undefined
+    const value = setCookieKey ? headerRecord[setCookieKey] : undefined;
+
+    return Array.isArray(value) ? value.filter(Boolean).join(",") : (value ?? "");
+  }
+
+  return "";
+};
+
 /** RFC 6265 §6.1 recommends at least 4096 bytes per cookie / 单条 Cookie 的最小容量建议 */
 const MAX_COOKIE_SIZE = 4096;
 /** RFC 6265 §6.1 recommends at least 50 cookies per domain / 每个域名的最小容量建议 */
@@ -396,31 +433,19 @@ export class CookieStore {
   /**
    * 应用 header cookies
    *
+   * Accepts the wx response `header` object, a plain object and a fetch-style `Headers` instance.
+   * Header names are matched case-insensitively, and a headers implementation that exposes
+   * `getSetCookie()` (Node 20+/undici) keeps every `Set-Cookie` value separate.
+   *
    * @param header 小程序 response header
    * @param domainOrURL Url 或域名
    */
   applyHeader(header: unknown, domainOrURL: string): void {
-    if (env === "js") {
-      this.apply(
-        parseCookieHeader(
-          (header as Headers).getSetCookie().join(","),
-          getRequiredDomain(domainOrURL),
-        ),
-      );
-      return;
-    }
+    // Validate the URL even when the response has no Set-Cookie header
+    const domain = getRequiredDomain(domainOrURL);
+    const setCookieHeader = readSetCookieHeader(header);
 
-    const setCookieHeader =
-      // oxlint-disable-next-line typescript/strict-boolean-expressions
-      (header as Record<string, string[] | string>)["Set-Cookie"] ||
-      // oxlint-disable-next-line typescript/strict-boolean-expressions
-      (header as Record<string, string[] | string>)["set-cookie"] ||
-      "";
-    const realHeader = Array.isArray(setCookieHeader)
-      ? setCookieHeader.filter(Boolean).join(",")
-      : setCookieHeader;
-
-    this.apply(parseCookieHeader(realHeader, getRequiredDomain(domainOrURL)));
+    if (setCookieHeader) this.apply(parseCookieHeader(setCookieHeader, domain));
   }
 
   /**
