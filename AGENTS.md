@@ -28,7 +28,7 @@ The table lists **every** script defined in the root `package.json`; the "Implem
 | `pnpm run dev`             | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run dev`   | Same sync, then recursive `dev`. **No package defines a `dev` script** (only `build` / `clean`), so this currently builds nothing — use `build`                         |
 | `pnpm run clean`           | `pnpm --stream -r run clean`                                                                | Remove every package's `dist/` (`rimraf ./dist`)                                                                                                                        |
 | `pnpm run copy`            | `unrun scripts/copy-package.ts`                                                             | Copy `packages/all/dist` + `package.json` into `demo/node_modules/@mptool/all` for the demo                                                                             |
-| `pnpm run test`            | `vitest run --coverage`                                                                     | Full test suite with coverage (see [Testing](#testing))                                                                                                                 |
+| `pnpm run test`            | `vitest run --coverage`                                                                     | Full test suite with coverage (see [Testing](#testing)); builds the workspace first when `dist/` is missing                                                             |
 | `pnpm run typecheck`       | `tsc -p tsconfig.json --noEmit`                                                             | Type-check all sources, tests and type tests (run after `build`, like tests)                                                                                            |
 | `pnpm run lint`            | `oxlint --fix && oxfmt`                                                                     | Lint + format with auto-fix                                                                                                                                             |
 | `pnpm run lint:check`      | `oxlint && oxfmt --check`                                                                   | Read-only lint/format check (CI gate)                                                                                                                                   |
@@ -56,6 +56,7 @@ mptool/
 │   ├── copy.ts          # Recursive copy / mkdir helpers used by the scripts above
 │   ├── tsdown.ts        # Shared tsdown config factory (es2018, single-file ESM, dts via oxc, atob injection, Codecov bundle analysis)
 │   ├── atob.ts          # atob polyfill injected into bundles (htmlparser2's `entities` needs it)
+│   ├── vitest-setup.ts  # Vitest global setup: builds the workspace when `dist/` is missing
 │   └── sync.ts          # Mirror published packages to the npmmirror registry (release only)
 ├── demo/                # Demo mini-app (workspace dep on @mptool/all; `build` type-checks it, `demo:build` emits JS)
 ├── docs/                # VuePress site (guide / enhance / skyline-enhance / net / file / api / parser / run / mock)
@@ -173,7 +174,7 @@ All workspace packages are **inlined at build time** (`tsdown` `alwaysBundle: [/
 
 ### Build before test
 
-Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `import { createFunction } from "@mptool/run"`), which resolve through each package's `exports` field to `dist/`. Run `pnpm run build` before `pnpm run test` (CI does exactly this). After changing `@mptool/mock` source, rebuild it before running dependent packages' tests: `pnpm --filter @mptool/mock build`.
+Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `import { createFunction } from "@mptool/run"`), which resolve through each package's `exports` field to `dist/`. `pnpm run test` is self-contained: its `globalSetup` runs `pnpm run build` when any package output is missing, and is a no-op afterwards. CI still builds explicitly and runs tests against the built artifacts. After changing `@mptool/mock` source, rebuild it before running dependent packages' tests: `pnpm --filter @mptool/mock build`.
 
 ### Build output constraints
 

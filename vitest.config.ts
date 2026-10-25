@@ -9,6 +9,10 @@ const isCI = Boolean(process.env.CI);
 
 const config: ViteUserConfigExport = defineConfig({
   test: {
+    // Tests resolve workspace packages through their `dist/`, so make `pnpm test` self-contained on a
+    // clean checkout by building only when the output is missing (a no-op in CI and normal local runs).
+    globalSetup: ["./scripts/vitest-setup.ts"],
+
     coverage: {
       enabled: true,
       provider: "istanbul",
