@@ -338,6 +338,60 @@ mockWx.ui().update.applied; // true
 
 > `ui()` 是新增的只读查询接口；写状态仍然通过 `mockWx.user/auth/authorize/clipboard` 与 `wx` API 本身完成。
 
+## 路由 / 页面栈 / 页面生命周期
+
+`wx.navigateTo` / `redirectTo` / `switchTab` / `reLaunch` / `navigateBack` 现在维护真实页面栈，并按真机顺序触发页面生命周期。
+
+### 页面注册
+
+```ts
+Page({
+  route: "/pages/detail", // mock 扩展：用于把导航 URL 映射到页面（也支持 $name 末段匹配）
+  data: { count: 0 },
+  onLoad(query) {},
+  onShow() {},
+  onReady() {},
+  onHide() {},
+  onUnload() {},
+});
+```
+
+- `route` 是 mock 的扩展字段（真机 `Page` 选项没有它）；不写 `route` 时按 `$name` 与 URL 末段匹配（例如 `$name: "main"` 匹配 `/pages/main`）。
+- 注册后的页面只有在导航时才会创建实例；实例包含 `route`、`options`（query）、`data`（深拷贝注册时的 `data`）与 `setData(patch, callback?)`。
+- `getCurrentPages()` 返回页面实例数组的**快照**（修改返回值不影响栈）。
+
+### tabBar 页面配置
+
+```ts
+mockWx.tabBar(["/pages/index/index", "/pages/mine/index"]);
+```
+
+- 配置后这些路由被视为 tabBar 页面；也可以用 `Page({ route, tabBar: true })` / `isTabBar: true` 标记。
+- `switchTab` 会**保留**其它 tab 页实例：离开时只触发 `onHide`，切回来只触发 `onShow`，不会重新 `onLoad`、也不会 `onUnload`。
+- `getCurrentPages()` 在 tab 页场景下只包含当前 tab 页；`reLaunch` 会销毁所有 tab 页（`onUnload`）并清空缓存。
+- 未配置任何 tab 页时，`switchTab` 为兼容旧行为不校验目标。
+
+### 导航与页面栈
+
+| API                      | 语义                                                                                                        | 失败                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `navigateTo({url})`      | 压栈，旧页 `onHide` → 新页 `onLoad(query)` / `onShow` / `onReady`                                           | 页面未注册、栈已满 10 层、目标是 tab 页           |
+| `redirectTo({url})`      | 替换栈顶，旧页 `onUnload` → 新页 `onLoad/onShow/onReady`                                                    | 页面未注册、目标是 tab 页                         |
+| `navigateBack({delta?})` | 出栈 `delta`（默认 1），被出栈页 `onUnload`，新栈顶 `onShow`                                                | 已在首页（`stack.length <= delta`）、非法 delta   |
+| `switchTab({url})`       | 隐藏当前 tab 页（不销毁）→ 清空非 tab 页 → 目标 tab 页首次创建时 `onLoad/onShow/onReady`，已存在仅 `onShow` | 页面未注册、目标非 tabBar 页（存在 tab 页定义时） |
+| `reLaunch({url})`        | 全部 `onUnload` 后清栈（含缓存的 tab 页）、打开目标页                                                       | 页面未注册                                        |
+
+- 失败通过 `fail` + `complete` 回调或在无回调时 reject `Error`（含 `errMsg`）返回；可用 `mockWx.failNext("navigateTo", ...)` 额外注入失败。
+- 未注册页面的错误：`navigateTo:fail page "/pages/x" is not found`；栈满：`navigateTo:fail webview count limit exceed`；非 tab 页：`switchTab:fail can not switch to no-tabBar page`。
+
+### 生命周期
+
+- 新页面：`onLoad(query)` → `onShow()` → `onReady()`，同步按序调用。
+- `navigateTo` 前旧页 `onHide`；`redirectTo` / `navigateBack` 出栈页 `onUnload`；`navigateBack` 后新栈顶 `onShow`。
+- `Page` 注册、`App` 注册、`getApp()`、`Component` / `Behavior` 记录仍然保留；`getApp()` 返回最近一次 `App(options)` 的选项对象。
+
+> 生命周期是 mock 简化实现：只覆盖导航引起的页面生命周期，不模拟切后台 / 回前台的 `onHide`/`onShow`、渲染层、页面动画与真实 `onReady` 时机，也不实现 enhance 的导航锁 / `onNavigate` 钩子；需要这些行为时请继续替换对应 `wx` 方法或使用 enhance 层测试。
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：
