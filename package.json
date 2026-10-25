@@ -23,6 +23,8 @@
     "lint:check": "oxlint && oxfmt --check",
     "packages:update": "pnpm dlx npm-check-updates -u --workspaces",
     "postinstall": "husky",
+    "sync": "unrun scripts/sync-enhance.ts",
+    "sync:check": "unrun scripts/sync-enhance.ts --check",
     "test": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
