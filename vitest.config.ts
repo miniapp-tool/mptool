@@ -18,6 +18,15 @@ const config: ViteUserConfigExport = defineConfig({
       enabled: true,
       provider: "istanbul",
       include: ["packages/*/src/**/*.ts"],
+      // Baselines measured on main: statements 94.33, branches 88.19, functions 93.4, lines 95.49.
+      // Keep roughly one point of headroom so that a refactor moving a few untested branches around
+      // does not turn the gate red, while a PR that deletes tests does. Raise them when coverage grows.
+      thresholds: {
+        branches: 87,
+        functions: 92,
+        lines: 94,
+        statements: 93,
+      },
     },
 
     ...(isCI
