@@ -204,6 +204,41 @@ describe("async functions", () => {
     );
   });
 
+  it("should suspend for a microtask on non-thenable await operands", async () => {
+    const log: string[] = [];
+    const finished = run("async function f() { log.push('a1'); await 1; log.push('a2'); } f()", {
+      globals: { log },
+    });
+
+    log.push("sync");
+    await Promise.resolve();
+    log.push("micro");
+    await finished;
+
+    // standard ordering: the await continuation is queued before the test's own microtask
+    // 标准顺序：await 续体排在测试自身的微任务之前
+    expect(log).toStrictEqual(["a1", "sync", "a2", "micro"]);
+  });
+
+  it("should read a custom thenable's then property once", async () => {
+    let reads = 0;
+    const thenable = {
+      // oxlint-disable-next-line unicorn/no-thenable -- intentionally a thenable to observe reads
+      get then() {
+        reads += 1;
+
+        return (resolve: (value: number) => void): void => resolve(5);
+      },
+    };
+
+    const result = await run("async function f(t) { return await t; } f(t)", {
+      globals: { t: thenable },
+    });
+
+    expect(result).toBe(5);
+    expect(reads).toBe(1);
+  });
+
   it("should preserve await in destructuring assignment", async () => {
     await runBoth(
       "async function f() { const [a, b] = await Promise.resolve([1, 2]); return a + b; } f()",

@@ -201,17 +201,6 @@ const isSafeSyncExpression = (expr: Expression): boolean =>
   !containsAwait(expr) && !containsCall(expr);
 
 /**
- * Whether a value is a thenable (promise-like) / 值是否为 thenable（类 Promise）
- *
- * @param value - The value / 值
- * @returns Whether it is thenable / 是否为 thenable
- */
-const isThenable = (value: unknown): boolean =>
-  value != null &&
-  (typeof value === "object" || typeof value === "function") &&
-  typeof (value as { then?: unknown }).then === "function";
-
-/**
  * Read a property, throwing the host-like `TypeError` on `null`/`undefined` receivers.
  *
  * 读取属性，对 `null`/`undefined` 接收者抛出宿主风格 `TypeError`。
@@ -4447,22 +4436,27 @@ export class Runtime {
   }
 
   /**
-   * Evaluate an `await` expression: evaluate the operand, then suspend on thenables.
+   * Evaluate an `await` expression: evaluate the operand, then always suspend for one microtask.
    *
-   * 求值 `await` 表达式：求值操作数，遇 thenable 则挂起。
+   * 求值 `await` 表达式：先求值操作数，然后始终挂起一个微任务。
+   *
+   * `await` yields every operand — including non-thenables — so the continuation is scheduled as a
+   * microtask exactly like the specification requires (`await 1` still suspends). The driver wraps
+   * the yielded value with `Promise.resolve`, which also reads a custom thenable's `then` only
+   * once.
+   *
+   * `await` 对任何操作数（包括非 thenable）都会挂起，使后续执行按规范作为微任务调度（`await 1` 也会挂起）。 驱动方用 `Promise.resolve` 包装
+   * yield 出的值，因此自定义 thenable 的 `then` 只会被读取一次。
    *
    * @param operand - The awaited expression / 被等待的表达式
    * @param env - Current environment / 当前环境
-   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
-   *   promise
+   * @yields {unknown} The awaited value / 被等待的值
    * @returns The generator / 生成器
    */
   private *evalAwait(operand: Expression, env: Environment): Generator<unknown, unknown, unknown> {
     const value = yield* this.evalAsyncExpr(operand, env);
 
-    if (isThenable(value)) return yield value;
-
-    return value;
+    return yield value;
   }
 
   /**
