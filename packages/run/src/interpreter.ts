@@ -64,6 +64,7 @@ import { BreakSignalError } from "./breakSignalError.js";
 import { ContinueSignalError } from "./continueSignalError.js";
 import { Environment } from "./environment.js";
 import type { FeatureOptions } from "./parser.js";
+import { getFunctionSource } from "./parser.js";
 import { ReturnSignalError } from "./returnSignalError.js";
 import { ThrowSignalError } from "./throwSignalError.js";
 import {
@@ -1740,6 +1741,7 @@ export class Runtime {
         isAsync: stmt.isAsync,
         prototype: null,
         superBase: null,
+        sourceText: getFunctionSource(stmt) ?? void 0,
       });
 
       env.define(stmt.name, fn);
@@ -1792,6 +1794,7 @@ export class Runtime {
           // 直接位于 program / 函数体的函数声明连同值一起提升；块内函数是块级绑定（进入块时创建），
           // 仅在 sloppy 模式下额外获得 Annex B 的 var 绑定
           if (direct) {
+            console.log("DEBUG source", stmt.name, JSON.stringify(getFunctionSource(stmt)));
             const fn = this.createFunction({
               name: stmt.name,
               params: stmt.params,
@@ -1801,6 +1804,7 @@ export class Runtime {
               isAsync: stmt.isAsync,
               prototype: null,
               superBase: null,
+              sourceText: getFunctionSource(stmt) ?? void 0,
             });
 
             env.declareVar(stmt.name);
@@ -3099,6 +3103,7 @@ export class Runtime {
         prototype: null,
         superBase: extra?.superBase ?? null,
         constructable: extra?.constructable,
+        sourceText: getFunctionSource(node) ?? void 0,
       });
 
       nameEnv.initialize(node.name, fn);
@@ -3116,6 +3121,7 @@ export class Runtime {
       prototype: null,
       superBase: extra?.superBase ?? null,
       constructable: extra?.constructable,
+      sourceText: getFunctionSource(node) ?? void 0,
     });
   }
 
@@ -3164,9 +3170,21 @@ export class Runtime {
      * 调用（对象字面量方法为 `false`）
      */
     constructable?: boolean;
+    /** Original source text, for `Function.prototype.toString` / 源码原文，供 toString 使用 */
+    sourceText?: string;
   }): InterpreterFunction {
-    const { name, params, body, closure, thisMode, isAsync, prototype, superBase, constructable } =
-      options;
+    const {
+      name,
+      params,
+      body,
+      closure,
+      thisMode,
+      isAsync,
+      prototype,
+      superBase,
+      constructable,
+      sourceText,
+    } = options;
     const simpleParamNames = analyzeParams(params);
     const isArrow = thisMode === "arrow";
     const ctx = isArrow ? this.currentContext() : null;
@@ -3194,6 +3212,7 @@ export class Runtime {
         lexicalNewTargetMeta: isArrow ? (ctx?.newTargetMeta ?? null) : null,
         lexicalIsConstruct: isArrow ? (ctx?.isConstruct ?? false) : false,
         callee: null,
+        sourceText,
       },
       this.invokeHandler,
     );

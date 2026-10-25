@@ -129,6 +129,23 @@ const tokenValue = (token: Token): string => {
 };
 
 /**
+ * Original source text of parsed function nodes, used for `Function.prototype.toString`.
+ *
+ * 已解析函数节点的源码原文，用于实现 `Function.prototype.toString`。
+ */
+const functionSources = new WeakMap<object, string>();
+
+/**
+ * Get the original source text of a parsed function/arrow node.
+ *
+ * 获取已解析函数/箭头节点的源码原文。
+ *
+ * @param node - Function AST node / 函数 AST 节点
+ * @returns The source text, or `null` / 源码原文，或 `null`
+ */
+export const getFunctionSource = (node: object): string | null => functionSources.get(node) ?? null;
+
+/**
  * Whether the token can be a property name (identifier/keyword/string/number/bigint).
  *
  * 判断 token 是否可作为属性名（标识符/关键字/字符串/数字/bigint）。
@@ -358,6 +375,39 @@ export class Parser {
   }
 
   /**
+   * Record the source text of every function/arrow node for `Function.prototype.toString`.
+   *
+   * 记录所有函数/箭头节点的源码原文，供 `Function.prototype.toString` 使用。
+   *
+   * @param programBody - Parsed program body / 已解析的 program 主体
+   */
+  private recordFunctionSources(programBody: Statement[]): void {
+    const record = (value: unknown): void => {
+      if (value == null || typeof value !== "object") return;
+
+      const node = value as { type?: string; start?: number; end?: number };
+
+      if (
+        (node.type === "functionDeclaration" ||
+          node.type === "functionExpr" ||
+          node.type === "arrow") &&
+        typeof node.start === "number" &&
+        typeof node.end === "number"
+      )
+        functionSources.set(node, this.source.slice(node.start, node.end));
+
+      for (const key of Object.keys(node)) {
+        const child = (node as Record<string, unknown>)[key];
+
+        if (Array.isArray(child)) for (const item of child) record(item);
+        else record(child);
+      }
+    };
+
+    for (const statement of programBody) record(statement);
+  }
+
+  /**
    * Parse the whole source into a program.
    *
    * 将整个源码解析为 program。
@@ -378,6 +428,8 @@ export class Parser {
     const body: Statement[] = [];
 
     while (this.current().type !== "eof") body.push(this.parseStatement());
+
+    this.recordFunctionSources(body);
 
     return { type: "program", body, start, end: this.lastEnd };
   }
