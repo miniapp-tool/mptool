@@ -114,9 +114,15 @@ describe("file operations", () => {
   });
 
   it("should unzip to target path", async () => {
+    const fs = wx.getFileSystemManager();
+
+    fs.mkdirSync(`${wx.env.USER_DATA_PATH}/tmp`, true);
+    fs.writeFileSync(`${wx.env.USER_DATA_PATH}/tmp/archive.zip`, JSON.stringify({ "a.txt": "a" }));
+
     await unzip("tmp/archive.zip", "tmp/unzip");
 
     expect(isDir("tmp/unzip")).toBe(true);
+    expect(readFile("tmp/unzip/a.txt")).toBe("a");
   });
 
   it("should save online file", async () => {
@@ -164,26 +170,45 @@ describe("file operations", () => {
 
 describe("file edge cases", () => {
   it("should save a file", () => {
-    saveFile("mock://temp/source", "tmp/saved.txt");
+    const fs = wx.getFileSystemManager();
+    const sourcePath = `${wx.env.USER_DATA_PATH}/tmp/save-source.txt`;
+
+    fs.mkdirSync(`${wx.env.USER_DATA_PATH}/tmp`, true);
+    fs.writeFileSync(sourcePath, "source");
+
+    saveFile(sourcePath, "tmp/saved.txt");
 
     expect(exists("tmp/saved.txt")).toBe(true);
   });
 
   it("should return the saved file path", () => {
-    const savedPath = saveFile("mock://temp/source", "tmp/saved-return.txt");
+    const sourcePath = `${wx.env.USER_DATA_PATH}/tmp/save-return-source.txt`;
+
+    writeFile("tmp/save-return-source.txt", "source");
+
+    const savedPath = saveFile(sourcePath, "tmp/saved-return.txt");
 
     expect(savedPath).toBe(`${wx.env.USER_DATA_PATH}/tmp/saved-return.txt`);
   });
 
   it("should throw MpError when saving a file fails", () => {
+    const sourcePath = `${wx.env.USER_DATA_PATH}/tmp/save-fail-source.txt`;
+
+    writeFile("tmp/save-fail-source.txt", "source");
     writeFile("tmp/save-fail.txt", "x");
 
     // 目标已存在时 wx.saveFileSync 会失败
-    expect(() => saveFile("mock://temp/source", "tmp/save-fail.txt")).toThrow(MpError);
+    expect(() => saveFile(sourcePath, "tmp/save-fail.txt")).toThrow(MpError);
   });
 
   it("should create the parent directory when saving a file", () => {
-    saveFile("mock://temp/source", "tmp/new-dir/saved.txt");
+    const fs = wx.getFileSystemManager();
+    const sourcePath = `${wx.env.USER_DATA_PATH}/tmp/save-source-2.txt`;
+
+    fs.mkdirSync(`${wx.env.USER_DATA_PATH}/tmp`, true);
+    fs.writeFileSync(sourcePath, "source");
+
+    saveFile(sourcePath, "tmp/new-dir/saved.txt");
 
     expect(exists("tmp/new-dir/saved.txt")).toBe(true);
   });
@@ -231,9 +256,15 @@ describe("file edge cases", () => {
   });
 
   it("should throw when saving to an existing path", () => {
+    const fs = wx.getFileSystemManager();
+    const sourcePath = `${wx.env.USER_DATA_PATH}/tmp/save-source-3.txt`;
+
+    fs.mkdirSync(`${wx.env.USER_DATA_PATH}/tmp`, true);
+    fs.writeFileSync(sourcePath, "source");
+
     writeFile("tmp/exist.txt", "x");
 
-    expect(() => saveFile("mock://temp/source", "tmp/exist.txt")).toThrow(MpError);
+    expect(() => saveFile(sourcePath, "tmp/exist.txt")).toThrow(MpError);
   });
 
   it("should reject saveOnlineFile on non-200 status", async () => {

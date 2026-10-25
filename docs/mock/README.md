@@ -392,6 +392,46 @@ mockWx.tabBar(["/pages/index/index", "/pages/mine/index"]);
 
 > 生命周期是 mock 简化实现：只覆盖导航引起的页面生命周期，不模拟切后台 / 回前台的 `onHide`/`onShow`、渲染层、页面动画与真实 `onReady` 时机，也不实现 enhance 的导航锁 / `onNavigate` 钩子；需要这些行为时请继续替换对应 `wx` 方法或使用 enhance 层测试。
 
+## FileSystemManager 语义
+
+`wx.getFileSystemManager()` 返回完整的 45 个方法（20 个同步 + 25 个异步），路径解析、encoding、错误码与真机对齐：
+
+- **路径**：相对路径按 `wx.env.USER_DATA_PATH` 解析；接受 `wxfile://` / `http://` 前缀（`usr` 用户目录、`tmp` 临时目录）。`.`/`..` 会被解析，越出用户目录（如 `../../etc/passwd`、`wxfile://usr/..`）会以 `1300014` 拒绝。
+- **encoding**：
+  - 不传 encoding → `ArrayBuffer`；
+  - 传 encoding（`utf-8`/`utf8`/`ascii`/`base64`/`binary`/`hex`/`latin1`/`ucs2`/`utf16le`）→ **string**（`binary` 是 string，不是 ArrayBuffer）；
+  - 未知 encoding → 失败（`Unknown encoding: xxx`）。
+  - 写 `ArrayBuffer`/TypedArray 时按原始字节保存，不做 UTF-8 解码。
+- **错误**：同步方法抛 `Error`（带 `errMsg` / `errCode` / `errno`），异步方法走 `fail` + `complete`；`errMsg` 形如 `<api>:fail ...`，错误码使用官方表（`1300002` 不存在、`1300020` not a directory、`1300021` Is a directory、`1300066` 目录非空、`1301003` 对目录非法操作、`1301005` 已存在、`1300014` 路径越权、`1300202` 超出 100 MB）。
+- **`stat`**：返回 `{ size, mode, lastAccessedTime, lastModifiedTime, isFile(), isDirectory() }`；`statSync(path, true)` 对目录返回 `[{ path, stats }]`。
+- **父目录**：写文件、复制、重命名、保存文件都要求父目录已存在（否则 `1300002`）；`mkdirSync(path)` 非递归时父目录必须存在，`recursive` 才会自动创建。
+- **文件描述符**：`openSync({ filePath, flag })` 返回 fd；`readSync`/`writeSync`/`fstatSync`/`ftruncateSync`/`closeSync` 均接收 option 对象（与真机签名一致）。
+- **`saveFileSync`**：源临时文件不存在会失败（`1301112`）；目标已存在失败（`1301005`）。
+- **异步方法**：回调风格（`success`/`fail`/`complete`），**不支持 Promise 风格**（与真机一致）；未传回调时调用会返回 `undefined`。
+- **`unzip` / `readZipEntry`**：mock 不解析真实 zip 二进制；先用文件 API 把「条目表」写成 JSON 作为 zip 内容（mock 约定）：
+
+```ts
+wx.getFileSystemManager().writeFileSync(
+  `${wx.env.USER_DATA_PATH}/archive.zip`,
+  JSON.stringify({ "a.txt": "content", "nested/b.bin": { base64: "AAEC" } }),
+);
+
+await new Promise((resolve, reject) => {
+  wx.getFileSystemManager().unzip({
+    zipFilePath: `${wx.env.USER_DATA_PATH}/archive.zip`,
+    targetPath: `${wx.env.USER_DATA_PATH}/out`,
+    success: resolve,
+    fail: reject,
+  });
+}); // out/a.txt、out/nested/b.bin
+
+// 条目路径越界（zip-slip，如 "../escape.txt"）会以 1300014 失败，且不会落盘
+```
+
+> `getFileInfo` 的 `digest` 目前是占位值，不要用它断言真实哈希。
+
+> 用开发者工具实测确认：不传 encoding 返回 `ArrayBuffer`、`binary` 返回 string、`stat` 字段为 `size/mode/lastAccessedTime/lastModifiedTime`；开发者工具里 `wx.env.USER_DATA_PATH` 实测为 `http://usr`，错误文案细节与 mock 有差异（mock 以官方错误码 + `<api>:fail` 前缀为准）。
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：

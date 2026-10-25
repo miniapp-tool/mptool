@@ -263,9 +263,15 @@ export const readFile = (<T extends FileEncoding>(
   const target = resolvePath(path);
 
   try {
-    return getFileManager().readFileSync(target, encoding) as
-      | (T extends "binary" ? ArrayBuffer : string)
-      | undefined;
+    // The real `readFileSync(path, "binary")` returns a string; binary data must be read without
+    // an encoding (the runtime then returns an ArrayBuffer). Keep the public `binary` ⇄
+    // `ArrayBuffer` contract of this helper while using the real runtime semantics underneath.
+    const content =
+      encoding === "binary"
+        ? getFileManager().readFileSync(target)
+        : getFileManager().readFileSync(target, encoding);
+
+    return content as (T extends "binary" ? ArrayBuffer : string) | undefined;
   } catch (err) {
     // A missing file is a normal branch; permission / IO errors must be observable
     if (isNotFoundError(err)) {
