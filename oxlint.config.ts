@@ -3,7 +3,7 @@ import { defineHopeConfig } from "oxc-config-hope/oxlint";
 
 const config: OxlintConfig = defineHopeConfig(
   {
-    ignore: ["demo/**/*.js"],
+    ignore: ["demo/**/*.js", ".agents/**"],
     rules: {
       "new-cap": [
         "warn",
