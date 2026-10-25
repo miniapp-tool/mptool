@@ -160,6 +160,21 @@ export interface UserDecisions {
   gesture?: boolean;
 }
 
+/** Read-only UI state exposed by `mockWx.ui()`. */
+export interface MockUiState {
+  actionSheet: { tapIndex: number } | null;
+  loading: { title: string } | null;
+  modal: { cancel: boolean; confirm: boolean; content?: string } | null;
+  toast: { duration?: number; icon?: string; title: string } | null;
+  update: {
+    applied: boolean;
+    checked: boolean;
+    failed: string | null;
+    hasUpdate: boolean;
+    ready: boolean;
+  };
+}
+
 /** A reversible state scope created by `mockWx.scope()`. */
 export interface MockWxScope {
   /** Restore the state captured when the scope was created; idempotent. */

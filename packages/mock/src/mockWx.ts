@@ -18,6 +18,7 @@ import type {
   MockNetworkOptions,
   MockStorageOptions,
   MockSystemOptions,
+  MockUiState,
   MockWxScope,
   UserDecisions,
   WxApiKind,
@@ -29,6 +30,7 @@ import type {
   WxRuleOptions,
 } from "./typings.js";
 import { emitEvent } from "./ui.js";
+import { getUiState, uiDecisions } from "./uiState.js";
 import { DEFAULT_USER_DATA_PATH, wx, wxApiWrappers } from "./wx.js";
 
 /** APIs whose failures can be injected. */
@@ -299,6 +301,9 @@ export interface MockWx {
   calls: (api: WxApiName) => readonly (readonly unknown[])[];
   clearCalls: (api?: WxApiName) => void;
 
+  /** Read-only UI state (toast / loading / modal / update manager). */
+  ui: () => MockUiState;
+
   // ---- isolation ----
   scope: () => MockWxScope;
   run: <T>(callback: () => T | Promise<T>) => Promise<T>;
@@ -313,10 +318,12 @@ export interface MockWx {
 export const mockWx: MockWx = {
   auth(authSetting: Record<string, boolean>): void {
     mockState.config.auth = { ...mockState.config.auth, ...authSetting };
+    uiDecisions.auth = { ...uiDecisions.auth, ...authSetting };
   },
 
   authorize(decision: "allow" | "deny"): void {
     mockState.config.authorize = decision;
+    uiDecisions.authorize = decision;
   },
 
   autoRestore(afterEach: (hook: () => void) => void): void {
@@ -333,6 +340,7 @@ export const mockWx: MockWx = {
 
   clipboard(text: string): void {
     mockState.config.clipboard = text;
+    uiDecisions.clipboard = text;
   },
 
   compat(flags: MockCompatFlags): void {
@@ -394,6 +402,7 @@ export const mockWx: MockWx = {
 
   login(state: { code?: string; sessionValid?: boolean }): void {
     mockState.config.login = { ...mockState.config.login, ...state };
+    uiDecisions.login = { ...uiDecisions.login, ...state };
   },
 
   network(options: MockNetworkOptions): void {
@@ -474,5 +483,10 @@ export const mockWx: MockWx = {
 
   user(decisions: UserDecisions): void {
     mockState.config.user = { ...mockState.config.user, ...decisions };
+    uiDecisions.user = { ...uiDecisions.user, ...decisions };
+  },
+
+  ui(): MockUiState {
+    return getUiState();
   },
 };

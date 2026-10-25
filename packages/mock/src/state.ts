@@ -16,6 +16,8 @@ import type {
 } from "./typings.js";
 import { clearEventListeners, restoreEventListeners, snapshotEventListeners } from "./ui.js";
 import type { EventListenerSnapshot } from "./ui.js";
+import { resetUi, restoreUi, snapshotUi } from "./uiState.js";
+import type { UiSnapshot } from "./uiState.js";
 
 /** One entry of a `mockWx.route()` table. */
 export interface RouteEntry {
@@ -78,6 +80,8 @@ export interface MockStateSnapshot {
   rules: RuleSnapshot[];
   /** Recorded call count per API at snapshot time. */
   calls: Map<string, number>;
+  /** UI decisions / runtime state (toast, loading, modal, update manager). */
+  ui: UiSnapshot;
   storage: StorageSnapshot;
   fileSystem: FileSystemSnapshot;
   events: EventListenerSnapshot;
@@ -258,6 +262,7 @@ export const snapshotState = (): MockStateSnapshot => ({
   })),
   ruleSeq: mockState.ruleSeq,
   storage: snapshotStorage(),
+  ui: snapshotUi(),
 });
 
 const replaceArray = <T>(target: T[], next: readonly T[]): void => {
@@ -281,6 +286,7 @@ export const restoreState = (snapshot: MockStateSnapshot): void => {
   mockState.config = cloneConfig(snapshot.config);
 
   restoreStorage(snapshot.storage);
+  restoreUi(snapshot.ui);
   getFileSystemManager().restore(snapshot.fileSystem);
   restoreEventListeners(snapshot.events);
 
@@ -308,6 +314,7 @@ export const resetState = (): void => {
   mockState.config = createConfig();
 
   resetStorage();
+  resetUi();
   getFileSystemManager().reset();
   clearEventListeners();
 
