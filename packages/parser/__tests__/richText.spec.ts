@@ -258,7 +258,7 @@ describe(getRichTextNodes, () => {
         [
           {
             attrs: {
-              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='red'/%3E%3C/svg%3E",
+              src: "data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22%3E%3Ccircle%20cx=%2250%22%20cy=%2250%22%20r=%2240%22%20fill=%22red%22/%3E%3C/svg%3E",
               style: "width:100px;height:100px;",
             },
             name: "img",
@@ -328,7 +328,7 @@ describe(getRichTextNodes, () => {
         type: "node",
         name: "img",
         attrs: {
-          src: expect.stringContaining("viewBox='0 0 100 50'"),
+          src: expect.stringContaining("viewBox=%220%200%20100%2050%22"),
           style: "width:100px;height:50px;",
         },
       },
@@ -353,9 +353,9 @@ describe(getRichTextNodes, () => {
       attrs: { src },
     } = node as unknown as { attrs: { src: string } };
 
-    expect(src).toContain("viewBox='");
-    expect(src).toContain("preserveAspectRatio='");
-    expect(src).toContain("gradientUnits='");
+    expect(src).toContain("viewBox=%22");
+    expect(src).toContain("preserveAspectRatio=%22");
+    expect(src).toContain("gradientUnits=%22");
   });
 
   it("parses comma separated viewBox", async () => {
@@ -486,7 +486,7 @@ describe(getRichTextNodes, () => {
         type: "node",
         name: "img",
         attrs: {
-          src: expect.stringContaining("width='100%25'"),
+          src: expect.stringContaining("width=%22100%25%22"),
           style: "width:100%;height:50%;",
         },
       },
