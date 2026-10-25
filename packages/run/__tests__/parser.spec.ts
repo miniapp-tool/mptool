@@ -1580,22 +1580,14 @@ describe("statements", () => {
     });
   });
 
-  it("should parse throw and return", () => {
+  it("should parse throw and reject a top-level return", () => {
+    expect(() => parse("return a + b")).toThrow(ParseError);
     expect(stmtOf("throw new Error('x')")).toStrictEqual({
       type: "throw",
       argument: {
         type: "new",
         callee: { type: "identifier", name: "Error" },
         args: [{ type: "literal", value: "x" }],
-      },
-    });
-    expect(stmtOf("return a + b")).toStrictEqual({
-      type: "return",
-      argument: {
-        type: "binary",
-        op: "+",
-        left: { type: "identifier", name: "a" },
-        right: { type: "identifier", name: "b" },
       },
     });
   });

@@ -288,6 +288,23 @@ export interface ParserLimits {
 const DEFAULT_MAX_BACKTRACKS = 5000;
 
 /**
+ * Whether a statement is (or directly wraps) an iteration statement, used to validate `continue
+ * label`.
+ *
+ * 判断语句是否为（或直接包裹）迭代语句，用于校验 `continue label`。
+ *
+ * @param statement - The statement / 语句
+ * @returns Whether it is an iteration target / 是否为迭代目标
+ */
+const isIterationTarget = (statement: Statement): boolean => {
+  let current = statement;
+
+  while (current.type === "labeled") current = current.body;
+
+  return ["for", "forIn", "forOf", "while", "doWhile"].includes(current.type);
+};
+
+/**
  * Recursive descent parser producing an AST.
  *
  * 递归下降解析器，产出 AST。
@@ -305,6 +322,14 @@ export class Parser {
   private speculativeTokens = 0;
   /** Current expression/statement nesting depth / 当前表达式/语句嵌套深度 */
   private parseDepth = 0;
+  /** Nesting depth of function bodies (return legality) / 函数体嵌套深度（return 合法性） */
+  private functionDepth = 0;
+  /** Nesting depth of loops (break/continue legality) / 循环嵌套深度（break/continue 合法性） */
+  private loopDepth = 0;
+  /** Nesting depth of switch statements / switch 嵌套深度 */
+  private switchDepth = 0;
+  /** Labels currently in scope / 当前作用域内的标签 */
+  private readonly labels: { name: string; token: Token; needsIteration: boolean }[] = [];
   private readonly maxSourceLength: number;
   private readonly maxParseDepth: number;
   private readonly maxBacktracks: number;
@@ -645,6 +670,8 @@ export class Parser {
       declarations.push(this.parseVariableDeclarator(true));
     }
 
+    if (tokenValue(kindToken) === "const") this.requireConstInitializers(declarations);
+
     if (this.match(";")) this.advance();
 
     return {
@@ -667,6 +694,33 @@ export class Parser {
     }
 
     return { id, init, start, end: this.lastEnd };
+  }
+
+  /**
+   * Validate that every `const` declarator has an initializer.
+   *
+   * 校验每个 `const` 声明符都有初始化器。
+   *
+   * @param declarations - Declarators / 声明符
+   */
+  private requireConstInitializers(declarations: VariableDeclarator[]): void {
+    for (const declaration of declarations)
+      if (declaration.init == null) throw this.error("Missing initializer in const declaration");
+  }
+
+  /**
+   * Validate the binding of a `for-in` / `for-of` header.
+   *
+   * 校验 `for-in` / `for-of` 头部的绑定。
+   *
+   * @param declarations - Declarators / 声明符
+   */
+  private requireSingleForBinding(declarations: VariableDeclarator[]): void {
+    if (declarations.length > 1)
+      throw this.error("Only one binding is allowed in a for-in/of header");
+
+    if (declarations[0].init != null)
+      throw this.error("for-in/of loop variable declaration may not have an initializer");
   }
 
   private parseIfStatement(): Statement {
@@ -700,7 +754,15 @@ export class Parser {
 
     this.expect(")");
 
-    const body = this.parseStatement();
+    this.loopDepth += 1;
+
+    let body: Statement;
+
+    try {
+      body = this.parseStatement();
+    } finally {
+      this.loopDepth -= 1;
+    }
 
     return { type: "while", test, body, start, end: this.lastEnd };
   }
@@ -710,7 +772,15 @@ export class Parser {
 
     this.expect("do");
 
-    const body = this.parseStatement();
+    this.loopDepth += 1;
+
+    let body: Statement;
+
+    try {
+      body = this.parseStatement();
+    } finally {
+      this.loopDepth -= 1;
+    }
 
     this.expect("while");
     this.expect("(");
@@ -741,7 +811,15 @@ export class Parser {
 
       this.expect(")");
 
-      const body = this.parseStatement();
+      this.loopDepth += 1;
+
+      let body: Statement;
+
+      try {
+        body = this.parseStatement();
+      } finally {
+        this.loopDepth -= 1;
+      }
 
       return { type: "for", init: null, test, update, body, start, end: this.lastEnd };
     }
@@ -769,11 +847,21 @@ export class Parser {
       if (this.match("in")) {
         this.advance();
 
+        this.requireSingleForBinding(declarations);
+
         const right = this.parseExpression(true);
 
         this.expect(")");
 
-        const body = this.parseStatement();
+        this.loopDepth += 1;
+
+        let body: Statement;
+
+        try {
+          body = this.parseStatement();
+        } finally {
+          this.loopDepth -= 1;
+        }
 
         return { type: "forIn", left: declaration, right, body, start, end: this.lastEnd };
       }
@@ -783,14 +871,26 @@ export class Parser {
 
         this.advance();
 
+        this.requireSingleForBinding(declarations);
+
         const right = this.parseAssignment(true);
 
         this.expect(")");
 
-        const body = this.parseStatement();
+        this.loopDepth += 1;
+
+        let body: Statement;
+
+        try {
+          body = this.parseStatement();
+        } finally {
+          this.loopDepth -= 1;
+        }
 
         return { type: "forOf", left: declaration, right, body, start, end: this.lastEnd };
       }
+
+      if (tokenValue(kindToken) === "const") this.requireConstInitializers(declarations);
 
       this.expect(";");
 
@@ -802,7 +902,15 @@ export class Parser {
 
       this.expect(")");
 
-      const body = this.parseStatement();
+      this.loopDepth += 1;
+
+      let body: Statement;
+
+      try {
+        body = this.parseStatement();
+      } finally {
+        this.loopDepth -= 1;
+      }
 
       return { type: "for", init: declaration, test, update, body, start, end: this.lastEnd };
     }
@@ -816,7 +924,16 @@ export class Parser {
 
       this.expect(")");
 
-      const body = this.parseStatement();
+      this.loopDepth += 1;
+
+      let body: Statement;
+
+      try {
+        body = this.parseStatement();
+      } finally {
+        this.loopDepth -= 1;
+      }
+
       const left: AssignmentTarget | VariableDeclaration = this.toAssignmentTarget(init);
 
       return { type: "forIn", left, right, body, start, end: this.lastEnd };
@@ -831,7 +948,16 @@ export class Parser {
 
       this.expect(")");
 
-      const body = this.parseStatement();
+      this.loopDepth += 1;
+
+      let body: Statement;
+
+      try {
+        body = this.parseStatement();
+      } finally {
+        this.loopDepth -= 1;
+      }
+
       const left: AssignmentTarget | VariableDeclaration = this.toAssignmentTarget(init);
 
       return { type: "forOf", left, right, body, start, end: this.lastEnd };
@@ -847,7 +973,15 @@ export class Parser {
 
     this.expect(")");
 
-    const body = this.parseStatement();
+    this.loopDepth += 1;
+
+    let body: Statement;
+
+    try {
+      body = this.parseStatement();
+    } finally {
+      this.loopDepth -= 1;
+    }
 
     return { type: "for", init, test, update, body, start, end: this.lastEnd };
   }
@@ -864,6 +998,8 @@ export class Parser {
     this.expect("{");
 
     const cases: { test: Expression | null; body: Statement[] }[] = [];
+
+    this.switchDepth += 1;
 
     while (!this.match("}")) {
       let test: Expression | null;
@@ -889,6 +1025,8 @@ export class Parser {
 
       cases.push({ test, body });
     }
+
+    this.switchDepth -= 1;
 
     this.expect("}");
 
@@ -942,9 +1080,12 @@ export class Parser {
   }
 
   private parseReturnStatement(): Statement {
-    const { start } = this.current();
+    const token = this.current();
+    const { start } = token;
 
     this.advance();
+
+    if (this.functionDepth === 0) throw this.error("Illegal return statement", token);
 
     let argument: Expression | null = null;
 
@@ -957,7 +1098,8 @@ export class Parser {
   }
 
   private parseBreakContinue(isContinue: boolean): Statement {
-    const { start } = this.current();
+    const startToken = this.current();
+    const { start } = startToken;
 
     this.advance();
 
@@ -967,6 +1109,22 @@ export class Parser {
 
     if (this.match(";")) this.advance();
 
+    if (label == null) {
+      if (isContinue) {
+        if (this.loopDepth === 0) throw this.error("Illegal continue statement", startToken);
+      } else if (this.loopDepth === 0 && this.switchDepth === 0) {
+        throw this.error("Illegal break statement", startToken);
+      }
+    } else {
+      const target = [...this.labels].reverse().find((item) => item.name === label);
+
+      if (target == null) throw this.error(`Undefined label '${label}'`, startToken);
+
+      // `continue label` only allows labels that denote an iteration statement
+      // `continue label` 只允许指向迭代语句的标签
+      if (isContinue) target.needsIteration = true;
+    }
+
     if (isContinue) return { type: "continue", label, start, end: this.lastEnd };
 
     return { type: "break", label, start, end: this.lastEnd };
@@ -974,14 +1132,31 @@ export class Parser {
 
   private parseLabeledStatement(): Statement {
     const labelToken = this.advance();
+    const labelName = tokenValue(labelToken);
+
+    if (this.labels.some((item) => item.name === labelName))
+      throw this.error(`Label '${labelName}' has already been declared`, labelToken);
 
     this.expect(":");
 
-    const body = this.parseStatement();
+    const label = { name: labelName, token: labelToken, needsIteration: false };
+
+    this.labels.push(label);
+
+    let body: Statement;
+
+    try {
+      body = this.parseStatement();
+    } finally {
+      this.labels.pop();
+    }
+
+    if (label.needsIteration && !isIterationTarget(body))
+      throw this.error(`Illegal continue target '${labelName}'`, labelToken);
 
     return {
       type: "labeled",
-      label: tokenValue(labelToken),
+      label: labelName,
       body,
       start: labelToken.start,
       end: body.end,
@@ -1025,7 +1200,7 @@ export class Parser {
   private parseFunctionName(): string {
     const token = this.current();
 
-    if (token.type === "identifier" || token.type === "keyword") {
+    if (token.type === "identifier") {
       this.advance();
 
       return token.value;
@@ -1103,16 +1278,43 @@ export class Parser {
     return params;
   }
 
-  private parseFunctionBody(isAsync: boolean): BlockStatement {
-    const saved = this.inAsyncFunction;
+  /**
+   * Parse inside a function context: `return` becomes legal, while `break`/`continue` and labels do
+   * not cross the function boundary.
+   *
+   * 在函数上下文中解析：`return` 合法，而 `break`/`continue` 与标签不能跨函数边界。
+   *
+   * @param isAsync - Whether the function is async / 是否 async 函数
+   * @param parse - Callback parsing the body / 解析函数体的回调
+   * @returns The parse result / 解析结果
+   */
+  private parseWithFunctionContext<T>(isAsync: boolean, parse: () => T): T {
+    const savedAsync = this.inAsyncFunction;
+    const savedFunctionDepth = this.functionDepth;
+    const savedLoopDepth = this.loopDepth;
+    const savedSwitchDepth = this.switchDepth;
+    const savedLabels = [...this.labels];
 
     this.inAsyncFunction = isAsync;
+    this.functionDepth += 1;
+    this.loopDepth = 0;
+    this.switchDepth = 0;
+    this.labels.length = 0;
 
     try {
-      return this.parseBlock();
+      return parse();
     } finally {
-      this.inAsyncFunction = saved;
+      this.inAsyncFunction = savedAsync;
+      this.functionDepth = savedFunctionDepth;
+      this.loopDepth = savedLoopDepth;
+      this.switchDepth = savedSwitchDepth;
+      this.labels.length = 0;
+      this.labels.push(...savedLabels);
     }
+  }
+
+  private parseFunctionBody(isAsync: boolean): BlockStatement {
+    return this.parseWithFunctionContext(isAsync, () => this.parseBlock());
   }
 
   private parseClassDeclaration(): Statement {
@@ -1157,6 +1359,7 @@ export class Parser {
     this.expect("{");
 
     const methods: ClassMethod[] = [];
+    let hasConstructor = false;
 
     while (!this.match("}")) {
       if (this.match(";")) {
@@ -1166,7 +1369,15 @@ export class Parser {
 
       if (this.current().type === "eof") throw this.error("Unexpected end of input");
 
-      methods.push(this.parseClassMethod());
+      const method = this.parseClassMethod();
+
+      if (method.kind === "constructor") {
+        if (hasConstructor) throw this.error("A class may only have one constructor");
+
+        hasConstructor = true;
+      }
+
+      methods.push(method);
     }
 
     this.expect("}");
@@ -1220,6 +1431,13 @@ export class Parser {
     }
 
     const { key, computed } = this.parsePropertyKey();
+
+    if (key === "constructor" && !computed && !isStatic) {
+      if (isAsync) throw this.error("Class constructor may not be async");
+
+      if (kind === "get" || kind === "set")
+        throw this.error("Class constructor may not be an accessor");
+    }
 
     if (kind === "method" && key === "constructor" && !computed && !isAsync && !isStatic)
       kind = "constructor";
@@ -2555,19 +2773,15 @@ export class Parser {
    * @returns The parsed body / 解析出的函数体
    */
   private parseArrowBody(isAsync: boolean, allowIn: boolean): Expression | BlockStatement {
-    const saved = this.inAsyncFunction;
-
     // a non-async arrow inherits the enclosing async context, so `await` stays legal
     // 非 async 箭头继承外层 async 上下文，因此 `await` 仍然合法
-    this.inAsyncFunction = saved || isAsync;
+    const isAsyncContext = this.inAsyncFunction || isAsync;
 
-    try {
+    return this.parseWithFunctionContext(isAsyncContext, () => {
       if (this.match("{")) return this.parseBlock();
 
       return this.parseAssignment(allowIn);
-    } finally {
-      this.inAsyncFunction = saved;
-    }
+    });
   }
 
   /**
