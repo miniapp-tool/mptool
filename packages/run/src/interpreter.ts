@@ -238,6 +238,21 @@ const getProperty = (object: unknown, key: PropertyKey): unknown => {
 };
 
 /**
+ * Own enumerable property keys, including symbols (ECMAScript CopyDataProperties semantics).
+ *
+ * 自身的可枚举属性键，包含 symbol（ECMAScript CopyDataProperties 语义）。
+ *
+ * @param source - Source object / 源对象
+ * @returns Enumerable own keys / 可枚举的自有键
+ */
+const ownEnumerableKeys = (source: object): PropertyKey[] => [
+  ...Object.keys(source),
+  ...Object.getOwnPropertySymbols(source).filter(
+    (symbol) => Object.getOwnPropertyDescriptor(source, symbol)?.enumerable === true,
+  ),
+];
+
+/**
  * Sentinel returned by optional-chain evaluation when a link short-circuits the whole chain.
  *
  * 可选链某一链节短路时由链求值返回的哨兵值。
@@ -1771,21 +1786,21 @@ export class Runtime {
 
     // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
     const source = Object(value) as Record<PropertyKey, unknown>;
-    const taken = new Set<string>();
+    const taken = new Set<PropertyKey>();
 
     for (const prop of target.props) {
       const key = prop.computed
         ? toPropertyKey(this.evalExpression(prop.key as Expression, env))
         : (prop.key as string);
 
-      if (typeof key === "string") taken.add(key);
+      taken.add(key);
       if (prop.value != null) this.assignTo(prop.value, source[key], env, initialize);
     }
 
     if (target.rest != null) {
-      const rest: Record<string, unknown> = {};
+      const rest: Record<PropertyKey, unknown> = {};
 
-      for (const key of Object.keys(source)) if (!taken.has(key)) rest[key] = source[key];
+      for (const key of ownEnumerableKeys(source)) if (!taken.has(key)) rest[key] = source[key];
 
       this.assignTo(target.rest.argument, rest, env, initialize);
     }
@@ -2132,8 +2147,8 @@ export class Runtime {
         const source = this.evalExpression(prop.argument, env);
 
         if (source != null && (typeof source === "object" || typeof source === "function")) {
-          for (const key of Object.keys(source))
-            obj[key] = (source as Record<string, unknown>)[key];
+          for (const key of ownEnumerableKeys(source))
+            obj[key] = (source as Record<PropertyKey, unknown>)[key];
         }
 
         continue;
@@ -4874,8 +4889,8 @@ export class Runtime {
         const source = yield* this.evalAsyncExpr(prop.argument, env);
 
         if (source != null && (typeof source === "object" || typeof source === "function")) {
-          for (const key of Object.keys(source))
-            obj[key] = (source as Record<string, unknown>)[key];
+          for (const key of ownEnumerableKeys(source))
+            obj[key] = (source as Record<PropertyKey, unknown>)[key];
         }
 
         continue;
@@ -5012,22 +5027,22 @@ export class Runtime {
 
     // oxlint-disable-next-line unicorn/new-for-builtins -- ToObject conversion
     const source = Object(value) as Record<PropertyKey, unknown>;
-    const taken = new Set<string>();
+    const taken = new Set<PropertyKey>();
 
     for (const prop of target.props) {
       const key = prop.computed
         ? toPropertyKey(yield* this.evalAsyncExpr(prop.key as Expression, env))
         : (prop.key as string);
 
-      if (typeof key === "string") taken.add(key);
+      taken.add(key);
       if (prop.value != null)
         yield* this.evalAsyncAssignTo(prop.value, source[key], env, initialize);
     }
 
     if (target.rest != null) {
-      const rest: Record<string, unknown> = {};
+      const rest: Record<PropertyKey, unknown> = {};
 
-      for (const key of Object.keys(source)) if (!taken.has(key)) rest[key] = source[key];
+      for (const key of ownEnumerableKeys(source)) if (!taken.has(key)) rest[key] = source[key];
 
       yield* this.evalAsyncAssignTo(target.rest.argument, rest, env, initialize);
     }
