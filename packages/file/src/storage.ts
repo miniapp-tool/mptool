@@ -23,7 +23,17 @@ logger.debug(`Current sessionId is ${sessionId}`);
 
 const CACHE_PREFIX = "_cache_";
 
-/** 存储 */
+/**
+ * In-memory store used by {@link put} / {@link take}
+ *
+ * This Map is **independent** from the persisted storage used by {@link set} / {@link get}: it
+ * lives for the current session only and is never written to `wx` storage. Keys of the two stores
+ * are not synchronized automatically, except that `remove` / `removeAsync` / `check` also drop the
+ * matching in-memory entry so a stale value cannot survive a removal.
+ *
+ * {@link put} / {@link take} 使用的内存存储。它与 `set` / `get` 的持久化存储相互独立，仅本次会话有效，不会写入 wx storage；`remove` /
+ * `removeAsync` / `check` 会同时清理同名的内存值，避免删除后仍能 `take` 到残留数据。
+ */
 export const storage: Map<string, unknown> = new Map<string, unknown>();
 
 /**
@@ -267,7 +277,8 @@ export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
  */
 export const remove = (key: string): void => {
   wx.removeStorageSync(`${CACHE_PREFIX}${key}`);
-  getData(key, null);
+  // Keep the two stores consistent: a removed key must not be readable through `take()` either
+  storage.delete(key);
 };
 
 /**
@@ -277,10 +288,18 @@ export const remove = (key: string): void => {
  * @param option 回调函数
  * @returns 异步回调结果
  */
-export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallbackResult> =>
-  wx.removeStorage({
+export const removeAsync = async (
+  key: string,
+): Promise<WechatMiniprogram.GeneralCallbackResult> => {
+  const result = await wx.removeStorage({
     key: `${CACHE_PREFIX}${key}`,
   });
+
+  // Keep the two stores consistent: a removed key must not be readable through `take()` either
+  storage.delete(key);
+
+  return result;
+};
 
 /**
  * 清除失效数据
@@ -294,7 +313,10 @@ export const check = (): void => {
     const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
     // Drop corrupt values and expired ones / 清除损坏与已过期的值
-    if (!value || isExpired(value)) wx.removeStorageSync(key);
+    if (!value || isExpired(value)) {
+      wx.removeStorageSync(key);
+      storage.delete(key.slice(CACHE_PREFIX.length));
+    }
   });
 };
 
@@ -315,7 +337,10 @@ export const checkAsync = async (): Promise<void> => {
           const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
 
           // Drop corrupt values and expired ones / 清除损坏与已过期的值
-          if (!data || isExpired(data)) await wx.removeStorage({ key });
+          if (!data || isExpired(data)) {
+            await wx.removeStorage({ key });
+            storage.delete(key.slice(CACHE_PREFIX.length));
+          }
         } catch {
           // The key can disappear between `getStorageInfo` and `getStorage` (another context
           // cleared the cache, or the entry expired); treat it as already cleaned up.
