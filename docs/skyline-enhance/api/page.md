@@ -74,13 +74,15 @@ Skyline 模式下页面在**首次跳转时**才现场注册，因此本包不�
 
 ### $state
 
-- 类型: `Record<string, any>`
+- 类型: `PageState & Record<string, unknown>`
 
 框架生成的页面状态。
 
-::: tip
+::: tip 每个实例独立
 
-你可以考虑将部分自定义扩展的数据注入到此处。
+每个页面实例都会在 `onLoad` 时得到一份独立的 `$state`（以页面定义上的状态为初始值），因此可以安全地读写业务数据，同一页面的多个实例之间不会互相影响。
+
+Skyline 版本没有 `onAppLaunch` / `onPreload` / `onNavigate`，实例创建前不会由框架写入任何状态。
 
 :::
 

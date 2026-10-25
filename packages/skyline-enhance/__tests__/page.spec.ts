@@ -11,9 +11,47 @@ type MyPageOptions = WechatMiniprogram.Page.Options<
   WechatMiniprogram.IAnyObject
 >;
 
+interface PageState {
+  firstOpen: boolean;
+  [key: string]: unknown;
+}
+
+interface PageStateInstance {
+  $state?: PageState;
+}
+
+interface CapturedPageOptions extends MyPageOptions {
+  $state?: PageState;
+}
+
+// Load a fresh `$Page` / `$Config` pair so `firstOpen` is isolated per test
+const loadFreshPage = async (): Promise<{
+  $Config: typeof $Config;
+  $Page: typeof $Page;
+}> => {
+  vi.resetModules();
+
+  const [{ $Config: freshConfig }, { $Page: freshPage }] = await Promise.all([
+    import("../src/config/index.js"),
+    import("../src/page/index.js"),
+  ]);
+
+  return { $Config: freshConfig, $Page: freshPage };
+};
+
+// Run one page instance through the wrapped `onLoad` and return the state it created
+const loadPageState = (options: CapturedPageOptions | undefined): PageState => {
+  const instance: PageStateInstance = {};
+
+  if (options?.onLoad) void Reflect.apply(options.onLoad, instance, [{}]);
+
+  // the wrapped `onLoad` always creates the instance state
+  return instance.$state!;
+};
+
 describe($Page, () => {
-  const capturePageOptions = (): (() => MyPageOptions | undefined) => {
-    let pageOptions: MyPageOptions | undefined;
+  const capturePageOptions = (): (() => CapturedPageOptions | undefined) => {
+    let pageOptions: CapturedPageOptions | undefined;
 
     (globalThis as any).Page = (options: any): void => {
       pageOptions = options;
@@ -22,28 +60,61 @@ describe($Page, () => {
     return () => pageOptions;
   };
 
-  it("should mark the first page as firstOpen", () => {
-    $Config({ defaultPage: "/pages/$name" });
+  it("should mark the first page instance as firstOpen", async () => {
+    const { $Config: freshConfig, $Page: freshPage } = await loadFreshPage();
+
+    freshConfig({ defaultPage: "/pages/$name" });
 
     const getOptions = capturePageOptions();
 
-    $Page("index", {});
+    freshPage("index", {});
 
-    void getOptions()?.onLoad?.({});
-
-    expect(getOptions()?.$state.firstOpen).toBe(true);
+    expect(loadPageState(getOptions()).firstOpen).toBe(true);
   });
 
-  it("should not mark later pages as firstOpen", () => {
-    $Config({ defaultPage: "/pages/$name" });
+  it("should not mark later page instances as firstOpen", async () => {
+    const { $Config: freshConfig, $Page: freshPage } = await loadFreshPage();
+
+    freshConfig({ defaultPage: "/pages/$name" });
 
     const getOptions = capturePageOptions();
 
-    $Page("channel", {});
+    freshPage("index", {});
+    const firstState = loadPageState(getOptions());
 
-    void getOptions()?.onLoad?.({});
+    freshPage("channel", {});
+    const secondState = loadPageState(getOptions());
 
-    expect(getOptions()?.$state.firstOpen).toBe(false);
+    expect(firstState.firstOpen).toBe(true);
+    expect(secondState.firstOpen).toBe(false);
+  });
+
+  it("should give every page instance its own $state", async () => {
+    const { $Config: freshConfig, $Page: freshPage } = await loadFreshPage();
+
+    freshConfig({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    freshPage("index", {});
+
+    const options = getOptions()!;
+
+    // Data written by the pre-instance lifecycles (which run with the page options as `this`) must
+    // be inherited by the instance.
+    options.$state = { firstOpen: false, preloaded: "yes" };
+
+    const firstState = loadPageState(options);
+    const secondState = loadPageState(options);
+
+    expect(firstState).not.toBe(secondState);
+    expect(firstState.preloaded).toBe("yes");
+    expect(secondState.preloaded).toBe("yes");
+
+    firstState.custom = "first";
+
+    expect(firstState.custom).toBe("first");
+    expect(secondState.custom).toBeUndefined();
   });
 
   it("should unregister onAwake listener on unload", () => {
