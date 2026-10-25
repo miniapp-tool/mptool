@@ -1,4 +1,4 @@
-import { Runtime } from "./interpreter.js";
+import { ASYNC_UNSUPPORTED_MESSAGE, Runtime } from "./interpreter.js";
 import { parse } from "./parser.js";
 
 /**
@@ -139,12 +139,15 @@ export const run = (code: string, options?: RunOptions): RunResult => {
  * @returns Run result / 运行结果
  */
 export const runSync = (code: string, options?: RunOptions): unknown => {
-  const result = run(code, options);
+  const runtime = new Runtime({ ...options, forbidAsync: true });
+  const { value, asyncStarted } = runtime.runWithStatus(parse(code, runtime.features));
 
-  if (result instanceof Promise)
-    throw new Error("The code triggered async operations, which runSync does not support");
+  // only a real async invocation is rejected; a synchronous value that happens to be a Promise
+  // (`Promise.resolve(1)`, `new Promise(() => {})`, ...) is a normal return value
+  // 仅真正调用 async 函数时报错；同步代码返回的 Promise 值（`Promise.resolve(1)` 等）属于普通返回值
+  if (asyncStarted) throw new Error(ASYNC_UNSUPPORTED_MESSAGE);
 
-  return result;
+  return value;
 };
 
 /**

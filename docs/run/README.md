@@ -46,7 +46,7 @@ fn(1, 2); // 3
 
 ### `runSync(code, options?): unknown`
 
-同步执行，代码触发 async 时抛出 `Error`。
+同步执行，代码触发 async 时抛出 `Error`。若代码本身完全同步、只是返回值是 Promise（如 `Promise.resolve(1)`、`new Promise(() => {})`），该 Promise 会作为普通返回值原样返回。
 
 ### `createSandbox(options?): Sandbox`
 

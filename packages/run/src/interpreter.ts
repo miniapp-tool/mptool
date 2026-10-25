@@ -102,7 +102,25 @@ export interface RuntimeOptions {
 
   /** Feature toggles / 特性开关 */
   features?: Partial<FeatureOptions>;
+
+  /**
+   * Reject async function invocation synchronously instead of starting the async runner, used by
+   * `runSync` so a synchronous run never leaves a pending async chain behind
+   *
+   * 同步拒绝 async 函数调用（不启动 async 运行器），供 `runSync` 使用，避免同步运行留下挂起的 async 链
+   *
+   * @internal
+   */
+  forbidAsync?: boolean;
 }
+
+/**
+ * Error message used when async code is executed through a synchronous API.
+ *
+ * 同步 API 执行 async 代码时使用的错误信息。
+ */
+export const ASYNC_UNSUPPORTED_MESSAGE =
+  "The code triggered async operations, which runSync does not support";
 
 /** Default feature flags / 默认特性开关 */
 const DEFAULT_FEATURES: FeatureOptions = {
@@ -569,6 +587,9 @@ export class Runtime {
   /** Current call stack depth / 当前调用栈深度 */
   stackDepth = 0;
 
+  /** Whether an async function was invoked during the current run / 本次 run 是否调用过 async 函数 */
+  asyncStarted = false;
+
   /**
    * Pending async operation count — extension point for the future async round / 挂起的 async 操作计数——后续
    * async 轮次的扩展点
@@ -581,6 +602,9 @@ export class Runtime {
   /** Routing callback passed to interpreter function wrappers / 传给解释器函数包装的路由回调 */
   private readonly invokeHandler: InterpreterInvoke;
 
+  /** Whether async invocation is rejected synchronously / 是否同步拒绝 async 调用 */
+  private readonly forbidAsync: boolean;
+
   /** @param options - Runtime options / 运行时选项 */
   constructor(options: RuntimeOptions = {}) {
     this.features = {
@@ -592,6 +616,7 @@ export class Runtime {
     this.strict = options.strict ?? false;
     this.maxSteps = options.maxSteps ?? 1_000_000;
     this.maxStack = options.maxStack ?? 512;
+    this.forbidAsync = options.forbidAsync ?? false;
 
     this.globalObject = {};
     this.globalEnv = new Environment(null, true, this.globalObject);
@@ -641,8 +666,21 @@ export class Runtime {
    * @returns The completion value (value of the last expression statement) / 完成值（最后一条表达式语句的值）
    */
   run(program: Program): unknown {
+    return this.runWithStatus(program).value;
+  }
+
+  /**
+   * Execute a parsed program and report whether async code was started.
+   *
+   * 执行已解析的 program，并报告是否启动过 async 代码。
+   *
+   * @param program - The parsed program / 已解析的 program
+   * @returns The completion value and the async flag / 完成值与 async 标记
+   */
+  runWithStatus(program: Program): { value: unknown; asyncStarted: boolean } {
     this.stepCount = 0;
     this.stackDepth = 0;
+    this.asyncStarted = false;
     this.contextStack.length = 0;
     this.contextStack.push({
       thisRef: { value: this.strict ? void 0 : this.globalObject },
@@ -666,7 +704,7 @@ export class Runtime {
         throw err;
       }
 
-      return completion;
+      return { value: completion, asyncStarted: this.asyncStarted };
     } finally {
       this.contextStack.length = 0;
     }
@@ -2804,6 +2842,10 @@ export class Runtime {
     // async 函数总是返回宿主 Promise（由 async 运行器驱动）；构造 async 函数同步抛错（无 [[Construct]]）
     if (meta.isAsync) {
       if (isConstruct) throw new TypeError(`${meta.name ?? "function"} is not a constructor`);
+
+      this.asyncStarted = true;
+
+      if (this.forbidAsync) throw new Error(ASYNC_UNSUPPORTED_MESSAGE);
 
       return this.asyncInvoke(meta, args, thisArg);
     }
