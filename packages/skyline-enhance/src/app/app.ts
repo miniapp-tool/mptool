@@ -1,23 +1,12 @@
 import { logger, wrapFunction } from "@mptool/shared";
 
-import { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
+import { ON_APP_AWAKE } from "../constant.js";
 import { appEmitter, userEmitter } from "../emitter/index.js";
 import type { AppConstructor, AppOptions } from "./typings.js";
 
 export const appState = {
-  /** 是否已启动 */
-  launch: false,
-  /** 启动参数 */
-  lOpt: {},
   /** 切入后台时的时间戳 */
   hide: 0,
-};
-
-const appLaunchHandler = (options: WechatMiniprogram.App.LaunchShowOption): void => {
-  appState.launch = true;
-  appState.lOpt = options;
-
-  appEmitter.emit(ON_APP_LAUNCH, options);
 };
 
 const appShowHandler = (): void => {
@@ -42,7 +31,6 @@ const appHideHandler = (): void => {
 export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject>(
   appOptions: AppOptions<Custom>,
 ): void => {
-  appOptions.onLaunch = wrapFunction(appOptions.onLaunch, appLaunchHandler);
   appOptions.onShow = wrapFunction(appOptions.onShow, appShowHandler);
   appOptions.onHide = wrapFunction(appOptions.onHide, appHideHandler);
 

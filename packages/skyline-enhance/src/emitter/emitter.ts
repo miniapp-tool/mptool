@@ -1,10 +1,9 @@
 import type { EmitterInstance } from "@mptool/shared";
 import { Emitter } from "@mptool/shared";
 
-import type { ON_APP_AWAKE, ON_APP_LAUNCH } from "../constant.js";
+import type { ON_APP_AWAKE } from "../constant.js";
 
 export interface AppEventType {
-  [ON_APP_LAUNCH]: WechatMiniprogram.App.LaunchShowOption;
   [ON_APP_AWAKE]: number;
 }
 

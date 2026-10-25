@@ -12,8 +12,10 @@ describe($App, () => {
     expect(frameworkApi.app).toBeDefined();
   });
 
-  it("should set launch state on onLaunch", () => {
-    $App({});
+  it("should keep the user onLaunch callback untouched", () => {
+    const onLaunch = vi.fn<(options: WechatMiniprogram.App.LaunchShowOption) => void>();
+
+    $App({ onLaunch });
 
     const app = frameworkApi.app as WechatMiniprogram.App.Options<WechatMiniprogram.IAnyObject>;
 
@@ -25,7 +27,8 @@ describe($App, () => {
       referrerInfo: {},
     } as WechatMiniprogram.App.LaunchShowOption);
 
-    expect(appState.launch).toBe(true);
+    // skyline-enhance has no onAppLaunch lifecycle, so onLaunch is not wrapped
+    expect(onLaunch).toHaveBeenCalledTimes(1);
   });
 
   it("should register onAwake listener", () => {
