@@ -193,6 +193,11 @@ export const runSync = (code: string, options?: RunOptions): unknown => {
  *
  * 创建可复用沙箱（共享全局环境）
  *
+ * Runs are strictly sequential: calling `run()` again before the previous run (and any Promise it
+ * returned) finishes throws, because concurrent runs would share one execution state.
+ *
+ * 串行执行：上一次 `run()`（以及它返回的 Promise）结算前再次调用 `run()` 会抛错，因为并发运行会共享同一份执行状态。
+ *
  * @param options - Interpreter options / 解释器选项
  * @returns Sandbox instance / 沙箱实例
  */

@@ -290,6 +290,7 @@ installGlobal();
 - 代码含 async 时 `run()` 返回 `Promise`；`runSync()` 抛错
 - 微信端 Promise 时序：基础库 3.8.2 基线（iOS 14 ≤ 15）以 `setTimeout` 模拟 Promise（宏任务），async 时序与标准不同；iOS 16+ 无差异
 - **有意扩展**：async 函数内的非 async 箭头继承 async 上下文，`() => await p` 在 async 体内合法（标准引擎会拒绝）
+- **串行契约**：`createSandbox` 返回的 sandbox 必须串行使用——上一次 `run()`（及其返回的 Promise）结算前再次调用会抛 `Runtime is not reentrant` 错误；需要并发执行请使用多个 sandbox 或 `run()`。
 
 ## 平台要求
 
