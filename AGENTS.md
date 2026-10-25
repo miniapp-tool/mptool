@@ -60,6 +60,7 @@ mptool/
 ├── demo/                # Demo mini-app (workspace dep on @mptool/all; `build` type-checks it, `demo:build` emits JS)
 ├── docs/                # VuePress site (guide / enhance / skyline-enhance / net / file / api / parser / run / mock)
 ├── .github/workflows/   # test.yml, docs-check.yml, docs.yml, publish.yml, codeql-analysis.yml, scraper.yml
+├── __tests__/           # Cross-package invariant tests (package metadata)
 ├── vitest.config.ts     # Coverage (istanbul) + typecheck
 ├── tsconfig.json        # Extends @mr-hope/tsconfig/check.json, isolatedDeclarations
 ├── oxlint.config.ts / oxfmt.config.ts
@@ -68,7 +69,7 @@ mptool/
 └── .ncurc.js            # npm-check-updates options
 ```
 
-Each package directory contains: `package.json` (`exports` → `dist/`, `files: ["dist"]`), `tsdown.config.mts` (built on `scripts/tsdown.ts`), `README.md`, `LICENSE`, `CHANGELOG.md`, `src/` (entry `src/index.ts`) and `__tests__/` (`*.spec.ts`; type tests `*.spec-d.ts` exist in `shared`, `net`, `enhance` and `skyline-enhance`).
+Each package directory contains: `package.json` (`exports` → `dist/`, `main` / `module` → `./dist/index.js` as a fallback for tooling that ignores `exports`, `files: ["dist"]`), `tsdown.config.mts` (built on `scripts/tsdown.ts`), `README.md`, `LICENSE`, `CHANGELOG.md`, `src/` (entry `src/index.ts`) and `__tests__/` (`*.spec.ts`; type tests `*.spec-d.ts` exist in `shared`, `net`, `enhance` and `skyline-enhance`).
 
 Generated / ignored paths: `dist/`, `coverage/`, `docs/.vuepress/{cache,temp,dist}`, `demo/**/*.js` (compiled demo output), `node_modules/`. Do not edit or commit these.
 
@@ -197,7 +198,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - Coverage: istanbul provider, enabled by default, scope `packages/*/src/**/*.ts`. **No coverage threshold is configured** — coverage is uploaded to Codecov from CI (`.github/workflows/test.yml` on `main`), so do not claim specific coverage percentages in docs.
 - Type checking: `pnpm run typecheck` runs `tsc -p tsconfig.json --noEmit` over the whole repo (sources, tests and `*.spec-d.ts` type tests). Like the tests it needs a completed `build`, because workspace packages resolve through their generated `dist/`.
 - Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/shared/__tests__/`, `packages/net/__tests__/`, `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
-- Test layout: `packages/<pkg>/__tests__/<name>.spec.ts`. `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
+- Test layout: `packages/<pkg>/__tests__/<name>.spec.ts` for package tests, plus `__tests__/package-metadata.spec.ts` at the repository root for cross-package invariants (entry points, `files`, version sync with `lerna.json`). `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
 - `@mptool/mock` is imported for its side effect: it installs `globalThis.wx` and the mini-program framework mocks before tests run.
 - CI gate order in `.github/workflows/test.yml`: install → `pnpm run sync:check` → `pnpm run build` → `git diff --exit-code` → `pnpm run lint:check` → `pnpm run typecheck` → `pnpm run test` → Codecov upload.
 
