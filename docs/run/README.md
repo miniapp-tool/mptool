@@ -261,15 +261,17 @@ installGlobal();
 
 ### 全局 API
 
-| 内容                                   | 说明                                    |
-| -------------------------------------- | --------------------------------------- |
-| `Function` 构造器                      | 不暴露，使用 `createFunction` 替代      |
-| `eval`                                 | 不暴露，使用 `run` 替代                 |
-| `Proxy`                                | 不暴露                                  |
-| `console`、`wx`、`setTimeout` 等       | 不暴露，通过 `options.globals` 显式注入 |
-| `Function.caller` / `arguments.caller` | 禁用                                    |
+| 内容                                   | 说明                                                                         |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `Function` 构造器                      | 不暴露，使用 `createFunction` 替代；`global: true` 也不会注入宿主 `Function` |
+| `eval`                                 | 不暴露，使用 `run` 替代；`global: true` 也不会注入宿主 `eval`                |
+| `Proxy`                                | 不暴露                                                                       |
+| `console`、`wx`、`setTimeout` 等       | 不暴露，通过 `options.globals` 显式注入                                      |
+| `Function.caller` / `arguments.caller` | 禁用                                                                         |
 
 ### 已知差异
+
+**全局对象**：沙箱全局对象继承 `Object.prototype`，因此 `toString`、`hasOwnProperty`、`constructor` 等可作为全局标识符访问（顶层 `let`/`const` 仍可遮蔽它们）；`global: true` 注入宿主全局时会跳过 `eval` 与 `Function`。
 
 错误路径只保证「能抛错」，错误类型与消息可能与标准引擎不同。例如顶层 `super.x` 在 Node 抛 `SyntaxError`、在本解释器抛 `ReferenceError`；基类方法内使用 `super`，Node 读取 `Object.prototype`、本解释器报错。
 

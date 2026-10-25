@@ -71,7 +71,13 @@ export class Environment {
    * @returns Whether it exists / 是否存在
    */
   has(name: string): boolean {
-    return this.hasOwn(name) || (this.parent != null && this.parent.has(name));
+    if (this.hasOwn(name)) return true;
+
+    // the global environment also sees inherited properties of the sandbox global object
+    // 全局环境还会看到沙箱全局对象的继承属性（如 Object.prototype 上的 toString）
+    if (this.globalObject != null && name in this.globalObject) return true;
+
+    return this.parent != null && this.parent.has(name);
   }
 
   /**
@@ -111,8 +117,7 @@ export class Environment {
       return binding.value;
     }
 
-    if (this.globalObject != null && Object.hasOwn(this.globalObject, name))
-      return this.globalObject[name];
+    if (this.globalObject != null && name in this.globalObject) return this.globalObject[name];
 
     if (this.parent != null) return this.parent.get(name);
 
@@ -148,7 +153,7 @@ export class Environment {
       return true;
     }
 
-    if (this.globalObject != null && Object.hasOwn(this.globalObject, name)) {
+    if (this.globalObject != null && name in this.globalObject) {
       this.globalObject[name] = value;
 
       return true;
