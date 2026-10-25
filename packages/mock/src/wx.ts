@@ -130,6 +130,11 @@ const wxMock: {
 // object; direct assignment (e.g. `wx.request = vi.fn()`) still takes precedence over the rules.
 instrumentWx(wxMock);
 
+/** Instrumented `wx` functions, used by `mockWx` scopes to restore replaced APIs. */
+export const wxApiWrappers: ReadonlyMap<string, unknown> = new Map(
+  Object.entries(wxMock).filter(([, value]) => typeof value === "function"),
+);
+
 (globalThis as typeof globalThis & { wx: typeof wxMock }).wx = wxMock;
 
 export const wx: typeof wxMock = wxMock;

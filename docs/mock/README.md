@@ -53,7 +53,7 @@ const task = wx.request({
 task.abort();
 ```
 
-> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；模拟真实网络延迟仍属于后续版本的能力。
+> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；`respond()` / `route()` 支持 `delay` 模拟慢响应（`wx.request` 自身 `option.timeout` 的自然超时仍属于后续版本的能力）。
 
 任务还提供 `onHeadersReceived` / `offHeadersReceived`（在 `success` 之前触发）以及 `onChunkReceived` / `offChunkReceived`（mock 不会产生数据分片，仅保证接口可用）。
 
@@ -113,8 +113,8 @@ wx.getStorageSync("key"); // throws: setStorage:fail exceed storage max size
 | `throw`      | 同步 API 抛出指定 `Error` | -                                                                                 |
 
 > 回调式 API：`fail` 与 `complete` 会被调用；未传回调的 Promise 风格调用会 reject。
-> 任务式 API（`wx.request`）：返回真实的 `RequestTask`，失败通过 `fail` 回调投递。
-> 事件 / 管理器 / 无参 API 不支持注入，注册规则时会直接报错。
+> 任务式 API（`wx.request` / `wx.downloadFile` / `wx.uploadFile` / `wx.connectSocket`）：返回任务对象，失败通过 `fail` 回调投递。
+> 管理器 API 不支持失败注入，但可以用 `respond()` 替换返回的管理器对象；事件 / 无参 API 的规则会在注册时直接报错。
 
 ### 注入响应
 
@@ -134,9 +134,13 @@ mockWx.route({
   "POST https://api.example.com/pay": { statusCode: 502, data: { error: "bad gateway" } },
   // 正则（可带 flags）
   "/^https:\\/\\/api\\.example\\.com\\/v\\d+\\//": { statusCode: 204 },
-  // 路由到失败
-  "GET https://api.example.com/slow": { type: "timeout" },
+  // 单个响应可指定延迟；也可以直接路由到失败
+  "GET https://api.example.com/slow": { delay: 100, statusCode: 200 },
+  "GET https://api.example.com/offline": { type: "timeout" },
 });
+
+// 管理器 API 可以整体替换返回值（失败注入不支持管理器）
+mockWx.respond("getUpdateManager", fakeUpdateManager);
 ```
 
 未命中的请求会落回 mock 的默认响应（`wx.request` 为 `statusCode: 200`、空 body）。

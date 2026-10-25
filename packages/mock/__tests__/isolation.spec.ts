@@ -220,6 +220,32 @@ describe("mockWx isolation", () => {
     expect((await callApi("getNetworkType")).ok).toBe(false);
   });
 
+  it("scope() should restore APIs replaced inside the scope", () => {
+    const original = wx.getNetworkType;
+    const manual = vi.fn<(option: unknown) => void>();
+
+    const scope = mockWx.scope();
+
+    wx.getNetworkType = manual;
+    wx.getNetworkType({});
+    expect(manual).toHaveBeenCalledTimes(1);
+
+    scope.restore();
+
+    expect(wx.getNetworkType).toBe(original);
+  });
+
+  it("reset() should restore APIs replaced by tests", () => {
+    const original = wx.getNetworkType;
+    const manual = vi.fn<(option: unknown) => void>();
+
+    wx.getNetworkType = manual;
+
+    mockWx.reset();
+
+    expect(wx.getNetworkType).toBe(original);
+  });
+
   it("should stay compatible with vi.spyOn", () => {
     const spy = vi.spyOn(wx, "getStorageSync");
 

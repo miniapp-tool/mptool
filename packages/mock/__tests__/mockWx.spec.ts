@@ -286,4 +286,129 @@ describe("mockWx control plane", () => {
       expect(listener).toHaveBeenCalledWith({ theme: "dark" });
     });
   });
+
+  describe("failure mapping", () => {
+    const catchFailure = (): unknown => {
+      try {
+        wx.getStorageSync("key");
+      } catch (err) {
+        return err;
+      }
+
+      return null;
+    };
+
+    it.each([
+      [{ type: "network" } as const, "getStorageSync:fail"],
+      [{ type: "timeout" } as const, "getStorageSync:fail timeout"],
+      [{ type: "abort" } as const, "getStorageSync:fail abort"],
+      [{ type: "quota" } as const, "setStorage:fail exceed storage max size"],
+      [{ type: "cancel" } as const, "getStorageSync:fail cancel"],
+      [{ type: "permission" } as const, "getStorageSync:fail permission denied"],
+      [{ errMsg: "custom failure", type: "fail" } as const, "custom failure"],
+    ])("should map %j to the expected errMsg", (failure, errMsg) => {
+      mockWx.failNext("getStorageSync", failure);
+
+      expect(catchFailure()).toMatchObject({ errMsg });
+    });
+
+    it("should attach errCode for noent and permission failures", () => {
+      mockWx.failNext("getStorageSync", { path: "a.txt", type: "noent" });
+      expect(catchFailure()).toMatchObject({ errCode: 1300002, errMsg: /no such file/u });
+
+      mockWx.failNext("getStorageSync", { type: "permission" });
+      expect(catchFailure()).toMatchObject({ errCode: 1300014 });
+    });
+
+    it("should reject the provided error for throw failures", () => {
+      const error = new Error("boom");
+
+      mockWx.failNext("getStorageSync", { error, type: "throw" });
+
+      expect(catchFailure()).toBe(error);
+    });
+  });
+
+  describe("task APIs", () => {
+    it("should return a task-shaped object when downloadFile fails", async () => {
+      mockWx.failNext("downloadFile", { type: "network" });
+
+      const fail = vi.fn<(result: { errMsg: string }) => void>();
+      const task = wx.downloadFile({ fail, url: "https://example.com/file" }) as unknown as {
+        onProgressUpdate?: unknown;
+      };
+
+      expect(task).toBeTypeOf("object");
+      expect(task.onProgressUpdate).toBeTypeOf("function");
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 5);
+      });
+
+      expect(fail).toHaveBeenCalledWith({ errMsg: "downloadFile:fail" });
+    });
+
+    it("should return a task-shaped object when respond() replaces a downloadFile result", async () => {
+      mockWx.respond("downloadFile", { statusCode: 200, tempFilePath: "mock://tmp/file" });
+
+      const success = vi.fn<(result: { tempFilePath?: string }) => void>();
+      const task = wx.downloadFile({ success, url: "https://example.com/file" });
+
+      expect(task).toBeTypeOf("object");
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 5);
+      });
+
+      expect(success).toHaveBeenCalledWith({ statusCode: 200, tempFilePath: "mock://tmp/file" });
+    });
+  });
+
+  describe("manager APIs", () => {
+    it("should allow respond() to replace a manager", () => {
+      const manager = { onCheckForUpdate: vi.fn<() => void>() };
+
+      mockWx.respond("getUpdateManager", manager);
+
+      expect(wx.getUpdateManager()).toBe(manager);
+    });
+
+    it("should still reject failures on manager APIs", () => {
+      expect(() => mockWx.fail("getUpdateManager", { type: "network" })).toThrow(/manager/u);
+    });
+  });
+
+  describe("timing", () => {
+    it("should honour the per-response delay", async () => {
+      vi.useFakeTimers();
+
+      try {
+        const success = vi.fn<(result: { statusCode: number }) => void>();
+
+        mockWx.respond("request", { data: { ok: true }, delay: 20, statusCode: 200 });
+        wx.request({ success, url: "https://example.com/api" });
+
+        await vi.advanceTimersByTimeAsync(10);
+        expect(success).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(10);
+        expect(success).toHaveBeenCalledTimes(1);
+        expect(success).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 200 }));
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  describe("reset", () => {
+    it("should clear the call log", () => {
+      void wx.getNetworkType({});
+      expect(mockWx.calls("getNetworkType")).toHaveLength(1);
+
+      mockWx.reset();
+
+      expect(mockWx.calls("getNetworkType")).toHaveLength(0);
+      expect(mockWx.calls("getFileSystemManager")).toHaveLength(0);
+    });
+  });
 });

@@ -14,6 +14,28 @@ interface CallbackOption {
 }
 
 type AnyFunction = (...args: unknown[]) => unknown;
+type TaskListener = (result?: unknown) => void;
+
+/** Superset of the task methods used by request / download / upload / socket APIs. */
+export interface MockInjectedTask {
+  abort: () => void;
+  close: () => void;
+  offChunkReceived: (listener?: TaskListener) => void;
+  offClose: (listener?: TaskListener) => void;
+  offError: (listener?: TaskListener) => void;
+  offHeadersReceived: (listener?: TaskListener) => void;
+  offMessage: (listener?: TaskListener) => void;
+  offOpen: (listener?: TaskListener) => void;
+  offProgressUpdate: (listener?: TaskListener) => void;
+  onChunkReceived: (listener: TaskListener) => void;
+  onClose: (listener: TaskListener) => void;
+  onError: (listener: TaskListener) => void;
+  onHeadersReceived: (listener: TaskListener) => void;
+  onMessage: (listener: TaskListener) => void;
+  onOpen: (listener: TaskListener) => void;
+  onProgressUpdate: (listener: TaskListener) => void;
+  send: () => void;
+}
 
 /** Everything needed to inject one call. */
 interface Injection {
@@ -49,18 +71,140 @@ const later = (callback: () => void, delay: number): void => {
   setTimeout(callback, delay);
 };
 
+/** Use the per-response `delay` when present and strip it from the response payload. */
+const splitResponseDelay = (
+  value: unknown,
+  fallback: number,
+): { delay: number; result: unknown } => {
+  if (typeof value !== "object" || value == null) return { delay: fallback, result: value };
+
+  const { delay } = value as { delay?: unknown };
+
+  if (typeof delay !== "number") return { delay: fallback, result: value };
+
+  const result = { ...(value as Record<string, unknown>) };
+
+  delete result.delay;
+
+  return { delay, result };
+};
+
 const deliverSuccess = (injection: Injection, option: CallbackOption, result: unknown): void => {
   option.success?.(result);
   option.complete?.({ errMsg: `${injection.api}:ok` });
 };
 
+const createListenerSlot = (): {
+  clear: () => void;
+  off: (listener?: TaskListener) => void;
+  on: (listener: TaskListener) => void;
+} => {
+  const listeners = new Set<TaskListener>();
+
+  return {
+    clear(): void {
+      listeners.clear();
+    },
+    off(listener?: TaskListener): void {
+      if (listener) listeners.delete(listener);
+      else listeners.clear();
+    },
+    on(listener: TaskListener): void {
+      listeners.add(listener);
+    },
+  };
+};
+
+/**
+ * Create a task-shaped object for download / upload / socket failure injection.
+ *
+ * The mock in PR-1 does not emit progress or socket events for these APIs; the task only keeps the
+ * real shape so code such as `wx.downloadFile(...).onProgressUpdate(...)` keeps working.
+ */
+const createInjectedTask = (
+  api: string,
+  option: CallbackOption | undefined,
+): { settle: () => boolean; task: MockInjectedTask } => {
+  const chunk = createListenerSlot();
+  const close = createListenerSlot();
+  const error = createListenerSlot();
+  const headers = createListenerSlot();
+  const message = createListenerSlot();
+  const open = createListenerSlot();
+  const progress = createListenerSlot();
+  let settled = false;
+
+  const task: MockInjectedTask = {
+    abort(): void {
+      if (settled) return;
+
+      settled = true;
+
+      later(() => {
+        option?.fail?.({ errMsg: `${api}:fail abort` });
+        option?.complete?.({ errMsg: `${api}:fail abort` });
+      }, 0);
+    },
+    close(): void {
+      // noop
+    },
+    offChunkReceived: chunk.off,
+    offClose: close.off,
+    offError: error.off,
+    offHeadersReceived: headers.off,
+    offMessage: message.off,
+    offOpen: open.off,
+    offProgressUpdate: progress.off,
+    onChunkReceived: chunk.on,
+    onClose: close.on,
+    onError: error.on,
+    onHeadersReceived: headers.on,
+    onMessage: message.on,
+    onOpen: open.on,
+    onProgressUpdate: progress.on,
+    send(): void {
+      // noop
+    },
+  };
+
+  return {
+    settle(): boolean {
+      if (settled) return false;
+
+      settled = true;
+
+      return true;
+    },
+    task,
+  };
+};
+
+const createRequestInjection = (injection: Injection): MockRequestOption | undefined =>
+  injection.arg as MockRequestOption | undefined;
+
 /** Inject a failure into `wx.request`. */
 const failRequest = (injection: Injection, failure: WxFailure): unknown => {
-  const { fail, task } = createRequestTask(injection.arg as MockRequestOption | undefined);
+  const { fail, task } = createRequestTask(createRequestInjection(injection));
   const { errMsg } = createFailureResult(injection.api, failure);
 
   later(() => {
     fail(errMsg);
+  }, injection.delay);
+
+  return task;
+};
+
+/** Inject a failure into a task API other than `wx.request` (download / upload / socket). */
+const failTask = (injection: Injection, failure: WxFailure): unknown => {
+  const option = injection.arg as CallbackOption | undefined;
+  const result = createFailureResult(injection.api, failure);
+  const { settle, task } = createInjectedTask(injection.api, option);
+
+  later(() => {
+    if (!settle()) return;
+
+    option?.fail?.(result);
+    option?.complete?.(result);
   }, injection.delay);
 
   return task;
@@ -89,22 +233,45 @@ const failCallback = (injection: Injection, failure: WxFailure): unknown => {
 
 /** Replace the success payload of `wx.request`. */
 const respondRequest = (injection: Injection, responder: WxResponder): unknown => {
-  const { schedule, task } = createRequestTask(injection.arg as MockRequestOption | undefined);
+  const { schedule, task } = createRequestTask(createRequestInjection(injection));
   const value = resolveResponder(responder, injection);
+  const deliver = (response: unknown): void => {
+    const { delay, result } = splitResponseDelay(response, injection.delay);
+
+    schedule(delay, result as Partial<MockRequestResult>);
+  };
 
   if (value instanceof Promise) {
-    void value
-      .then((result) => {
-        schedule(injection.delay, result as Partial<MockRequestResult>);
-      })
-      .catch(() => {
-        schedule(injection.delay, {});
-      });
+    void value.then(deliver).catch(() => {
+      schedule(injection.delay, {});
+    });
 
     return task;
   }
 
-  schedule(injection.delay, value as Partial<MockRequestResult>);
+  deliver(value);
+
+  return task;
+};
+
+/** Replace the success payload of a task API other than `wx.request`. */
+const respondTask = (injection: Injection, responder: WxResponder): unknown => {
+  const option = injection.arg as CallbackOption | undefined;
+  const value = resolveResponder(responder, injection);
+  const { settle, task } = createInjectedTask(injection.api, option);
+  const deliver = (response: unknown): void => {
+    const { delay, result } = splitResponseDelay(response, injection.delay);
+
+    later(() => {
+      if (!settle()) return;
+
+      option?.success?.(result);
+      option?.complete?.({ errMsg: `${injection.api}:ok` });
+    }, delay);
+  };
+
+  if (value instanceof Promise) void value.then(deliver);
+  else deliver(value);
 
   return task;
 };
@@ -113,9 +280,12 @@ const respondRequest = (injection: Injection, responder: WxResponder): unknown =
 const respondPlain = (injection: Injection, responder: WxResponder): unknown => {
   const value = resolveResponder(responder, injection);
 
-  if (injection.kind === "sync") {
-    if (value instanceof Promise)
-      throw new TypeError(`[mockWx] respond() for sync API "${injection.api}" must be synchronous`);
+  if (injection.kind === "sync" || injection.kind === "manager") {
+    if (value instanceof Promise) {
+      throw new TypeError(
+        `[mockWx] respond() for ${injection.kind} API "${injection.api}" must be synchronous`,
+      );
+    }
 
     return value;
   }
@@ -158,7 +328,9 @@ const applyFailure = (injection: Injection, failure: WxFailure): unknown => {
     }
 
     case "task": {
-      return failRequest(injection, failure);
+      return injection.api === "request"
+        ? failRequest(injection, failure)
+        : failTask(injection, failure);
     }
 
     case "callback": {
@@ -166,7 +338,7 @@ const applyFailure = (injection: Injection, failure: WxFailure): unknown => {
     }
 
     default: {
-      // event / manager / void rules are rejected at registration time.
+      // event / void rules are rejected at registration time.
       throw new TypeError(
         `[mockWx] failures cannot be injected into ${injection.kind} API "${injection.api}"`,
       );
@@ -174,10 +346,15 @@ const applyFailure = (injection: Injection, failure: WxFailure): unknown => {
   }
 };
 
-const applyRespond = (injection: Injection, responder: WxResponder): unknown =>
-  injection.kind === "task"
-    ? respondRequest(injection, responder)
-    : respondPlain(injection, responder);
+const applyRespond = (injection: Injection, responder: WxResponder): unknown => {
+  if (injection.kind === "task") {
+    return injection.api === "request"
+      ? respondRequest(injection, responder)
+      : respondTask(injection, responder);
+  }
+
+  return respondPlain(injection, responder);
+};
 
 const applyMatched = (injection: Injection, matched: MatchedRule): unknown => {
   if (matched.route) {
