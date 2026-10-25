@@ -24,6 +24,9 @@ const SYNC_APIS = new Set<string>([
   "setStorageSync",
 ]);
 
+/** APIs that return task objects. */
+const TASK_APIS = new Set<string>(["connectSocket", "downloadFile", "request", "uploadFile"]);
+
 /** APIs that return manager / context objects. */
 const MANAGER_APIS = new Set<string>([
   "createCanvasContext",
@@ -52,7 +55,7 @@ const VOID_APIS = new Set<string>([
 
 /** Classify a `wx` API, which decides how an injected failure is surfaced. */
 export const getApiKind = (api: string): WxApiKind => {
-  if (api === "request") return "task";
+  if (TASK_APIS.has(api)) return "task";
   if (api.startsWith("on") || api.startsWith("off")) return "event";
   if (SYNC_APIS.has(api)) return "sync";
   if (MANAGER_APIS.has(api)) return "manager";

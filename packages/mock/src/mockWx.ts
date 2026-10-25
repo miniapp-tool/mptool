@@ -29,22 +29,34 @@ import type {
   WxRuleOptions,
 } from "./typings.js";
 import { emitEvent } from "./ui.js";
-import { DEFAULT_USER_DATA_PATH, wx } from "./wx.js";
+import { DEFAULT_USER_DATA_PATH, wx, wxApiWrappers } from "./wx.js";
 
 /** APIs whose failures can be injected. */
-const INJECTABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
+const FAILABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
 
-interface EnvSnapshot {
+/** APIs whose result can be replaced with `respond()`. */
+const RESPONDABLE_KINDS = new Set<WxApiKind>(["callback", "manager", "sync", "task"]);
+
+interface RuntimeSnapshot {
+  /** Current value of every function-valued `wx` member. */
+  apis: Map<string, unknown>;
   DEBUG: unknown;
   USER_DATA_PATH: string;
 }
 
-const snapshotEnv = (): EnvSnapshot => ({
+const snapshotRuntime = (): RuntimeSnapshot => ({
+  apis: new Map(Object.entries(wx).filter(([, value]) => typeof value === "function")),
   DEBUG: (wx.env as unknown as Record<string, unknown>).DEBUG,
   USER_DATA_PATH: wx.env.USER_DATA_PATH,
 });
 
-const restoreEnv = (snapshot: EnvSnapshot): void => {
+const restoreRuntime = (snapshot: RuntimeSnapshot): void => {
+  const target = wx as unknown as Record<string, unknown>;
+
+  // Restore APIs replaced inside a scope (e.g. `wx.request = vi.fn()`), so a scope cannot leak
+  // manual overrides into later tests. Direct assignment still wins outside a scope.
+  for (const [api, value] of snapshot.apis) target[api] = value;
+
   wx.env.USER_DATA_PATH = snapshot.USER_DATA_PATH;
 
   const env = wx.env as unknown as Record<string, unknown>;
@@ -52,6 +64,12 @@ const restoreEnv = (snapshot: EnvSnapshot): void => {
   // oxlint-disable-next-line no-undefined -- `DEBUG` is optional on `wx.env`
   if (snapshot.DEBUG === undefined) delete env.DEBUG;
   else env.DEBUG = snapshot.DEBUG;
+};
+
+const restoreApiWrappers = (): void => {
+  const target = wx as unknown as Record<string, unknown>;
+
+  for (const [api, value] of wxApiWrappers) target[api] = value;
 };
 
 const resetEnv = (): void => {
@@ -62,7 +80,7 @@ const resetEnv = (): void => {
 
 const createScope = (): MockWxScope => {
   const stateSnapshot = snapshotState();
-  const envSnapshot = snapshotEnv();
+  const runtimeSnapshot = snapshotRuntime();
   let restored = false;
 
   return {
@@ -71,7 +89,7 @@ const createScope = (): MockWxScope => {
 
       restored = true;
       restoreState(stateSnapshot);
-      restoreEnv(envSnapshot);
+      restoreRuntime(runtimeSnapshot);
     },
   };
 };
@@ -94,27 +112,30 @@ const installAutoRestore = (afterEach: (hook: () => void) => void): void => {
   autoRestoreInstalled = true;
 
   const stateSnapshot = snapshotState();
-  const envSnapshot = snapshotEnv();
+  const runtimeSnapshot = snapshotRuntime();
 
   afterEach(() => {
     restoreState(stateSnapshot);
-    restoreEnv(envSnapshot);
+    restoreRuntime(runtimeSnapshot);
   });
 };
 
 const normalizeApis = (api: WxApiName | WxApiName[]): WxApiName[] =>
   Array.isArray(api) ? api : [api];
 
-const assertInjectable = (api: WxApiName): void => {
+const assertInjectable = (api: WxApiName, mode: "fail" | "respond"): void => {
   const value = (wx as unknown as Record<string, unknown>)[api];
 
   if (typeof value !== "function") throw new TypeError(`[mockWx] unknown wx API "${api}"`);
 
   const kind = getApiKind(api);
+  const supported = mode === "respond" ? RESPONDABLE_KINDS : FAILABLE_KINDS;
 
-  if (!INJECTABLE_KINDS.has(kind)) {
+  if (!supported.has(kind)) {
     throw new TypeError(
-      `[mockWx] "${api}" is an ${kind} API; failures can only be injected into callback / task / sync APIs`,
+      mode === "respond"
+        ? `[mockWx] "${api}" is an ${kind} API; respond() supports callback / task / sync / manager APIs`
+        : `[mockWx] "${api}" is an ${kind} API; failures can only be injected into callback / task / sync APIs`,
     );
   }
 };
@@ -209,7 +230,7 @@ const registerFailure = (
 
   const remaining = resolveRemaining(options);
   const rules = normalizeApis(api).map((name) => {
-    assertInjectable(name);
+    assertInjectable(name, "fail");
 
     return createRule({
       api: name,
@@ -346,7 +367,7 @@ export const mockWx: MockWx = {
     if (failures.length === 0)
       throw new RangeError("[mockWx] failSequence() needs at least one failure");
 
-    assertInjectable(api);
+    assertInjectable(api, "fail");
 
     const rule = createRule({
       api,
@@ -387,6 +408,7 @@ export const mockWx: MockWx = {
   reset(): void {
     resetState();
     resetEnv();
+    restoreApiWrappers();
   },
 
   respond<R>(
@@ -396,7 +418,7 @@ export const mockWx: MockWx = {
   ): WxRuleHandle {
     const remaining = resolveRemaining(options);
     const rules = normalizeApis(api).map((name) => {
-      assertInjectable(name);
+      assertInjectable(name, "respond");
 
       return createRule({
         api: name,
@@ -417,7 +439,7 @@ export const mockWx: MockWx = {
     table: Record<string, WxResponder<WxNetworkResponse> | WxFailure>,
     options?: { delay?: number },
   ): WxRuleHandle {
-    assertInjectable("request");
+    assertInjectable("request", "respond");
 
     const routes = Object.entries(table).map(([key, response]) => parseRouteKey(key, response));
 
