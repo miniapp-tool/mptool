@@ -1,4 +1,9 @@
-/** 页面跳转 API */
+/**
+ * 页面跳转 API
+ *
+ * 注意：`@mptool/enhance` 中导航锁尚未释放时（上一次跳转的目标页尚未 `onReady`，或距上次跳转不足 `minInterval`），调用这些方法会被忽略，返回的
+ * Promise 解析为 `undefined`；`@mptool/skyline-enhance` 没有导航锁，始终解析为导航结果。
+ */
 export interface NavigatorMethods {
   /**
    * 导航到指定页面
@@ -13,7 +18,7 @@ export interface NavigatorMethods {
    *   this.$go("play?vid=xxx&cid=xxx");
    *   ```
    */
-  $go: (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+  $go: (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult | undefined>;
 
   /**
    * 跳转到指定页面, **替换页面，不产生历史**
@@ -29,7 +34,7 @@ export interface NavigatorMethods {
    *   ```
    */
 
-  $redirect: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $redirect: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
 
   /**
    * 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面
@@ -45,7 +50,7 @@ export interface NavigatorMethods {
    *   this.$switch("main?user=mrhope");
    *   ```
    */
-  $switch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $switch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
 
   /**
    * 关闭所有页面，之后打开到应用内的某个页面
@@ -57,10 +62,10 @@ export interface NavigatorMethods {
    *   示例：
    *
    *   ```js
-   *   this.$launch("main");
+   *   this.$reLaunch("main");
    *   ```
    */
-  $reLaunch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $reLaunch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
 
   /**
    * 返回上一页，`wx.navigateBack` 的封装
@@ -74,7 +79,7 @@ export interface NavigatorMethods {
    *   this.$back(2);
    *   ```
    */
-  $back: (delta?: number) => Promise<WechatMiniprogram.GeneralCallbackResult>;
+  $back: (delta?: number) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
 
   /**
    * 点击代理方法，绑定 `$go` 逻辑

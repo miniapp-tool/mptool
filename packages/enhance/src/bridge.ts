@@ -26,14 +26,19 @@ export type NavigatorOptionsType =
   | WechatMiniprogram.RedirectToOption
   | WechatMiniprogram.SwitchTabOption;
 
-export const go: (pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult> =
+export const go: (
+  pageName: string,
+) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult | undefined> =
   getTrigger("navigateTo");
-export const redirect: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
-  getTrigger("redirectTo");
-export const switchTab: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
-  getTrigger("switchTab");
-export const reLaunch: (pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult> =
-  getTrigger("reLaunch");
+export const redirect: (
+  pageName: string,
+) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined> = getTrigger("redirectTo");
+export const switchTab: (
+  pageName: string,
+) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined> = getTrigger("switchTab");
+export const reLaunch: (
+  pageName: string,
+) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined> = getTrigger("reLaunch");
 
 const clickHandlerFactory = function (
   action: (pageName: string) => Promise<unknown>,
@@ -75,7 +80,7 @@ const bindRelaunch = clickHandlerFactory(reLaunch);
  * @param delta - 后退层数
  * @returns Promise resolving to navigation result
  */
-const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult> => {
+const back = (delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult | undefined> => {
   const { home } = getConfig();
   const pageStackLength = getCurrentPages().length;
   const maxDelta = pageStackLength - 1;

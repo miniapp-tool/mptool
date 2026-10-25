@@ -148,9 +148,15 @@ $Page({
 
 :::
 
+::: tip
+
+Skyline 版本没有导航锁，跳转总是立即执行。为与 `@mptool/enhance` 共享类型，以下方法的返回类型包含 `undefined`，但实际总是解析为导航结果。
+
+:::
+
 ### $go
 
-- 类型: `(pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>`
+- 类型: `(pageName: string) => Promise<WechatMiniprogram.NavigateToSuccessCallbackResult | undefined>`
 
 导航到指定页面，是 `wx.navigateTo` 的封装。
 
@@ -160,7 +166,7 @@ this.$go("play?vid=xxx&cid=xxx");
 
 ### $redirect
 
-- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>`
+- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>`
 
 重定向到指定页面，即**替换页面，不产生历史**，是 `wx.redirectTo` 的封装。
 
@@ -170,7 +176,7 @@ this.$redirect("about?year=2021");
 
 ### $switch
 
-- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>`
+- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>`
 
 跳转到指定 tabBar 页面，并关闭其他所有非 tabBar 页面，是 `wx.switchTab` 的封装。
 
@@ -186,7 +192,7 @@ this.$switch("main");
 
 ### $reLaunch
 
-- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult>`
+- 类型: `(pageName: string) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>`
 
 关闭所有页面，之后打开到应用内的某个页面，是 `wx.reLaunch` 的封装。
 
@@ -196,7 +202,7 @@ this.$reLaunch("main?user=mrhope");
 
 ### $back
 
-- 类型: `(delta = 1) => Promise<WechatMiniprogram.GeneralCallbackResult>`
+- 类型: `(delta = 1) => Promise<WechatMiniprogram.GeneralCallbackResult | undefined>`
 
 `wx.navigateBack` 的简单封装，`delta` 为返回的层数，默认为 `1`。页面栈不足且配置了 `home` 时，会 `reLaunch` 到 `home`。
 
