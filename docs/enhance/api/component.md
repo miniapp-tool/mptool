@@ -7,6 +7,12 @@ order: 5
 
 框架提供的组件注册器。
 
+::: warning 前置条件
+
+`$Component` 依赖全局配置：必须先在小程序入口（`app.js`）调用 `$Config`（在 `$App` 前），否则注册组件时会抛出 `MpError`。
+
+:::
+
 ## 注入
 
 ### $id

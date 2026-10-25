@@ -5,6 +5,8 @@ order: 2
 
 全局配置器，必须放置在应用主脚本中、在 `$App` 前调用。
 
+`$Page` / `$Component` 的注册同样依赖全局配置：在调用 `$Config` 之前注册页面或组件会抛出 `MpError`。
+
 与 `@mptool/enhance` 相比，Skyline 版本没有 `onNavigate` 生命周期与导航锁，因此 `maxDelay` / `minInterval` 不会生效（仅保留以兼容 enhance 的配置）。
 
 ## defaultPage
