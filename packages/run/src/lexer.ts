@@ -37,38 +37,49 @@ import {
  * - `value` 一般是原始文本（`string` 含引号；`template*` 为分隔符之间的文本）。
  * - `string`/`template*` 额外提供 `cooked`（转义处理后的字符串值）。
  */
-export type Token =
-  | { type: "identifier"; value: string; start: number; end: number }
-  | { type: "keyword"; value: string; start: number; end: number }
-  | { type: "number"; value: string; numericValue?: number; start: number; end: number }
-  | { type: "bigint"; value: string; start: number; end: number } // value 不含 'n' 后缀
-  | { type: "string"; value: string; cooked: string; start: number; end: number }
-  | {
-      type: "regexp";
-      value: string;
-      pattern: string;
-      flags: string;
-      start: number;
-      end: number;
-    }
-  | {
-      type: "templateNoSubstitution";
-      value: string;
-      cooked: string;
-      start: number;
-      end: number;
-    } // `...`
-  | { type: "templateHead"; value: string; cooked: string; start: number; end: number } // `...${
-  | {
-      type: "templateMiddle";
-      value: string;
-      cooked: string;
-      start: number;
-      end: number;
-    } // }...${
-  | { type: "templateTail"; value: string; cooked: string; start: number; end: number } // }...`
-  | { type: "punct"; value: string; start: number; end: number }
-  | { type: "eof"; start: number; end: number };
+export interface TokenBase {
+  start: number;
+  end: number;
+  /**
+   * Whether a line terminator (or a comment containing one) precedes this token.
+   *
+   * Required for ASI restricted productions (`return`/`throw`/`break`/`continue`/postfix `++`).
+   *
+   * 该 token 之前是否有行终结符（或包含行终结符的注释）。ASI 受限产生式需要此信息。
+   */
+  newlineBefore?: boolean;
+}
+
+export type Token = TokenBase &
+  (
+    | { type: "identifier"; value: string }
+    | { type: "keyword"; value: string }
+    | { type: "number"; value: string; numericValue?: number }
+    | { type: "bigint"; value: string } // value 不含 'n' 后缀
+    | { type: "string"; value: string; cooked: string }
+    | { type: "regexp"; value: string; pattern: string; flags: string }
+    | { type: "templateNoSubstitution"; value: string; cooked: string } // `...`
+    | { type: "templateHead"; value: string; cooked: string } // `...${
+    | { type: "templateMiddle"; value: string; cooked: string } // }...${
+    | { type: "templateTail"; value: string; cooked: string } // }...`
+    | { type: "punct"; value: string }
+    | { type: "eof" }
+  );
+
+/**
+ * Attach the pending newline flag to a token.
+ *
+ * 将待定换行标记附加到 token。
+ *
+ * @param token - The token / token
+ * @param newlineBefore - Whether a line terminator precedes it / 之前是否有行终结符
+ * @returns The same token / 同一个 token
+ */
+const withNewline = <T extends Token>(token: T, newlineBefore: boolean): T => {
+  token.newlineBefore = newlineBefore;
+
+  return token;
+};
 
 /**
  * Whether a token can be the end of a complete expression, used to decide whether a following `/`
@@ -161,13 +172,13 @@ export class Lexer {
    * @returns The next token / 下一个 token
    */
   next(): Token {
-    this.skipTrivia();
+    const newlineBefore = this.skipTrivia();
 
     const start = this.pos;
     const { source } = this;
 
     if (this.pos >= source.length) {
-      const token: Token = { type: "eof", start, end: start };
+      const token: Token = withNewline({ type: "eof", start, end: start }, newlineBefore);
 
       this.lastToken = token;
 
@@ -176,14 +187,20 @@ export class Lexer {
 
     const ch = source[this.pos];
 
-    if (isIdentifierStart(ch)) return this.readIdentifier(start);
-    if (isDigit(ch) || (ch === "." && isDigit(source[this.pos + 1]))) return this.readNumber(start);
+    if (isIdentifierStart(ch)) return withNewline(this.readIdentifier(start), newlineBefore);
+    if (isDigit(ch) || (ch === "." && isDigit(source[this.pos + 1])))
+      return withNewline(this.readNumber(start), newlineBefore);
 
-    if (ch === '"' || ch === "'") return this.readString(start);
-    if (ch === "`") return this.readTemplateStart(start);
-    if (ch === "/") return this.regexAllowed ? this.readRegexp(start) : this.readPunct(start);
+    if (ch === '"' || ch === "'") return withNewline(this.readString(start), newlineBefore);
+    if (ch === "`") return withNewline(this.readTemplateStart(start), newlineBefore);
+    if (ch === "/") {
+      return withNewline(
+        this.regexAllowed ? this.readRegexp(start) : this.readPunct(start),
+        newlineBefore,
+      );
+    }
 
-    return this.readPunct(start);
+    return withNewline(this.readPunct(start), newlineBefore);
   }
 
   /**
@@ -247,14 +264,19 @@ export class Lexer {
    * Skip whitespace, line comments and block comments.
    *
    * 跳过空白、行注释与块注释。
+   *
+   * @returns Whether a line terminator was crossed / 是否跨过行终结符
    */
-  private skipTrivia(): void {
+  private skipTrivia(): boolean {
     const { source } = this;
+    let newlineBefore = false;
 
     while (this.pos < source.length) {
       const ch = source[this.pos];
 
       if (isWhitespace(ch)) {
+        if (ch === "\n" || ch === "\r" || ch === "\u2028" || ch === "\u2029") newlineBefore = true;
+
         this.pos += 1;
         continue;
       }
@@ -270,12 +292,18 @@ export class Lexer {
 
         if (end === -1) throw this.error("Unterminated comment", commentStart, source.length);
 
+        // a multi-line comment counts as a line terminator for ASI
+        // 跨行块注释对 ASI 而言等同于行终结符
+        if (/[\n\r\u2028\u2029]/u.test(source.slice(commentStart, end))) newlineBefore = true;
+
         this.pos = end + 2;
         continue;
       }
 
       break;
     }
+
+    return newlineBefore;
   }
 
   private readIdentifier(start: number): Token {
