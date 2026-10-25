@@ -249,15 +249,19 @@ installGlobal();
 
 ### 语法
 
-| 特性                       | 说明                                            |
-| -------------------------- | ----------------------------------------------- |
-| `with` 语句                | 不支持，解析即报错                              |
-| 生成器                     | `function*` / `yield` / `yield*` 不支持         |
-| `Proxy`                    | 不支持                                          |
-| 模块语法                   | `import` / `export` 不支持（单脚本执行）        |
-| 标签模板                   | `` tag`...` `` 不支持                           |
-| `new.target`               | 不支持                                          |
-| 函数内 `"use strict"` 指令 | 未实现，仅 `RunOptions.strict` 全局严格模式生效 |
+| 特性                                      | 说明                                                       |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `with` 语句                               | 不支持，解析即报错                                         |
+| 生成器                                    | `function*` / `yield` / `yield*` 不支持                    |
+| `Proxy`                                   | 不支持                                                     |
+| 模块语法                                  | `import` / `export` 不支持（单脚本执行）                   |
+| 标签模板                                  | `` tag`...` `` 不支持                                      |
+| `new.target`                              | 不支持                                                     |
+| 函数内 `"use strict"` 指令                | 未实现，仅 `RunOptions.strict` 全局严格模式生效            |
+| class 字段 / 私有字段                     | `class A { x = 1 }`、`#x`、`static {}` 块不支持            |
+| 数字分隔符                                | `1_000` 不支持（ES2021）                                   |
+| Unicode 标识符                            | 仅 ASCII 标识符；中文标识符与 `\u{…}` 转义标识符不支持     |
+| `let`/`static`/`yield`/`await` 作为标识符 | 作为关键字处理，`var await = 1` 这类 sloppy 旧代码无法解析 |
 
 ### 全局 API
 
@@ -272,6 +276,10 @@ installGlobal();
 ### 已知差异
 
 错误路径只保证「能抛错」，错误类型与消息可能与标准引擎不同。例如顶层 `super.x` 在 Node 抛 `SyntaxError`、在本解释器抛 `ReferenceError`；基类方法内使用 `super`，Node 读取 `Object.prototype`、本解释器报错。
+
+**ASI（自动分号插入）**：只实现受限产生式——`return`/`throw`/`break`/`continue` 后换行、`++`/`--` 前换行、`async` 后换行按标准处理（`return\n42` 返回 `undefined`，`throw\n` 抛 `ParseError`，`async\nfunction` 不再视为 async 函数）。**不强制语句边界**：`let x = 1 let y = 2`、漏写分号的续行写法仍会被接受（标准引擎会报 `SyntaxError`）。
+
+**资源上限边界**：`maxSteps` 只约束解释执行，不覆盖解析阶段、宿主函数调用（如 `Array(1e8)`）与宿主正则回溯；解析阶段可用 `maxSourceLength` / `maxParseDepth` / `maxBacktracks` 单独约束（默认仅回溯有 5000 上限，其余不限制）。
 
 ## async/await
 

@@ -606,6 +606,7 @@ export class Parser {
     if (
       token.type === "identifier" &&
       token.value === "async" &&
+      !this.peek().newlineBefore &&
       this.peek().type === "keyword" &&
       tokenValue(this.peek()) === "function"
     )
@@ -934,6 +935,10 @@ export class Parser {
 
     this.advance();
 
+    // `throw` is a restricted production: a line terminator before the operand is a syntax error
+    // `throw` 是受限产生式：操作数前出现行终结符属于语法错误
+    if (this.current().newlineBefore) throw this.error("Illegal newline after 'throw'");
+
     const argument = this.parseExpression(true);
 
     if (this.match(";")) this.advance();
@@ -948,7 +953,14 @@ export class Parser {
 
     let argument: Expression | null = null;
 
-    if (!this.match(";") && !this.match("}") && this.current().type !== "eof")
+    // restricted production: a line terminator after `return` terminates the statement
+    // 受限产生式：`return` 后出现行终结符即结束语句（返回 undefined）
+    if (
+      !this.current().newlineBefore &&
+      !this.match(";") &&
+      !this.match("}") &&
+      this.current().type !== "eof"
+    )
       argument = this.parseExpression(true);
 
     if (this.match(";")) this.advance();
@@ -963,7 +975,10 @@ export class Parser {
 
     let label: string | null = null;
 
-    if (this.current().type === "identifier") label = tokenValue(this.advance());
+    // restricted production: a line terminator after `break`/`continue` ends the statement
+    // 受限产生式：`break`/`continue` 后出现行终结符即结束语句（无标签）
+    if (!this.current().newlineBefore && this.current().type === "identifier")
+      label = tokenValue(this.advance());
 
     if (this.match(";")) this.advance();
 
@@ -1195,7 +1210,11 @@ export class Parser {
     // `async` modifier — `async() {}` / `async = x` are not modifiers
     const asyncToken = this.current();
 
-    if (asyncToken.type === "identifier" && asyncToken.value === "async") {
+    if (
+      asyncToken.type === "identifier" &&
+      asyncToken.value === "async" &&
+      !this.peek().newlineBefore
+    ) {
       const next = tokenValue(this.peek());
 
       if (next !== "(" && next !== "=" && next !== ";" && next !== "}") {
@@ -1575,6 +1594,7 @@ export class Parser {
     if (
       token.type === "identifier" &&
       token.value === "async" &&
+      !this.peek().newlineBefore &&
       (tokenValue(this.peek()) === "(" || this.peek().type === "identifier")
     ) {
       const snapshot = this.save();
@@ -1810,7 +1830,13 @@ export class Parser {
     const node = this.parseLeftHandSide();
     const token = this.current();
 
-    if (token.type === "punct" && (token.value === "++" || token.value === "--")) {
+    // restricted production: a line terminator before `++`/`--` means it starts a new statement
+    // 受限产生式：`++`/`--` 前出现行终结符时，它开启新语句而非后缀自增
+    if (
+      !token.newlineBefore &&
+      token.type === "punct" &&
+      (token.value === "++" || token.value === "--")
+    ) {
       const op = token.value;
 
       this.advance();
@@ -2087,6 +2113,7 @@ export class Parser {
       case "identifier": {
         if (
           token.value === "async" &&
+          !this.peek().newlineBefore &&
           this.peek().type === "keyword" &&
           tokenValue(this.peek()) === "function"
         )
@@ -2347,6 +2374,7 @@ export class Parser {
     if (
       token.type === "identifier" &&
       token.value === "async" &&
+      !this.peek().newlineBefore &&
       (isPropertyNameToken(this.peek()) || tokenValue(this.peek()) === "[") &&
       tokenValue(this.peek()) !== ":" &&
       tokenValue(this.peek()) !== "," &&

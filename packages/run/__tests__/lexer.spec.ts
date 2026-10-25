@@ -751,3 +751,52 @@ describe("punct edge cases", () => {
     expectError("a + @");
   });
 });
+
+describe("newline tracking (ASI restricted productions)", () => {
+  /**
+   * Collect `[value, newlineBefore]` pairs.
+   *
+   * 收集 `[值, 之前是否有换行]` 对。
+   *
+   * @param source - Source to tokenize / 源码
+   * @returns Pairs / 对
+   */
+  const flags = (source: string): [string | undefined, boolean][] =>
+    tokenize(source).map((token) => [
+      token.type === "eof" ? undefined : (token as { value?: string }).value,
+      token.newlineBefore === true,
+    ]);
+
+  it("should mark tokens preceded by a line terminator", () => {
+    expect(flags("a\nb")).toStrictEqual([
+      ["a", false],
+      ["b", true],
+      [undefined, false],
+    ]);
+    expect(flags("a\n")).toStrictEqual([
+      ["a", false],
+      [undefined, true],
+    ]);
+    expect(flags("a\u2028b")).toStrictEqual([
+      ["a", false],
+      ["b", true],
+      [undefined, false],
+    ]);
+  });
+
+  it("should treat multi-line comments as line terminators", () => {
+    expect(flags("a /* x\ny */ b")).toStrictEqual([
+      ["a", false],
+      ["b", true],
+      [undefined, false],
+    ]);
+  });
+
+  it("should not mark same-line comments", () => {
+    expect(flags("a /* x */ b")).toStrictEqual([
+      ["a", false],
+      ["b", false],
+      [undefined, false],
+    ]);
+  });
+});
