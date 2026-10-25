@@ -277,6 +277,9 @@ importers:
       '@mptool/file':
         specifier: workspace:*
         version: link:../file
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
       '@mptool/net':
         specifier: workspace:*
         version: link:../net

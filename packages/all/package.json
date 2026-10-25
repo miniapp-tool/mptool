@@ -43,6 +43,7 @@
     "@mptool/api": "workspace:*",
     "@mptool/enhance": "workspace:*",
     "@mptool/file": "workspace:*",
+    "@mptool/mock": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
     "@mptool/shared": "workspace:*",
