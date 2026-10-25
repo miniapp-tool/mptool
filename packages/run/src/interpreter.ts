@@ -2774,6 +2774,8 @@ export class Runtime {
         lexicalThis: isArrow ? (ctx?.thisRef ?? { value: this.globalObject }) : null,
         lexicalSuperBase: isArrow ? (ctx?.superBase ?? null) : null,
         lexicalSuperClass: isArrow ? (ctx?.superClass ?? null) : null,
+        lexicalNewTargetMeta: isArrow ? (ctx?.newTargetMeta ?? null) : null,
+        lexicalIsConstruct: isArrow ? (ctx?.isConstruct ?? false) : false,
         callee: null,
       },
       this.invokeHandler,
@@ -2828,8 +2830,10 @@ export class Runtime {
           thisRef: meta.lexicalThis ?? { value: this.globalObject },
           superBase: meta.lexicalSuperBase,
           superClass: meta.lexicalSuperClass,
-          newTargetMeta: null,
-          isConstruct: false,
+          // arrows inherit the construction state so `super()` works inside a derived constructor
+          // 箭头继承构造状态，使派生构造器内的 `super()` 可用
+          newTargetMeta: meta.lexicalNewTargetMeta,
+          isConstruct: meta.lexicalIsConstruct,
         });
 
         try {
@@ -3376,6 +3380,8 @@ export class Runtime {
         lexicalThis: null,
         lexicalSuperBase: null,
         lexicalSuperClass: null,
+        lexicalNewTargetMeta: null,
+        lexicalIsConstruct: false,
         callee: null,
       },
       this.invokeHandler,
@@ -3427,6 +3433,8 @@ export class Runtime {
         lexicalThis: null,
         lexicalSuperBase: null,
         lexicalSuperClass: null,
+        lexicalNewTargetMeta: null,
+        lexicalIsConstruct: false,
         callee: null,
       },
       this.invokeHandler,
@@ -3573,8 +3581,10 @@ export class Runtime {
       thisRef,
       superBase,
       superClass,
-      newTargetMeta: null,
-      isConstruct: false,
+      // arrows inherit the construction state so `super()` works inside a derived constructor
+      // 箭头继承构造状态，使派生构造器内的 `super()` 可用
+      newTargetMeta: meta.lexicalNewTargetMeta,
+      isConstruct: meta.lexicalIsConstruct,
     });
 
     try {
