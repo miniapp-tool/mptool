@@ -88,9 +88,12 @@ export interface MockStorageOptions {
   limitSize?: number;
   /** Single-key quota in KB; defaults to `1024`. */
   keySize?: number;
-  /** Behaviour of `getStorage` for a missing key; defaults to `"fail"` once PR-3 lands. */
+  /** Behaviour of `getStorage` for a missing key; defaults to `"fail"` (real-device semantics). */
   missingKey?: "fail" | "resolve";
-  /** Behaviour of `getStorageSync` for a missing key; defaults to `"empty-string"` once PR-3 lands. */
+  /**
+   * Behaviour of `getStorageSync` for a missing key; defaults to `"empty-string"` (real-device
+   * semantics).
+   */
   missingKeySync?: "empty-string" | "undefined";
 }
 

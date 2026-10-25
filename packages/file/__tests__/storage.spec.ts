@@ -346,6 +346,10 @@ describe("storage error contract", () => {
 });
 
 describe(getAsync, () => {
+  it("should return undefined for a missing key with the real mock semantics", async () => {
+    await expect(getAsync("missing-key-without-stub")).resolves.toBeUndefined();
+  });
+
   it("should return undefined when getStorage fails", async () => {
     const wxAny = wx as unknown as {
       getStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
@@ -362,6 +366,36 @@ describe(getAsync, () => {
       await expect(getAsync("fail-get-key")).resolves.toBeUndefined();
     } finally {
       wxAny.getStorage = original;
+    }
+  });
+});
+
+describe(checkAsync, () => {
+  it("should ignore keys that disappear before getStorage resolves", async () => {
+    const wxAny = wx as unknown as {
+      getStorage: (option: { key: string }) => Promise<unknown>;
+      getStorageInfo: () => Promise<{ currentSize: number; keys: string[]; limitSize: number }>;
+    };
+    const originalGetStorageInfo = wxAny.getStorageInfo;
+    const originalGetStorage = wxAny.getStorage;
+
+    wxAny.getStorageInfo = (): Promise<{
+      currentSize: number;
+      keys: string[];
+      limitSize: number;
+    }> => Promise.resolve({ currentSize: 0, keys: ["_cache_raced"], limitSize: 10240 });
+    wxAny.getStorage = (): Promise<never> =>
+      Promise.reject(
+        Object.assign(new Error("getStorage:fail data not found"), {
+          errMsg: "getStorage:fail data not found",
+        }),
+      );
+
+    try {
+      await expect(checkAsync()).resolves.toBeUndefined();
+    } finally {
+      wxAny.getStorageInfo = originalGetStorageInfo;
+      wxAny.getStorage = originalGetStorage;
     }
   });
 });

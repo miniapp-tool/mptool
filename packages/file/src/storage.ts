@@ -311,10 +311,16 @@ export const checkAsync = async (): Promise<void> => {
     keys
       .filter((key) => key.startsWith(CACHE_PREFIX))
       .map(async (key) => {
-        const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
+        try {
+          const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
 
-        // Drop corrupt values and expired ones / 清除损坏与已过期的值
-        if (!data || isExpired(data)) await wx.removeStorage({ key });
+          // Drop corrupt values and expired ones / 清除损坏与已过期的值
+          if (!data || isExpired(data)) await wx.removeStorage({ key });
+        } catch {
+          // The key can disappear between `getStorageInfo` and `getStorage` (another context
+          // cleared the cache, or the entry expired); treat it as already cleaned up.
+          logger.debug(`check async: "${key}" is gone, skip`);
+        }
       }),
   );
 };

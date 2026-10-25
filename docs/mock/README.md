@@ -198,7 +198,52 @@ mockWx.dir("data");
 mockWx.compat({ storageResolveMissingKey: true });
 ```
 
-> 当前版本中，`pages()` / `file()` / `dir()` 会立即生效；`storage` / `auth` / `authorize` / `user` / `system` / `network` / `clipboard` / `login` / `compat` 只是把状态保存到控制面，供后续版本（storage / 权限 / UI / 系统信息归一化）消费。这样可以在不改动现有行为的前提下先把测试写法定下来。
+> `pages()` / `file()` / `dir()` 与 `storage()` 会立即生效；`auth` / `authorize` / `user` / `system` / `network` / `clipboard` / `login` / `compat` 只保存状态，供后续版本（权限 / UI / 系统信息归一化）消费。这样可以在不改动其余行为的前提下先把测试写法定下来。
+
+## Storage 语义（真机对齐）
+
+`@mptool/mock` 的 storage 默认按真机语义工作：
+
+- **按值序列化**：写入时 `JSON.stringify`，读取时 `JSON.parse`。修改原对象不会影响已存数据，每次读取都得到新对象；`undefined` 不占空间，循环引用等无法序列化的值会失败。
+- **缺 key**：`wx.getStorage` 默认 `fail`（`errMsg: "getStorage:fail data not found"`），`wx.getStorageSync` 默认返回 `""`。
+- **配额**：单 key 默认 1 MB、总量默认 10 MB，超限时异步 API `fail`、同步 API 抛错，`errMsg: "setStorage:fail exceed storage max size"`；`batchSetStorage` 会先整体校验，失败时不会写入任何一项。
+- **errMsg**：成功回调统一为 `<api>:ok`（如 `"getStorage:ok"` / `"setStorage:ok"` / `"clearStorage:ok"`）。
+- **currentSize**：按序列化后的 UTF-8 值字节数计算并向上取整到 KB（暂不计 key 名，真机采样后可能调整）；`limitSize` 默认 `10240`（KB）。
+
+可以用 `mockWx.storage()` 调整（全部单位均为 KB）：
+
+```ts
+// 更小的配额，便于构造自然超限
+mockWx.storage({ keySize: 1, limitSize: 1 });
+
+// 缺 key 的替代语义（0.x 的兼容开关见下）
+mockWx.storage({ missingKey: "resolve", missingKeySync: "undefined" });
+```
+
+`missingKey: "resolve"` 时 `wx.getStorage` 成功返回 `{ data: undefined, errMsg: "getStorage:ok" }`；`missingKeySync: "undefined"` 时 `wx.getStorageSync` 返回 `undefined`。
+
+### 旧行为兼容（0.x 过渡）
+
+升级 mock 后如需保留「缺 key 走 success + `undefined`」的旧行为，可开启 compat 开关：
+
+```ts
+mockWx.compat({ storageResolveMissingKey: true });
+```
+
+开启后，`wx.getStorage` 缺 key 时成功返回 `{ data: undefined, errMsg: "" }`，`wx.getStorageSync` 返回 `undefined`，`batchGetStorage` 缺 key 返回 `[undefined, ...]`（旧形态）。该开关将在 1.0 移除。
+
+### 失败注入
+
+```ts
+// 强制配额失败 / 缺文件失败
+mockWx.failNext("setStorage", { type: "quota" });
+await expect(wx.setStorage({ key: "k", data: "v" })).rejects.toThrow(/exceed/u);
+
+mockWx.failNext("getStorage", { type: "noent" });
+await expect(wx.getStorage({ key: "k" })).rejects.toMatchObject({ errCode: 1300002 });
+```
+
+> 同步 API 在自然超限时抛出带 `errMsg` 的 `Error`；异步 API 未传回调时以 `Error` reject、传了回调时调用 `fail` + `complete`。
 
 ## 事件监听与手动触发
 
