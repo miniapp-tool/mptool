@@ -65,3 +65,23 @@ describe(getWindowInfo, () => {
     expect(info.windowHeight).toBe(667);
   });
 });
+
+describe("showModal failure", () => {
+  it("should call the failure action when showModal fails", () => {
+    const mockShowModal = wx as unknown as {
+      showModal: (option: { fail?: () => void }) => void;
+    };
+
+    mockShowModal.showModal = (option): void => {
+      option.fail?.();
+    };
+
+    let called = false;
+
+    showModal("title", "content", undefined, undefined, () => {
+      called = true;
+    });
+
+    expect(called).toBe(true);
+  });
+});

@@ -43,10 +43,19 @@ export const withScope = (
 
             // 用户拒绝权限，提示用户开启权限
             fail: () => {
-              showModal("权限被拒", denyMessage, () => {
-                void wx.openSetting();
-                reject(new MpError({ message: "用户拒绝权限" }));
-              });
+              showModal(
+                "权限被拒",
+                denyMessage,
+                () => {
+                  void wx.openSetting();
+                  reject(new MpError({ message: "用户拒绝权限" }));
+                },
+                // oxlint-disable-next-line no-undefined -- skip the cancel callback
+                undefined,
+                () => {
+                  reject(new MpError({ message: "权限提示框打开失败" }));
+                },
+              );
             },
           });
         }

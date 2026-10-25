@@ -21,3 +21,11 @@ describe(compareVersion, () => {
     expect(compareVersion("1.0.1", "1.0")).toBe(1);
   });
 });
+
+describe("compareVersion validation", () => {
+  it("should throw for non-numeric segments", () => {
+    expect(() => compareVersion("1.0.0-beta", "1.0.0")).toThrow(TypeError);
+    expect(() => compareVersion("", "1")).toThrow(TypeError);
+    expect(() => compareVersion("1..0", "1.0")).toThrow(TypeError);
+  });
+});
