@@ -1,4 +1,5 @@
 import "@mptool/mock";
+import { MpError } from "@mptool/shared";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -292,5 +293,73 @@ describe("writeJSON guards", () => {
     writeJSON("tmp/serializable-json", { a: 1 });
 
     expect(readJSON("tmp/serializable-json")).toStrictEqual({ a: 1 });
+  });
+});
+
+describe("file error contract", () => {
+  it("should throw MpError when stat fails for reasons other than a missing file", () => {
+    const fs = wx.getFileSystemManager() as unknown as {
+      statSync: (path: string, recursive?: boolean) => unknown;
+    };
+    const original = fs.statSync;
+
+    fs.statSync = (): never => {
+      throw Object.assign(new Error("permission denied"), {
+        errCode: 1300014,
+        errMsg: "statSync:fail permission denied",
+      });
+    };
+
+    try {
+      expect(() => exists("tmp/denied.txt")).toThrow(MpError);
+    } finally {
+      fs.statSync = original;
+    }
+  });
+
+  it("should throw MpError when reading fails for reasons other than a missing file", () => {
+    const fs = wx.getFileSystemManager() as unknown as {
+      readFileSync: (path: string, encoding?: string) => unknown;
+    };
+    const original = fs.readFileSync;
+
+    fs.readFileSync = (): never => {
+      throw Object.assign(new Error("permission denied"), {
+        errCode: 1300014,
+        errMsg: "readFileSync:fail permission denied",
+      });
+    };
+
+    try {
+      expect(() => readFile("tmp/denied.txt")).toThrow(MpError);
+      expect(() => readJSON("tmp/denied")).toThrow(MpError);
+    } finally {
+      fs.readFileSync = original;
+    }
+  });
+
+  it("should throw MpError when listing fails for reasons other than a missing directory", () => {
+    const fs = wx.getFileSystemManager() as unknown as { readdirSync: (path: string) => unknown };
+    const original = fs.readdirSync;
+
+    fs.readdirSync = (): never => {
+      throw Object.assign(new Error("permission denied"), {
+        errCode: 1300014,
+        errMsg: "readdirSync:fail permission denied",
+      });
+    };
+
+    try {
+      expect(() => ls("tmp/denied")).toThrow(MpError);
+    } finally {
+      fs.readdirSync = original;
+    }
+  });
+
+  it("should keep returning empty results for missing targets", () => {
+    expect(exists("tmp/missing-contract")).toBe(false);
+    expect(readFile("tmp/missing-contract.txt")).toBeUndefined();
+    expect(ls("tmp/missing-contract-dir")).toStrictEqual([]);
+    expect(readJSON("tmp/missing-contract-json")).toBeUndefined();
   });
 });

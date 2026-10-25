@@ -86,24 +86,48 @@ const isExpired = (value: StorageData<unknown>): boolean => {
 };
 
 /**
+ * Extract the message of a wx storage error.
+ *
+ * @param err Error thrown by wx
+ * @returns The error message
+ */
+const getErrorMessage = (err: unknown): string => {
+  if (typeof err === "string") return err;
+
+  const record = typeof err === "object" && err != null ? (err as { errMsg?: unknown }) : {};
+
+  if (typeof record.errMsg === "string") return record.errMsg;
+  if (err instanceof Error) return err.message;
+
+  return String(err);
+};
+
+/**
+ * Whether a wx storage error means the key does not exist.
+ *
+ * `wx.getStorage` fails with `getStorage:fail data not found` for a missing key, which is a normal
+ * cache-miss branch; other failures (invalid key, storage corruption) must stay observable.
+ *
+ * @param err Error thrown by wx
+ * @returns Whether the key is missing
+ */
+const isMissingStorageError = (err: unknown): boolean =>
+  /data not found/iu.test(getErrorMessage(err));
+
+/**
  * Convert a wx storage error into an `MpError`
  *
  * @param key Storage key, without the cache prefix
  * @param err Error thrown by wx
+ * @param action Operation that failed, used in the message
  * @returns Normalized error
  */
-const createStorageError = (key: string, err: unknown): MpError => {
-  const record = err as { errCode?: unknown; errMsg?: unknown } | undefined;
-  const errMsg =
-    typeof record?.errMsg === "string"
-      ? record.errMsg
-      : err instanceof Error
-        ? err.message
-        : String(err);
+const createStorageError = (key: string, err: unknown, action = "Write"): MpError => {
+  const record = typeof err === "object" && err != null ? (err as { errCode?: unknown }) : {};
 
   return new MpError({
-    ...(typeof record?.errCode === "number" ? { code: record.errCode } : {}),
-    message: `Write storage "${key}" failed: ${errMsg}`,
+    ...(typeof record.errCode === "number" ? { code: record.errCode } : {}),
+    message: `${action} storage "${key}" failed: ${getErrorMessage(err)}`,
   });
 };
 
@@ -257,18 +281,26 @@ export const get = <T = unknown>(key: string): T | undefined =>
  * @param key Key
  * @returns 设置值
  */
-export const getAsync = <T = unknown>(key: string): Promise<T | undefined> =>
-  wx
-    .getStorage<StorageData<T>>({
+export const getAsync = async <T = unknown>(key: string): Promise<T | undefined> => {
+  try {
+    const { data } = await wx.getStorage<StorageData<T>>({
       key: `${CACHE_PREFIX}${key}`,
-    })
-    .then(({ data }) => getData(key, data))
-    .catch(() => {
-      logger.error(`get "${key}" fail`);
-
-      // oxlint-disable-next-line no-undefined, unicorn/no-useless-undefined
-      return undefined;
     });
+
+    return getData(key, data);
+  } catch (err) {
+    // A missing key is a normal cache miss; permission / corrupt storage errors must not be
+    // reported as "no cache" (that would silently reset user data).
+    if (isMissingStorageError(err)) {
+      // oxlint-disable-next-line no-undefined
+      return undefined;
+    }
+
+    logger.error(`get "${key}" fail`, err);
+
+    throw createStorageError(key, err, "Read");
+  }
+};
 
 /**
  * 移除

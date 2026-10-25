@@ -359,13 +359,45 @@ describe(getAsync, () => {
     const original = wxAny.getStorage;
 
     wxAny.getStorage = (option): Promise<never> => {
-      option.fail?.({ errMsg: "get fail" });
+      option.fail?.({ errMsg: "getStorage:fail data not found" });
 
-      return Promise.reject(new Error("get fail"));
+      return Promise.reject(
+        Object.assign(new Error("data not found"), {
+          errMsg: "getStorage:fail data not found",
+        }),
+      );
     };
 
     try {
-      await expect(getAsync("fail-get-key")).resolves.toBeUndefined();
+      await expect(getAsync("missing-get-key")).resolves.toBeUndefined();
+    } finally {
+      wxAny.getStorage = original;
+    }
+  });
+
+  it("should reject with MpError when getStorage fails for another reason", async () => {
+    const wxAny = wx as unknown as {
+      getStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
+    };
+    const original = wxAny.getStorage;
+
+    wxAny.getStorage = (option): Promise<never> => {
+      option.fail?.({ errMsg: "getStorage:fail permission denied" });
+
+      return Promise.reject(
+        Object.assign(new Error("permission denied"), {
+          errMsg: "getStorage:fail permission denied",
+        }),
+      );
+    };
+
+    try {
+      const error = await getAsync("fail-get-key").catch((err: unknown) => err);
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error as MpError).toMatchObject({
+        message: expect.stringContaining("permission denied"),
+      });
     } finally {
       wxAny.getStorage = original;
     }

@@ -21,7 +21,12 @@ icon: folder
 
 - `exists(path: string): boolean`
 
-  返回布尔值，代表文件或文件夹是否存在
+  返回布尔值，代表文件或文件夹是否存在。文件确实不存在时返回 `false`；权限、IO 等其它错误会抛出 `MpError`，不会被伪装成“不存在”。
+
+  ::: tip
+
+  读取类 API（`exists` / `ls` / `readFile` / `readJSON`）只有在“目标不存在”时才返回缺省值，其它错误统一抛出 `MpError`。
+  :::
 
 - `isDir(path: string): boolean`
 
@@ -195,6 +200,8 @@ icon: folder
 
   `get` 的异步版本，在读取大量数据避免阻塞线程时可考虑使用，返回一个 Promise。
   - `key`: 设置的键名
+
+  仅当 key 不存在（微信返回 `getStorage:fail data not found`）时 resolve `undefined`；其它读取错误（权限、存储损坏等）会以 `MpError` reject，不会被当成“没有缓存”。
 
 - `remove(key: string): void`
 
