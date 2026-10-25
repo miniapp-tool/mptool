@@ -1,4 +1,6 @@
 import "@mptool/mock";
+import type { MpError } from "@mptool/shared";
+import { MpError as MpErrorClass } from "@mptool/shared";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -91,6 +93,34 @@ describe(check, () => {
         resolve();
       }, 100);
     }));
+
+  it("should remove once values written by a previous session", () => {
+    set("check-once-key", "value", "once");
+
+    const raw = wx.getStorageSync<{ expired: number }>("_cache_check-once-key");
+
+    wx.setStorageSync("_cache_check-once-key", {
+      data: "stale",
+      expired: raw.expired - 1000,
+      once: true,
+    });
+
+    check();
+
+    expect(wx.getStorageSync("_cache_check-once-key")).toBeFalsy();
+  });
+
+  it("should remove values whose clock moved backwards", () => {
+    wx.setStorageSync("_cache_check-rollback-key", {
+      data: "future",
+      expired: Date.now() + 60_000,
+      createdAt: Date.now() + 30_000,
+    });
+
+    check();
+
+    expect(wx.getStorageSync("_cache_check-rollback-key")).toBeFalsy();
+  });
 });
 
 describe(checkAsync, () => {
@@ -148,6 +178,76 @@ describe(set, () => {
 
     expect(get("keep-none-key")).toBeUndefined();
   });
+
+  it("should bound once values to the writing session", () => {
+    set("once-session-key", "value", "once");
+
+    const raw = wx.getStorageSync<{ expired: number; once?: boolean }>("_cache_once-session-key");
+
+    expect(raw.once).toBe(true);
+    // A payload written by a previous session (with a rolled back clock) must not be revived
+    wx.setStorageSync("_cache_once-session-key", {
+      data: "stale",
+      expired: raw.expired - 1000,
+      once: true,
+    });
+
+    expect(get("once-session-key")).toBeUndefined();
+    expect(wx.getStorageSync("_cache_once-session-key")).toBeFalsy();
+  });
+
+  it("should preserve the once marker when keeping the expiry", () => {
+    set("keep-once-key", "first", "once");
+
+    const before = wx.getStorageSync<{ expired: number }>("_cache_keep-once-key");
+
+    set("keep-once-key", "second", "keep");
+
+    const after = wx.getStorageSync<{ expired: number; once?: boolean }>("_cache_keep-once-key");
+
+    expect(after).toMatchObject({ data: "second", expired: before.expired, once: true });
+    expect(get("keep-once-key")).toBe("second");
+  });
+
+  it("should preserve the creation time when keeping the expiry", () => {
+    set("keep-created-key", "first", 1000);
+
+    const before = wx.getStorageSync<{ createdAt?: number }>("_cache_keep-created-key");
+
+    set("keep-created-key", "second", "keep");
+
+    expect(wx.getStorageSync("_cache_keep-created-key")).toMatchObject({
+      data: "second",
+      createdAt: before.createdAt,
+    });
+  });
+
+  it("should expire timestamp based values when the clock moved backwards", () => {
+    wx.setStorageSync("_cache_clock-rollback-key", {
+      data: "future",
+      expired: Date.now() + 60_000,
+      createdAt: Date.now() + 30_000,
+    });
+
+    expect(get("clock-rollback-key")).toBeUndefined();
+    expect(wx.getStorageSync("_cache_clock-rollback-key")).toBeFalsy();
+  });
+
+  it("should keep timestamp based values while the clock is monotonic", () => {
+    wx.setStorageSync("_cache_clock-normal-key", {
+      data: "valid",
+      expired: Date.now() + 60_000,
+      createdAt: Date.now(),
+    });
+
+    expect(get("clock-normal-key")).toBe("valid");
+  });
+
+  it("should remove legacy timestamp entries that have already expired", () => {
+    wx.setStorageSync("_cache_legacy-expired-key", { data: "stale", expired: Date.now() - 1 });
+
+    expect(get("legacy-expired-key")).toBeUndefined();
+  });
 });
 
 describe(remove, () => {
@@ -171,7 +271,7 @@ describe(removeAsync, () => {
 });
 
 describe(setAsync, () => {
-  it("should catch setStorage failure", async () => {
+  it("should reject with MpError when setStorage fails", async () => {
     const wxAny = wx as unknown as {
       setStorage: (option: { fail?: (result: { errMsg: string }) => void }) => Promise<never>;
     };
@@ -184,9 +284,63 @@ describe(setAsync, () => {
     };
 
     try {
-      await expect(setAsync("fail-set-key", "value")).resolves.toBeUndefined();
+      const error = await setAsync("fail-set-key", "value").catch((err: unknown) => err);
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error as MpError).toMatchObject({ message: expect.stringContaining("set fail") });
+      expect(get("fail-set-key")).toBeUndefined();
     } finally {
       wxAny.setStorage = original;
+    }
+  });
+});
+
+describe("storage error contract", () => {
+  it("should throw MpError with errMsg when the sync write fails", () => {
+    const wxAny = wx as unknown as { setStorageSync: (key: string, data: unknown) => void };
+    const original = wxAny.setStorageSync;
+
+    wxAny.setStorageSync = (): void => {
+      throw Object.assign(new Error("quota exceeded"), {
+        errCode: 1001,
+        errMsg: "setStorageSync:fail exceed storage max size",
+      });
+    };
+
+    try {
+      let error: unknown;
+
+      try {
+        set("quota-key", { a: 1 });
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error).toMatchObject({
+        code: 1001,
+        message: expect.stringContaining("exceed storage max size"),
+      });
+    } finally {
+      wxAny.setStorageSync = original;
+    }
+  });
+
+  it("should reject with MpError when the async prepare step fails", async () => {
+    const wxAny = wx as unknown as { getStorageSync: (key: string) => unknown };
+    const original = wxAny.getStorageSync;
+
+    wxAny.getStorageSync = (): never => {
+      throw Object.assign(new Error("read failed"), { errMsg: "getStorageSync:fail read failed" });
+    };
+
+    try {
+      await expect(setAsync("fail-prepare-key", "value", "keep")).rejects.toMatchObject({
+        name: "MpError",
+        message: expect.stringContaining("read failed"),
+      });
+    } finally {
+      wxAny.getStorageSync = original;
     }
   });
 });
