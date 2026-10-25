@@ -25,6 +25,58 @@ const checkEnv = (): void => {
 };
 
 /**
+ * Extract the message of a wx / file-system error.
+ *
+ * @param err Error thrown by wx
+ * @returns The error message
+ */
+const getErrorMessage = (err: unknown): string => {
+  if (typeof err === "string") return err;
+
+  const record =
+    typeof err === "object" && err != null ? (err as { errMsg?: unknown; message?: unknown }) : {};
+
+  if (typeof record.errMsg === "string") return record.errMsg;
+  if (err instanceof Error) return err.message;
+
+  return String(err);
+};
+
+/**
+ * Whether an error means the target file / directory does not exist.
+ *
+ * A missing file is a normal branch for the read helpers; every other failure (permission, IO,
+ * invalid path) must not be reported as "does not exist".
+ *
+ * @param err Error thrown by wx
+ * @returns Whether the target does not exist
+ */
+const isNotFoundError = (err: unknown): boolean => {
+  const record = typeof err === "object" && err != null ? (err as { errCode?: unknown }) : {};
+
+  // wx file-system APIs report "no such file or directory" with errCode 1300002
+  if (record.errCode === 1300002) return true;
+
+  return /(?:no such file or directory|ENOENT)/iu.test(getErrorMessage(err));
+};
+
+/**
+ * Normalize a wx / file-system error into an `MpError`.
+ *
+ * @param path Path passed to the API
+ * @param err Error thrown by wx
+ * @returns Normalized error
+ */
+const createFileError = (path: string, err: unknown): MpError => {
+  const record = typeof err === "object" && err != null ? (err as { errCode?: unknown }) : {};
+
+  return new MpError({
+    ...(typeof record.errCode === "number" ? { code: record.errCode } : {}),
+    message: `File "${path}" failed: ${getErrorMessage(err)}`,
+  });
+};
+
+/**
  * 获取文件管理器
  *
  * @returns 文件管理器实例
@@ -102,8 +154,11 @@ export const exists = (path: string): boolean => {
     getFileManager().statSync(target, false);
 
     return true;
-  } catch {
-    return false;
+  } catch (err) {
+    // Only "no such file" means the target does not exist; surface permission / IO errors
+    if (isNotFoundError(err)) return false;
+
+    throw createFileError(path, err);
   }
 };
 
@@ -177,9 +232,12 @@ export const ls = (path: string): string[] => {
 
     return fileList;
   } catch (err) {
+    // A missing directory is a normal branch; other failures must not look like an empty folder
+    if (isNotFoundError(err)) return [];
+
     logger.error(`Error listing ${path} folder:`, err);
 
-    return [];
+    throw createFileError(path, err);
   }
 };
 
@@ -209,10 +267,17 @@ export const readFile = (<T extends FileEncoding>(
       | (T extends "binary" ? ArrayBuffer : string)
       | undefined;
   } catch (err) {
-    logger.warn(`Cannot read ${path}`, err);
+    // A missing file is a normal branch; permission / IO errors must be observable
+    if (isNotFoundError(err)) {
+      logger.warn(`Cannot read ${path}`, err);
 
-    // oxlint-disable-next-line no-undefined
-    return undefined;
+      // oxlint-disable-next-line no-undefined
+      return undefined;
+    }
+
+    logger.error(`Cannot read ${path}`, err);
+
+    throw createFileError(path, err);
   }
 }) as ReadFile;
 
@@ -242,7 +307,14 @@ export const readJSON = <T = unknown>(
       // 调试
       logger.warn(`Parse ${path}.json failed`);
     }
-  } catch {
+  } catch (err) {
+    // A missing file is a normal branch; permission / IO errors must be observable
+    if (!isNotFoundError(err)) {
+      logger.error(`Cannot read ${path}.json`, err);
+
+      throw createFileError(`${path}.json`, err);
+    }
+
     // 调试
     logger.warn(`${path}.json doesn't exist`);
   }
