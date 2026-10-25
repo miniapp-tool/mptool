@@ -24,7 +24,7 @@ The table lists **every** script defined in the root `package.json`; the "Implem
 
 | Script                     | Implementation                                                                              | Purpose                                                                                                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm run build`           | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run build` | Regenerate the shared `enhance` → `skyline-enhance` files, then build all packages (production: minify + publint)                                                       |
+| `pnpm run build`           | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run build` | Regenerate the shared `enhance` → `skyline-enhance` files, then build all packages (production: minify + publint) and type-check `demo/` through its `build` script     |
 | `pnpm run dev`             | `unrun scripts/sync-enhance.ts && cross-env NODE_ENV=production pnpm --stream -r run dev`   | Same sync, then recursive `dev`. **No package defines a `dev` script** (only `build` / `clean`), so this currently builds nothing — use `build`                         |
 | `pnpm run clean`           | `pnpm --stream -r run clean`                                                                | Remove every package's `dist/` (`rimraf ./dist`)                                                                                                                        |
 | `pnpm run copy`            | `unrun scripts/copy-package.ts`                                                             | Copy `packages/all/dist` + `package.json` into `demo/node_modules/@mptool/all` for the demo                                                                             |
@@ -55,9 +55,9 @@ mptool/
 │   ├── tsdown.ts        # Shared tsdown config factory (es2018, single-file ESM, dts via oxc, atob injection, Codecov bundle analysis)
 │   ├── atob.ts          # atob polyfill injected into bundles (htmlparser2's `entities` needs it)
 │   └── sync.ts          # Mirror published packages to the npmmirror registry (release only)
-├── demo/                # Demo mini-app (workspace dep on @mptool/all, TypeScript compiled by `tsc`)
+├── demo/                # Demo mini-app (workspace dep on @mptool/all; `build` type-checks it, `demo:build` emits JS)
 ├── docs/                # VuePress site (guide / enhance / skyline-enhance / net / file / api / parser / run / mock)
-├── .github/workflows/   # test.yml, docs.yml, publish.yml, codeql-analysis.yml, scraper.yml
+├── .github/workflows/   # test.yml, docs-check.yml, docs.yml, publish.yml, codeql-analysis.yml, scraper.yml
 ├── vitest.config.ts     # Coverage (istanbul) + typecheck
 ├── tsconfig.json        # Extends @mr-hope/tsconfig/check.json, isolatedDeclarations
 ├── oxlint.config.ts / oxfmt.config.ts
@@ -204,7 +204,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - **Pre-commit**: husky runs `nano-staged` (`.husky/pre-commit`): `oxfmt` on all staged files and `oxlint --fix` on staged `*.js` / `*.ts`.
 - **Branches**: lerna `version` only allows the `main` branch.
 - **Releases**: maintainer-only `workflow_dispatch` in `.github/workflows/publish.yml` (requires `Mister-Hope`): build + `lint:check` + `typecheck` + tests → `lerna version` → `lerna publish from-package` → `scripts/sync.ts`. There is no local release command.
-- **CI**: `test.yml` (build / lint / typecheck / test + Codecov), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
+- **CI**: `test.yml` (build / lint / typecheck / test + Codecov; the build step also type-checks `demo/`), `docs-check.yml` (pull requests touching `docs/**`: `docs:check` + `docs:build`), `docs.yml` (VuePress build → gh-pages + Meilisearch scraper), `publish.yml`, `codeql-analysis.yml`.
 - **Docs**: `pnpm run docs:dev` for local preview, `pnpm run docs:check` to type-check the site project (its own `docs/tsconfig.json`, which gives the docs DOM libs that the root `tsconfig.json` does not). The site config is `docs/.vuepress/config.ts` (navbar sections: enhance, skyline-enhance, net, file, api, parser, run, mock; guide is the landing section). `.vue` SFCs are **not** type-checked: `vue-tsc` currently fails to start against the repository's TypeScript version (`ERR_PACKAGE_PATH_NOT_EXPORTED`), so keep docs logic in `.ts` files until it supports the installed TypeScript.
 - **Adding a package**: create `packages/<name>/` with `package.json`, `tsdown.config.mts`, `src/index.ts`, `__tests__/` (lerna and the pnpm workspace pick up `packages/*` automatically); if it belongs in a bundle, update `packages/all` and/or `packages/skyline`; add a docs section.
 - **Fixing a bug**: write a failing test first, fix the code, run `pnpm run build` + `pnpm run test`, then check dependent packages for side effects.

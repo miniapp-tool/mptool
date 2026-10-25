@@ -3,6 +3,7 @@
   "version": "0.8.6",
   "private": true,
   "scripts": {
+    "build": "tsc --noEmit",
     "demo:build": "tsc",
     "demo:dev": "tsc -w"
   },
