@@ -23,6 +23,14 @@ const config: UserConfig = defineUserConfig({
     docsDir: "docs",
 
     navbar: [
+      {
+        text: "全量包",
+        icon: "box",
+        children: [
+          { text: "@mptool/all", link: "/all/" },
+          { text: "@mptool/skyline", link: "/skyline/" },
+        ],
+      },
       { text: "enhance", link: "/enhance/" },
       { text: "skyline-enhance", link: "/skyline-enhance/" },
       { text: "net", link: "/net/" },
@@ -30,6 +38,8 @@ const config: UserConfig = defineUserConfig({
       { text: "api", link: "/api/" },
       { text: "parser", link: "/parser/" },
       { text: "run", link: "/run/" },
+      { text: "encoder", link: "/encoder/" },
+      { text: "shared", link: "/shared/" },
       { text: "mock", link: "/mock/" },
     ],
     sidebar: "structure",
