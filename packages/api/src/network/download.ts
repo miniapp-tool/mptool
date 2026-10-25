@@ -1,8 +1,5 @@
 import { MpError, logger } from "@mptool/shared";
 
-import { showToast } from "../ui/index.js";
-import { reportNetworkStatus } from "./report.js";
-
 /**
  * 下载文件
  *
@@ -21,7 +18,6 @@ export const download = (url: string, mask = false): Promise<string> =>
         } else {
           const errMsg = `Download ${url} failed with statusCode: ${statusCode}`;
 
-          void showToast("下载失败");
           logger.warn(errMsg);
           reject(new MpError({ code: statusCode, message: errMsg }));
         }
@@ -30,8 +26,6 @@ export const download = (url: string, mask = false): Promise<string> =>
         void wx.hideLoading();
 
         reject(new MpError({ message: errMsg }));
-
-        reportNetworkStatus();
         logger.warn(`Download ${url} failed:`, errMsg);
       },
     });

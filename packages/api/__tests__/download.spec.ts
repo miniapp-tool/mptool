@@ -10,7 +10,15 @@ describe(download, () => {
     expect(path).toBeDefined();
   });
 
-  it("should reject when download fails", async () => {
+  it("should reject when download fails without showing UI", async () => {
+    const titles: string[] = [];
+    const mockShowToastApi = wx as unknown as {
+      showToast: (option: { title: string }) => void;
+    };
+
+    mockShowToastApi.showToast = (option): void => {
+      titles.push(option.title);
+    };
     const mockDownloadFile = wx as unknown as {
       downloadFile: (option: { fail?: (result: { errMsg: string }) => void }) => void;
     };
@@ -20,9 +28,11 @@ describe(download, () => {
     };
 
     await expect(download("https://example.com/file.png")).rejects.toThrow("download fail");
+
+    expect(titles).toStrictEqual([]);
   });
 
-  it("should reject with status code on non-200 response", async () => {
+  it("should reject with status code on non-200 response without showing UI", async () => {
     const titles: string[] = [];
     const mockShowToastApi = wx as unknown as {
       showToast: (option: { title: string }) => void;
@@ -43,7 +53,7 @@ describe(download, () => {
 
     await expect(download("https://example.com/file.png")).rejects.toThrow("statusCode: 404");
 
-    expect(titles).toStrictEqual(["下载失败"]);
+    expect(titles).toStrictEqual([]);
   });
 
   it("should resolve the downloaded temp file path", async () => {

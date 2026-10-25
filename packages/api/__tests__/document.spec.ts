@@ -27,16 +27,6 @@ const mockDownloadFile = (fail = false): void => {
   };
 };
 
-const mockNetworkType = (networkType: string): void => {
-  const mockNetworkTypeApi = wx as unknown as {
-    getNetworkType: (option: { success: (result: { networkType: string }) => void }) => void;
-  };
-
-  mockNetworkTypeApi.getNetworkType = (option): void => {
-    option.success({ networkType });
-  };
-};
-
 const mockShowToast = (): string[] => {
   const titles: string[] = [];
   const mockShowToastApi = wx as unknown as {
@@ -104,9 +94,6 @@ describe(openDocument, () => {
     const titles = mockShowToast();
     const events = mockReportEvent();
     mockDownloadFile(true);
-    // reportNetworkStatus is triggered on download failure; keep it quiet so
-    // this case only verifies the download failure handling
-    mockNetworkType("4g");
 
     openDocument("https://example.com/broken.pdf");
     await flush();
@@ -145,9 +132,6 @@ describe(saveDocument, () => {
     const titles = mockShowToast();
     const events = mockReportEvent();
     mockDownloadFile(true);
-    // reportNetworkStatus is triggered on download failure; keep it quiet so
-    // this case only verifies the download failure handling
-    mockNetworkType("4g");
 
     saveDocument("https://example.com/broken.pdf");
     await flush();
