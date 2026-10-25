@@ -1,0 +1,456 @@
+// oxlint-disable promise/prefer-await-to-callbacks
+
+import { getApiKind } from "./failure.js";
+import { frameworkApi } from "./framework.js";
+import {
+  addRule,
+  clearCalls,
+  getCalls,
+  mockState,
+  nextRuleSeq,
+  resetState,
+  restoreState,
+  snapshotState,
+} from "./state.js";
+import type { MockRule, RouteEntry } from "./state.js";
+import type {
+  MockCompatFlags,
+  MockNetworkOptions,
+  MockStorageOptions,
+  MockSystemOptions,
+  MockWxScope,
+  UserDecisions,
+  WxApiKind,
+  WxApiName,
+  WxFailure,
+  WxNetworkResponse,
+  WxResponder,
+  WxRuleHandle,
+  WxRuleOptions,
+} from "./typings.js";
+import { emitEvent } from "./ui.js";
+import { DEFAULT_USER_DATA_PATH, wx } from "./wx.js";
+
+/** APIs whose failures can be injected. */
+const INJECTABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
+
+interface EnvSnapshot {
+  DEBUG: unknown;
+  USER_DATA_PATH: string;
+}
+
+const snapshotEnv = (): EnvSnapshot => ({
+  DEBUG: (wx.env as unknown as Record<string, unknown>).DEBUG,
+  USER_DATA_PATH: wx.env.USER_DATA_PATH,
+});
+
+const restoreEnv = (snapshot: EnvSnapshot): void => {
+  wx.env.USER_DATA_PATH = snapshot.USER_DATA_PATH;
+
+  const env = wx.env as unknown as Record<string, unknown>;
+
+  // oxlint-disable-next-line no-undefined -- `DEBUG` is optional on `wx.env`
+  if (snapshot.DEBUG === undefined) delete env.DEBUG;
+  else env.DEBUG = snapshot.DEBUG;
+};
+
+const resetEnv = (): void => {
+  wx.env.USER_DATA_PATH = DEFAULT_USER_DATA_PATH;
+
+  delete (wx.env as unknown as Record<string, unknown>).DEBUG;
+};
+
+const createScope = (): MockWxScope => {
+  const stateSnapshot = snapshotState();
+  const envSnapshot = snapshotEnv();
+  let restored = false;
+
+  return {
+    restore(): void {
+      if (restored) return;
+
+      restored = true;
+      restoreState(stateSnapshot);
+      restoreEnv(envSnapshot);
+    },
+  };
+};
+
+const runInScope = async <T>(callback: () => T | Promise<T>): Promise<T> => {
+  const scope = createScope();
+
+  try {
+    return await callback();
+  } finally {
+    scope.restore();
+  }
+};
+
+let autoRestoreInstalled = false;
+
+const installAutoRestore = (afterEach: (hook: () => void) => void): void => {
+  if (autoRestoreInstalled) return;
+
+  autoRestoreInstalled = true;
+
+  const stateSnapshot = snapshotState();
+  const envSnapshot = snapshotEnv();
+
+  afterEach(() => {
+    restoreState(stateSnapshot);
+    restoreEnv(envSnapshot);
+  });
+};
+
+const normalizeApis = (api: WxApiName | WxApiName[]): WxApiName[] =>
+  Array.isArray(api) ? api : [api];
+
+const assertInjectable = (api: WxApiName): void => {
+  const value = (wx as unknown as Record<string, unknown>)[api];
+
+  if (typeof value !== "function") throw new TypeError(`[mockWx] unknown wx API "${api}"`);
+
+  const kind = getApiKind(api);
+
+  if (!INJECTABLE_KINDS.has(kind)) {
+    throw new TypeError(
+      `[mockWx] "${api}" is an ${kind} API; failures can only be injected into callback / task / sync APIs`,
+    );
+  }
+};
+
+interface RuleInput {
+  api: string;
+  kind: MockRule["kind"];
+  remaining: number;
+  delay: number;
+  match?: (arg: unknown, callIndex: number) => boolean;
+  failure?: WxFailure;
+  failures?: WxFailure[];
+  responder?: WxResponder;
+  routes?: RouteEntry[];
+}
+
+const createRule = (input: RuleInput): MockRule => {
+  const seq = nextRuleSeq();
+
+  return {
+    api: input.api,
+    apiKind: getApiKind(input.api),
+    count: 0,
+    delay: input.delay,
+    disposed: false,
+    failure: input.failure,
+    failures: input.failures,
+    id: `rule-${seq}`,
+    kind: input.kind,
+    match: input.match,
+    remaining: input.remaining,
+    responder: input.responder,
+    routes: input.routes,
+    seq,
+  };
+};
+
+const createHandle = (rules: MockRule[]): WxRuleHandle => ({
+  get count(): number {
+    return rules.reduce((total, rule) => total + rule.count, 0);
+  },
+  get id(): string {
+    return rules.map((rule) => rule.id).join(",");
+  },
+  dispose(): void {
+    for (const rule of rules) rule.disposed = true;
+  },
+});
+
+const resolveRemaining = (options?: WxRuleOptions): number => {
+  if (typeof options?.times === "number") {
+    if (!Number.isInteger(options.times) || options.times < 1)
+      throw new RangeError("[mockWx] options.times must be a positive integer");
+
+    return options.once ? 1 : options.times;
+  }
+
+  return options?.once ? 1 : Number.POSITIVE_INFINITY;
+};
+
+const parseRouteKey = (
+  key: string,
+  response: WxResponder<WxNetworkResponse> | WxFailure,
+): RouteEntry => {
+  const trimmed = key.trim();
+  const methodMatch = /^(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH|TRACE|CONNECT)\s+(.+)$/iu.exec(
+    trimmed,
+  );
+  const method = methodMatch?.[1]?.toUpperCase();
+  const target = (methodMatch?.[2] ?? trimmed).trim();
+
+  // `/pattern/` or `/pattern/flags` keys are treated as regular expressions; URLs start with
+  // `http`, so there is no ambiguity for the usual cases.
+  const regexpMatch = /^\/(.*)\/([a-z]*)$/u.exec(target);
+
+  if (regexpMatch)
+    return { method, regexp: new RegExp(regexpMatch[1] ?? "", regexpMatch[2]), response };
+
+  return { method, response, url: target };
+};
+
+const registerFailure = (
+  api: WxApiName | WxApiName[],
+  failure: WxFailure,
+  options?: WxRuleOptions,
+): WxRuleHandle => {
+  if (failure.type === "http") {
+    throw new TypeError(
+      "[mockWx] HTTP status codes are responses, not failures; use respond() or route() instead",
+    );
+  }
+
+  const remaining = resolveRemaining(options);
+  const rules = normalizeApis(api).map((name) => {
+    assertInjectable(name);
+
+    return createRule({
+      api: name,
+      delay: options?.delay ?? 0,
+      failure,
+      kind: "fail",
+      match: options?.match,
+      remaining,
+    });
+  });
+
+  for (const rule of rules) addRule(rule);
+
+  return createHandle(rules);
+};
+
+const ensureParentDir = (path: string): void => {
+  const index = path.lastIndexOf("/");
+
+  if (index > 0) wx.getFileSystemManager().mkdirSync(path.slice(0, index), true);
+};
+
+const toArrayBuffer = (data: Uint8Array): ArrayBuffer =>
+  data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+
+/** MockWx control plane; see the "Failing requests and injecting responses" section of the docs. */
+export interface MockWx {
+  // ---- failure injection ----
+  fail: (api: WxApiName | WxApiName[], failure: WxFailure, options?: WxRuleOptions) => WxRuleHandle;
+  failNext: (
+    api: WxApiName | WxApiName[],
+    failure: WxFailure,
+    options?: Omit<WxRuleOptions, "once" | "times">,
+  ) => WxRuleHandle;
+  failSequence: (
+    api: WxApiName,
+    failures: WxFailure[],
+    options?: Omit<WxRuleOptions, "times">,
+  ) => WxRuleHandle;
+
+  // ---- response injection ----
+  respond: <R>(
+    api: WxApiName | WxApiName[],
+    responder: WxResponder<R>,
+    options?: WxRuleOptions,
+  ) => WxRuleHandle;
+  route: (
+    table: Record<string, WxResponder<WxNetworkResponse> | WxFailure>,
+    options?: { delay?: number },
+  ) => WxRuleHandle;
+
+  // ---- state presets (consumed by the follow-up PRs) ----
+  storage: (options: MockStorageOptions) => void;
+  auth: (authSetting: Record<string, boolean>) => void;
+  authorize: (decision: "allow" | "deny") => void;
+  user: (decisions: UserDecisions) => void;
+  system: (options: MockSystemOptions) => void;
+  network: (options: MockNetworkOptions) => void;
+  clipboard: (text: string) => void;
+  pages: (pages: unknown[]) => void;
+  login: (state: { code?: string; sessionValid?: boolean }) => void;
+  file: (path: string, content: string | ArrayBuffer | Uint8Array) => void;
+  dir: (path: string) => void;
+
+  // ---- call recording ----
+  calls: (api: WxApiName) => readonly (readonly unknown[])[];
+  clearCalls: (api?: WxApiName) => void;
+
+  // ---- isolation ----
+  scope: () => MockWxScope;
+  run: <T>(callback: () => T | Promise<T>) => Promise<T>;
+  autoRestore: (afterEach: (hook: () => void) => void) => void;
+  reset: () => void;
+  compat: (flags: MockCompatFlags) => void;
+
+  /** Trigger an event registered through `wx.onXxx`. */
+  emit: (event: string, ...args: unknown[]) => void;
+}
+
+export const mockWx: MockWx = {
+  auth(authSetting: Record<string, boolean>): void {
+    mockState.config.auth = { ...mockState.config.auth, ...authSetting };
+  },
+
+  authorize(decision: "allow" | "deny"): void {
+    mockState.config.authorize = decision;
+  },
+
+  autoRestore(afterEach: (hook: () => void) => void): void {
+    installAutoRestore(afterEach);
+  },
+
+  calls(api: WxApiName): readonly (readonly unknown[])[] {
+    return getCalls(api);
+  },
+
+  clearCalls(api?: WxApiName): void {
+    clearCalls(api);
+  },
+
+  clipboard(text: string): void {
+    mockState.config.clipboard = text;
+  },
+
+  compat(flags: MockCompatFlags): void {
+    mockState.config.compat = { ...mockState.config.compat, ...flags };
+  },
+
+  dir(path: string): void {
+    wx.getFileSystemManager().mkdirSync(path, true);
+  },
+
+  emit(event: string, ...args: unknown[]): void {
+    emitEvent(event, ...args);
+  },
+
+  fail(api: WxApiName | WxApiName[], failure: WxFailure, options?: WxRuleOptions): WxRuleHandle {
+    return registerFailure(api, failure, options);
+  },
+
+  failNext(
+    api: WxApiName | WxApiName[],
+    failure: WxFailure,
+    options?: Omit<WxRuleOptions, "once" | "times">,
+  ): WxRuleHandle {
+    return registerFailure(api, failure, { ...options, times: 1 });
+  },
+
+  failSequence(
+    api: WxApiName,
+    failures: WxFailure[],
+    options?: Omit<WxRuleOptions, "times">,
+  ): WxRuleHandle {
+    if (failures.length === 0)
+      throw new RangeError("[mockWx] failSequence() needs at least one failure");
+
+    assertInjectable(api);
+
+    const rule = createRule({
+      api,
+      delay: options?.delay ?? 0,
+      failures,
+      kind: "sequence",
+      match: options?.match,
+      remaining: Math.min(failures.length, resolveRemaining(options)),
+    });
+
+    addRule(rule);
+
+    return createHandle([rule]);
+  },
+
+  file(path: string, content: string | ArrayBuffer | Uint8Array): void {
+    ensureParentDir(path);
+
+    wx.getFileSystemManager().writeFileSync(
+      path,
+      content instanceof Uint8Array ? toArrayBuffer(content) : content,
+    );
+  },
+
+  login(state: { code?: string; sessionValid?: boolean }): void {
+    mockState.config.login = { ...mockState.config.login, ...state };
+  },
+
+  network(options: MockNetworkOptions): void {
+    mockState.config.network = { ...mockState.config.network, ...options };
+  },
+
+  pages(pages: unknown[]): void {
+    frameworkApi.currentPages.length = 0;
+    frameworkApi.currentPages.push(...pages);
+  },
+
+  reset(): void {
+    resetState();
+    resetEnv();
+  },
+
+  respond<R>(
+    api: WxApiName | WxApiName[],
+    responder: WxResponder<R>,
+    options?: WxRuleOptions,
+  ): WxRuleHandle {
+    const remaining = resolveRemaining(options);
+    const rules = normalizeApis(api).map((name) => {
+      assertInjectable(name);
+
+      return createRule({
+        api: name,
+        delay: options?.delay ?? 0,
+        kind: "respond",
+        match: options?.match,
+        remaining,
+        responder,
+      });
+    });
+
+    for (const rule of rules) addRule(rule);
+
+    return createHandle(rules);
+  },
+
+  route(
+    table: Record<string, WxResponder<WxNetworkResponse> | WxFailure>,
+    options?: { delay?: number },
+  ): WxRuleHandle {
+    assertInjectable("request");
+
+    const routes = Object.entries(table).map(([key, response]) => parseRouteKey(key, response));
+
+    if (routes.length === 0) throw new RangeError("[mockWx] route() needs at least one entry");
+
+    const rule = createRule({
+      api: "request",
+      delay: options?.delay ?? 0,
+      kind: "route",
+      remaining: Number.POSITIVE_INFINITY,
+      routes,
+    });
+
+    addRule(rule);
+
+    return createHandle([rule]);
+  },
+
+  run: <T>(callback: () => T | Promise<T>): Promise<T> => runInScope(callback),
+
+  scope(): MockWxScope {
+    return createScope();
+  },
+
+  storage(options: MockStorageOptions): void {
+    mockState.config.storage = { ...mockState.config.storage, ...options };
+  },
+
+  system(options: MockSystemOptions): void {
+    mockState.config.system = { ...mockState.config.system, ...options };
+  },
+
+  user(decisions: UserDecisions): void {
+    mockState.config.user = { ...mockState.config.user, ...decisions };
+  },
+};
