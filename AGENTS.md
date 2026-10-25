@@ -38,6 +38,8 @@ The table lists **every** script defined in the root `package.json`; the "Implem
 | `pnpm run docs:dev`        | `pnpm --dir=docs run docs:dev`                                                              | VuePress dev server                                                                                                                                                     |
 | `pnpm run packages:update` | `pnpm dlx npm-check-updates -u --workspaces`                                                | Interactive dependency upgrade (root `.ncurc.js` sets `workspaces: true`; npm-check-updates rejects `--deep` together with `--workspaces`, so do not add `--deep` back) |
 | `pnpm run postinstall`     | `husky`                                                                                     | Install git hooks (runs automatically after install)                                                                                                                    |
+| `pnpm run sync`            | `unrun scripts/sync-enhance.ts`                                                             | Copy the shared `enhance` → `skyline-enhance` files without building                                                                                                    |
+| `pnpm run sync:check`      | `unrun scripts/sync-enhance.ts --check`                                                     | Verify the committed `skyline-enhance` copies are up to date (CI gate; exits 1 on drift)                                                                                |
 
 There is **no `release` script**. Releases are cut by a maintainer through the `workflow_dispatch` workflow `.github/workflows/publish.yml` (lerna-lite `version` → `publish from-package` → `unrun scripts/sync.ts` to mirror to npmmirror).
 
@@ -165,6 +167,7 @@ All workspace packages are **inlined at build time** (`tsdown` `alwaysBundle: [/
 `app/index.ts`, `app/typings.ts`, `component/index.ts`, `component/store.ts`, `config/index.ts`, `emitter/index.ts`, `emitter/typings.ts`, `hotReload.ts`, `navigator/index.ts`, `navigator/typings.ts`, `page/index.ts`, `index.ts`.
 
 - Edit these files **in `enhance` only**; hand edits in `skyline-enhance` are overwritten by the next sync.
+- `pnpm run sync:check` fails when the committed copies differ from `enhance` (CI runs it before `build`), and `test.yml` also runs `git diff --exit-code` after `build`, so a build that rewrites tracked files cannot go unnoticed. Run `pnpm run sync` to regenerate the copies.
 - Everything else is maintained per package, notably `config/typings.ts`, `page/page.ts`, `page/typings.ts`, `bridge.ts`, `constant.ts`, `app/app.ts`, `component/component.ts`, `component/typings.ts`, `config/config.ts`, `emitter/emitter.ts`, `navigator/navigator.ts`. When a change touches `$Page` / `$Config` / navigation, update both packages (the hot-reload integration had to touch both `page/page.ts` files).
 - The hot-reload spec exists in both `packages/enhance/__tests__/hotReload.spec.ts` and `packages/skyline-enhance/__tests__/hotReload.spec.ts`; keep them in sync.
 
@@ -196,7 +199,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 - Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/shared/__tests__/`, `packages/net/__tests__/`, `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
 - Test layout: `packages/<pkg>/__tests__/<name>.spec.ts`. `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
 - `@mptool/mock` is imported for its side effect: it installs `globalThis.wx` and the mini-program framework mocks before tests run.
-- CI gate order in `.github/workflows/test.yml`: install → `pnpm run build` → `pnpm run lint:check` → `pnpm run typecheck` → `pnpm run test` → Codecov upload.
+- CI gate order in `.github/workflows/test.yml`: install → `pnpm run sync:check` → `pnpm run build` → `git diff --exit-code` → `pnpm run lint:check` → `pnpm run typecheck` → `pnpm run test` → Codecov upload.
 
 ## Contribution Guidelines
 
