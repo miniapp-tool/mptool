@@ -166,12 +166,55 @@ const walkContains = (node: unknown, pred: (type: string) => boolean): boolean =
 };
 
 /**
+ * Memoized subtree scans. AST nodes are immutable after parsing, so a scan result can be cached per
+ * node; async loops otherwise re-walk every statement/expression on every iteration.
+ *
+ * 子树扫描缓存。AST 节点解析后不可变，因此结果可按节点缓存；否则 async 循环每轮都会重复整树遍历。
+ */
+const awaitCache = new WeakMap<object, boolean>();
+const callCache = new WeakMap<object, boolean>();
+const controlFlowCache = new WeakMap<object, boolean>();
+const safeStatementCache = new WeakMap<object, boolean>();
+const safeExpressionCache = new WeakMap<object, boolean>();
+
+/**
+ * Run `walkContains` with a per-node cache.
+ *
+ * 带节点缓存的 `walkContains`。
+ *
+ * @param cache - The cache / 缓存
+ * @param node - The node or value / 节点或值
+ * @param pred - Type predicate / 类型谓词
+ * @returns Whether any node matches / 是否存在匹配节点
+ */
+const cachedWalk = (
+  cache: WeakMap<object, boolean>,
+  node: unknown,
+  pred: (type: string) => boolean,
+): boolean => {
+  if (node != null && typeof node === "object" && !Array.isArray(node)) {
+    const cached = cache.get(node);
+
+    if (cached != null) return cached;
+
+    const result = walkContains(node, pred);
+
+    cache.set(node, result);
+
+    return result;
+  }
+
+  return walkContains(node, pred);
+};
+
+/**
  * Whether a node subtree contains an `await` expression / 子树是否含 `await` 表达式
  *
  * @param node - The node or value / 节点或值
  * @returns Whether it contains `await` / 是否含 `await`
  */
-const containsAwait = (node: unknown): boolean => walkContains(node, (type) => type === "await");
+const containsAwait = (node: unknown): boolean =>
+  cachedWalk(awaitCache, node, (type) => type === "await");
 
 /**
  * Whether a node subtree contains a call or `new` / 子树是否含调用或 `new`
@@ -180,7 +223,7 @@ const containsAwait = (node: unknown): boolean => walkContains(node, (type) => t
  * @returns Whether it contains a call or `new` / 是否含调用或 `new`
  */
 const containsCall = (node: unknown): boolean =>
-  walkContains(node, (type) => type === "call" || type === "new");
+  cachedWalk(callCache, node, (type) => type === "call" || type === "new");
 
 /**
  * Whether a node subtree contains control-flow altering statements / 子树是否含改变控制流的语句
@@ -189,7 +232,8 @@ const containsCall = (node: unknown): boolean =>
  * @returns Whether it contains control flow / 是否含控制流
  */
 const containsControlFlow = (node: unknown): boolean =>
-  walkContains(
+  cachedWalk(
+    controlFlowCache,
     node,
     (type) =>
       type === "return" ||
@@ -206,8 +250,17 @@ const containsControlFlow = (node: unknown): boolean =>
  * @param stmt - The statement / 语句
  * @returns Whether it is safe to evaluate synchronously / 是否可安全同步求值
  */
-const isSafeSyncStatement = (stmt: Statement): boolean =>
-  !containsAwait(stmt) && !containsCall(stmt) && !containsControlFlow(stmt);
+const isSafeSyncStatement = (stmt: Statement): boolean => {
+  const cached = safeStatementCache.get(stmt);
+
+  if (cached != null) return cached;
+
+  const result = !containsAwait(stmt) && !containsCall(stmt) && !containsControlFlow(stmt);
+
+  safeStatementCache.set(stmt, result);
+
+  return result;
+};
 
 /**
  * Whether an expression can be evaluated synchronously inside an async body / 表达式是否可在 async 体内同步求值
@@ -215,8 +268,17 @@ const isSafeSyncStatement = (stmt: Statement): boolean =>
  * @param expr - The expression / 表达式
  * @returns Whether it is safe to evaluate synchronously / 是否可安全同步求值
  */
-const isSafeSyncExpression = (expr: Expression): boolean =>
-  !containsAwait(expr) && !containsCall(expr);
+const isSafeSyncExpression = (expr: Expression): boolean => {
+  const cached = safeExpressionCache.get(expr);
+
+  if (cached != null) return cached;
+
+  const result = !containsAwait(expr) && !containsCall(expr);
+
+  safeExpressionCache.set(expr, result);
+
+  return result;
+};
 
 /**
  * Read a property, throwing the host-like `TypeError` on `null`/`undefined` receivers.
