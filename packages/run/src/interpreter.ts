@@ -440,6 +440,9 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
   const { simpleParamNames } = meta;
   const argsObject: Record<PropertyKey, unknown> = { length: args.length };
   const sloppy = meta.thisMode === "sloppy";
+  // any non-simple parameter (default / destructuring / rest) disables parameter mapping entirely
+  // 任一非简单参数（默认值/解构/rest）都会关闭整个 arguments 的参数映射
+  const mapped = sloppy && simpleParamNames.every((name) => name != null);
 
   if (sloppy && meta.callee != null) {
     Object.defineProperty(argsObject, "callee", {
@@ -453,7 +456,7 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
   for (let i = 0; i < args.length; i += 1) {
     const paramName = i < simpleParamNames.length ? simpleParamNames[i] : null;
 
-    if (sloppy && paramName != null) {
+    if (mapped && paramName != null) {
       Object.defineProperty(argsObject, i, {
         enumerable: true,
         configurable: true,
@@ -471,6 +474,41 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
       });
     }
   }
+
+  // arguments is iterable over its current (possibly mapped) values
+  // arguments 可迭代，读取当前的（可能是映射后的）值
+  const createArgumentsIterator = (): IterableIterator<unknown> => {
+    let index = 0;
+
+    return {
+      next(): IteratorResult<unknown> {
+        if (index >= args.length) return { done: true, value: void 0 };
+
+        const value = argsObject[index];
+
+        index += 1;
+
+        return { done: false, value };
+      },
+      [Symbol.iterator](): IterableIterator<unknown> {
+        return this;
+      },
+    };
+  };
+
+  Object.defineProperty(argsObject, Symbol.iterator, {
+    value: createArgumentsIterator,
+    writable: true,
+    enumerable: false,
+    configurable: true,
+  });
+
+  Object.defineProperty(argsObject, Symbol.toStringTag, {
+    value: "Arguments",
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
 
   env.define("arguments", argsObject);
 };
