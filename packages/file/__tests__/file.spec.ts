@@ -253,3 +253,44 @@ describe("file edge cases", () => {
     }
   });
 });
+
+const getThrownError = (fn: () => void): unknown => {
+  try {
+    fn();
+  } catch (err) {
+    return err;
+  }
+
+  return undefined;
+};
+
+describe("writeJSON guards", () => {
+  it("should reject values JSON cannot represent", () => {
+    expect(getThrownError(() => writeJSON("tmp/undefined-json", undefined))).toMatchObject({
+      name: "MpError",
+      message: expect.stringContaining("JSON-serializable"),
+    });
+    expect(getThrownError(() => writeJSON("tmp/function-json", () => undefined))).toMatchObject({
+      name: "MpError",
+      message: expect.stringContaining("JSON-serializable"),
+    });
+    expect(exists("tmp/undefined-json.json")).toBe(false);
+    expect(exists("tmp/function-json.json")).toBe(false);
+  });
+
+  it("should reject circular structures with MpError", () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+
+    expect(getThrownError(() => writeJSON("tmp/circular-json", circular))).toMatchObject({
+      name: "MpError",
+      message: expect.stringContaining("circular"),
+    });
+  });
+
+  it("should still write JSON-serializable data", () => {
+    writeJSON("tmp/serializable-json", { a: 1 });
+
+    expect(readJSON("tmp/serializable-json")).toStrictEqual({ a: 1 });
+  });
+});

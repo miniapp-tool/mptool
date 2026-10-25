@@ -374,16 +374,33 @@ export const writeFile = <T = unknown>(
 /**
  * 写入 JSON 文件
  *
+ * `JSON.stringify()` cannot represent `undefined`, functions or symbols (it returns `undefined` for
+ * them, or throws on circular structures); writing such a value would silently store
+ * `undefined`/`null` instead. Those inputs are rejected with an `MpError` so the mistake is visible
+ * at the call site.
+ *
  * @param path 写入文件的路径，不含 `.json`，若父文件夹不存在会自动创建
- * @param data 写入文件的数据，可接受任意可序列化的数据
+ * @param data 写入文件的数据，必须是可 JSON 序列化的数据
  * @param encoding 文件编码选项，默认 `utf-8`
+ * @throws {MpError} 数据不可 JSON 序列化时抛出
  */
 export const writeJSON = <T = unknown>(
   path: string,
   data: T,
   encoding: FileEncoding = "utf-8",
 ): void => {
-  const jsonString = JSON.stringify(data);
+  let jsonString: string | undefined;
+
+  try {
+    jsonString = JSON.stringify(data) as string | undefined;
+  } catch (err) {
+    throw new MpError({
+      message: `writeJSON("${path}") failed: ${err instanceof Error ? err.message : String(err)}`,
+    });
+  }
+
+  if (typeof jsonString !== "string")
+    throw new MpError({ message: `writeJSON("${path}") requires a JSON-serializable value` });
 
   mkdir(dirname(path));
   getFileManager().writeFileSync(`${resolvePath(path)}.json`, jsonString, encoding);
