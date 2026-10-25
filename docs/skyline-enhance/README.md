@@ -20,7 +20,7 @@ Skyline 渲染对运行环境有要求：客户端 8.0.40+（对应基础库 3.0
 | 额外生命周期               | `onRegister` / `onAppLaunch` / `onNavigate` / `onPreload` / `onAwake` | `onRegister` / `onAwake`  |
 | `$preload`                 | ✅                                                                    | ❌                        |
 | 导航锁                     | ✅（`onReady` + `minInterval` 后释放）                                | ❌                        |
-| `maxDelay` / `minInterval` | 生效                                                                  | 保留但**不生效**          |
+| `maxDelay` / `minInterval` | 生效                                                                  | ❌（配置项已移除）        |
 | 路由事件                   | `routeEmitter` + `onNavigate` / `onPreload`                           | ❌                        |
 
 具体原因：Skyline 模式下页面在**首次跳转时**才现场注册（不是启动时调用 `Page()`），因此没有 `onPreload` 生命周期，也没有 `$preload` 实例方法；同时框架没有可等待的页面准备周期，所以 `onNavigate` 与导航锁一并移除。
@@ -83,7 +83,7 @@ $App({
 
 ::: warning 仅 enhance 生效的选项
 
-`maxDelay` / `minInterval` 为兼容 `@mptool/enhance` 的配置而保留。Skyline 版本没有 `onNavigate` 与导航锁，这两个值不会产生任何效果。
+Skyline 版本没有 `onNavigate` 与导航锁，`$Config` 不提供 `maxDelay` / `minInterval`，传入这两个选项会类型报错。
 
 :::
 
@@ -217,7 +217,7 @@ installGlobal();
 1. 删除 `onAppLaunch` / `onNavigate` / `onPreload` 生命周期及 `this.$preload(...)` 调用；
 2. 依赖 `onNavigate` 的跳转前准备逻辑，改为在目标页 `onLoad` / `onRegister` 中处理；
 3. 依赖导航锁的防重复跳转，改为调用方自行防抖；
-4. `maxDelay` / `minInterval` 配置可以保留，但在 Skyline 版本中无效；
+4. 删除 `maxDelay` / `minInterval` 配置：Skyline 没有 `onNavigate` 与导航锁，`$Config` 不再接受这两个选项；
 5. 页面热更新、Emitter、`$Component`、`$refs` 等用法不变。
 
 ## API

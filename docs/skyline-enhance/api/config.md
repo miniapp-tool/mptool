@@ -7,7 +7,7 @@ order: 2
 
 `$Page` / `$Component` 的注册同样依赖全局配置：在调用 `$Config` 之前注册页面或组件会抛出 `MpError`。
 
-与 `@mptool/enhance` 相比，Skyline 版本没有 `onNavigate` 生命周期与导航锁，因此 `maxDelay` / `minInterval` 不会生效（仅保留以兼容 enhance 的配置）。
+与 `@mptool/enhance` 相比，Skyline 版本没有 `onNavigate` 生命周期与导航锁，因此**不接受** `maxDelay` / `minInterval` 配置（传入会类型报错）。
 
 ## defaultPage
 
@@ -137,10 +137,3 @@ order: 2
 热更新是尽力而为的，不阻塞页面注册与加载；拉取或执行失败时静默跳过。
 
 @example `https://example.com/hotReloadCode/$name`
-
-## 仅 @mptool/enhance 生效的选项
-
-以下选项在 Skyline 版本中**不生效**，仅为兼容 enhance 的配置而保留：
-
-- `maxDelay`：enhance 中控制等待异步 `onNavigate` 的最长时间（默认 200ms）
-- `minInterval`：enhance 中控制导航锁释放前的最小间隔（默认 100ms）

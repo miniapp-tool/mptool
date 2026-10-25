@@ -6,22 +6,6 @@ export interface AppConfigCommonOptions {
   home?: string;
 
   /**
-   * 跳转延迟执行的最长时间，单位 ms
-   *
-   * 异步 onNavigate 方法用时过久会直接调转
-   *
-   * @default 200
-   */
-  maxDelay?: number;
-
-  /**
-   * 允许进行跳转据页面首屏渲染后的最小间隔时间，单位 ms
-   *
-   * @default 100
-   */
-  minInterval?: number;
-
-  /**
    * 自定义扩展组件
    *
    * 时机在框架执行扩展之前，可为每个组件挂载实例方法
