@@ -761,6 +761,15 @@ export class Lexer {
         continue;
       }
 
+      // template cooked values normalize line terminators to LF (`\r\n` and lone `\r`)
+      // 模板 cooked 值将换行统一为 LF（`\r\n` 与孤立 `\r`）
+      if (ch === "\r") {
+        cooked += "\n";
+        pos += source[pos + 1] === "\n" ? 2 : 1;
+
+        continue;
+      }
+
       cooked += ch;
       pos += 1;
     }
