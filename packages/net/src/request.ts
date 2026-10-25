@@ -270,6 +270,69 @@ const createResponseHeaders = (header: Record<string, string>): Headers => {
   return headers;
 };
 
+/** Maximum number of characters of a response body written to the debug log */
+const MAX_LOGGED_BODY_LENGTH = 512;
+
+/** Header names whose values must never be written verbatim to the debug log */
+const SENSITIVE_HEADER_PATTERN = /cookie|authorization|api-key/iu;
+
+/**
+ * Copy headers with sensitive values masked, for debug logging.
+ *
+ * @param headers - Headers to log / 待打印的 header
+ * @returns Headers with cookie / authorization values replaced / 敏感值被替换后的 header
+ */
+const redactHeadersForLog = (headers: Record<string, string>): Record<string, string> => {
+  const redacted: Record<string, string> = {};
+
+  for (const [name, value] of Object.entries(headers))
+    redacted[name] = SENSITIVE_HEADER_PATTERN.test(name) ? "<redacted>" : value;
+
+  return redacted;
+};
+
+/**
+ * List cookie names (never values) for debug logs.
+ *
+ * @param cookieHeader - Raw `Cookie` header / 原始 Cookie 头
+ * @returns Comma separated cookie names / 逗号分隔的 Cookie 名称
+ */
+const getCookieNames = (cookieHeader: string): string =>
+  cookieHeader
+    .split(";")
+    .map((pair) => pair.split("=")[0]?.trim())
+    .filter((name): name is string => Boolean(name))
+    .join(", ");
+
+/**
+ * Truncate a string for debug logging.
+ *
+ * @param value - String to log
+ * @returns The string, or a truncated version with its original length
+ */
+const truncateForLog = (value: string): string =>
+  value.length > MAX_LOGGED_BODY_LENGTH
+    ? `${value.slice(0, MAX_LOGGED_BODY_LENGTH)}… (truncated, ${value.length} chars)`
+    : value;
+
+/**
+ * Describe a response body without dumping it whole into the debug log.
+ *
+ * @param data - Response data
+ * @returns A short, size-bounded description
+ */
+const summarizeResponseBody = (data: unknown): string => {
+  if (typeof data === "string") return truncateForLog(data.trimEnd());
+  if (data instanceof ArrayBuffer) return `[ArrayBuffer ${data.byteLength} bytes]`;
+  if (ArrayBuffer.isView(data)) return `[${data.constructor.name} ${data.byteLength} bytes]`;
+
+  try {
+    return truncateForLog(JSON.stringify(data) ?? String(data));
+  } catch {
+    return `[${typeof data}]`;
+  }
+};
+
 /** Wx.request 失败结果 / wx.request fail result */
 interface WxFailResult {
   errMsg: string;
@@ -429,10 +492,8 @@ class RequestExecution<T extends RequestData> {
     if (this.settled || this.aborted) return;
 
     this.currentTask = null;
-    logger.debug(
-      `Request ends with ${statusCode}`,
-      typeof data === "string" ? data.trimEnd() : data,
-    );
+    // Never dump the whole response body (it can be large and may contain personal data)
+    logger.debug(`Request ends with ${statusCode}`, summarizeResponseBody(data));
 
     this.config.cookieStore.applyHeader(header, this.config.cookieScope);
 
@@ -513,9 +574,10 @@ class RequestExecution<T extends RequestData> {
     logger.debug(
       `\
 Requesting ${url} (attempt ${this.attempt}):
-Cookie: ${cookieHeader}
-Options:
-`,
+Cookie names: ${cookieHeader ? getCookieNames(cookieHeader) : "(none)"}
+Headers:`,
+      redactHeadersForLog(requestHeaders.toObject()),
+      "Options:",
       wxOptions,
     );
 

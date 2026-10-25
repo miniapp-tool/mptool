@@ -37,6 +37,8 @@ icon: network-wired
 - 新增 `cookieScope` 控制附带的 Cookie 范围 (默认为 `url`)；它必须包含域名（绝对 URL 或域名，不能是 `"/api"` 这种纯路径）
 - 新增 `cookieStore` 控制请求时读取和响应时写入的 CookieStore 实例 (默认为内置全局实例)
 
+`request` 在 `wx.env.DEBUG` 开启时会输出调试日志，但日志做了脱敏：`Cookie` 只打印名称（不打印值），`Cookie` / `Authorization` 等敏感 header 的值统一替换为 `<redacted>`；响应体只打印类型/长度或截断到 512 字符，避免把完整响应与凭证写进日志。
+
 请求地址必须是绝对地址（`https://example.com/api` 或 `//example.com/api`）；相对地址属于错误调用，会在发请求前抛 `TypeError`。使用 `createRequest()` 工厂时可以直接传 `"/api"`，工厂会自动拼上 `server`。
 
 ::: info
