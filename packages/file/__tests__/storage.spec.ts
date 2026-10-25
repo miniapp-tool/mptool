@@ -53,7 +53,9 @@ describe(set, () => {
   it("set expire x2", () =>
     new Promise<void>((resolve) => {
       void setAsync("data-expire-x2", { title: 123 }, 100).then(() => {
-        set("data-expire-x2", { title: 456 }, 200);
+        // Use a TTL well above the 150 ms wait: a loaded CI worker can delay the timer past a
+        // tight 200 ms expiry and turn this into a flaky failure.
+        set("data-expire-x2", { title: 456 }, 1000);
         setTimeout(() => {
           expect(get("data-expire-x2")).toStrictEqual({ title: 456 });
           resolve();
