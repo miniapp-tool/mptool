@@ -1,6 +1,7 @@
+import { parseDocument } from "htmlparser2";
 import { describe, expect, it } from "vitest";
 
-import { getText } from "../src/index.js";
+import { getText, parseHTML } from "../src/index.js";
 
 describe(getText, () => {
   it("should extract text from html", () => {
@@ -41,5 +42,25 @@ describe(getText, () => {
 
   it("should ignore script content", () => {
     expect(getText("<script>alert(1)</script>")).toBe("");
+  });
+
+  it("should ignore invisible element content", () => {
+    expect(getText("<style>.a{color:red}</style><p>正文</p>")).toBe("正文");
+    expect(getText("<title>T</title><noscript>NS</noscript><p>正文</p>")).toBe("正文");
+    expect(getText("<template><p>tpl</p></template><p>正文</p>")).toBe("正文");
+  });
+
+  it("should ignore invisible content in pre-parsed nodes", () => {
+    // parseHTML keeps <style> (only <script> is removed), getText must filter it itself
+    // parseHTML 会保留 <style>（只删 <script>），getText 必须自行过滤
+    expect(getText(parseHTML("<p>a</p><style>.x{}</style>"))).toBe("a");
+    // raw DOM nodes (e.g. from htmlparser2) still contain scripts
+    // 原始 DOM 节点（例如 htmlparser2 产出）仍含 script
+    expect(getText(parseDocument("<p>a</p><script>evil()</script>").children)).toBe("a");
+  });
+
+  it("should keep text inside unknown container tags", () => {
+    expect(getText("<figure><figcaption>图 1</figcaption></figure>")).toBe("图 1");
+    expect(getText("<main><p>正文</p></main>")).toBe("正文");
   });
 });
