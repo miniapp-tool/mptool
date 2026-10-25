@@ -49,5 +49,5 @@ const html = getHTML(nodes); // <div>hello</div>
 import { convertSVGToDataURI } from "@mptool/parser";
 
 const dataUri = convertSVGToDataURI('<svg viewBox="0 0 100 100"></svg>');
-// data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22%3E%3C%2Fsvg%3E
+// data:image/svg+xml,%3Csvg%20viewBox=%220%200%20100%20100%22%3E%3C/svg%3E
 ```
