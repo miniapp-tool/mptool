@@ -32,7 +32,7 @@ icon: network-wired
 `request` 会自动保存响应的 Cookie，并在请求时附加对应的 Cookie，同时完善了以下选项:
 
 - `method` 额外支持小写的方法名
-- `body` 额外支持 `URLSearchParams` 和 `null`
+- `body` 额外支持 `URLSearchParams` 和 `null`。这里的 `URLSearchParams` 必须是**本包导出的类**才能被识别；使用其它来源的 `URLSearchParams` 时，请先 `body.toString()` 再传字符串。
 - `headers` 额外支持 `Headers` 实例与数组格式的 Headers
 - 新增 `cookieScope` 控制附带的 Cookie 范围 (默认为 `url`)；它必须包含域名（绝对 URL 或域名，不能是 `"/api"` 这种纯路径）
 - 新增 `cookieStore` 控制请求时读取和响应时写入的 CookieStore 实例 (默认为内置全局实例)

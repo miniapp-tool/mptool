@@ -1,7 +1,6 @@
 // oxlint-disable max-lines -- request types, execution and factory form one public surface
 // oxlint-disable max-classes-per-file -- RequestError + RequestExecution live together
 // oxlint-disable unicorn/custom-error-definition -- RequestError extends MpError and keeps its name
-// oxlint-disable max-lines -- request types, execution and factory form one public surface
 import { MpError, logger } from "@mptool/shared";
 
 import { CookieStore } from "./cookieStore.js";
@@ -11,6 +10,14 @@ import { parseUrl } from "./utils.js";
 
 export const requestCookieStore: CookieStore = new CookieStore("__request_cookie__");
 
+/**
+ * Request body accepted by `request()` / `createRequest()`.
+ *
+ * `URLSearchParams` must be this package's exported class to be recognised; for any other
+ * implementation, convert it with `body.toString()` and pass the string instead.
+ *
+ * 请求体。`URLSearchParams` 必须是本包导出的类才能被识别；其它实现请先 `toString()` 后传字符串。
+ */
 export type RequestBody =
   | WechatMiniprogram.IAnyObject
   | ArrayBuffer
