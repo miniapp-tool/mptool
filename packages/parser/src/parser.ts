@@ -9,22 +9,32 @@ import { parseDocument } from "htmlparser2";
  * @param nodes - 节点数组
  */
 const removeScript = (nodes: AnyNode[]): void => {
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const node = nodes[i];
+  // explicit stack instead of recursion: deeply nested input must not overflow the host stack
+  // 使用显式栈而非递归：深嵌套输入不得撑爆宿主调用栈
+  const stack: AnyNode[][] = [nodes];
 
-    // domhandler v6 中 script 元素的 type 为 "script" 而非 "tag"，用 isTag 判断
-    if (isTag(node) && node.name === "script") {
-      const { next, prev } = node;
+  while (stack.length > 0) {
+    const list = stack.pop();
 
-      if (prev) prev.next = next;
-      if (next) next.prev = prev;
+    if (list == null) continue;
 
-      node.next = null;
-      node.prev = null;
-      node.parent = null;
-      nodes.splice(i, 1);
-    } else if ("children" in node) {
-      removeScript(node.children);
+    for (let i = list.length - 1; i >= 0; i -= 1) {
+      const node = list[i];
+
+      // domhandler v6 中 script 元素的 type 为 "script" 而非 "tag"，用 isTag 判断
+      if (isTag(node) && node.name === "script") {
+        const { next, prev } = node;
+
+        if (prev) prev.next = next;
+        if (next) next.prev = prev;
+
+        node.next = null;
+        node.prev = null;
+        node.parent = null;
+        list.splice(i, 1);
+      } else if ("children" in node) {
+        stack.push(node.children);
+      }
     }
   }
 };
