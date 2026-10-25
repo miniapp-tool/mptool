@@ -4,6 +4,7 @@ import type { AnyNode, Element } from "domhandler";
 import type { AllowTag } from "./allowedTags.js";
 import { ALLOWED_TAGS } from "./allowedTags.js";
 import { BLOCK_TAGS } from "./blockTags.js";
+import { isInvisibleTag } from "./invisibleTags.js";
 import type { ParserOptions } from "./options.js";
 import { getHTML, parseHTML } from "./parser.js";
 import { convertSVGToDataURI } from "./svg.js";
@@ -85,6 +86,35 @@ const handleSVG = (node: Element): RichTextNode => {
 };
 
 /**
+ * A converted node: a single node, an unwrapped fragment (children of an unknown container), or
+ * nothing (invisible/dropped element).
+ *
+ * 转换结果：单个节点、解包后的片段（未知容器的子节点）或空（不可见/被丢弃的元素）。
+ */
+type ConvertedNode = RichTextNode | ConvertedNode[] | null;
+
+/**
+ * Flatten converted nodes, expanding unwrapped fragments.
+ *
+ * 扁平化转换结果，展开解包产生的片段。
+ *
+ * @param nodes - Converted nodes / 转换结果
+ * @returns Flattened rich-text nodes / 扁平化后的 rich-text 节点
+ */
+const flattenNodes = (nodes: readonly ConvertedNode[]): RichTextNode[] => {
+  const result: RichTextNode[] = [];
+
+  for (const node of nodes) {
+    if (node == null) continue;
+
+    if (Array.isArray(node)) result.push(...flattenNodes(node));
+    else result.push(node);
+  }
+
+  return result;
+};
+
+/**
  * Collect the child nodes of an element.
  *
  * Leading / trailing whitespace-only text nodes are only dropped for block containers: trimming
@@ -97,8 +127,8 @@ const handleSVG = (node: Element): RichTextNode => {
  * @param trimEdges - Whether to trim whitespace-only edge text nodes / 是否裁剪首尾空白文本节点
  * @returns The children to keep / 保留的子节点
  */
-const handleNodes = (nodes: (RichTextNode | null)[], trimEdges = true): RichTextNode[] => {
-  const result: RichTextNode[] = nodes.filter((item): item is RichTextNode => item != null);
+const handleNodes = (nodes: readonly ConvertedNode[], trimEdges = true): RichTextNode[] => {
+  const result = flattenNodes(nodes);
 
   if (!trimEdges) return result;
 
@@ -118,9 +148,13 @@ const handleNodes = (nodes: (RichTextNode | null)[], trimEdges = true): RichText
 const handleNode = async (
   node: AnyNode,
   { appendClass, transform }: Required<ParserOptions>,
-): Promise<RichTextNode | null> => {
+): Promise<ConvertedNode> => {
   // HTML preprocessing normalizes CRLF / CR to LF in text nodes
   if (node.type === "text") return { type: "text", text: node.data.replace(/\r\n?/gu, "\n") };
+
+  // invisible elements never contribute content (script/style/template/...)
+  // 不可见元素（script/style/template/...）不贡献任何内容
+  if (isInvisibleTag(node)) return null;
 
   if (node.type === "tag") {
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
@@ -163,6 +197,12 @@ const handleNode = async (
 
       return converter ? converter(convertedNode) : convertedNode;
     }
+
+    // unknown container: unwrap it so its children (text included) are preserved
+    // 未知容器：解包该容器，保留其子节点（含文本）
+    return Promise.all(
+      node.children.map((childNode) => handleNode(childNode, { appendClass, transform })),
+    );
   }
 
   return null;

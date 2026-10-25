@@ -9,7 +9,7 @@ icon: network-wired
 
 ## getText
 
-获取一段 HTML 中的文本内容。
+获取一段 HTML 中的文本内容。`script` / `style` / `noscript` / `template` 等不可见元素的内容不会进入结果（字符串与预解析节点输入均生效）。
 
 ```js
 import { getText } from "@mptool/parser";
@@ -23,7 +23,8 @@ console.log(getText(html)); // hello world
 
 解析一段 HTML，异步返回节点数组数组，第二个参数是行为选项
 
-- 任何小程序 `<rich-text>` 不支持的标签和属性都会被移除。
+- 任何小程序 `<rich-text>` 不支持的标签和属性都会被移除；不支持的**容器**标签会被"解包"，其中的文本与子节点仍会保留。
+- `script` / `style` / `template` / `noscript` / `title` / `head` 等不可见元素会整棵丢弃。
 - 所有节点会默认附加和标签名相同的类名，可以通过 `appendClass: false` 取消
 - 你可以通过行为选项中的 `transform` 方法对节点进行转换，返回值会被用于替换原节点
 

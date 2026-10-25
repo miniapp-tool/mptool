@@ -2,6 +2,7 @@
 import type { AnyNode } from "domhandler";
 
 import { BLOCK_TAGS } from "./blockTags.js";
+import { isInvisibleTag } from "./invisibleTags.js";
 import { parseHTML } from "./parser.js";
 
 export const getText = (content: string | AnyNode[]): string => {
@@ -11,6 +12,9 @@ export const getText = (content: string | AnyNode[]): string => {
     nodes
       .map((node) => {
         if (node.type === "text") return node.data;
+        // script/style/... never contribute text, whether parsed from a string or passed in
+        // script/style/... 不贡献文本（无论来自字符串解析还是预解析节点）
+        if (isInvisibleTag(node)) return "";
         if ("childNodes" in node) {
           const inner = getText(node.childNodes);
 

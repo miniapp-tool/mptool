@@ -1,3 +1,4 @@
+import { parseDocument } from "htmlparser2";
 import { describe, expect, it } from "vitest";
 
 import type { RichTextNode } from "../src/index.js";
@@ -526,6 +527,70 @@ describe(getRichTextNodes, () => {
             children: [{ type: "text", text: "hi" }],
           },
         ],
+      },
+    ]);
+  });
+});
+
+describe("unknown and invisible elements", () => {
+  it("should unwrap unknown container tags", async () => {
+    await expect(
+      getRichTextNodes("<figure><figcaption>图 1</figcaption></figure>"),
+    ).resolves.toStrictEqual([{ type: "text", text: "图 1" }]);
+    await expect(getRichTextNodes("<main><p>正文</p></main>")).resolves.toStrictEqual([
+      {
+        attrs: { class: "p" },
+        children: [{ text: "正文", type: "text" }],
+        name: "p",
+        type: "node",
+      },
+    ]);
+  });
+
+  it("should drop invisible elements and their content", async () => {
+    const invisible = [
+      "<script>evil()</script>",
+      "<style>.a{}</style>",
+      "<template><p>tpl</p></template>",
+      "<noscript>ns</noscript>",
+      "<title>title</title>",
+    ];
+
+    const results = await Promise.all(
+      invisible.map((html) => getRichTextNodes(`${html}<p>ok</p>`)),
+    );
+    const expected = {
+      attrs: { class: "p" },
+      children: [{ text: "ok", type: "text" }],
+      name: "p",
+      type: "node",
+    };
+
+    results.forEach((result) => expect(result).toStrictEqual([expected]));
+  });
+
+  it("should keep text of inline unknown wrappers", async () => {
+    const [paragraph] = await getRichTextNodes("<p>a<unknown> b </unknown>c</p>");
+
+    expect(paragraph).toMatchObject({
+      children: [
+        { type: "text", text: "a" },
+        { type: "text", text: " b " },
+        { type: "text", text: "c" },
+      ],
+      name: "p",
+    });
+  });
+
+  it("should drop invisible elements from pre-parsed nodes", async () => {
+    const nodes = parseDocument("<p>ok</p><script>evil()</script>").children;
+
+    await expect(getRichTextNodes(nodes)).resolves.toStrictEqual([
+      {
+        attrs: { class: "p" },
+        children: [{ text: "ok", type: "text" }],
+        name: "p",
+        type: "node",
       },
     ]);
   });
