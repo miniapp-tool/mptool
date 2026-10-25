@@ -41,8 +41,10 @@
   },
   "devDependencies": {
     "@mptool/file": "workspace:*",
+    "@mptool/mock": "workspace:*",
     "@mptool/net": "workspace:*",
     "@mptool/parser": "workspace:*",
+    "@mptool/shared": "workspace:*",
     "@mptool/skyline-enhance": "workspace:*",
     "miniprogram-api-typings": "5.2.3"
   },
