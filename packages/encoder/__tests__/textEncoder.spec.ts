@@ -35,6 +35,22 @@ describe(TextEncoder, () => {
     expect(new TextDecoder("gbk").decode(encoded)).toBe("微信小程序");
   });
 
+  it("encodes GBK consistently across repeated encodes", () => {
+    // The first call builds the reverse lookup map lazily; later calls must reuse it and return
+    // the same bytes.
+    const text = "微信小程序".repeat(2000);
+    const encoder = new TextEncoder("gbk");
+    const first = encoder.encode(text);
+    const second = encoder.encode(text);
+
+    expect(bytes(second)).toStrictEqual(bytes(first));
+    expect(new TextDecoder("gbk").decode(first)).toBe(text);
+  });
+
+  it("encodes supplementary code points through the GB18030 ranges", () => {
+    expect(bytes(new TextEncoder("gb18030").encode("💩"))).toStrictEqual([148, 57, 218, 51]);
+  });
+
   it("throws a RangeError for an unknown label", () => {
     expect(() => new TextEncoder("not-an-encoding")).toThrow(RangeError);
   });
