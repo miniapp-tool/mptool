@@ -245,6 +245,21 @@ const getProperty = (object: unknown, key: PropertyKey): unknown => {
 const SHORT_CIRCUIT = Symbol("short-circuit");
 
 /**
+ * `ToString` for template interpolation: unlike `String(value)`, interpolating a Symbol throws a
+ * `TypeError` (`${Symbol()}` is a TypeError in the specification).
+ *
+ * 模板插值使用的 `ToString`：与 `String(value)` 不同，插值 Symbol 会抛 `TypeError`（规范中 `${Symbol()}` 是 TypeError）。
+ *
+ * @param value - The interpolated value / 插值
+ * @returns The string form / 字符串形式
+ */
+const toTemplateString = (value: unknown): string => {
+  if (typeof value === "symbol") throw new TypeError("Cannot convert a Symbol value to a string");
+
+  return toString(value);
+};
+
+/**
  * Whether a member/call expression belongs to an optional chain (has a `?.` link on its spine).
  *
  * 成员/调用表达式是否属于可选链（脊上存在 `?.` 链节）。
@@ -2684,7 +2699,7 @@ export class Runtime {
     let result = node.quasis[0].cooked;
 
     for (let i = 0; i < node.expressions.length; i += 1) {
-      result += toString(this.evalExpression(node.expressions[i], env));
+      result += toTemplateString(this.evalExpression(node.expressions[i], env));
       result += node.quasis[i + 1].cooked;
     }
 
@@ -4512,7 +4527,7 @@ export class Runtime {
         let result = expr.quasis[0].cooked;
 
         for (let i = 0; i < expr.expressions.length; i += 1) {
-          result += toString(yield* this.evalAsyncExpr(expr.expressions[i], env));
+          result += toTemplateString(yield* this.evalAsyncExpr(expr.expressions[i], env));
           result += expr.quasis[i + 1].cooked;
         }
 
