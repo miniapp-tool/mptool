@@ -229,6 +229,30 @@ describe("navigator", () => {
     expect(switchTab).toHaveBeenCalledTimes(2);
   });
 
+  it("should resolve undefined while the navigate lock is held", async () => {
+    await setup({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    // 第一次导航取得锁，目标页未 ready，锁保持
+    await expect(go("main")).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledTimes(1);
+
+    const lockedResult = go("main");
+
+    // 被锁的调用仍然返回 Promise（而不是 undefined），解析值为 undefined，调用方可以安全 await / then
+    expect(lockedResult).toBeInstanceOf(Promise);
+    await expect(lockedResult).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledTimes(1);
+
+    // 清理残留的锁，避免影响后续用例
+    appEmitter.emit(ON_PAGE_UNLOAD);
+  });
+
   it("should force release the navigate lock when the target page never becomes ready", async () => {
     await setup({ defaultPage: "/pages/$name", minInterval: 0, maxDelay: 0 });
 

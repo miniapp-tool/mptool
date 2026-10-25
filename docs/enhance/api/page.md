@@ -197,7 +197,9 @@ $Component({
 - 类型:
 
   ```ts
-  function $go(pageName: string): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult>;
+  function $go(
+    pageName: string,
+  ): Promise<WechatMiniprogram.NavigateToSuccessCallbackResult | undefined>;
   ```
 
 - 参数:
@@ -206,6 +208,12 @@ $Component({
 导航到指定页面
 
 本函数是 `wx.navigateTo` 的封装
+
+::: warning 导航锁
+
+为防止快速连点导致重复跳转，框架在上一次跳转的目标页 `onReady` 后（并经过 `minInterval`）才释放导航锁。锁未释放时调用 `$go`（以及 `$redirect` / `$switch` / `$reLaunch` / `$back` 的 `home` 回退）会被忽略：返回的 Promise 解析为 `undefined`，不会报错，也不会执行跳转。
+
+:::
 
 ::: tip 示例
 
@@ -220,7 +228,9 @@ this.$go("play?vid=xxx&cid=xxx");
 - 类型:
 
   ```ts
-  function $redirect(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $redirect(
+    pageName: string,
+  ): Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
   ```
 
 - 参数:
@@ -243,7 +253,7 @@ this.$redirect("about?year=2021");
 - 类型:
 
   ```ts
-  function $switch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $switch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
   ```
 
 - 参数:
@@ -272,7 +282,9 @@ this.$switch("main?user=mrhope");
 - 类型:
 
   ```ts
-  function $reLaunch(pageName: string): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $reLaunch(
+    pageName: string,
+  ): Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
   ```
 
 - 参数:
@@ -295,7 +307,7 @@ this.$reLaunch("main?user=mrhope");
 - 类型:
 
   ```ts
-  function $back(delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult>;
+  function $back(delta = 1): Promise<WechatMiniprogram.GeneralCallbackResult | undefined>;
   ```
 
 - 参数:
