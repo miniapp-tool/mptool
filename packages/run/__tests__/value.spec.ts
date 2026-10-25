@@ -81,6 +81,8 @@ describe("interpreter function wrappers", () => {
       lexicalThis: null,
       lexicalSuperBase: null,
       lexicalSuperClass: null,
+      lexicalNewTargetMeta: null,
+      lexicalIsConstruct: false,
       callee: null,
     } as Parameters<typeof makeInterpreterFunction>[0];
 
@@ -124,6 +126,8 @@ describe("interpreter function wrappers", () => {
       lexicalThis: null,
       lexicalSuperBase: null,
       lexicalSuperClass: null,
+      lexicalNewTargetMeta: null,
+      lexicalIsConstruct: false,
       callee: null,
     } as Parameters<typeof makeInterpreterFunction>[0];
 

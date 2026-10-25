@@ -85,6 +85,18 @@ export interface InterpreterFunctionMeta {
   readonly lexicalSuperClass: unknown;
 
   /**
+   * Lexical `new.target` captured by an arrow function (enables `super()` inside arrows created by
+   * a derived constructor) / 箭头函数捕获的词法 `new.target`（使派生构造器内创建的箭头可调用 `super()`）
+   */
+  readonly lexicalNewTargetMeta: InterpreterFunctionMeta | null;
+
+  /**
+   * Whether the arrow was created inside a construction call (`super()` is only allowed there) /
+   * 箭头是否在构造调用中创建（仅此时允许调用 `super()`）
+   */
+  readonly lexicalIsConstruct: boolean;
+
+  /**
    * The host wrapper itself, back-filled by `makeInterpreterFunction` / 宿主包装本身（由
    * `makeInterpreterFunction` 回填）
    */
