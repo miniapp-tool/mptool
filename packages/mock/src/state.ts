@@ -306,7 +306,6 @@ export const resetState = (): void => {
   mockState.rules = [];
   mockState.ruleSeq = 0;
   mockState.config = createConfig();
-  mockState.calls.clear();
 
   resetStorage();
   getFileSystemManager().reset();
@@ -317,4 +316,7 @@ export const resetState = (): void => {
   frameworkApi.components.length = 0;
   frameworkApi.behaviors.length = 0;
   frameworkApi.app = void 0;
+
+  // Clear the call log last: the internal `getFileSystemManager()` call above is recorded too.
+  mockState.calls.clear();
 };

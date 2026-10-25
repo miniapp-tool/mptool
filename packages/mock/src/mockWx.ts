@@ -32,7 +32,10 @@ import { emitEvent } from "./ui.js";
 import { DEFAULT_USER_DATA_PATH, wx } from "./wx.js";
 
 /** APIs whose failures can be injected. */
-const INJECTABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
+const FAILABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
+
+/** APIs whose result can be replaced with `respond()`. */
+const RESPONDABLE_KINDS = new Set<WxApiKind>(["callback", "manager", "sync", "task"]);
 
 interface EnvSnapshot {
   DEBUG: unknown;
@@ -105,16 +108,19 @@ const installAutoRestore = (afterEach: (hook: () => void) => void): void => {
 const normalizeApis = (api: WxApiName | WxApiName[]): WxApiName[] =>
   Array.isArray(api) ? api : [api];
 
-const assertInjectable = (api: WxApiName): void => {
+const assertInjectable = (api: WxApiName, mode: "fail" | "respond"): void => {
   const value = (wx as unknown as Record<string, unknown>)[api];
 
   if (typeof value !== "function") throw new TypeError(`[mockWx] unknown wx API "${api}"`);
 
   const kind = getApiKind(api);
+  const supported = mode === "respond" ? RESPONDABLE_KINDS : FAILABLE_KINDS;
 
-  if (!INJECTABLE_KINDS.has(kind)) {
+  if (!supported.has(kind)) {
     throw new TypeError(
-      `[mockWx] "${api}" is an ${kind} API; failures can only be injected into callback / task / sync APIs`,
+      mode === "respond"
+        ? `[mockWx] "${api}" is an ${kind} API; respond() supports callback / task / sync / manager APIs`
+        : `[mockWx] "${api}" is an ${kind} API; failures can only be injected into callback / task / sync APIs`,
     );
   }
 };
@@ -209,7 +215,7 @@ const registerFailure = (
 
   const remaining = resolveRemaining(options);
   const rules = normalizeApis(api).map((name) => {
-    assertInjectable(name);
+    assertInjectable(name, "fail");
 
     return createRule({
       api: name,
@@ -346,7 +352,7 @@ export const mockWx: MockWx = {
     if (failures.length === 0)
       throw new RangeError("[mockWx] failSequence() needs at least one failure");
 
-    assertInjectable(api);
+    assertInjectable(api, "fail");
 
     const rule = createRule({
       api,
@@ -396,7 +402,7 @@ export const mockWx: MockWx = {
   ): WxRuleHandle {
     const remaining = resolveRemaining(options);
     const rules = normalizeApis(api).map((name) => {
-      assertInjectable(name);
+      assertInjectable(name, "respond");
 
       return createRule({
         api: name,
@@ -417,7 +423,7 @@ export const mockWx: MockWx = {
     table: Record<string, WxResponder<WxNetworkResponse> | WxFailure>,
     options?: { delay?: number },
   ): WxRuleHandle {
-    assertInjectable("request");
+    assertInjectable("request", "respond");
 
     const routes = Object.entries(table).map(([key, response]) => parseRouteKey(key, response));
 
