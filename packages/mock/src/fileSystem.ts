@@ -5,6 +5,9 @@ export interface MockFileNode {
   content?: string;
 }
 
+/** Internal snapshot of the in-memory file system; used by `mockWx` scopes. */
+export type FileSystemSnapshot = Map<string, MockFileNode>;
+
 /** 规范化路径 */
 const normalizePath = (path: string): string => path.replace(/\/+/gu, "/").replace(/\/$/u, "");
 
@@ -123,6 +126,23 @@ export class FileSystemManager {
   }): void {
     this.files.set(normalizePath(options.targetPath), { type: "dir" });
     options.success();
+  }
+
+  /** Capture the current file system contents. */
+  snapshot(): FileSystemSnapshot {
+    return new Map(this.files);
+  }
+
+  /** Restore contents captured by {@link snapshot}. */
+  restore(snapshot: FileSystemSnapshot): void {
+    this.files.clear();
+
+    for (const [path, node] of snapshot) this.files.set(path, node);
+  }
+
+  /** Clear the in-memory file system. */
+  reset(): void {
+    this.files.clear();
   }
 }
 

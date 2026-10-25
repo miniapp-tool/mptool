@@ -25,7 +25,9 @@ export const callCallback = (
   }, 0);
 };
 
-type Listener = (...args: any[]) => void;
+export type MockEventListener = (...args: any[]) => void;
+
+type Listener = MockEventListener;
 
 /** 事件监听器注册表 */
 const eventListeners = new Map<string, Set<Listener>>();
@@ -53,6 +55,30 @@ export const emitEvent = (event: string, ...args: unknown[]): void => {
   eventListeners.get(event)?.forEach((listener) => {
     listener(...args);
   });
+};
+
+/** Internal snapshot of the event listeners; used by `mockWx` scopes. */
+export type EventListenerSnapshot = Map<string, Set<MockEventListener>>;
+
+/** Capture the current event listeners. */
+export const snapshotEventListeners = (): EventListenerSnapshot => {
+  const snapshot = new Map<string, Set<MockEventListener>>();
+
+  for (const [event, listeners] of eventListeners) snapshot.set(event, new Set(listeners));
+
+  return snapshot;
+};
+
+/** Restore event listeners captured by {@link snapshotEventListeners}. */
+export const restoreEventListeners = (snapshot: EventListenerSnapshot): void => {
+  eventListeners.clear();
+
+  for (const [event, listeners] of snapshot) eventListeners.set(event, new Set(listeners));
+};
+
+/** Remove all event listeners. */
+export const clearEventListeners = (): void => {
+  eventListeners.clear();
 };
 
 /** UI、权限、设备等相关 wx API mock */
