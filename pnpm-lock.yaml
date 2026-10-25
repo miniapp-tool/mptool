@@ -396,12 +396,18 @@ importers:
       '@mptool/file':
         specifier: workspace:*
         version: link:../file
+      '@mptool/mock':
+        specifier: workspace:*
+        version: link:../mock
       '@mptool/net':
         specifier: workspace:*
         version: link:../net
       '@mptool/parser':
         specifier: workspace:*
         version: link:../parser
+      '@mptool/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@mptool/skyline-enhance':
         specifier: workspace:*
         version: link:../skyline-enhance
