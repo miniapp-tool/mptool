@@ -1,8 +1,8 @@
 import { getFileSystemManager } from "./fileSystem.js";
 import type { FileSystemSnapshot } from "./fileSystem.js";
 import { frameworkApi } from "./framework.js";
-import { resetStorage, restoreStorage, snapshotStorage } from "./storage.js";
-import type { StorageSnapshot } from "./storage.js";
+import { resetStorage, restoreStorage, snapshotStorage } from "./storageState.js";
+import type { StorageSnapshot } from "./storageState.js";
 import type {
   MockCompatFlags,
   MockNetworkOptions,

@@ -114,7 +114,7 @@ export const createFailureResult = (api: string, failure: WxFailure): FailureRes
       const errMsg =
         failure.errMsg ??
         (api.toLowerCase().includes("storage")
-          ? "setStorage:fail exceed storage max size"
+          ? "setStorage:fail exceed storage max size 10Mb"
           : `${api}:fail exceed storage max size`);
 
       return withOptional(errMsg, { errno: failure.errno });

@@ -1,6 +1,10 @@
-// oxlint-disable typescript/consistent-return
 // oxlint-disable typescript/no-explicit-any
 
+// oxlint-disable no-undefined -- storage payloads and missing-key semantics are built around `undefined`
+// oxlint-disable promise/prefer-promise-reject-errors -- async storage APIs reject plain `{ errMsg }` objects, like the runtime
+import { mockState } from "./state.js";
+import { storage } from "./storageState.js";
+import type { StoredValue } from "./storageState.js";
 import type { GeneralCallbackResult, PromisifySuccessResult } from "./utils.js";
 
 export interface GetStorageSuccessCallbackResult<T = any> {
@@ -103,13 +107,20 @@ export interface RemoveStorageOption {
   success?: RemoveStorageSuccessCallback;
 }
 
+/** 接口调用结束的回调函数（调用成功、失败都会执行） */
+export type ClearStorageCompleteCallback = (res: GeneralCallbackResult) => void;
+/** 接口调用失败的回调函数 */
+export type ClearStorageFailCallback = (res: GeneralCallbackResult) => void;
+/** 接口调用成功的回调函数 */
+export type ClearStorageSuccessCallback = (res: GeneralCallbackResult) => void;
+
 export interface ClearStorageOption {
   /** 接口调用结束的回调函数（调用成功、失败都会执行） */
-  complete?: () => void;
+  complete?: ClearStorageCompleteCallback;
   /** 接口调用失败的回调函数 */
-  fail?: () => void;
+  fail?: ClearStorageFailCallback;
   /** 接口调用成功的回调函数 */
-  success?: () => void;
+  success?: ClearStorageSuccessCallback;
 }
 
 export interface BatchGetStorageOption {
@@ -140,8 +151,8 @@ export interface KvList {
 }
 
 export interface BatchGetStorageSuccessCallbackResult {
-  /** 对应 key 的缓存内容 */
-  data: any[];
+  /** 对应 key 的缓存内容；缺失的 key 为 `null` */
+  dataList: any[];
   errMsg: string;
 }
 
@@ -158,527 +169,423 @@ export type BatchSetStorageFailCallback = (res: GeneralCallbackResult) => void;
 /** 接口调用成功的回调函数 */
 export type BatchSetStorageSuccessCallback = (res: GeneralCallbackResult) => void;
 
-const storage = new Map<string, any>();
+/** Fallback error messages used by natural storage failures (no injection involved). */
+const ERR_MSG = {
+  batchMissingKey: "batchGetStorage:fail data not found",
+  invalidData: "setStorage:fail data should be JSON serializable",
+  missingKey: "getStorage:fail data not found",
+  quota: "setStorage:fail exceed storage max size 10Mb",
+} as const;
 
+const DEFAULT_LIMIT_SIZE = 10240;
+/** Developer tools do not enforce the documented 1 MB per-key limit; opt in through `keySize`. */
+const DEFAULT_KEY_SIZE: number = Number.POSITIVE_INFINITY;
+const BYTES_PER_KB = 1024;
+/** Tag used to persist a top-level `Date` (nested dates stay ISO strings, like the runtime). */
+const DATE_PREFIX = "@mptool-mock:date:";
+
+const encoder = new TextEncoder();
+
+const createStorageError = (errMsg: string): Error & { errMsg: string } => {
+  const error = new Error(errMsg) as Error & { errMsg: string };
+
+  error.errMsg = errMsg;
+
+  return error;
+};
+
+const getErrorMsg = (error: unknown): string =>
+  error instanceof Error && "errMsg" in error
+    ? String((error as { errMsg: unknown }).errMsg)
+    : "storage:fail";
+
+/** Async storage APIs reject with a plain `{ errMsg }` object, not an `Error`. */
+const createStorageFailure = (errMsg: string): { errMsg: string } => ({ errMsg });
+
+interface StorageConfig {
+  /** Total quota in bytes. */
+  limitBytes: number;
+  /** Single-key quota in bytes. */
+  keyLimitBytes: number;
+  /** Total quota in KB (what `getStorageInfo` reports). */
+  limitSize: number;
+  missingKey: "fail" | "resolve";
+  batchMissingKey: "fail" | "resolve";
+  missingKeySync: "empty-string" | "undefined";
+  /** Whether missing keys use the legacy `success` + empty `errMsg` shape (compat flag). */
+  legacyMissingKey: boolean;
+}
+
+/**
+ * Resolve the effective storage configuration, honouring the 0.x compat flags.
+ *
+ * `storageResolveMissingKey` keeps the old "missing key resolves to `undefined`" behaviour for one
+ * minor release; `MockStorageOptions` is the forward-looking way to configure the same thing.
+ */
+const resolveConfig = (): StorageConfig => {
+  const { compat, storage: options } = mockState.config;
+  const limitSize = options.limitSize ?? DEFAULT_LIMIT_SIZE;
+  const keySize = options.keySize ?? DEFAULT_KEY_SIZE;
+
+  return {
+    batchMissingKey: compat.storageResolveMissingKey
+      ? "resolve"
+      : (options.batchMissingKey ?? "resolve"),
+    keyLimitBytes: Number.isFinite(keySize) ? keySize * BYTES_PER_KB : Number.POSITIVE_INFINITY,
+    legacyMissingKey: Boolean(compat.storageResolveMissingKey),
+    limitBytes: limitSize * BYTES_PER_KB,
+    limitSize,
+    missingKey: compat.storageResolveMissingKey ? "resolve" : (options.missingKey ?? "fail"),
+    missingKeySync: compat.storageResolveMissingKey
+      ? "undefined"
+      : (options.missingKeySync ?? "empty-string"),
+  };
+};
+
+const byteLength = (text: string): number => encoder.encode(text).length;
+
+/**
+ * Serialize a storage value.
+ *
+ * A top-level `Date` survives (the runtime keeps it a `Date`); dates nested inside objects are
+ * serialized to ISO strings by `JSON.stringify`, exactly like the runtime. `undefined` is stored
+ * without consuming value bytes. Values that cannot be serialized fail with `errMsg`.
+ */
+const serialize = (data: unknown): StoredValue => {
+  if (data === undefined) return undefined;
+  if (data instanceof Date) return `${DATE_PREFIX}${data.toISOString()}`;
+
+  try {
+    return JSON.stringify(data);
+  } catch {
+    throw createStorageError(ERR_MSG.invalidData);
+  }
+};
+
+const deserialize = (value: StoredValue): unknown => {
+  if (value === undefined) return undefined;
+  if (value.startsWith(DATE_PREFIX)) return new Date(value.slice(DATE_PREFIX.length));
+
+  return JSON.parse(value) as unknown;
+};
+
+/** Serialized value bytes; the date tag itself is not counted. */
+const getValueSize = (value: StoredValue): number => {
+  if (value === undefined) return 0;
+  if (value.startsWith(DATE_PREFIX)) return byteLength(value.slice(DATE_PREFIX.length));
+
+  return byteLength(value);
+};
+
+/** Serialized entry bytes (key + value), as the runtime counts both. */
+const getEntrySize = (key: string, value: StoredValue): number =>
+  byteLength(key) + getValueSize(value);
+
+/** `currentSize` is reported in KB; an empty storage reads 1 in the developer tools. */
 const getStorageSize = (): number => {
   let size = 0;
 
-  for (const value of storage.values()) size += new Blob([JSON.stringify(value)]).size;
+  for (const [key, value] of storage) size += getEntrySize(key, value);
 
-  return Math.ceil(size / 1024);
+  return Math.max(1, Math.ceil(size / BYTES_PER_KB));
+};
+
+/** Validate quotas for writing one entry; keeps the total limit consistent on overwrite. */
+const assertQuota = (key: string, value: StoredValue): void => {
+  const { keyLimitBytes, limitBytes } = resolveConfig();
+  const entrySize = getEntrySize(key, value);
+  const valueSize = getValueSize(value);
+
+  if (valueSize > keyLimitBytes) throw createStorageError(ERR_MSG.quota);
+
+  const previousSize = storage.has(key) ? getEntrySize(key, storage.get(key)) : 0;
+  let total = 0;
+
+  for (const [storedKey, storedValue] of storage) total += getEntrySize(storedKey, storedValue);
+
+  if (total - previousSize + entrySize > limitBytes) throw createStorageError(ERR_MSG.quota);
+};
+
+/** Validate quotas for a batch write; the whole batch must fit before anything is written. */
+const assertBatchQuota = (entries: { key: string; value: unknown }[]): void => {
+  const { keyLimitBytes, limitBytes } = resolveConfig();
+  const next = new Map<string, StoredValue>(storage);
+
+  for (const { key, value } of entries) {
+    const serialized = serialize(value);
+
+    if (getValueSize(serialized) > keyLimitBytes) throw createStorageError(ERR_MSG.quota);
+
+    next.set(key, serialized);
+  }
+
+  let total = 0;
+
+  for (const [key, value] of next) total += getEntrySize(key, value);
+
+  if (total > limitBytes) throw createStorageError(ERR_MSG.quota);
+};
+
+const writeEntry = (key: string, data: unknown): void => {
+  const serialized = serialize(data);
+
+  assertQuota(key, serialized);
+  storage.set(key, serialized);
+};
+
+const readEntry = (key: string): { found: true; value: unknown } | { found: false } =>
+  storage.has(key) ? { found: true, value: deserialize(storage.get(key)) } : { found: false };
+
+interface CallbackOption {
+  complete?: (res: GeneralCallbackResult) => void;
+  fail?: (res: GeneralCallbackResult) => void;
+  success?: (res: GeneralCallbackResult) => void;
+}
+
+const asCallbackOption = (option: unknown): CallbackOption => option as CallbackOption;
+
+/** Any `wx` option object with callbacks; the concrete result types differ per API. */
+const hasCallbacks = (rawOption: unknown): boolean => {
+  const option = asCallbackOption(rawOption);
+
+  return (
+    typeof option?.success === "function" ||
+    typeof option?.fail === "function" ||
+    typeof option?.complete === "function"
+  );
+};
+
+/** Deliver a failure following the callback-or-promise convention. */
+const deliverFailure = (rawOption: unknown, errMsg: string): unknown => {
+  const option = asCallbackOption(rawOption);
+
+  if (rawOption == null || !hasCallbacks(rawOption))
+    return Promise.reject(createStorageFailure(errMsg));
+
+  setTimeout(() => {
+    option.fail?.({ errMsg });
+    option.complete?.({ errMsg });
+  }, 0);
+
+  return undefined;
+};
+
+/** Deliver a result computed inside an async task (set/remove/clear/batch). */
+const deliverResult = (rawOption: unknown, task: () => { errMsg: string }): unknown => {
+  const option = asCallbackOption(rawOption);
+
+  if (rawOption == null || !hasCallbacks(rawOption)) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          resolve(task());
+        } catch (err) {
+          reject(createStorageFailure(getErrorMsg(err)));
+        }
+      }, 0);
+    });
+  }
+
+  setTimeout(() => {
+    try {
+      const result = task();
+
+      option.success?.(result);
+      option.complete?.(result);
+    } catch (err) {
+      const errMsg = getErrorMsg(err);
+
+      option.fail?.({ errMsg });
+      option.complete?.({ errMsg });
+    }
+  }, 0);
+
+  return undefined;
 };
 
 export const storageApi = {
-  /**
-   * [wx.getStorage(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorage.html)
-   *
-   * 在插件中使用：需要基础库 `1.9.6`
-   *
-   * 从本地缓存中异步获取指定 key 的内容。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.getStorage({
-   *   key: "key",
-   *   success(res) {
-   *     console.log(res.data);
-   *   },
-   * });
-   * ```
-   *
-   * ```js
-   * // 开启加密存储
-   * wx.setStorage({
-   *   key: "key",
-   *   data: "value",
-   *   encrypt: true, // 若开启加密存储，setStorage 和 getStorage 需要同时声明 encrypt 的值为 true
-   *   success() {
-   *     wx.getStorage({
-   *       key: "key",
-   *       encrypt: true, // 若开启加密存储，setStorage 和 getStorage 需要同时声明 encrypt 的值为 true
-   *       success(res) {
-   *         console.log(res.data);
-   *       },
-   *     });
-   *   },
-   * });
-   * ```
-   */
   getStorage<T = any, U extends GetStorageOption<T> = GetStorageOption<T>>(
     option: U,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, GetStorageOption<T>> {
-    const value: T = storage.has(option.key)
-      ? (storage.get(option.key) as T)
-      : // oxlint-disable-next-line no-undefined
-        (undefined as unknown as T);
+    const { legacyMissingKey, missingKey } = resolveConfig();
 
-    if (!option.success && !option.fail && !option.complete) {
-      // @ts-expect-error: api return a promise
-      return new Promise((resolve) => {
+    if (!hasCallbacks(option)) {
+      return new Promise((resolve, reject) => {
         setTimeout(() => {
-          resolve({ data: value, errMsg: "" });
+          const result = readEntry(option.key);
+
+          if (!result.found && missingKey === "fail") {
+            reject(createStorageFailure(ERR_MSG.missingKey));
+
+            return;
+          }
+
+          resolve(
+            result.found
+              ? { data: result.value as T, errMsg: "getStorage:ok" }
+              : // Compat mode preserves the old success + `undefined` + empty `errMsg` shape.
+                { data: undefined as T, errMsg: legacyMissingKey ? "" : "getStorage:ok" },
+          );
         }, 0);
-      });
+      }) as PromisifySuccessResult<U, GetStorageOption<T>>;
     }
 
     setTimeout(() => {
-      if (option.success) option.success({ data: value, errMsg: "" });
-      if (option.complete) option.complete({ errMsg: "" });
+      const result = readEntry(option.key);
+
+      if (!result.found && missingKey === "fail") {
+        const { errMsg } = createStorageError(ERR_MSG.missingKey);
+
+        option.fail?.({ errMsg });
+        option.complete?.({ errMsg });
+
+        return;
+      }
+
+      const successResult: GetStorageSuccessCallbackResult<T> = result.found
+        ? { data: result.value as T, errMsg: "getStorage:ok" }
+        : { data: undefined as T, errMsg: legacyMissingKey ? "" : "getStorage:ok" };
+
+      option.success?.(successResult);
+      option.complete?.({ errMsg: successResult.errMsg });
     }, 0);
+
+    return undefined as never;
   },
 
-  /**
-   * [any wx.getStorageSync(string
-   * key)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageSync.html)
-   *
-   * 在插件中使用：需要基础库 `1.9.6`
-   *
-   * 从本地缓存中同步获取指定 key 的内容。
-   *
-   * **注意**
-   *
-   * Storage 应只用来进行数据的持久化存储，不应用于运行时的数据传递或全局状态管理。启动过程中过多的同步读写存储，会显著影响启动耗时。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * try {
-   *   var value = wx.getStorageSync("key");
-   *   if (value) {
-   *     // Do something with return value
-   *   }
-   * } catch (e) {
-   *   // Do something when catch error
-   * }
-   * ```
-   */
-  getStorageSync<T = any>(
-    /** 本地缓存中指定的 key */
-    key: string,
-  ): T {
-    // oxlint-disable-next-line no-undefined
-    return storage.has(key) ? (storage.get(key) as T) : (undefined as unknown as T);
+  getStorageSync<T = any>(key: string): T {
+    if (storage.has(key)) return deserialize(storage.get(key)) as T;
+
+    const { missingKeySync } = resolveConfig();
+
+    return (missingKeySync === "undefined" ? undefined : "") as unknown as T;
   },
 
-  /**
-   * [wx.getStorageInfo(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageInfo.html)
-   *
-   * 在插件中使用：不支持
-   *
-   * 异步获取当前storage的相关信息。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.getStorageInfo({
-   *   success(res) {
-   *     console.log(res.keys);
-   *     console.log(res.currentSize);
-   *     console.log(res.limitSize);
-   *   },
-   * });
-   * ```
-   *
-   * ```js
-   * try {
-   *   const res = wx.getStorageInfoSync();
-   *   console.log(res.keys);
-   *   console.log(res.currentSize);
-   *   console.log(res.limitSize);
-   * } catch (e) {
-   *   // Do something when catch error
-   * }
-   * ```
-   */
   getStorageInfo<T extends GetStorageInfoOption = GetStorageInfoOption>(
     option?: T,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, GetStorageInfoOption> {
     const result = {
-      keys: [...storage.keys()],
       currentSize: getStorageSize(),
-      limitSize: 1024 * 10,
-      errMsg: "",
+      errMsg: "getStorageInfo:ok",
+      keys: [...storage.keys()],
+      limitSize: resolveConfig().limitSize,
     };
 
-    if (!option || (!option.success && !option.fail && !option.complete)) {
-      // @ts-expect-error: return type mismatch
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(result);
-        }, 0);
-      });
-    }
+    if (!option || !hasCallbacks(option))
+      return Promise.resolve(result) as PromisifySuccessResult<T, GetStorageInfoOption>;
 
     setTimeout(() => {
-      if (option.success) option.success(result);
-      if (option.complete) option.complete({ errMsg: "" });
+      option.success?.(result);
+      option.complete?.({ errMsg: result.errMsg });
     }, 0);
+
+    return undefined as never;
   },
 
-  /**
-   * [Object
-   * wx.getStorageInfoSync()](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageInfoSync.html)
-   *
-   * 在插件中使用：不支持
-   *
-   * [wx.getStorageInfo](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.getStorageInfo.html)
-   * 的同步版本
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.getStorageInfo({
-   *   success(res) {
-   *     console.log(res.keys);
-   *     console.log(res.currentSize);
-   *     console.log(res.limitSize);
-   *   },
-   * });
-   * ```
-   *
-   * ```js
-   * try {
-   *   const res = wx.getStorageInfoSync();
-   *   console.log(res.keys);
-   *   console.log(res.currentSize);
-   *   console.log(res.limitSize);
-   * } catch (e) {
-   *   // Do something when catch error
-   * }
-   * ```
-   */
   getStorageInfoSync(): GetStorageInfoSyncOption {
     return {
-      keys: [...storage.keys()],
       currentSize: getStorageSize(),
-      limitSize: 1024 * 10,
+      keys: [...storage.keys()],
+      limitSize: resolveConfig().limitSize,
     };
   },
 
-  /**
-   * [wx.setStorage(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)
-   *
-   * 将数据存储在本地缓存中指定的 key 中。会覆盖掉原来该 key 对应的内容。除非用户主动删除或因存储空间原因被系统清理，否则数据都一直可用。单个 key 允许存储的最大数据长度为
-   * 1MB，所有数据存储上限为 10MB。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.setStorage({
-   *   key: "key",
-   *   data: "value",
-   * });
-   * ```
-   *
-   * ```js
-   * try {
-   *   wx.setStorageSync("key", "value");
-   * } catch (e) {}
-   * ```
-   */
   setStorage<T = any, U extends SetStorageOption<T> = SetStorageOption<T>>(
     option: U,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<U, SetStorageOption<T>> {
-    if (!option.success && !option.fail && !option.complete) {
-      // @ts-expect-error: api return a promise
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          storage.set(option.key, option.data);
-          resolve({ errMsg: "" });
-        }, 0);
-      });
-    }
+    return deliverResult(option, () => {
+      writeEntry(option.key, option.data);
 
-    setTimeout(() => {
-      storage.set(option.key, option.data);
-      if (option.success) option.success({ errMsg: "" });
-      if (option.complete) option.complete({ errMsg: "" });
-    }, 0);
+      return { errMsg: "setStorage:ok" };
+    }) as PromisifySuccessResult<U, SetStorageOption<T>>;
   },
 
-  /**
-   * [wx.setStorageSync(string key, any
-   * data)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorageSync.html)
-   *
-   * [wx.setStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.setStorage.html)
-   * 的同步版本
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.setStorage({
-   *   key: "key",
-   *   data: "value",
-   * });
-   * ```
-   *
-   * ```js
-   * try {
-   *   wx.setStorageSync("key", "value");
-   * } catch (e) {}
-   * ```
-   */
-  setStorageSync<T = any>(
-    /** 本地缓存中指定的 key */
-    key: string,
-    /** 需要存储的内容。只支持原生类型、Date、及能够通过`JSON.stringify`序列化的对象。 */
-    data: T,
-  ): void {
-    storage.set(key, data);
+  setStorageSync<T = any>(key: string, data: T): void {
+    writeEntry(key, data);
   },
 
   removeStorage<T extends RemoveStorageOption = RemoveStorageOption>(
     option: T,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, RemoveStorageOption> {
-    if (!option.success && !option.fail && !option.complete) {
-      // @ts-expect-error: api return a promise
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          storage.delete(option.key);
-          resolve({ errMsg: "" });
-        }, 0);
-      });
-    }
-
-    setTimeout(() => {
+    return deliverResult(option, () => {
       storage.delete(option.key);
-      if (option.success) option.success({ errMsg: "" });
-      if (option.complete) option.complete({ errMsg: "" });
-    }, 0);
+
+      return { errMsg: "removeStorage:ok" };
+    }) as PromisifySuccessResult<T, RemoveStorageOption>;
   },
 
-  /**
-   * [wx.removeStorageSync(string
-   * key)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorageSync.html)
-   *
-   * [wx.removeStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.removeStorage.html)
-   * 的同步版本
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.removeStorage({
-   *   key: "key",
-   *   success(res) {
-   *     console.log(res);
-   *   },
-   * });
-   * ```
-   *
-   * ```js
-   * try {
-   *   wx.removeStorageSync("key");
-   * } catch (e) {
-   *   // Do something when catch error
-   * }
-   * ```
-   */
-  removeStorageSync(
-    /** 本地缓存中指定的 key */
-    key: string,
-  ): void {
+  removeStorageSync(key: string): void {
     storage.delete(key);
   },
 
-  /**
-   * [wx.clearStorage(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.clearStorage.html)
-   *
-   * 清除本地数据缓存。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.clearStorage();
-   * ```
-   *
-   * ```js
-   * wx.clearStorageSync();
-   * ```
-   */
   clearStorage<T extends ClearStorageOption = ClearStorageOption>(
     option?: T,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, ClearStorageOption> {
-    if (!option || (!option.success && !option.fail && !option.complete)) {
-      // @ts-expect-error: return type mismatch
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          storage.clear();
-          // oxlint-disable-next-line no-undefined, unicorn/no-useless-undefined
-          resolve(undefined);
-        }, 0);
-      });
-    }
-
-    setTimeout(() => {
+    return deliverResult(option, () => {
       storage.clear();
-      if (option.success) option.success();
-      if (option.complete) option.complete();
-    }, 0);
+
+      return { errMsg: "clearStorage:ok" };
+    }) as PromisifySuccessResult<T, ClearStorageOption>;
   },
 
-  /**
-   * [wx.clearStorageSync()](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.clearStorageSync.html)
-   *
-   * [wx.clearStorage](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.clearStorage.html)
-   * 的同步版本
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.clearStorage();
-   * ```
-   *
-   * ```js
-   * wx.clearStorageSync();
-   * ```
-   */
   clearStorageSync(): void {
     storage.clear();
   },
 
-  /**
-   * [wx.batchGetStorage(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.batchGetStorage.html)
-   *
-   * 需要基础库： `2.25.0`
-   *
-   * 在插件中使用：不支持
-   *
-   * 从本地缓存中异步批量获取指定 key 的内容。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.batchGetStorage({
-   *   keyList: ["key"],
-   *   success(res) {
-   *     console.log(res);
-   *   },
-   * });
-   * ```
-   */
   batchGetStorage<T extends BatchGetStorageOption = BatchGetStorageOption>(
     option: T,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, BatchGetStorageOption> {
-    // oxlint-disable-next-line typescript/no-unsafe-return
-    const values = option.keyList.map((key) => storage.get(key));
-    const result: BatchGetStorageSuccessCallbackResult = { data: values, errMsg: "" };
+    const { batchMissingKey, legacyMissingKey } = resolveConfig();
+    const values = option.keyList.map((key) => readEntry(key));
 
-    if (!option.success && !option.fail && !option.complete) {
-      // @ts-expect-error: return type mismatch
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(result);
-        }, 0);
-      });
+    if (values.some((value) => !value.found) && batchMissingKey === "fail") {
+      return deliverFailure(option, ERR_MSG.batchMissingKey) as PromisifySuccessResult<
+        T,
+        BatchGetStorageOption
+      >;
     }
 
+    // The runtime succeeds and returns `null` for missing keys (the legacy compat mode keeps the
+    // old `undefined` entries).
+    const result: BatchGetStorageSuccessCallbackResult = {
+      dataList: values.map((value) => {
+        if (value.found) return value.value;
+
+        return legacyMissingKey ? undefined : null;
+      }),
+      errMsg: "batchGetStorage:ok",
+    };
+
+    if (!hasCallbacks(option))
+      return Promise.resolve(result) as PromisifySuccessResult<T, BatchGetStorageOption>;
+
     setTimeout(() => {
-      if (option.success) option.success(result);
-      if (option.complete) option.complete({ errMsg: "" });
+      option.success?.(result);
+      option.complete?.({ errMsg: result.errMsg });
     }, 0);
+
+    return undefined as never;
   },
-  /**
-   * [wx.batchSetStorage(Object
-   * object)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.batchSetStorage.html)
-   *
-   * 需要基础库： `2.25.0`
-   *
-   * 在插件中使用：不支持
-   *
-   * 将数据批量存储在本地缓存中指定的 key 中。会覆盖掉原来该 key 对应的内容。除非用户主动删除或因存储空间原因被系统清理，否则数据都一直可用。单个 key 允许存储的最大数据长度为
-   * 1MB，所有数据存储上限为 10MB。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * wx.setStorage({
-   *   key: "key",
-   *   data: "value",
-   * });
-   * ```
-   *
-   * ```js
-   * // 开启加密存储
-   * wx.batchSetStorage({
-   *   kvList: [
-   *     {
-   *       key: "key",
-   *       value: "value",
-   *     },
-   *   ],
-   * });
-   * ```
-   */
+
   batchSetStorage<T extends BatchSetStorageOption = BatchSetStorageOption>(
     option: T,
-    // @ts-expect-error: api return void in some cases
   ): PromisifySuccessResult<T, BatchSetStorageOption> {
-    for (const { key, value } of option.kvList) storage.set(key, value);
+    return deliverResult(option, () => {
+      const entries = option.kvList.map(({ key, value }) => ({ key, value: value as unknown }));
 
-    if (!option.success && !option.fail && !option.complete) {
-      // @ts-expect-error: return type mismatch
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ errMsg: "" });
-        }, 0);
-      });
-    }
+      assertBatchQuota(entries);
 
-    setTimeout(() => {
-      if (option.success) option.success({ errMsg: "" });
-      if (option.complete) option.complete({ errMsg: "" });
-    }, 0);
+      for (const { key, value } of entries) storage.set(key, serialize(value));
+
+      return { errMsg: "batchSetStorage:ok" };
+    }) as PromisifySuccessResult<T, BatchSetStorageOption>;
   },
-  /**
-   * [wx.batchSetStorageSync(Array.<Object>
-   * kvList)](https://developers.weixin.qq.com/miniprogram/dev/api/storage/wx.batchSetStorageSync.html)
-   *
-   * 需要基础库： `2.25.0`
-   *
-   * 在插件中使用：不支持
-   *
-   * 将数据批量存储在本地缓存中指定的 key 中。会覆盖掉原来该 key 对应的内容。除非用户主动删除或因存储空间原因被系统清理，否则数据都一直可用。单个 key 允许存储的最大数据长度为
-   * 1MB，所有数据存储上限为 10MB。
-   *
-   * **示例代码**
-   *
-   * ```js
-   * try {
-   *   wx.batchSetStorageSync([{ key: "key", value: "value" }]);
-   * } catch (e) {}
-   * ```
-   */
+
   batchSetStorageSync(kvList: KvList[]): void {
-    for (const { key, value } of kvList) storage.set(key, value);
+    const entries = kvList.map(({ key, value }) => ({ key, value: value as unknown }));
+
+    assertBatchQuota(entries);
+
+    for (const { key, value } of entries) storage.set(key, serialize(value));
   },
-};
-
-/** Internal snapshot of the in-memory storage; used by `mockWx` scopes. */
-export type StorageSnapshot = Map<string, any>;
-
-/** Capture the current storage contents. */
-export const snapshotStorage = (): StorageSnapshot => new Map(storage);
-
-/** Restore storage contents captured by {@link snapshotStorage}. */
-export const restoreStorage = (snapshot: StorageSnapshot): void => {
-  storage.clear();
-
-  for (const [key, value] of snapshot) storage.set(key, value);
-};
-
-/** Clear all storage entries. */
-export const resetStorage = (): void => {
-  storage.clear();
 };

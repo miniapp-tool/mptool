@@ -73,7 +73,7 @@ describe("mockWx control plane", () => {
         caught = err;
       }
 
-      expect(caught).toMatchObject({ errMsg: "setStorage:fail exceed storage max size" });
+      expect(caught).toMatchObject({ errMsg: "setStorage:fail exceed storage max size 10Mb" });
     });
 
     it("should only match the requested number of calls", async () => {
@@ -302,7 +302,7 @@ describe("mockWx control plane", () => {
       [{ type: "network" } as const, "getStorageSync:fail"],
       [{ type: "timeout" } as const, "getStorageSync:fail timeout"],
       [{ type: "abort" } as const, "getStorageSync:fail abort"],
-      [{ type: "quota" } as const, "setStorage:fail exceed storage max size"],
+      [{ type: "quota" } as const, "setStorage:fail exceed storage max size 10Mb"],
       [{ type: "cancel" } as const, "getStorageSync:fail cancel"],
       [{ type: "permission" } as const, "getStorageSync:fail permission denied"],
       [{ errMsg: "custom failure", type: "fail" } as const, "custom failure"],

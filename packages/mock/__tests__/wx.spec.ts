@@ -1,7 +1,7 @@
 // oxlint-disable vitest/no-commented-out-tests
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { wx } from "../src/index.js";
+import { mockWx, wx } from "../src/index.js";
 
 describe("wx mock", () => {
   // oxlint-disable-next-line vitest/no-hooks
@@ -9,16 +9,23 @@ describe("wx mock", () => {
     wx.clearStorageSync();
   });
 
+  // oxlint-disable-next-line vitest/no-hooks
+  afterEach(() => {
+    mockWx.reset();
+  });
+
   describe("getStorage", () => {
-    it("should return undefined for non-existent key", async () => {
-      const result = await wx.getStorage({ key: "nonexistent" });
-      expect(result.data).toBeUndefined();
+    it("should fail for a non-existent key", async () => {
+      await expect(wx.getStorage({ key: "nonexistent" })).rejects.toMatchObject({
+        errMsg: "getStorage:fail data not found",
+      });
     });
 
     it("should return stored value", async () => {
       wx.setStorageSync("test-key", "test-value");
       const result = await wx.getStorage({ key: "test-key" });
       expect(result.data).toBe("test-value");
+      expect(result.errMsg).toBe("getStorage:ok");
     });
 
     it("should work with callback style", () =>
@@ -28,6 +35,21 @@ describe("wx mock", () => {
           key: "callback-key",
           success: (res) => {
             expect(res.data).toStrictEqual({ foo: "bar" });
+            expect(res.errMsg).toBe("getStorage:ok");
+            resolve();
+          },
+        });
+      }));
+
+    it("should call fail and complete for a missing key", () =>
+      new Promise<void>((resolve) => {
+        wx.getStorage({
+          key: "missing-callback-key",
+          fail: (res) => {
+            expect(res.errMsg).toBe("getStorage:fail data not found");
+          },
+          complete: (res) => {
+            expect(res.errMsg).toBe("getStorage:fail data not found");
             resolve();
           },
         });
@@ -44,7 +66,7 @@ describe("wx mock", () => {
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
+            expect(res.errMsg).toBe("getStorage:ok");
             resolve();
           },
         });
@@ -55,11 +77,29 @@ describe("wx mock", () => {
       const result = await wx.getStorage({ key: "promise-key" });
       expect(result.data).toBe(12345);
     });
+
+    it("should keep the old missing-key behaviour with the compat flag", async () => {
+      mockWx.compat({ storageResolveMissingKey: true });
+
+      const result = await wx.getStorage({ key: "nonexistent" });
+
+      expect(result.data).toBeUndefined();
+      expect(result.errMsg).toBe("");
+    });
+
+    it("should support MockStorageOptions.missingKey", async () => {
+      mockWx.storage({ missingKey: "resolve" });
+
+      const result = await wx.getStorage({ key: "nonexistent" });
+
+      expect(result.data).toBeUndefined();
+      expect(result.errMsg).toBe("getStorage:ok");
+    });
   });
 
   describe("getStorageSync", () => {
-    it("should return undefined for non-existent key", () => {
-      expect(wx.getStorageSync("nonexistent")).toBeUndefined();
+    it("should return an empty string for a non-existent key", () => {
+      expect(wx.getStorageSync("nonexistent")).toBe("");
     });
 
     it("should return stored string value", () => {
@@ -68,32 +108,41 @@ describe("wx mock", () => {
     });
 
     it("should return stored object value", () => {
-      const obj = { nested: { data: true } };
-      wx.setStorageSync("sync-obj", obj);
-      expect(wx.getStorageSync("sync-obj")).toStrictEqual(obj);
+      wx.setStorageSync("sync-object", { foo: "bar" });
+      expect(wx.getStorageSync("sync-object")).toStrictEqual({ foo: "bar" });
     });
 
     it("should return stored array value", () => {
-      const arr = [1, 2, 3];
-      wx.setStorageSync("sync-arr", arr);
-      expect(wx.getStorageSync("sync-arr")).toStrictEqual(arr);
+      wx.setStorageSync("sync-array", [1, 2, 3]);
+      expect(wx.getStorageSync("sync-array")).toStrictEqual([1, 2, 3]);
+    });
+
+    it("should support MockStorageOptions.missingKeySync", () => {
+      mockWx.storage({ missingKeySync: "undefined" });
+
+      expect(wx.getStorageSync("nonexistent")).toBeUndefined();
+    });
+
+    it("should keep the old undefined behaviour with the compat flag", () => {
+      mockWx.compat({ storageResolveMissingKey: true });
+
+      expect(wx.getStorageSync("nonexistent")).toBeUndefined();
     });
   });
 
   describe("setStorage", () => {
     it("should store value with promise", async () => {
-      await wx.setStorage({ key: "new-key", data: "new-value" });
-      expect(wx.getStorageSync("new-key")).toBe("new-value");
+      await wx.setStorage({ key: "promise-set", data: { a: 1 } });
+      expect(wx.getStorageSync("promise-set")).toStrictEqual({ a: 1 });
     });
 
     it("should store value with callback", () =>
       new Promise<void>((resolve) => {
         wx.setStorage({
-          key: "cb-key",
-          data: "cb-value",
+          key: "callback-set",
+          data: { a: 1 },
           success: (res) => {
-            expect(res.errMsg).toBe("");
-            expect(wx.getStorageSync("cb-key")).toBe("cb-value");
+            expect(res.errMsg).toBe("setStorage:ok");
             resolve();
           },
         });
@@ -103,76 +152,62 @@ describe("wx mock", () => {
       new Promise<void>((resolve) => {
         let successCalled = false;
         wx.setStorage({
-          key: "complete-set-key",
+          key: "complete-set",
           data: "value",
           success: () => {
             successCalled = true;
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
-            expect(wx.getStorageSync("complete-set-key")).toBe("value");
+            expect(res.errMsg).toBe("setStorage:ok");
             resolve();
           },
         });
       }));
 
-    it("should overwrite existing value", () => {
-      wx.setStorageSync("overwrite", "first");
-      wx.setStorageSync("overwrite", "second");
-      expect(wx.getStorageSync("overwrite")).toBe("second");
+    it("should overwrite existing value", async () => {
+      wx.setStorageSync("overwrite", "old");
+      await wx.setStorage({ key: "overwrite", data: "new" });
+      expect(wx.getStorageSync("overwrite")).toBe("new");
     });
 
     it("should store objects", async () => {
-      const data = { complex: { nested: [1, 2, 3] } };
-      await wx.setStorage({ key: "object-key", data });
-      expect(wx.getStorageSync("object-key")).toStrictEqual(data);
+      const value = { nested: { list: [1, 2, 3] } };
+      await wx.setStorage({ key: "object-set", data: value });
+      expect(wx.getStorageSync("object-set")).toStrictEqual(value);
     });
   });
 
   describe("setStorageSync", () => {
     it("should store string value", () => {
-      wx.setStorageSync("sync-set", "value");
-      expect(wx.getStorageSync("sync-set")).toBe("value");
+      wx.setStorageSync("sync-set-string", "value");
+      expect(wx.getStorageSync("sync-set-string")).toBe("value");
     });
 
     it("should store number value", () => {
-      wx.setStorageSync("sync-num", 42);
-      expect(wx.getStorageSync("sync-num")).toBe(42);
+      wx.setStorageSync("sync-set-number", 42);
+      expect(wx.getStorageSync("sync-set-number")).toBe(42);
     });
 
     it("should store boolean value", () => {
-      wx.setStorageSync("sync-bool", false);
-      expect(wx.getStorageSync("sync-bool")).toBe(false);
+      wx.setStorageSync("sync-set-boolean", false);
+      expect(wx.getStorageSync("sync-set-boolean")).toBe(false);
     });
 
     it("should store null value", () => {
-      wx.setStorageSync("sync-null", null);
-      expect(wx.getStorageSync("sync-null")).toBeNull();
+      wx.setStorageSync("sync-set-null", null);
+      expect(wx.getStorageSync("sync-set-null")).toBeNull();
     });
   });
 
   describe("removeStorage", () => {
     it("should remove key with callback style", () =>
       new Promise<void>((resolve) => {
-        wx.setStorageSync("to-remove", "value");
+        wx.setStorageSync("callback-remove", "value");
         wx.removeStorage({
-          key: "to-remove",
-          success: () => {
-            expect(wx.getStorageSync("to-remove")).toBeUndefined();
-            resolve();
-          },
-        });
-      }));
-
-    it("should remove key with callback", () =>
-      new Promise<void>((resolve) => {
-        wx.setStorageSync("cb-remove", "value");
-        wx.removeStorage({
-          key: "cb-remove",
+          key: "callback-remove",
           success: (res) => {
-            expect(res.errMsg).toBe("");
-            expect(wx.getStorageSync("cb-remove")).toBeUndefined();
+            expect(res.errMsg).toBe("removeStorage:ok");
             resolve();
           },
         });
@@ -189,8 +224,8 @@ describe("wx mock", () => {
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
-            expect(wx.getStorageSync("complete-remove-key")).toBeUndefined();
+            expect(res.errMsg).toBe("removeStorage:ok");
+            expect(wx.getStorageSync("complete-remove-key")).toBe("");
             resolve();
           },
         });
@@ -198,7 +233,7 @@ describe("wx mock", () => {
 
     it("should handle removing non-existent key", async () => {
       await wx.removeStorage({ key: "nonexistent" });
-      expect(wx.getStorageSync("nonexistent")).toBeUndefined();
+      expect(wx.getStorageSync("nonexistent")).toBe("");
     });
   });
 
@@ -206,7 +241,7 @@ describe("wx mock", () => {
     it("should remove existing key", () => {
       wx.setStorageSync("remove-sync", "value");
       wx.removeStorageSync("remove-sync");
-      expect(wx.getStorageSync("remove-sync")).toBeUndefined();
+      expect(wx.getStorageSync("remove-sync")).toBe("");
     });
 
     it("should handle non-existent key gracefully", () => {
@@ -225,7 +260,7 @@ describe("wx mock", () => {
     it("should return empty after clear", () => {
       wx.setStorageSync("any-key", "any-value");
       wx.clearStorageSync();
-      expect(wx.getStorageSync("any-key")).toBeUndefined();
+      expect(wx.getStorageSync("any-key")).toBe("");
     });
   });
 
@@ -234,8 +269,8 @@ describe("wx mock", () => {
       new Promise<void>((resolve) => {
         wx.setStorageSync("clear-key", "clear-value");
         wx.clearStorage({
-          success: () => {
-            expect(wx.getStorageSync("clear-key")).toBeUndefined();
+          success: (res) => {
+            expect(res.errMsg).toBe("clearStorage:ok");
             resolve();
           },
         });
@@ -243,15 +278,14 @@ describe("wx mock", () => {
 
     it("should call complete after success", () =>
       new Promise<void>((resolve) => {
-        wx.setStorageSync("complete-clear-key", "value");
         let successCalled = false;
         wx.clearStorage({
           success: () => {
             successCalled = true;
           },
-          complete: () => {
+          complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(wx.getStorageSync("complete-clear-key")).toBeUndefined();
+            expect(res.errMsg).toBe("clearStorage:ok");
             resolve();
           },
         });
@@ -260,7 +294,7 @@ describe("wx mock", () => {
     it("should clear storage with promise", async () => {
       wx.setStorageSync("promise-clear-key", "promise-clear-value");
       await wx.clearStorage();
-      expect(wx.getStorageSync("promise-clear-key")).toBeUndefined();
+      expect(wx.getStorageSync("promise-clear-key")).toBe("");
     });
   });
 
@@ -272,7 +306,8 @@ describe("wx mock", () => {
         wx.batchGetStorage({
           keyList: ["batch-key-1", "batch-key-2"],
           success: (res) => {
-            expect(res.data).toStrictEqual(["value1", "value2"]);
+            expect(res.dataList).toStrictEqual(["value1", "value2"]);
+            expect(res.errMsg).toBe("batchGetStorage:ok");
             resolve();
           },
         });
@@ -289,7 +324,7 @@ describe("wx mock", () => {
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
+            expect(res.errMsg).toBe("batchGetStorage:ok");
             resolve();
           },
         });
@@ -301,14 +336,42 @@ describe("wx mock", () => {
       const res = await wx.batchGetStorage({
         keyList: ["batch-promise-1", "batch-promise-2"],
       });
-      expect(res.data).toStrictEqual([{ a: 1 }, { b: 2 }]);
+      expect(res.dataList).toStrictEqual([{ a: 1 }, { b: 2 }]);
     });
 
-    it("should return undefined for non-existent keys", async () => {
+    it("should succeed with null for missing keys", async () => {
+      const res = await wx.batchGetStorage({ keyList: ["nonexistent"] });
+
+      expect(res.dataList).toStrictEqual([null]);
+      expect(res.errMsg).toBe("batchGetStorage:ok");
+    });
+
+    it("should return null only for the missing positions", async () => {
+      wx.setStorageSync("mixed-present", "value");
+
+      const res = await wx.batchGetStorage({
+        keyList: ["mixed-present", "mixed-missing"],
+      });
+
+      expect(res.dataList).toStrictEqual(["value", null]);
+    });
+
+    it("should fail when configured with batchMissingKey fail", async () => {
+      mockWx.storage({ batchMissingKey: "fail" });
+
+      await expect(wx.batchGetStorage({ keyList: ["nonexistent"] })).rejects.toMatchObject({
+        errMsg: "batchGetStorage:fail data not found",
+      });
+    });
+
+    it("should resolve missing keys as undefined in compat mode", async () => {
+      mockWx.compat({ storageResolveMissingKey: true });
+
       const res = await wx.batchGetStorage({
         keyList: ["nonexistent-1", "nonexistent-2"],
       });
-      expect(res.data).toStrictEqual([undefined, undefined]);
+
+      expect(res.dataList).toStrictEqual([undefined, undefined]);
     });
   });
 
@@ -321,7 +384,7 @@ describe("wx mock", () => {
             { key: "batch-set-2", value: "value2" },
           ],
           success: (res) => {
-            expect(res.errMsg).toBe("");
+            expect(res.errMsg).toBe("batchSetStorage:ok");
             expect(wx.getStorageSync("batch-set-1")).toBe("value1");
             expect(wx.getStorageSync("batch-set-2")).toBe("value2");
             resolve();
@@ -339,7 +402,7 @@ describe("wx mock", () => {
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
+            expect(res.errMsg).toBe("batchSetStorage:ok");
             expect(wx.getStorageSync("complete-batch-set-key")).toBe("value");
             resolve();
           },
@@ -434,7 +497,7 @@ describe("wx mock", () => {
           },
           complete: (res) => {
             expect(successCalled).toBe(true);
-            expect(res.errMsg).toBe("");
+            expect(res.errMsg).toBe("getStorageInfo:ok");
             resolve();
           },
         });
