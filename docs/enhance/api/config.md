@@ -5,6 +5,8 @@ order: 2
 
 全局配置器，必须放置在应用主脚本中在 `$App` 前调用。
 
+`$Page` / `$Component` 的注册同样依赖全局配置：在调用 `$Config` 之前注册页面或组件会抛出 `MpError`。
+
 ## defaultPage
 
 - 类型: `string`

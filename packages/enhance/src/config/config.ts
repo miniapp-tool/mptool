@@ -1,4 +1,4 @@
-import { isFunction } from "@mptool/shared";
+import { MpError, isFunction } from "@mptool/shared";
 
 import type {
   AppConfigCommonOptions,
@@ -63,8 +63,19 @@ export const $Config = (config: AppConfigOptions): void => {
   };
 };
 
+/**
+ * Get the global config.
+ *
+ * @returns Global config / 全局配置
+ * @throws {MpError} When `$Config` has not been called yet / 尚未调用 `$Config` 时抛出
+ */
 export const getConfig = (): Config => {
-  if (!appConfig) throw new Error("$Config is not called");
+  if (!appConfig) {
+    throw new MpError({
+      message:
+        "$Config is not called: call $Config() in app.js before registering pages or components",
+    });
+  }
 
   return appConfig;
 };
