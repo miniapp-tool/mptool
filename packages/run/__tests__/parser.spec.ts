@@ -104,6 +104,18 @@ describe("literals", () => {
     expect(exprOf("1e3")).toStrictEqual({ type: "literal", value: 1000 });
   });
 
+  it("should parse legacy octal literals by their octal value", () => {
+    // legacy octal literals are octal, not decimal (`Number("0123")` would be wrong)
+    // 旧式八进制按八进制取值（`Number("0123")` 是错的）
+    expect(exprOf("0123")).toStrictEqual({ type: "literal", value: 83 });
+    expect(exprOf("0777")).toStrictEqual({ type: "literal", value: 511 });
+    expect(exprOf("00")).toStrictEqual({ type: "literal", value: 0 });
+    // NonOctalDecimalIntegerLiteral stays decimal in sloppy mode
+    // 含 8/9 的非八进制十进制字面量保持十进制
+    expect(exprOf("08")).toStrictEqual({ type: "literal", value: 8 });
+    expect(exprOf("018")).toStrictEqual({ type: "literal", value: 18 });
+  });
+
   it("should parse string literals with escapes", () => {
     expect(exprOf('"hello"')).toStrictEqual({ type: "literal", value: "hello" });
     expect(exprOf(String.raw`'it\'s'`)).toStrictEqual({ type: "literal", value: "it's" });

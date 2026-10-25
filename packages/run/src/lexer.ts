@@ -40,7 +40,7 @@ import {
 export type Token =
   | { type: "identifier"; value: string; start: number; end: number }
   | { type: "keyword"; value: string; start: number; end: number }
-  | { type: "number"; value: string; start: number; end: number }
+  | { type: "number"; value: string; numericValue?: number; start: number; end: number }
   | { type: "bigint"; value: string; start: number; end: number } // value 不含 'n' 后缀
   | { type: "string"; value: string; cooked: string; start: number; end: number }
   | {
@@ -401,7 +401,12 @@ export class Lexer {
 
     if (isIdentifierStart(source[pos])) throw this.error("Invalid number literal", start, pos);
 
-    const token: Token = { type: "number", value: raw, start, end: pos };
+    // Legacy octal literals (`0123`) keep their raw text; the ECMAScript value is the
+    // octal interpretation (`83`), not `Number("0123")` (`123`).
+    // 旧式八进制字面量（`0123`）保留原始文本，但 ECMAScript 取值是八进制解释（`83`）。
+    const token: Token = legacyOctal
+      ? { type: "number", value: raw, numericValue: Number.parseInt(raw, 8), start, end: pos }
+      : { type: "number", value: raw, start, end: pos };
 
     this.pos = pos;
     this.lastToken = token;
