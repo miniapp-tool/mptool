@@ -86,13 +86,20 @@ export interface WxNetworkResponse {
 export interface MockStorageOptions {
   /** Total quota in KB; defaults to `10240`. */
   limitSize?: number;
-  /** Single-key quota in KB; defaults to `1024`. */
-  keySize?: number;
-  /** Behaviour of `getStorage` for a missing key; defaults to `"fail"` (real-device semantics). */
-  missingKey?: "fail" | "resolve";
   /**
-   * Behaviour of `getStorageSync` for a missing key; defaults to `"empty-string"` (real-device
-   * semantics).
+   * Single-key quota in KB.
+   *
+   * Not enforced by default: the developer tools accept multi-MB keys even though the official docs
+   * mention a 1 MB per-key limit; set this (for example `1024`) to enforce it in tests.
+   */
+  keySize?: number;
+  /** Behaviour of `getStorage` for a missing key; defaults to `"fail"` (developer-tools behaviour). */
+  missingKey?: "fail" | "resolve";
+  /** Behaviour of `batchGetStorage` for missing keys; defaults to `"resolve"` (returns `null`). */
+  batchMissingKey?: "fail" | "resolve";
+  /**
+   * Behaviour of `getStorageSync` for a missing key; defaults to `"empty-string"` (developer-tools
+   * behaviour).
    */
   missingKeySync?: "empty-string" | "undefined";
 }

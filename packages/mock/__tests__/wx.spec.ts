@@ -306,7 +306,7 @@ describe("wx mock", () => {
         wx.batchGetStorage({
           keyList: ["batch-key-1", "batch-key-2"],
           success: (res) => {
-            expect(res.data).toStrictEqual(["value1", "value2"]);
+            expect(res.dataList).toStrictEqual(["value1", "value2"]);
             expect(res.errMsg).toBe("batchGetStorage:ok");
             resolve();
           },
@@ -336,23 +336,42 @@ describe("wx mock", () => {
       const res = await wx.batchGetStorage({
         keyList: ["batch-promise-1", "batch-promise-2"],
       });
-      expect(res.data).toStrictEqual([{ a: 1 }, { b: 2 }]);
+      expect(res.dataList).toStrictEqual([{ a: 1 }, { b: 2 }]);
     });
 
-    it("should fail when a key is missing", async () => {
+    it("should succeed with null for missing keys", async () => {
+      const res = await wx.batchGetStorage({ keyList: ["nonexistent"] });
+
+      expect(res.dataList).toStrictEqual([null]);
+      expect(res.errMsg).toBe("batchGetStorage:ok");
+    });
+
+    it("should return null only for the missing positions", async () => {
+      wx.setStorageSync("mixed-present", "value");
+
+      const res = await wx.batchGetStorage({
+        keyList: ["mixed-present", "mixed-missing"],
+      });
+
+      expect(res.dataList).toStrictEqual(["value", null]);
+    });
+
+    it("should fail when configured with batchMissingKey fail", async () => {
+      mockWx.storage({ batchMissingKey: "fail" });
+
       await expect(wx.batchGetStorage({ keyList: ["nonexistent"] })).rejects.toMatchObject({
         errMsg: "batchGetStorage:fail data not found",
       });
     });
 
-    it("should resolve missing keys in compat mode", async () => {
+    it("should resolve missing keys as undefined in compat mode", async () => {
       mockWx.compat({ storageResolveMissingKey: true });
 
       const res = await wx.batchGetStorage({
         keyList: ["nonexistent-1", "nonexistent-2"],
       });
 
-      expect(res.data).toStrictEqual([undefined, undefined]);
+      expect(res.dataList).toStrictEqual([undefined, undefined]);
     });
   });
 

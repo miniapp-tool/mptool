@@ -1,6 +1,7 @@
 // oxlint-disable typescript/no-explicit-any
 
 // oxlint-disable no-undefined -- storage payloads and missing-key semantics are built around `undefined`
+// oxlint-disable promise/prefer-promise-reject-errors -- async storage APIs reject plain `{ errMsg }` objects, like the runtime
 import { mockState } from "./state.js";
 import { storage } from "./storageState.js";
 import type { StoredValue } from "./storageState.js";
@@ -150,8 +151,8 @@ export interface KvList {
 }
 
 export interface BatchGetStorageSuccessCallbackResult {
-  /** 对应 key 的缓存内容 */
-  data: any[];
+  /** 对应 key 的缓存内容；缺失的 key 为 `null` */
+  dataList: any[];
   errMsg: string;
 }
 
@@ -170,14 +171,18 @@ export type BatchSetStorageSuccessCallback = (res: GeneralCallbackResult) => voi
 
 /** Fallback error messages used by natural storage failures (no injection involved). */
 const ERR_MSG = {
+  batchMissingKey: "batchGetStorage:fail data not found",
   invalidData: "setStorage:fail data should be JSON serializable",
   missingKey: "getStorage:fail data not found",
-  quota: "setStorage:fail exceed storage max size",
+  quota: "setStorage:fail exceed storage max size 10Mb",
 } as const;
 
 const DEFAULT_LIMIT_SIZE = 10240;
-const DEFAULT_KEY_SIZE = 1024;
+/** Developer tools do not enforce the documented 1 MB per-key limit; opt in through `keySize`. */
+const DEFAULT_KEY_SIZE: number = Number.POSITIVE_INFINITY;
 const BYTES_PER_KB = 1024;
+/** Tag used to persist a top-level `Date` (nested dates stay ISO strings, like the runtime). */
+const DATE_PREFIX = "@mptool-mock:date:";
 
 const encoder = new TextEncoder();
 
@@ -194,6 +199,9 @@ const getErrorMsg = (error: unknown): string =>
     ? String((error as { errMsg: unknown }).errMsg)
     : "storage:fail";
 
+/** Async storage APIs reject with a plain `{ errMsg }` object, not an `Error`. */
+const createStorageFailure = (errMsg: string): { errMsg: string } => ({ errMsg });
+
 interface StorageConfig {
   /** Total quota in bytes. */
   limitBytes: number;
@@ -202,6 +210,7 @@ interface StorageConfig {
   /** Total quota in KB (what `getStorageInfo` reports). */
   limitSize: number;
   missingKey: "fail" | "resolve";
+  batchMissingKey: "fail" | "resolve";
   missingKeySync: "empty-string" | "undefined";
   /** Whether missing keys use the legacy `success` + empty `errMsg` shape (compat flag). */
   legacyMissingKey: boolean;
@@ -219,22 +228,32 @@ const resolveConfig = (): StorageConfig => {
   const keySize = options.keySize ?? DEFAULT_KEY_SIZE;
 
   return {
-    keyLimitBytes: keySize * BYTES_PER_KB,
+    batchMissingKey: compat.storageResolveMissingKey
+      ? "resolve"
+      : (options.batchMissingKey ?? "resolve"),
+    keyLimitBytes: Number.isFinite(keySize) ? keySize * BYTES_PER_KB : Number.POSITIVE_INFINITY,
+    legacyMissingKey: Boolean(compat.storageResolveMissingKey),
     limitBytes: limitSize * BYTES_PER_KB,
     limitSize,
     missingKey: compat.storageResolveMissingKey ? "resolve" : (options.missingKey ?? "fail"),
     missingKeySync: compat.storageResolveMissingKey
       ? "undefined"
       : (options.missingKeySync ?? "empty-string"),
-    legacyMissingKey: Boolean(compat.storageResolveMissingKey),
   };
 };
 
 const byteLength = (text: string): number => encoder.encode(text).length;
 
-/** Serialize a storage value. Throws `Error` (with `errMsg`) for non-serializable values. */
+/**
+ * Serialize a storage value.
+ *
+ * A top-level `Date` survives (the runtime keeps it a `Date`); dates nested inside objects are
+ * serialized to ISO strings by `JSON.stringify`, exactly like the runtime. `undefined` is stored
+ * without consuming value bytes. Values that cannot be serialized fail with `errMsg`.
+ */
 const serialize = (data: unknown): StoredValue => {
   if (data === undefined) return undefined;
+  if (data instanceof Date) return `${DATE_PREFIX}${data.toISOString()}`;
 
   try {
     return JSON.stringify(data);
@@ -243,32 +262,46 @@ const serialize = (data: unknown): StoredValue => {
   }
 };
 
-const deserialize = (value: StoredValue): unknown =>
-  value === undefined ? undefined : (JSON.parse(value) as unknown);
+const deserialize = (value: StoredValue): unknown => {
+  if (value === undefined) return undefined;
+  if (value.startsWith(DATE_PREFIX)) return new Date(value.slice(DATE_PREFIX.length));
 
-/** Value bytes only; key names are not counted (real-device samples pending). */
-const getValueSize = (value: StoredValue): number => (value === undefined ? 0 : byteLength(value));
+  return JSON.parse(value) as unknown;
+};
 
+/** Serialized value bytes; the date tag itself is not counted. */
+const getValueSize = (value: StoredValue): number => {
+  if (value === undefined) return 0;
+  if (value.startsWith(DATE_PREFIX)) return byteLength(value.slice(DATE_PREFIX.length));
+
+  return byteLength(value);
+};
+
+/** Serialized entry bytes (key + value), as the runtime counts both. */
+const getEntrySize = (key: string, value: StoredValue): number =>
+  byteLength(key) + getValueSize(value);
+
+/** `currentSize` is reported in KB; an empty storage reads 1 in the developer tools. */
 const getStorageSize = (): number => {
   let size = 0;
 
-  for (const value of storage.values()) size += getValueSize(value);
+  for (const [key, value] of storage) size += getEntrySize(key, value);
 
-  return Math.ceil(size / BYTES_PER_KB);
+  return Math.max(1, Math.ceil(size / BYTES_PER_KB));
 };
 
 /** Validate quotas for writing one entry; keeps the total limit consistent on overwrite. */
 const assertQuota = (key: string, value: StoredValue): void => {
   const { keyLimitBytes, limitBytes } = resolveConfig();
-  const entrySize = getValueSize(value);
+  const entrySize = getEntrySize(key, value);
+  const valueSize = getValueSize(value);
 
-  if (entrySize > keyLimitBytes) throw createStorageError(ERR_MSG.quota);
+  if (valueSize > keyLimitBytes) throw createStorageError(ERR_MSG.quota);
 
-  const previous = storage.get(key);
-  const previousSize = storage.has(key) ? getValueSize(previous) : 0;
+  const previousSize = storage.has(key) ? getEntrySize(key, storage.get(key)) : 0;
   let total = 0;
 
-  for (const stored of storage.values()) total += getValueSize(stored);
+  for (const [storedKey, storedValue] of storage) total += getEntrySize(storedKey, storedValue);
 
   if (total - previousSize + entrySize > limitBytes) throw createStorageError(ERR_MSG.quota);
 };
@@ -276,7 +309,7 @@ const assertQuota = (key: string, value: StoredValue): void => {
 /** Validate quotas for a batch write; the whole batch must fit before anything is written. */
 const assertBatchQuota = (entries: { key: string; value: unknown }[]): void => {
   const { keyLimitBytes, limitBytes } = resolveConfig();
-  const next = new Map(storage);
+  const next = new Map<string, StoredValue>(storage);
 
   for (const { key, value } of entries) {
     const serialized = serialize(value);
@@ -288,7 +321,7 @@ const assertBatchQuota = (entries: { key: string; value: unknown }[]): void => {
 
   let total = 0;
 
-  for (const stored of next.values()) total += getValueSize(stored);
+  for (const [key, value] of next) total += getEntrySize(key, value);
 
   if (total > limitBytes) throw createStorageError(ERR_MSG.quota);
 };
@@ -327,7 +360,7 @@ const deliverFailure = (rawOption: unknown, errMsg: string): unknown => {
   const option = asCallbackOption(rawOption);
 
   if (rawOption == null || !hasCallbacks(rawOption))
-    return Promise.reject(createStorageError(errMsg));
+    return Promise.reject(createStorageFailure(errMsg));
 
   setTimeout(() => {
     option.fail?.({ errMsg });
@@ -347,7 +380,7 @@ const deliverResult = (rawOption: unknown, task: () => { errMsg: string }): unkn
         try {
           resolve(task());
         } catch (err) {
-          reject(createStorageError(getErrorMsg(err)));
+          reject(createStorageFailure(getErrorMsg(err)));
         }
       }, 0);
     });
@@ -382,7 +415,7 @@ export const storageApi = {
           const result = readEntry(option.key);
 
           if (!result.found && missingKey === "fail") {
-            reject(createStorageError(ERR_MSG.missingKey));
+            reject(createStorageFailure(ERR_MSG.missingKey));
 
             return;
           }
@@ -502,18 +535,24 @@ export const storageApi = {
   batchGetStorage<T extends BatchGetStorageOption = BatchGetStorageOption>(
     option: T,
   ): PromisifySuccessResult<T, BatchGetStorageOption> {
-    const { missingKey } = resolveConfig();
+    const { batchMissingKey, legacyMissingKey } = resolveConfig();
     const values = option.keyList.map((key) => readEntry(key));
 
-    if (values.some((value) => !value.found) && missingKey === "fail") {
-      return deliverFailure(
-        option,
-        "batchGetStorage:fail data not found",
-      ) as PromisifySuccessResult<T, BatchGetStorageOption>;
+    if (values.some((value) => !value.found) && batchMissingKey === "fail") {
+      return deliverFailure(option, ERR_MSG.batchMissingKey) as PromisifySuccessResult<
+        T,
+        BatchGetStorageOption
+      >;
     }
 
+    // The runtime succeeds and returns `null` for missing keys (the legacy compat mode keeps the
+    // old `undefined` entries).
     const result: BatchGetStorageSuccessCallbackResult = {
-      data: values.map((value) => (value.found ? value.value : undefined)),
+      dataList: values.map((value) => {
+        if (value.found) return value.value;
+
+        return legacyMissingKey ? undefined : null;
+      }),
       errMsg: "batchGetStorage:ok",
     };
 

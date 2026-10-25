@@ -202,22 +202,32 @@ mockWx.compat({ storageResolveMissingKey: true });
 
 ## Storage 语义（真机对齐）
 
-`@mptool/mock` 的 storage 默认按真机语义工作：
+`@mptool/mock` 的 storage 按微信开发者工具实测行为工作（2026-10 实测，SDK 3.17.4 / libVersion 3.5.0 结论一致）：
 
-- **按值序列化**：写入时 `JSON.stringify`，读取时 `JSON.parse`。修改原对象不会影响已存数据，每次读取都得到新对象；`undefined` 不占空间，循环引用等无法序列化的值会失败。
-- **缺 key**：`wx.getStorage` 默认 `fail`（`errMsg: "getStorage:fail data not found"`），`wx.getStorageSync` 默认返回 `""`。
-- **配额**：单 key 默认 1 MB、总量默认 10 MB，超限时异步 API `fail`、同步 API 抛错，`errMsg: "setStorage:fail exceed storage max size"`；`batchSetStorage` 会先整体校验，失败时不会写入任何一项。
-- **errMsg**：成功回调统一为 `<api>:ok`（如 `"getStorage:ok"` / `"setStorage:ok"` / `"clearStorage:ok"`）。
-- **currentSize**：按序列化后的 UTF-8 值字节数计算并向上取整到 KB（暂不计 key 名，真机采样后可能调整）；`limitSize` 默认 `10240`（KB）。
+- **按值序列化**：写入时序列化、读取时反序列化。修改原对象不会影响已存数据，每次读取都得到新对象；`undefined` 可以存取且不占 value 字节；循环引用等无法序列化的值会失败。**顶层 `Date` 保持 `Date`**（`instanceof Date`、`getTime()` 正常）；**嵌套在对象/数组里的 `Date` 会变成 ISO 字符串**（与真机一致）。
+- **缺 key**：
+  - `wx.getStorage` 默认 `fail`（`errMsg: "getStorage:fail data not found"`），`complete` 同样收到该文案。
+  - `wx.getStorageSync` 默认返回 `""`。
+  - `wx.batchGetStorage` 默认 **success**（`errMsg: "batchGetStorage:ok"`），缺失位置为 **`null`**（结果字段是 `dataList`，不是 `data`）。
+- **配额**：开发者工具**只强制总量 10 MB**，单 key 1 MB 并不强制（2 MB 单 key 可写入）；超限报 `errMsg: "setStorage:fail exceed storage max size 10Mb"`（同步抛错在工具内会带 `APP-SERVICE-SDK:` 前缀）。`batchSetStorage` 会先整体校验，失败时不会写入任何一项。单 key 限额可用 `mockWx.storage({ keySize })` 显式开启。
+- **errMsg**：成功回调统一为 `<api>:ok`（如 `"setStorage:ok"` / `"getStorage:ok"` / `"batchGetStorage:ok"` / `"clearStorage:ok"`）。
+- **currentSize**：按 key 名 + 序列化 value 的 UTF-8 字节计算、向上取整到 KB；**空 storage 也返回 `1`**（开发者工具基线）。`limitSize` 默认 `10240`（KB）。
 
 可以用 `mockWx.storage()` 调整（全部单位均为 KB）：
 
 ```ts
-// 更小的配额，便于构造自然超限
-mockWx.storage({ keySize: 1, limitSize: 1 });
+// 更小的总量配额，便于构造自然超限
+mockWx.storage({ limitSize: 1 });
 
-// 缺 key 的替代语义（0.x 的兼容开关见下）
-mockWx.storage({ missingKey: "resolve", missingKeySync: "undefined" });
+// 显式开启单 key 限额（默认不强制，模拟开发者工具行为）
+mockWx.storage({ keySize: 1024 });
+
+// 缺 key 的替代语义（默认值见上）
+mockWx.storage({
+  missingKey: "resolve", // getStorage 缺 key 走 success
+  missingKeySync: "undefined", // getStorageSync 缺 key 返回 undefined
+  batchMissingKey: "fail", // batchGetStorage 缺 key 改为 fail
+});
 ```
 
 `missingKey: "resolve"` 时 `wx.getStorage` 成功返回 `{ data: undefined, errMsg: "getStorage:ok" }`；`missingKeySync: "undefined"` 时 `wx.getStorageSync` 返回 `undefined`。
@@ -230,20 +240,27 @@ mockWx.storage({ missingKey: "resolve", missingKeySync: "undefined" });
 mockWx.compat({ storageResolveMissingKey: true });
 ```
 
-开启后，`wx.getStorage` 缺 key 时成功返回 `{ data: undefined, errMsg: "" }`，`wx.getStorageSync` 返回 `undefined`，`batchGetStorage` 缺 key 返回 `[undefined, ...]`（旧形态）。该开关将在 1.0 移除。
+开启后，`wx.getStorage` 缺 key 时成功返回 `{ data: undefined, errMsg: "" }`，`wx.getStorageSync` 返回 `undefined`，`batchGetStorage` 缺失位置为 `undefined`（旧形态；结果字段仍为修正后的 `dataList`）。该开关将在 1.0 移除。
 
 ### 失败注入
 
 ```ts
 // 强制配额失败 / 缺文件失败
 mockWx.failNext("setStorage", { type: "quota" });
-await expect(wx.setStorage({ key: "k", data: "v" })).rejects.toThrow(/exceed/u);
+await expect(wx.setStorage({ key: "k", data: "v" })).rejects.toMatchObject({
+  errMsg: "setStorage:fail exceed storage max size 10Mb",
+});
 
 mockWx.failNext("getStorage", { type: "noent" });
 await expect(wx.getStorage({ key: "k" })).rejects.toMatchObject({ errCode: 1300002 });
 ```
 
-> 同步 API 在自然超限时抛出带 `errMsg` 的 `Error`；异步 API 未传回调时以 `Error` reject、传了回调时调用 `fail` + `complete`。
+> 自然失败：同步 API 抛出带 `errMsg` 的 `Error`；异步 API 未传回调时 reject **普通对象** `{ errMsg }`（与开发者工具一致），传了回调时调用 `fail` + `complete`。
+
+### 已知开发者工具差异
+
+- 开发者工具里 `wx.batchSetStorage`（异步版）会失败并报 `"batchSetStorage:fail An object could not be cloned."`；mock 不模拟该工具缺陷，异步批量写入正常工作（`batchSetStorageSync` 在工具里正常）。
+- 开发者工具对超限的写入会留下一个空/部分 key 条目；mock 不模拟该残缺状态，超限写入不会落盘。
 
 ## 事件监听与手动触发
 
