@@ -1901,18 +1901,19 @@ export class Runtime {
   private evalDeleteTarget(
     node: MemberExpr,
     env: Environment,
-  ): { object: unknown; key: PropertyKey; shortCircuited: boolean } {
+  ): { object: unknown; key: PropertyKey | null; shortCircuited: boolean } {
     const { object, shortCircuited } = this.evalDeleteObject(node.object, env);
+
+    // a short-circuited chain must not evaluate the computed key at all
+    // 链已短路时不得求值计算键
+    if (shortCircuited || (node.optional && object == null))
+      return { object, key: null, shortCircuited: true };
+
     const key = node.computed
       ? toPropertyKey(this.evalExpression(node.property as Expression, env))
       : (node.property as string);
 
-    // the delete argument itself may be the optional link (e.g. `delete o?.a`)
-    // delete 参数本身可能就是可选链（例如 `delete o?.a`）
-    if (shortCircuited || (node.optional && object == null))
-      return { object, key, shortCircuited: true };
-
-    return { object, key, shortCircuited };
+    return { object, key, shortCircuited: false };
   }
 
   /**
@@ -2491,7 +2492,7 @@ export class Runtime {
 
         // an optional chain that short-circuits makes the delete a no-op (returns true)
         // 可选链短路使 delete 成为空操作（返回 true）
-        if (shortCircuited) return true;
+        if (shortCircuited || key == null) return true;
 
         // oxlint-disable-next-line typescript/no-dynamic-delete -- `delete` operator semantics
         return delete (object as Record<PropertyKey, unknown>)[key];
@@ -4386,7 +4387,7 @@ export class Runtime {
 
             // an optional chain that short-circuits makes the delete a no-op (returns true)
             // 可选链短路使 delete 成为空操作（返回 true）
-            if (shortCircuited) return true;
+            if (shortCircuited || key == null) return true;
 
             // oxlint-disable-next-line typescript/no-dynamic-delete -- `delete` operator semantics
             return delete (object as Record<PropertyKey, unknown>)[key];
@@ -4785,18 +4786,23 @@ export class Runtime {
   private *evalAsyncDeleteTarget(
     node: MemberExpr,
     env: Environment,
-  ): Generator<unknown, { object: unknown; key: PropertyKey; shortCircuited: boolean }, unknown> {
+  ): Generator<
+    unknown,
+    { object: unknown; key: PropertyKey | null; shortCircuited: boolean },
+    unknown
+  > {
     const { object, shortCircuited } = yield* this.evalAsyncDeleteObject(node.object, env);
+
+    // a short-circuited chain must not evaluate the computed key at all
+    // 链已短路时不得求值计算键
+    if (shortCircuited || (node.optional && object == null))
+      return { object, key: null, shortCircuited: true };
+
     const key = node.computed
       ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
       : (node.property as string);
 
-    // the delete argument itself may be the optional link (e.g. `delete o?.a`)
-    // delete 参数本身可能就是可选链（例如 `delete o?.a`）
-    if (shortCircuited || (node.optional && object == null))
-      return { object, key, shortCircuited: true };
-
-    return { object, key, shortCircuited };
+    return { object, key, shortCircuited: false };
   }
 
   /**
