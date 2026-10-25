@@ -87,15 +87,15 @@ icon: folder
   `undefined`、函数、Symbol 以及循环引用无法被 `JSON.stringify` 正确表示，`writeJSON` 会抛出 `MpError` 而不是静默写入 `undefined`/`null`。
   :::
 
-- `saveFile(tempFilePath: string, path: string): void`
+- `saveFile(tempFilePath: string, path: string): string`
 
-  将缓存文件保存到本地文件存储。
+  将缓存文件保存到本地文件存储，返回 `wx.saveFileSync` 给出的保存路径；保存失败时抛出 `MpError`。
   - `tempFilePath`: 缓存文件路径
   - `path`: 保存文件路径
 
-- `saveOnlineFile(onlinePath: string, localPath: string): Promise<string>`
+- `saveOnlineFile(onlinePath: string, localPath: string): Promise<string> & { task: DownloadTask }`
 
-  将在线文件保存到本地指定位置，返回保存后的本地文件路径。
+  将在线文件保存到本地指定位置，返回保存后的本地文件路径；返回值上的 `task` 是底层 `DownloadTask`，大文件下载时可调用 `task.abort()` 取消，或用 `task.onProgressUpdate()` 监听进度。
   - `onlinePath`: 在线文件路径
   - `localPath`: 本地文件路径
 

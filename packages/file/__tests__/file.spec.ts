@@ -1,6 +1,6 @@
 import "@mptool/mock";
 import { MpError } from "@mptool/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   dirname,
@@ -125,6 +125,41 @@ describe("file operations", () => {
     // 传入 filePath 时返回 filePath（而非 tempFilePath）
     expect(path).toBe("wxfile:///tmp/online.txt");
   });
+
+  it("should return a promise with the download task attached", async () => {
+    const wxAny = wx as unknown as {
+      downloadFile: (option: {
+        filePath?: string;
+        success?: (result: { statusCode: number; filePath?: string }) => void;
+      }) => unknown;
+    };
+    const original = wxAny.downloadFile;
+    const task = {
+      abort: vi.fn<() => void>(),
+      offProgressUpdate: vi.fn<() => void>(),
+      onProgressUpdate: vi.fn<() => void>(),
+    };
+
+    wxAny.downloadFile = (option): unknown => {
+      setTimeout(() => {
+        option.success?.({ statusCode: 200, filePath: option.filePath });
+      }, 0);
+
+      return task;
+    };
+
+    try {
+      const promise = saveOnlineFile("https://example.com/file", "tmp/task.txt");
+
+      expect(promise.task).toBe(task);
+
+      const savedPath = await promise;
+
+      expect(savedPath).toBe(`${wx.env.USER_DATA_PATH}/tmp/task.txt`);
+    } finally {
+      wxAny.downloadFile = original;
+    }
+  });
 });
 
 describe("file edge cases", () => {
@@ -132,6 +167,19 @@ describe("file edge cases", () => {
     saveFile("mock://temp/source", "tmp/saved.txt");
 
     expect(exists("tmp/saved.txt")).toBe(true);
+  });
+
+  it("should return the saved file path", () => {
+    const savedPath = saveFile("mock://temp/source", "tmp/saved-return.txt");
+
+    expect(savedPath).toBe(`${wx.env.USER_DATA_PATH}/tmp/saved-return.txt`);
+  });
+
+  it("should throw MpError when saving a file fails", () => {
+    writeFile("tmp/save-fail.txt", "x");
+
+    // 目标已存在时 wx.saveFileSync 会失败
+    expect(() => saveFile("mock://temp/source", "tmp/save-fail.txt")).toThrow(MpError);
   });
 
   it("should create the parent directory when saving a file", () => {
@@ -182,10 +230,10 @@ describe("file edge cases", () => {
     expect(ls("tmp/missing-ls")).toStrictEqual([]);
   });
 
-  it("should not throw when saving to an existing path", () => {
+  it("should throw when saving to an existing path", () => {
     writeFile("tmp/exist.txt", "x");
 
-    expect(() => saveFile("mock://temp/source", "tmp/exist.txt")).not.toThrow();
+    expect(() => saveFile("mock://temp/source", "tmp/exist.txt")).toThrow(MpError);
   });
 
   it("should reject saveOnlineFile on non-200 status", async () => {
