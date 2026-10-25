@@ -8,7 +8,14 @@ import { env } from "./env.js";
 const log = env === "js" ? console : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
 
-/** 写入普通日志 */
+/**
+ * 写入普通日志（仅当 `wx.env.DEBUG` 为真时输出）
+ *
+ * 受 `wx.env.DEBUG` 控制，生产环境默认静默；需要线上日志请使用 `info` / `warn` / `error`。
+ *
+ * Only emitted when `wx.env.DEBUG` is set, so production builds stay quiet; use `info` / `warn` /
+ * `error` for logs that must always be recorded.
+ */
 export const debug = (...args: any[]): void => {
   // js 环境直接输出到 console
   if (env === "js") {
@@ -24,13 +31,29 @@ export const debug = (...args: any[]): void => {
   }
 };
 
-/** 写入信息日志 */
+/**
+ * 写入信息日志
+ *
+ * 在非 js 环境下**刻意双写**：既写入微信日志管理器，也输出到 `console`，便于在开发者工具中同时看到； 与 `debug` 不同， `info` / `warn` 不受
+ * `wx.env.DEBUG` 控制（与 `error` 一致），线上也会输出。
+ *
+ * In non-js environments `info` / `warn` are intentionally written to both the wx log manager and
+ * the console, and are **not** gated by `wx.env.DEBUG` (unlike `debug`), matching `error`. This is
+ * the documented logging policy, not an oversight.
+ */
 export const info = (...args: any[]): void => {
   log.info(...args);
   if (log !== console) console.info(...args);
 };
 
-/** 写入警告日志 */
+/**
+ * 写入警告日志
+ *
+ * 在非 js 环境下**刻意双写**（微信日志管理器 + `console`），且不受 `wx.env.DEBUG` 控制，线上也会输出。
+ *
+ * In non-js environments `warn` is intentionally written to both the wx log manager and the
+ * console, and is **not** gated by `wx.env.DEBUG` (unlike `debug`).
+ */
 export const warn = (...args: any[]): void => {
   log.warn(...args);
   if (log !== console) console.warn(...args);
