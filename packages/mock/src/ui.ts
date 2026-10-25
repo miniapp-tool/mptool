@@ -1,5 +1,8 @@
 // oxlint-disable promise/prefer-await-to-callbacks
 // oxlint-disable typescript/no-explicit-any
+// oxlint-disable typescript/no-unnecessary-boolean-literal-compare -- missing auth keys must stay distinguishable from an explicit `false`
+
+import { uiDecisions, uiRuntime } from "./uiState.js";
 
 interface CallbackOption {
   success?: (result: any) => void;
@@ -22,6 +25,29 @@ export const callCallback = (
   setTimeout(() => {
     if (realOption.success) realOption.success(result);
     if (realOption.complete) realOption.complete({ errMsg });
+  }, 0);
+};
+
+const createCallbackError = (errMsg: string): Error & { errMsg: string } =>
+  Object.assign(new Error(errMsg), { errMsg });
+
+/** 调用 fail/complete 回调，或返回 reject 的 Promise */
+// oxlint-disable-next-line typescript/explicit-module-boundary-types -- mirrors callCallback
+export const callFail = (option: any, errMsg: string): void | Promise<unknown> => {
+  const realOption = option as
+    | {
+        complete?: (result: { errMsg: string }) => void;
+        fail?: (result: { errMsg: string }) => void;
+      }
+    | undefined;
+
+  if (!realOption) return Promise.reject(createCallbackError(errMsg));
+
+  if (!realOption.fail && !realOption.complete) return Promise.reject(createCallbackError(errMsg));
+
+  setTimeout(() => {
+    realOption.fail?.({ errMsg });
+    realOption.complete?.({ errMsg });
   }, 0);
 };
 
@@ -84,27 +110,76 @@ export const clearEventListeners = (): void => {
 /** UI、权限、设备等相关 wx API mock */
 export const uiApi = {
   showToast(option: unknown): unknown {
+    const { duration, icon, title } = (option ?? {}) as {
+      duration?: number;
+      icon?: string;
+      title?: string;
+    };
+
+    uiRuntime.toast = { duration, icon, title: title ?? "" };
+
     return callCallback(option, { errMsg: "showToast:ok" });
   },
 
   showModal(option: unknown): unknown {
-    return callCallback(option, { confirm: true, cancel: false, errMsg: "showModal:ok" });
+    const { editable } = (option ?? {}) as { editable?: boolean };
+    const decision = uiDecisions.user.modal;
+    const decided =
+      decision === "cancel"
+        ? { cancel: true, confirm: false }
+        : typeof decision === "object"
+          ? {
+              cancel: decision.confirm === false,
+              confirm: decision.confirm !== false,
+            }
+          : { cancel: false, confirm: true };
+    const result: { cancel: boolean; confirm: boolean; content?: string } = {
+      cancel: decided.cancel,
+      confirm: decided.confirm,
+    };
+
+    if (editable && typeof decision === "object" && typeof decision.content === "string")
+      result.content = decision.content;
+
+    uiRuntime.modal = { ...result };
+
+    return callCallback(option, { ...result, errMsg: "showModal:ok" });
   },
 
   showLoading(option: unknown): unknown {
+    const { title } = (option ?? {}) as { title?: string };
+
+    uiRuntime.loading = { title: title ?? "" };
+
     return callCallback(option, { errMsg: "showLoading:ok" });
   },
 
   hideLoading(): void {
-    // noop
+    uiRuntime.loading = null;
   },
 
   hideToast(): void {
-    // noop
+    uiRuntime.toast = null;
   },
 
   showActionSheet(option: unknown): unknown {
-    return callCallback(option, { tapIndex: 0, errMsg: "showActionSheet:ok" });
+    const { itemList } = (option ?? {}) as { itemList?: unknown[] };
+    const decision = uiDecisions.user.actionSheet;
+
+    if (decision === "cancel") {
+      uiRuntime.actionSheet = null;
+
+      return callFail(option, "showActionSheet:fail cancel");
+    }
+
+    const tapIndex = typeof decision === "number" ? decision : 0;
+
+    if (Array.isArray(itemList) && (tapIndex < 0 || tapIndex >= itemList.length))
+      return callFail(option, "showActionSheet:fail index out of range");
+
+    uiRuntime.actionSheet = { tapIndex };
+
+    return callCallback(option, { tapIndex, errMsg: "showActionSheet:ok" });
   },
 
   hideKeyboard(): void {
@@ -132,15 +207,35 @@ export const uiApi = {
   },
 
   getSetting(option: unknown): unknown {
-    return callCallback(option, { authSetting: {}, errMsg: "getSetting:ok" });
+    return callCallback(option, {
+      authSetting: { ...uiDecisions.auth },
+      errMsg: "getSetting:ok",
+    });
   },
 
   authorize(option: unknown): unknown {
+    const { scope } = (option ?? {}) as { scope?: string };
+
+    if (!scope) return callFail(option, "authorize:fail scope is required");
+
+    if (uiDecisions.auth[scope] === true) return callCallback(option, { errMsg: "authorize:ok" });
+
+    if (uiDecisions.auth[scope] === false || uiDecisions.authorize === "deny") {
+      uiDecisions.auth[scope] = false;
+
+      return callFail(option, "authorize:fail auth deny");
+    }
+
+    uiDecisions.auth[scope] = true;
+
     return callCallback(option, { errMsg: "authorize:ok" });
   },
 
   openSetting(option: unknown): unknown {
-    return callCallback(option, { authSetting: {}, errMsg: "openSetting:ok" });
+    return callCallback(option, {
+      authSetting: { ...uiDecisions.auth },
+      errMsg: "openSetting:ok",
+    });
   },
 
   getWindowInfo(): Record<string, unknown> {
@@ -258,15 +353,26 @@ export const uiApi = {
   },
 
   setClipboardData(option: unknown): unknown {
+    const { data } = (option ?? {}) as { data?: unknown };
+
+    if (typeof data !== "string") return callFail(option, "setClipboardData:fail data is required");
+
+    uiDecisions.clipboard = data;
+
     return callCallback(option, { errMsg: "setClipboardData:ok" });
   },
 
   getClipboardData(option: unknown): unknown {
-    // 真实微信中读取剪贴板通常为空且依赖用户授权，这里直接返回空字符串
-    return callCallback(option, { data: "", errMsg: "getClipboardData:ok" });
+    return callCallback(option, {
+      data: uiDecisions.clipboard ?? "",
+      errMsg: "getClipboardData:ok",
+    });
   },
 
   saveImageToPhotosAlbum(option: unknown): unknown {
+    if (uiDecisions.auth["scope.writePhotosAlbum"] === false)
+      return callFail(option, "saveImageToPhotosAlbum:fail auth deny");
+
     return callCallback(option, { errMsg: "saveImageToPhotosAlbum:ok" });
   },
 
@@ -337,10 +443,19 @@ export const uiApi = {
     applyUpdate: () => void;
   } {
     return {
-      onCheckForUpdate: (): void => void 0,
-      onUpdateReady: (): void => void 0,
-      onUpdateFailed: (): void => void 0,
-      applyUpdate: (): void => void 0,
+      onCheckForUpdate: (callback): void => {
+        onEvent("updateCheck", callback);
+      },
+      onUpdateReady: (callback): void => {
+        onEvent("updateReady", callback);
+      },
+      onUpdateFailed: (callback): void => {
+        onEvent("updateFailed", callback);
+      },
+      applyUpdate: (): void => {
+        uiRuntime.update.applied = true;
+        emitEvent("updateApplied");
+      },
     };
   },
 

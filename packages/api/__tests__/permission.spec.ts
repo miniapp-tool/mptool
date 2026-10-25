@@ -1,5 +1,5 @@
-import "@mptool/mock";
-import { describe, expect, it } from "vitest";
+import { mockWx as mockWxControl } from "@mptool/mock";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { withScope } from "../src/index.js";
 
@@ -154,5 +154,57 @@ describe("withScope modal failure", () => {
     await expect(withScope("scope.camera", () => Promise.resolve(), "测试权限")).rejects.toThrow(
       "权限提示框打开失败",
     );
+  });
+});
+
+describe("withScope with mockWx decisions", () => {
+  const recordRuns = (): { run: () => Promise<void>; calls: { count: number } } => {
+    const calls = { count: 0 };
+
+    return {
+      calls,
+      run: () => {
+        calls.count += 1;
+
+        return Promise.resolve();
+      },
+    };
+  };
+
+  // oxlint-disable-next-line vitest/no-hooks
+  beforeEach(() => {
+    mockWxControl.reset();
+  });
+
+  // oxlint-disable-next-line vitest/no-hooks
+  afterEach(() => {
+    mockWxControl.reset();
+  });
+
+  it("should run when the scope is already authorized", async () => {
+    mockWxControl.auth({ "scope.camera": true });
+
+    const { calls, run } = recordRuns();
+
+    await expect(withScope("scope.camera", run, "deny")).resolves.toBeUndefined();
+    expect(calls.count).toBe(1);
+  });
+
+  it("should reject through the mock modal / openSetting flow when denied", async () => {
+    mockWxControl.authorize("deny");
+
+    const { calls, run } = recordRuns();
+
+    await expect(withScope("scope.camera", run, "请开启权限")).rejects.toThrow("用户拒绝权限");
+    expect(calls.count).toBe(0);
+    expect(mockWxControl.ui().modal).toMatchObject({ confirm: true });
+  });
+
+  it("should surface a getSetting failure", async () => {
+    mockWxControl.failNext("getSetting", { type: "network" });
+
+    const { run } = recordRuns();
+
+    await expect(withScope("scope.camera", run, "deny")).rejects.toThrow(/getSetting:fail/u);
   });
 });

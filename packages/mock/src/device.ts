@@ -1,4 +1,6 @@
-import { callCallback, offEvent, onEvent } from "./ui.js";
+// oxlint-disable typescript/no-unnecessary-boolean-literal-compare -- a missing auth scope must differ from an explicit `false`
+import { callCallback, callFail, offEvent, onEvent } from "./ui.js";
+import { uiDecisions } from "./uiState.js";
 
 /** 生成管理器对象 mock：指定名称的方法均为 noop，可传入自定义实现 */
 const createManager = (
@@ -111,6 +113,9 @@ export const deviceApi = {
   },
 
   saveVideoToPhotosAlbum(option: unknown): unknown {
+    if (uiDecisions.auth["scope.writePhotosAlbum"] === false)
+      return callFail(option, "saveVideoToPhotosAlbum:fail auth deny");
+
     return callCallback(option, { errMsg: "saveVideoToPhotosAlbum:ok" });
   },
 
@@ -146,14 +151,26 @@ export const deviceApi = {
   },
 
   login(option: unknown): unknown {
-    return callCallback(option, { code: "mock-login-code", errMsg: "login:ok" });
+    return callCallback(option, {
+      code: uiDecisions.login.code ?? "mock-login-code",
+      errMsg: "login:ok",
+    });
   },
 
   checkSession(option: unknown): unknown {
+    if (uiDecisions.login.sessionValid === false)
+      return callFail(option, "checkSession:fail invalid session");
+
     return callCallback(option, { errMsg: "checkSession:ok" });
   },
 
   getUserProfile(option: unknown): unknown {
+    if (uiDecisions.user.gesture === false)
+      return callFail(option, "getUserProfile:fail can only be invoked by user TAP gesture");
+
+    if (uiDecisions.user.userInfo === "deny")
+      return callFail(option, "getUserProfile:fail auth deny");
+
     return callCallback(option, {
       userInfo: {},
       rawData: "",
@@ -166,6 +183,8 @@ export const deviceApi = {
   },
 
   getUserInfo(option: unknown): unknown {
+    if (uiDecisions.user.userInfo === "deny") return callFail(option, "getUserInfo:fail auth deny");
+
     return callCallback(option, {
       userInfo: {},
       rawData: "",
@@ -178,14 +197,22 @@ export const deviceApi = {
   },
 
   requestPayment(option: unknown): unknown {
+    if (uiDecisions.user.payment === "cancel")
+      return callFail(option, "requestPayment:fail cancel");
+
+    if (uiDecisions.user.payment === "fail") return callFail(option, "requestPayment:fail");
+
     return callCallback(option, { errMsg: "requestPayment:ok" });
   },
 
   requestSubscribeMessage(option: unknown): unknown {
     const tmplIds = (option as { tmplIds?: string[] } | undefined)?.tmplIds ?? [];
+    const decision = uiDecisions.user.subscribe ?? "accept";
+
+    if (decision === "cancel") return callFail(option, "requestSubscribeMessage:fail cancel");
 
     return callCallback(option, {
-      ...Object.fromEntries(tmplIds.map((id) => [id, "accept"])),
+      ...Object.fromEntries(tmplIds.map((id) => [id, decision === "reject" ? "reject" : "accept"])),
       errMsg: "requestSubscribeMessage:ok",
     });
   },

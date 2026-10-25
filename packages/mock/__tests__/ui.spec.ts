@@ -1,8 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { emitEvent, wx } from "../src/index.js";
+import { emitEvent, mockWx, wx } from "../src/index.js";
 
 describe("ui mock", () => {
+  // oxlint-disable-next-line vitest/no-hooks
+  beforeEach(() => {
+    mockWx.reset();
+  });
+
   it("showToast should resolve", async () => {
     await expect(wx.showToast({ title: "hi" })).resolves.toStrictEqual({
       errMsg: "showToast:ok",

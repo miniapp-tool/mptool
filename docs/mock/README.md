@@ -262,6 +262,82 @@ await expect(wx.getStorage({ key: "k" })).rejects.toMatchObject({ errCode: 13000
 - 开发者工具里 `wx.batchSetStorage`（异步版）会失败并报 `"batchSetStorage:fail An object could not be cloned."`；mock 不模拟该工具缺陷，异步批量写入正常工作（`batchSetStorageSync` 在工具里正常）。
 - 开发者工具对超限的写入会留下一个空/部分 key 条目；mock 不模拟该残缺状态，超限写入不会落盘。
 
+## UI / 权限 / 用户决策
+
+`mockWx` 可以配置用户选择，并查询当前 UI 状态（旧默认行为保持不变：`showModal` 默认确认、`showActionSheet` 默认第 0 项、`authorize` 默认允许、剪贴板默认空）。
+
+### 用户选择
+
+```ts
+import { mockWx } from "@mptool/mock";
+
+mockWx.user({
+  modal: "cancel", // 或 "confirm" / { confirm: false, content: "typed" }
+  actionSheet: 1, // 或 "cancel"
+  payment: "cancel", // "success" | "cancel" | "fail"
+  subscribe: "reject", // "accept" | "reject" | "cancel"
+  userInfo: "deny", // "allow" | "deny"
+  gesture: false, // 非用户手势（getUserProfile 失败）
+});
+```
+
+- `showModal`：`modal: "cancel"` → `{confirm:false,cancel:true}`；`{confirm,content}` 支持 `editable:true` 的输入内容；`modal` 未配置时保持默认确认。
+- `showActionSheet`：按下标返回 `tapIndex`；`"cancel"` → `fail "showActionSheet:fail cancel"`；越界 → fail。
+- `requestPayment` / `requestSubscribeMessage` / `getUserProfile` / `getUserInfo`：按 `payment` / `subscribe` / `userInfo` / `gesture` 走成功、取消或失败分支。
+
+### 授权状态
+
+```ts
+mockWx.auth({ "scope.camera": true, "scope.writePhotosAlbum": false });
+mockWx.authorize("deny"); // 所有未授权 scope 的 authorize 都失败
+```
+
+- `wx.getSetting` / `wx.openSetting` 返回当前 `authSetting`（只包含配置过或授权过的 scope）。
+- `wx.authorize({scope})`：已授权 → 成功；scope 明确为 `false` 或 `authorize("deny")` → `fail "authorize:fail auth deny"` 并记录 `false`；否则成功并记录 `true`。
+- `withScope` 的已授权 / 首次授权 / 拒绝 / `getSetting` 失败四条分支都可以用上述配置或 `mockWx.failNext("getSetting", ...)` 覆盖。
+- `saveImageToPhotosAlbum` / `saveVideoToPhotosAlbum` 在 `scope.writePhotosAlbum === false` 时 fail `auth deny`。
+
+### 剪贴板
+
+```ts
+mockWx.clipboard("preset"); // 预置初值
+await wx.setClipboardData({ data: "copied" });
+(await wx.getClipboardData({})).data; // "copied"
+```
+
+### UI 状态查询
+
+```ts
+mockWx.ui();
+// {
+//   toast: { title, icon?, duration? } | null,
+//   loading: { title } | null,
+//   modal: { confirm, cancel, content? } | null,
+//   actionSheet: { tapIndex } | null,
+//   update: { checked, hasUpdate, ready, failed, applied },
+// }
+```
+
+`showToast` / `showLoading` / `showModal` / `showActionSheet` 会更新状态，`hideToast` / `hideLoading` 清空对应状态；`scope()` / `reset()` 会一起还原。
+
+### 更新管理器
+
+```ts
+const manager = wx.getUpdateManager();
+
+manager.onCheckForUpdate(({ hasUpdate }) => {});
+manager.onUpdateReady(() => {});
+manager.onUpdateFailed(({ errMsg }) => {});
+
+mockWx.emit("updateCheck", { hasUpdate: true });
+mockWx.emit("updateReady");
+mockWx.emit("updateFailed", { errMsg: "network" });
+manager.applyUpdate();
+mockWx.ui().update.applied; // true
+```
+
+> `ui()` 是新增的只读查询接口；写状态仍然通过 `mockWx.user/auth/authorize/clipboard` 与 `wx` API 本身完成。
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：
