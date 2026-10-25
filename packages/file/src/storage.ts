@@ -1,8 +1,19 @@
-import { logger } from "@mptool/shared";
+import { MpError, logger } from "@mptool/shared";
 
 export interface StorageData<T> {
   data: T;
+  /**
+   * Expiry of the value:
+   *
+   * - `0`: the value never expires
+   * - A timestamp: the value expires at that moment
+   * - Together with `once: true`: the session id that wrote the value
+   */
   expired: number;
+  /** Whether the value was written with the `'once'` expire mode */
+  once?: boolean;
+  /** Creation timestamp, used by timestamp based expiry */
+  createdAt?: number;
 }
 
 /** 本次小程序启动的会话 ID */
@@ -41,26 +52,72 @@ export const take = <T = unknown>(key: string): T | undefined => {
 };
 
 /**
+ * Whether a stored value has expired
+ *
+ * `'once'` values are valid only within the session that wrote them.
+ *
+ * 判断已存储的值是否已过期。`'once'` 值仅在写入它的本次启动内有效。
+ *
+ * @param value 已存储的值
+ * @returns 是否已过期
+ */
+const isExpired = (value: StorageData<unknown>): boolean => {
+  if (value.once) return value.expired !== sessionId;
+
+  // `expired === 0` marks a permanent value
+  if (value.expired === 0) return false;
+
+  const now = Date.now();
+
+  // Timestamp based expiry: a value with a creation time in the future is treated as expired.
+  if (typeof value.createdAt === "number" && now < value.createdAt) return true;
+
+  return now >= value.expired;
+};
+
+/**
+ * Convert a wx storage error into an `MpError`
+ *
+ * @param key Storage key, without the cache prefix
+ * @param err Error thrown by wx
+ * @returns Normalized error
+ */
+const createStorageError = (key: string, err: unknown): MpError => {
+  const record = err as { errCode?: unknown; errMsg?: unknown } | undefined;
+  const errMsg =
+    typeof record?.errMsg === "string"
+      ? record.errMsg
+      : err instanceof Error
+        ? err.message
+        : String(err);
+
+  return new MpError({
+    ...(typeof record?.errCode === "number" ? { code: record.errCode } : {}),
+    message: `Write storage "${key}" failed: ${errMsg}`,
+  });
+};
+
+/**
  * 处理并返回值
  *
  * @param key 键
  * @param value 值
  * @returns 返回值
  */
-const getData = <T = unknown>(key: string, value: StorageData<T> | null): T | undefined =>
-  value
-    ? value.expired
-      ? value.expired === sessionId || Date.now() < value.expired
-        ? // not expired
-          value.data
-        : // expired
-          // oxlint-disable-next-line no-undefined
-          (wx.removeStorageSync(`${CACHE_PREFIX}${key}`), undefined)
-      : // permanent
-        value.data
-    : // not exist
-      // oxlint-disable-next-line no-undefined
-      undefined;
+const getData = <T = unknown>(
+  key: string,
+  value: StorageData<T> | null | undefined,
+): T | undefined => {
+  // oxlint-disable-next-line no-undefined
+  if (!value) return undefined;
+
+  if (!isExpired(value)) return value.data;
+
+  wx.removeStorageSync(`${CACHE_PREFIX}${key}`);
+
+  // oxlint-disable-next-line no-undefined
+  return undefined;
+};
 
 const prepareData = <Value = unknown>(
   key: string,
@@ -81,16 +138,18 @@ const prepareData = <Value = unknown>(
     // oxlint-disable-next-line no-undefined
     if (!oldData) return undefined;
 
-    // 使用上次过期时间
+    // Reuse the previous expiry, and the session / creation markers that come with it / 使用上次过期时间
     data.expired = oldData.expired || 0;
-    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    if (oldData.once) data.once = true;
+    if (typeof oldData.createdAt === "number") data.createdAt = oldData.createdAt;
+  } else if (expire === "once") {
+    // `'once'` values are bound to the current session instead of a timestamp / 仅本次会话有效
+    data.expired = sessionId;
+    data.once = true;
   } else if (expire) {
-    data.expired =
-      expire === "once"
-        ? // 仅本次会话有效
-          sessionId
-        : // 计算过期时间
-          expire + Date.now();
+    // 计算过期时间并记录创建时间
+    data.createdAt = Date.now();
+    data.expired = data.createdAt + expire;
   }
 
   return data;
@@ -105,19 +164,26 @@ const prepareData = <Value = unknown>(
  *
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
- *   - `'keep'`: 表示保持上一次缓存时间
- *   - `'once'`: 仅本次启动有效
+ *   - `'keep'`: 表示保持上一次缓存时间。该模式会先读取再写入，不是原子操作，不要与其它写入并发
+ *   - `'once'`: 仅本次启动有效（按启动会话判断）
+ * @throws {MpError} 写入失败时抛出，`message` 中包含微信返回的 `errMsg`
  */
 export const set = <Value = unknown>(
   key: string,
   value: Value,
   expire: number | "keep" | "once" = 0,
 ): void => {
-  const data = prepareData(key, value, expire);
+  try {
+    const data = prepareData(key, value, expire);
 
-  // prepareData returns undefined for "keep" without a previous cache; skip the
-  // write so no undefined value is stored
-  if (data) wx.setStorageSync(`${CACHE_PREFIX}${key}`, data);
+    // prepareData returns undefined for "keep" without a previous cache; skip the
+    // write so no undefined value is stored
+    if (data) wx.setStorageSync(`${CACHE_PREFIX}${key}`, data);
+  } catch (err) {
+    logger.error(`set "${key}" fail`, err);
+
+    throw createStorageError(key, err);
+  }
 };
 
 /**
@@ -129,30 +195,41 @@ export const set = <Value = unknown>(
  *
  *   - 0: 永久有效
  *   - 数字：过期时间，毫秒
- *   - `'keep'`: 表示保持上一次缓存时间
- *   - `'once'`: 仅本次启动有效
+ *   - `'keep'`: 表示保持上一次缓存时间。该模式会先读取再写入，不是原子操作，不要与其它写入并发
+ *   - `'once'`: 仅本次启动有效（按启动会话判断）
  * @param [asyncCB] 异步回调方法，不填为同步
  * @returns 异步回调结果
+ * @throws {MpError} 返回的 Promise 在写入失败时以 `MpError` reject，`message` 中包含微信返回的 `errMsg`
  */
-export const setAsync = <Value = unknown>(
+export const setAsync = async <Value = unknown>(
   key: string,
   value: Value,
   expire: number | "keep" | "once" = 0,
 ): Promise<WechatMiniprogram.GeneralCallbackResult | void> => {
-  const data = prepareData(key, value, expire);
+  let data: StorageData<Value> | undefined;
+
+  try {
+    data = prepareData(key, value, expire);
+  } catch (err) {
+    logger.error(`set "${key}" fail`, err);
+
+    throw createStorageError(key, err);
+  }
 
   // prepareData returns undefined for "keep" without a previous cache; skip the
   // write so no undefined value is stored
-  if (!data) return Promise.resolve();
+  if (!data) return;
 
-  return wx
-    .setStorage({
+  try {
+    return await wx.setStorage({
       key: `${CACHE_PREFIX}${key}`,
       data,
-    })
-    .catch(() => {
-      logger.error(`set "${key}" fail`);
     });
+  } catch (err) {
+    logger.error(`set "${key}" fail`, err);
+
+    throw createStorageError(key, err);
+  }
 };
 
 /**
@@ -212,15 +289,12 @@ export const removeAsync = (key: string): Promise<WechatMiniprogram.GeneralCallb
  */
 export const check = (): void => {
   wx.getStorageInfoSync().keys.forEach((key) => {
-    if (key.startsWith(CACHE_PREFIX)) {
-      const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
+    if (!key.startsWith(CACHE_PREFIX)) return;
 
-      if (
-        !value ||
-        (value.expired > 0 && value.expired !== sessionId && Date.now() >= value.expired)
-      )
-        wx.removeStorageSync(key);
-    }
+    const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
+
+    // Drop corrupt values and expired ones / 清除损坏与已过期的值
+    if (!value || isExpired(value)) wx.removeStorageSync(key);
   });
 };
 
@@ -239,8 +313,8 @@ export const checkAsync = async (): Promise<void> => {
       .map(async (key) => {
         const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
 
-        if (!data || (data.expired > 0 && data.expired !== sessionId && Date.now() >= data.expired))
-          await wx.removeStorage({ key });
+        // Drop corrupt values and expired ones / 清除损坏与已过期的值
+        if (!data || isExpired(data)) await wx.removeStorage({ key });
       }),
   );
 };

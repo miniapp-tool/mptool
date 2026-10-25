@@ -157,15 +157,31 @@ icon: folder
 
   :::
 
+  ::: warning
+
+  `'keep'` 的实现是「先读取旧的过期时间、再写入新值」，不是原子操作。如果同一个 key 同时存在其它写入（尤其是 `setAsync` 尚未完成的写入），最终保留的过期时间可能不是最新一次写入的。不要在并发场景下依赖 `'keep'` 的过期时间。
+
+  :::
+
+  ::: warning
+
+  写入失败（例如存储配额已满）时，`set` 会抛出 `MpError`，`message` 中包含微信返回的 `errMsg`。调用方应使用 `try/catch` 处理。
+
+  :::
+
 - `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 'once'): Promise<void>`
 
   `set` 的异步版本，在设置大量数据时可考虑使用，返回一个 Promise。
+
+  写入失败时返回的 Promise 会以 `MpError` reject（与 `set` 抛错保持一致），调用方应使用 `try/catch` 或 `.catch()` 处理。
 
 - `get<T = unknown>(key: string): T | undefined`
 
   同步读取数据并返回。
 
   当数据已经过期时，返回 `undefined`。
+
+  `'once'` 数据仅本次启动有效；数字过期时间按写入时间计算过期。
   - `key`: 设置的键名
 
 - `getAsync<T = unknown>(key: string): Promise<T | undefined>`
