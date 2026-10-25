@@ -22,6 +22,46 @@ const indexCodePointFor = (pointer: number, index: Uint16Array | undefined): num
   return index[pointer] || null;
 };
 
+/** Sentinel for "this code point has no pointer" in the reverse index */
+const NO_POINTER = 0xffff;
+
+/** Lazily built reverse indexes, keyed by the index they were built from */
+const reverseIndexes = new WeakMap<Uint16Array, Uint16Array>();
+
+/**
+ * Build (once) a `code point -> pointer` reverse index.
+ *
+ * `Uint16Array#indexOf` is a linear scan, so encoding a code point used to walk up to 23,940
+ * entries of the gb18030 index. A flat `Uint16Array` reverse table makes each lookup O(1) and costs
+ * 128 KB instead of the ~1.5 MB a `Map` with 23,940 entries would allocate. The table is only built
+ * when the first non-ASCII code point is encoded.
+ *
+ * 按需构建 `码点 -> pointer` 反向索引：`Uint16Array#indexOf` 是线性扫描，编码每个码点最坏要遍历 23940 项；`Uint16Array` 反向表让每次查找为
+ * O(1)，且只占 128 KB（Map 约 1.5 MB），在首次编码非 ASCII 码点时构建。
+ *
+ * @param index The |index| to build the reverse index for.
+ * @returns The reverse index of the given index.
+ */
+const getReverseIndex = (index: Uint16Array): Uint16Array => {
+  let reverse = reverseIndexes.get(index);
+
+  if (!reverse) {
+    reverse = new Uint16Array(0x10000).fill(NO_POINTER);
+
+    for (let pointer = 0; pointer < index.length; pointer += 1) {
+      const codePoint = index[pointer];
+
+      // The gb18030 index holds no falsy values (min 164); keep the first pointer for duplicated
+      // code points, matching `Uint16Array#indexOf`.
+      if (codePoint !== 0 && reverse[codePoint] === NO_POINTER) reverse[codePoint] = pointer;
+    }
+
+    reverseIndexes.set(index, reverse);
+  }
+
+  return reverse;
+};
+
 /**
  * @param codePoint The |code point| to search for.
  * @param index The |index| to search within.
@@ -29,9 +69,13 @@ const indexCodePointFor = (pointer: number, index: Uint16Array | undefined): num
  *   not in |index|.
  */
 const indexPointerFor = (codePoint: number, index: Uint16Array): number | null => {
-  const pointer = index.indexOf(codePoint);
+  // The gb18030 index only contains BMP code points; supplementary code points go through the
+  // ranges table instead.
+  if (codePoint > 0xffff) return null;
 
-  return pointer === -1 ? null : pointer;
+  const pointer = getReverseIndex(index)[codePoint];
+
+  return pointer === NO_POINTER ? null : pointer;
 };
 
 /**
