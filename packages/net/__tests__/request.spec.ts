@@ -44,6 +44,36 @@ const mockRequest = (fail = false): MockRequestCall[] => {
   return calls;
 };
 
+// Capture `logger.debug` output. `logger.debug` only writes in wx env when `wx.env.DEBUG` is set,
+// and its logger namespace is a read-only ES module namespace, so the observable output is
+// `console.debug` (read the calls before restoring the spy).
+const captureDebugLogs = async (run: () => Promise<unknown>): Promise<string> => {
+  const wxEnv = wx.env as unknown as Record<string, unknown>;
+  const originalDebug = wxEnv.DEBUG;
+  const debugSpy = vi.spyOn(console, "debug").mockReturnValue(undefined);
+
+  wxEnv.DEBUG = true;
+
+  let logs = "";
+
+  try {
+    await run();
+  } finally {
+    // Read the calls before restoring the spy: `mockRestore()` clears its mock state
+    logs = debugSpy.mock.calls
+      .map((args) =>
+        args.map((part) => (typeof part === "string" ? part : JSON.stringify(part))).join(" "),
+      )
+      .join("\n");
+
+    wxEnv.DEBUG = originalDebug;
+    if (originalDebug === undefined) delete wxEnv.DEBUG;
+    debugSpy.mockRestore();
+  }
+
+  return logs;
+};
+
 describe(request, () => {
   it("should resolve a successful request", async () => {
     mockRequest();
@@ -53,6 +83,58 @@ describe(request, () => {
     expect(res.status).toBe(200);
     expect(res.data).toStrictEqual({});
     expect(res.headers).toBeInstanceOf(Headers);
+  });
+
+  it("should redact cookie and authorization values in debug logs", async () => {
+    mockRequest();
+
+    const cookieStore = new CookieStore("debug-redaction-test");
+
+    cookieStore.set({
+      name: "session",
+      value: "super-secret-token",
+      domain: "example.com",
+      path: "/",
+    });
+
+    const logs = await captureDebugLogs(() =>
+      request("https://example.com/api", {
+        cookieStore,
+        headers: { Authorization: "Bearer secret-bearer" },
+      }),
+    );
+
+    // Cookie names stay useful for debugging, values never appear
+    expect(logs).toContain("session");
+    expect(logs).not.toContain("super-secret-token");
+    expect(logs).not.toContain("secret-bearer");
+    expect(logs).toContain("<redacted>");
+  });
+
+  it("should cap the logged response body length", async () => {
+    const wxAny = wx as unknown as {
+      request: (option: {
+        success?: (result: {
+          data: unknown;
+          statusCode: number;
+          header: Record<string, string>;
+        }) => void;
+      }) => void;
+    };
+    const original = wxAny.request;
+
+    wxAny.request = (option): void => {
+      option.success?.({ data: "x".repeat(2000), statusCode: 200, header: {} });
+    };
+
+    try {
+      const logs = await captureDebugLogs(() => request("https://example.com/long-body"));
+
+      expect(logs).toContain("truncated, 2000 chars");
+      expect(logs.length).toBeLessThan(1500);
+    } finally {
+      wxAny.request = original;
+    }
   });
 
   it("should uppercase method and set json content-type for plain object body", async () => {
