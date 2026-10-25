@@ -692,6 +692,7 @@ export class Runtime {
 
     try {
       this.hoistProgram(program.body, this.globalEnv);
+      this.predeclareLexical(program.body, this.globalEnv);
 
       let completion: unknown = void 0;
 
@@ -973,6 +974,10 @@ export class Runtime {
    */
   private evalBlock(block: BlockStatement, parentEnv: Environment): unknown {
     const env = new Environment(parentEnv, false);
+
+    this.predeclareLexical(block.body, env);
+    this.instantiateBlockFunctions(block.body, env);
+
     let completion: unknown = void 0;
 
     for (const stmt of block.body) completion = this.evalStatement(stmt, env);
@@ -1302,9 +1307,17 @@ export class Runtime {
 
     if (index < 0) return;
 
+    // the switch body is a single block scope for all cases
+    // switch 体是所有 case 共享的单个块作用域
+    const switchEnv = new Environment(env, false);
+    const caseStatements = stmt.cases.flatMap((caseNode) => caseNode.body);
+
+    this.predeclareLexical(caseStatements, switchEnv);
+    this.instantiateBlockFunctions(caseStatements, switchEnv);
+
     for (let i = index; i < stmt.cases.length; i += 1) {
       try {
-        for (const st of stmt.cases[i].body) this.evalStatement(st, env);
+        for (const st of stmt.cases[i].body) this.evalStatement(st, switchEnv);
       } catch (err) {
         if (err instanceof BreakSignalError && err.label == null) return;
         throw err;
@@ -1439,6 +1452,171 @@ export class Runtime {
   // -------------------------------------------------------------------------
 
   /**
+   * Collect every `var` name declared anywhere in a statement list (not entering nested functions
+   * or classes), used for `var` vs lexical conflict checks.
+   *
+   * 收集语句列表中任意位置声明的 `var` 名称（不进入嵌套函数或类），用于 var 与词法声明冲突检查。
+   *
+   * @param statements - Statements to scan / 待扫描语句
+   * @param out - Collected names / 收集结果
+   */
+  private collectVarNames(statements: readonly Statement[], out: Set<string>): void {
+    const addPattern = (pattern: AssignmentTarget): void => {
+      const names: string[] = [];
+
+      this.collectNames(pattern, names);
+
+      for (const name of names) out.add(name);
+    };
+
+    for (const stmt of statements) {
+      switch (stmt.type) {
+        case "variable": {
+          if (stmt.kind === "var") for (const decl of stmt.declarations) addPattern(decl.id);
+          break;
+        }
+        case "block": {
+          this.collectVarNames(stmt.body, out);
+          break;
+        }
+        case "if": {
+          this.collectVarNames([stmt.consequent], out);
+          if (stmt.alternate != null) this.collectVarNames([stmt.alternate], out);
+          break;
+        }
+        case "while":
+        case "doWhile": {
+          this.collectVarNames([stmt.body], out);
+          break;
+        }
+        case "for": {
+          if (stmt.init != null && stmt.init.type === "variable" && stmt.init.kind === "var")
+            for (const decl of stmt.init.declarations) addPattern(decl.id);
+          this.collectVarNames([stmt.body], out);
+          break;
+        }
+        case "forIn":
+        case "forOf": {
+          if (stmt.left.type === "variable" && stmt.left.kind === "var")
+            for (const decl of stmt.left.declarations) addPattern(decl.id);
+          this.collectVarNames([stmt.body], out);
+          break;
+        }
+        case "switch": {
+          for (const caseNode of stmt.cases) this.collectVarNames(caseNode.body, out);
+          break;
+        }
+        case "try": {
+          this.collectVarNames(stmt.block.body, out);
+          if (stmt.handler != null) this.collectVarNames(stmt.handler.body.body, out);
+          if (stmt.finalizer != null) this.collectVarNames(stmt.finalizer.body, out);
+          break;
+        }
+        case "labeled": {
+          this.collectVarNames([stmt.body], out);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Predeclare the lexical bindings (`let`/`const`/`class`) of a statement list in TDZ, rejecting
+   * duplicate declarations and conflicts with `var`/function names.
+   *
+   * 以 TDZ 预声明语句列表的词法绑定（let/const/class），并拒绝重复声明及与 var/函数名的冲突。
+   *
+   * @param statements - Statements of the scope / 作用域语句
+   * @param env - Target environment / 目标环境
+   */
+  private predeclareLexical(statements: readonly Statement[], env: Environment): void {
+    const names = new Set<string>();
+    const declarations: { name: string; kind: "let" | "const" }[] = [];
+
+    const declare = (name: string, kind: "let" | "const"): void => {
+      if (names.has(name)) throw new SyntaxError(`Identifier '${name}' has already been declared`);
+
+      names.add(name);
+      declarations.push({ name, kind });
+    };
+
+    for (const stmt of statements) {
+      if (stmt.type === "variable" && stmt.kind !== "var") {
+        const patternNames: string[] = [];
+
+        for (const decl of stmt.declarations) this.collectNames(decl.id, patternNames);
+
+        for (const name of patternNames) declare(name, stmt.kind);
+      } else if (stmt.type === "classDeclaration") {
+        declare(stmt.name, "let");
+      }
+    }
+
+    if (declarations.length === 0) return;
+
+    const varNames = new Set<string>();
+
+    this.collectVarNames(statements, varNames);
+
+    // direct function declarations are var-scoped in the same list
+    // 同列表中的直接函数声明按 var 作用域处理
+    for (const stmt of statements) if (stmt.type === "functionDeclaration") varNames.add(stmt.name);
+
+    for (const { name } of declarations) {
+      if (varNames.has(name))
+        throw new SyntaxError(`Identifier '${name}' has already been declared`);
+    }
+
+    // parameters / hoisted bindings already present in the same environment conflict as well
+    // （全局环境除外：宿主注入的全局属性允许被 let/const 遮蔽）
+    if (env !== this.globalEnv) {
+      for (const { name } of declarations) {
+        if (env.hasOwn(name))
+          throw new SyntaxError(`Identifier '${name}' has already been declared`);
+      }
+    }
+
+    for (const { name, kind } of declarations) {
+      if (kind === "const") env.declareConst(name);
+      else env.declareLet(name);
+    }
+  }
+
+  /**
+   * Instantiate block-level function declarations of a statement list in the block environment.
+   *
+   * 在块环境中实例化语句列表里的块级函数声明。
+   *
+   * @param statements - Statements of the block / 块语句
+   * @param env - Block environment / 块环境
+   */
+  private instantiateBlockFunctions(statements: readonly Statement[], env: Environment): void {
+    for (const stmt of statements) {
+      if (stmt.type !== "functionDeclaration") continue;
+
+      const fn = this.createFunction({
+        name: stmt.name,
+        params: stmt.params,
+        body: stmt.body,
+        closure: env,
+        thisMode: this.strict ? "strict" : "sloppy",
+        isAsync: stmt.isAsync,
+        prototype: null,
+        superBase: null,
+      });
+
+      env.define(stmt.name, fn);
+
+      // Annex B: in sloppy mode the block function is also written to the function-scoped var
+      // Annex B：sloppy 模式下块内函数同时写入函数作用域的 var 绑定
+      if (!this.strict) env.functionScope.set(stmt.name, fn);
+    }
+  }
+
+  /**
    * Hoist top-level `var` names and function declarations into `env`.
    *
    * 将顶层 `var` 名称与函数声明提升到 `env`。
@@ -1447,7 +1625,7 @@ export class Runtime {
    * @param env - Global environment / 全局环境
    */
   private hoistProgram(statements: readonly Statement[], env: Environment): void {
-    this.hoistStatements(statements, env);
+    this.hoistStatements(statements, env, true);
   }
 
   /**
@@ -1458,8 +1636,14 @@ export class Runtime {
    *
    * @param statements - Statements to scan / 待扫描的语句
    * @param env - The function environment / 函数环境
+   * @param direct - Whether the list is a program/function body (function hoisting) / 是否为
+   *   program/函数体语句列表（决定函数声明提升方式）
    */
-  private hoistStatements(statements: readonly Statement[], env: Environment): void {
+  private hoistStatements(
+    statements: readonly Statement[],
+    env: Environment,
+    direct = false,
+  ): void {
     for (const stmt of statements) {
       switch (stmt.type) {
         case "variable": {
@@ -1468,60 +1652,69 @@ export class Runtime {
           break;
         }
         case "functionDeclaration": {
-          const fn = this.createFunction({
-            name: stmt.name,
-            params: stmt.params,
-            body: stmt.body,
-            closure: env,
-            thisMode: this.strict ? "strict" : "sloppy",
-            isAsync: stmt.isAsync,
-            prototype: null,
-            superBase: null,
-          });
+          // function declarations directly in a program / function body are hoisted with their
+          // value; declarations inside blocks are block-scoped (created when the block runs) and
+          // only get an Annex B var binding in sloppy mode
+          // 直接位于 program / 函数体的函数声明连同值一起提升；块内函数是块级绑定（进入块时创建），
+          // 仅在 sloppy 模式下额外获得 Annex B 的 var 绑定
+          if (direct) {
+            const fn = this.createFunction({
+              name: stmt.name,
+              params: stmt.params,
+              body: stmt.body,
+              closure: env,
+              thisMode: this.strict ? "strict" : "sloppy",
+              isAsync: stmt.isAsync,
+              prototype: null,
+              superBase: null,
+            });
 
-          env.declareVar(stmt.name);
-          env.set(stmt.name, fn);
+            env.declareVar(stmt.name);
+            env.set(stmt.name, fn);
+          } else if (!this.strict) {
+            env.declareVar(stmt.name);
+          }
           break;
         }
         case "block": {
-          this.hoistStatements(stmt.body, env);
+          this.hoistStatements(stmt.body, env, false);
           break;
         }
         case "if": {
-          this.hoistStatements([stmt.consequent], env);
-          if (stmt.alternate != null) this.hoistStatements([stmt.alternate], env);
+          this.hoistStatements([stmt.consequent], env, false);
+          if (stmt.alternate != null) this.hoistStatements([stmt.alternate], env, false);
           break;
         }
         case "while":
         case "doWhile": {
-          this.hoistStatements([stmt.body], env);
+          this.hoistStatements([stmt.body], env, false);
           break;
         }
         case "for": {
           if (stmt.init != null && stmt.init.type === "variable" && stmt.init.kind === "var")
             for (const decl of stmt.init.declarations) this.hoistVar(decl.id, env);
-          this.hoistStatements([stmt.body], env);
+          this.hoistStatements([stmt.body], env, false);
           break;
         }
         case "forIn":
         case "forOf": {
           if (stmt.left.type === "variable" && stmt.left.kind === "var")
             for (const decl of stmt.left.declarations) this.hoistVar(decl.id, env);
-          this.hoistStatements([stmt.body], env);
+          this.hoistStatements([stmt.body], env, false);
           break;
         }
         case "switch": {
-          for (const caseNode of stmt.cases) this.hoistStatements(caseNode.body, env);
+          for (const caseNode of stmt.cases) this.hoistStatements(caseNode.body, env, false);
           break;
         }
         case "try": {
-          this.hoistStatements(stmt.block.body, env);
-          if (stmt.handler != null) this.hoistStatements(stmt.handler.body.body, env);
-          if (stmt.finalizer != null) this.hoistStatements(stmt.finalizer.body, env);
+          this.hoistStatements(stmt.block.body, env, false);
+          if (stmt.handler != null) this.hoistStatements(stmt.handler.body.body, env, false);
+          if (stmt.finalizer != null) this.hoistStatements(stmt.finalizer.body, env, false);
           break;
         }
         case "labeled": {
-          this.hoistStatements([stmt.body], env);
+          this.hoistStatements([stmt.body], env, false);
           break;
         }
         default: {
@@ -3088,7 +3281,8 @@ export class Runtime {
   private hoistFunctionBody(body: BlockStatement | Expression, env: Environment): void {
     if (body.type !== "block") return;
 
-    this.hoistStatements(body.body, env);
+    this.hoistStatements(body.body, env, true);
+    this.predeclareLexical(body.body, env);
   }
 
   /**
@@ -3761,6 +3955,9 @@ export class Runtime {
       case "block": {
         const blockEnv = new Environment(env, false);
 
+        this.predeclareLexical(stmt.body, blockEnv);
+        this.instantiateBlockFunctions(stmt.body, blockEnv);
+
         yield* this.evalAsyncBody(stmt.body, blockEnv);
 
         return void 0;
@@ -4204,9 +4401,17 @@ export class Runtime {
 
     if (index < 0) return;
 
+    // the switch body is a single block scope for all cases
+    // switch 体是所有 case 共享的单个块作用域
+    const switchEnv = new Environment(env, false);
+    const caseStatements = stmt.cases.flatMap((caseNode) => caseNode.body);
+
+    this.predeclareLexical(caseStatements, switchEnv);
+    this.instantiateBlockFunctions(caseStatements, switchEnv);
+
     for (let i = index; i < stmt.cases.length; i += 1) {
       try {
-        for (const st of stmt.cases[i].body) yield* this.evalAsyncStatement(st, env);
+        for (const st of stmt.cases[i].body) yield* this.evalAsyncStatement(st, switchEnv);
       } catch (err) {
         if (err instanceof BreakSignalError && err.label == null) return;
 

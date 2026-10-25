@@ -241,6 +241,7 @@ installGlobal();
 - **`var` 提升**：提升到函数作用域顶部，初始值为 `undefined`
 - **`let`/`const` TDZ**：声明前访问抛 `ReferenceError`；`const` 重赋值抛 `TypeError`
 - **逐迭代 `let`**：`for (let i...)` 每次迭代创建独立绑定，闭包捕获各自的值
+- **块级作用域**：`let`/`const`/`class` 在进入块（含 `switch` 体、函数体）时预声明并处于 TDZ，`switch` 的 `case` 共享同一个块作用域；块内函数声明在 sloppy 模式下按 Annex B 额外提供函数作用域 `var` 绑定（块执行前为 `undefined`），`RunOptions.strict` 下仅块内可见
 - **sloppy 模式**（默认）：独立函数调用中 `this` 为 `undefined` 时装箱为全局；给未声明变量赋值会创建全局；`arguments` 与命名参数映射
 - **严格模式**：通过 `RunOptions.strict` 开启——`this` 保持 `undefined`、未声明赋值抛 `ReferenceError`、`arguments` 不映射
 - **程序完成值**：`run()` 返回最后一条表达式的值（`run("1 + 1")` 返回 `2`）
