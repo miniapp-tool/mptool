@@ -231,25 +231,6 @@ const getProperty = (object: unknown, key: PropertyKey): unknown => {
 };
 
 /**
- * Write a property, throwing the host-like `TypeError` on `null`/`undefined` receivers.
- *
- * 写入属性，对 `null`/`undefined` 接收者抛出宿主风格 `TypeError`。
- *
- * @param object - The receiver / 接收者
- * @param key - The property key / 属性键
- * @param value - New value / 新值
- */
-const setProperty = (object: unknown, key: PropertyKey, value: unknown): void => {
-  if (object == null) {
-    throw new TypeError(
-      `Cannot set properties of ${typeof object === "object" ? "null" : "undefined"} (setting '${String(key)}')`,
-    );
-  }
-
-  (object as Record<PropertyKey, unknown>)[key] = value;
-};
-
-/**
  * Sentinel returned by optional-chain evaluation when a link short-circuits the whole chain.
  *
  * 可选链某一链节短路时由链求值返回的哨兵值。
@@ -1592,6 +1573,43 @@ export class Runtime {
    * @param initialize - Whether this is a `let`/`const` initializer (releases TDZ) / 是否为
    *   `let`/`const` 初始化（解除 TDZ）
    */
+  /**
+   * Write a property with ECMAScript sloppy/strict assignment semantics.
+   *
+   * 按 ECMAScript sloppy/严格模式语义写入属性。
+   *
+   * In sloppy mode a failed write (read-only property, getter-only accessor, non-extensible object)
+   * and a write on a primitive receiver are silent no-ops; in strict mode they throw `TypeError`.
+   * This module is ESM and therefore always strict, so `object[key] = value` must not be used
+   * directly — it would throw for sloppy code as well.
+   *
+   * Sloppy 模式下写入失败（只读属性、只有 getter、不可扩展对象）以及原始值接收者上的写入都会静默失败； 严格模式抛 `TypeError`。本模块是
+   * ESM（始终严格），因此不能直接使用 `object[key] = value`，否则 sloppy 代码也会抛错。
+   *
+   * @param object - The receiver / 接收者
+   * @param key - The property key / 属性键
+   * @param value - New value / 新值
+   */
+  private writeProperty(object: unknown, key: PropertyKey, value: unknown): void {
+    if (object == null) {
+      throw new TypeError(
+        `Cannot set properties of ${typeof object === "object" ? "null" : "undefined"} (setting '${String(key)}')`,
+      );
+    }
+
+    const type = typeof object;
+
+    if (type !== "object" && type !== "function") {
+      if (this.strict)
+        throw new TypeError(`Cannot create property '${String(key)}' on ${type} value`);
+
+      return;
+    }
+
+    if (!Reflect.set(object, key, value) && this.strict)
+      throw new TypeError(`Cannot assign to read only property '${String(key)}'`);
+  }
+
   private assignTo(
     target: AssignmentTarget,
     value: unknown,
@@ -1607,7 +1625,7 @@ export class Runtime {
       case "member": {
         const { object, key } = this.evalMemberRef(target, env);
 
-        setProperty(object, key, value);
+        this.writeProperty(object, key, value);
         break;
       }
       case "call": {
@@ -1788,7 +1806,7 @@ export class Runtime {
           // accessor 以实例作为接收者运行
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
           set: (value) => {
-            setProperty(thisRef.value, key, value);
+            this.writeProperty(thisRef.value, key, value);
           },
         };
       }
@@ -1801,7 +1819,7 @@ export class Runtime {
       return {
         get: () => getProperty(object, key),
         set: (value) => {
-          setProperty(object, key, value);
+          this.writeProperty(object, key, value);
         },
       };
     }
@@ -2531,7 +2549,7 @@ export class Runtime {
       const old = getProperty(object, key);
       const value = delta(old);
 
-      setProperty(object, key, value);
+      this.writeProperty(object, key, value);
 
       return node.prefix ? value : old;
     }
@@ -2853,7 +2871,13 @@ export class Runtime {
 
       let thisValue: unknown = thisArg;
 
-      if (meta.thisMode === "sloppy" && thisValue == null) thisValue = this.globalObject;
+      if (meta.thisMode === "sloppy") {
+        // sloppy `this` is boxed: nullish -> global object, primitives -> wrapper objects
+        // sloppy `this` 会装箱：null/undefined → 全局对象，原始值 → 包装对象
+        if (thisValue == null) thisValue = this.globalObject;
+        else if (typeof thisValue !== "object" && typeof thisValue !== "function")
+          thisValue = new Object(thisValue);
+      }
 
       const env = new Environment(meta.closure, true);
 
@@ -3551,7 +3575,13 @@ export class Runtime {
   ): Generator<unknown, unknown, unknown> {
     let thisValue: unknown = thisArg;
 
-    if (meta.thisMode === "sloppy" && thisValue == null) thisValue = this.globalObject;
+    if (meta.thisMode === "sloppy") {
+      // sloppy `this` is boxed: nullish -> global object, primitives -> wrapper objects
+      // sloppy `this` 会装箱：null/undefined → 全局对象，原始值 → 包装对象
+      if (thisValue == null) thisValue = this.globalObject;
+      else if (typeof thisValue !== "object" && typeof thisValue !== "function")
+        thisValue = new Object(thisValue);
+    }
 
     const env = new Environment(meta.closure, true);
 
@@ -4380,7 +4410,7 @@ export class Runtime {
           const old = getProperty(object, key);
           const value = delta(old);
 
-          setProperty(object, key, value);
+          this.writeProperty(object, key, value);
 
           return expr.prefix ? value : old;
         }
@@ -4563,7 +4593,7 @@ export class Runtime {
         return {
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
           set: (value) => {
-            setProperty(thisRef.value, key, value);
+            this.writeProperty(thisRef.value, key, value);
           },
         };
       }
@@ -4576,7 +4606,7 @@ export class Runtime {
       return {
         get: () => getProperty(object, key),
         set: (value) => {
-          setProperty(object, key, value);
+          this.writeProperty(object, key, value);
         },
       };
     }
@@ -4615,7 +4645,7 @@ export class Runtime {
       case "member": {
         const { object, key } = yield* this.evalAsyncMemberRef(target, env);
 
-        setProperty(object, key, value);
+        this.writeProperty(object, key, value);
         break;
       }
       case "objectPattern": {
