@@ -576,6 +576,26 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
 };
 
 /**
+ * Close an iterator on abrupt loop exit (`break` / `return` / throw), per IteratorClose.
+ *
+ * 循环异常退出（`break` / `return` / 抛出）时按 IteratorClose 关闭迭代器。
+ *
+ * @param iterator - The iterator / 迭代器
+ */
+const closeIterator = (iterator: IterableIterator<unknown>): void => {
+  const close = (iterator as { return?: () => unknown }).return;
+
+  if (typeof close === "function") {
+    try {
+      close.call(iterator);
+    } catch {
+      // errors from `return()` are ignored when the loop is already completing abruptly
+      // 循环已异常结束时忽略 `return()` 抛出的错误
+    }
+  }
+};
+
+/**
  * Get the host iterator of a value (host `Symbol.iterator` protocol).
  *
  * 获取值的宿主迭代器（宿主 `Symbol.iterator` 协议）。
@@ -1376,6 +1396,11 @@ export class Runtime {
       } catch (err) {
         if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
           continue;
+
+        // abrupt exits (break / return / throw) close the iterator
+        // 异常退出（break / return / 抛出）关闭迭代器
+        closeIterator(iterator);
+
         if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
         throw err;
       }
@@ -4478,6 +4503,11 @@ export class Runtime {
       } catch (err) {
         if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
           continue;
+
+        // abrupt exits (break / return / throw) close the iterator
+        // 异常退出（break / return / 抛出）关闭迭代器
+        closeIterator(iterator);
+
         if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
         throw err;
       }
