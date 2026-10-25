@@ -2810,8 +2810,13 @@ export class Runtime {
 
     this.stackDepth += 1;
 
-    if (this.stackDepth > this.maxStack)
+    if (this.stackDepth > this.maxStack) {
+      // undo the increment: the `finally` below is not entered when we throw here
+      // 抛出前撤销递增：此处抛错不会进入下方 `finally`
+      this.stackDepth -= 1;
+
       throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
+    }
 
     try {
       if (meta.thisMode === "arrow") {
@@ -3122,8 +3127,13 @@ export class Runtime {
 
     this.stackDepth += 1;
 
-    if (this.stackDepth > this.maxStack)
+    if (this.stackDepth > this.maxStack) {
+      // undo the increment: the `finally` below is not entered when we throw here
+      // 抛出前撤销递增：此处抛错不会进入下方 `finally`
+      this.stackDepth -= 1;
+
       throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
+    }
 
     const env = new Environment(parentMeta.closure, true);
 
