@@ -1,5 +1,6 @@
 /* oxlint-disable typescript/no-unsafe-enum-comparison */
-import type { AnyNode, Element } from "domhandler";
+import { Element } from "domhandler";
+import type { AnyNode } from "domhandler";
 
 import type { AllowTag } from "./allowedTags.js";
 import { ALLOWED_TAGS } from "./allowedTags.js";
@@ -52,11 +53,33 @@ const restoreSVGAttrs = (node: Element): void => {
   });
 };
 
-const handleSVG = (node: Element): RichTextNode => {
-  // Restore camel-case attribute names so the svg renders correctly
-  restoreSVGAttrs(node);
+/**
+ * Shallow-clone an SVG element with its attributes, leaving the caller's DOM untouched.
+ *
+ * 浅拷贝 SVG 元素及其属性，不改动调用方 DOM。
+ *
+ * @param node - The svg element / SVG 元素
+ * @returns The cloned element / 克隆的元素
+ */
+const cloneElement = (node: Element): Element => {
+  const clone = new Element(node.name, { ...node.attribs }, [], node.type);
 
-  const { width, height, viewBox } = node.attribs;
+  clone.children = node.children.map((child) =>
+    child.type === "tag" ? cloneElement(child) : child,
+  );
+
+  return clone;
+};
+
+const handleSVG = (node: Element): RichTextNode => {
+  // Restore camel-case attribute names so the svg renders correctly, on a clone: converting
+  // pre-parsed nodes must not mutate the caller's DOM
+  // 在克隆上恢复驼峰属性名以保证 SVG 正常渲染；转换预解析节点不得修改调用方 DOM
+  const svg = cloneElement(node);
+
+  restoreSVGAttrs(svg);
+
+  const { width, height, viewBox } = svg.attribs;
 
   let style = "";
 
@@ -79,7 +102,7 @@ const handleSVG = (node: Element): RichTextNode => {
     type: "node",
     name: "img",
     attrs: {
-      src: convertSVGToDataURI(getHTML(node)),
+      src: convertSVGToDataURI(getHTML(svg)),
       ...(style ? { style } : {}),
     },
   };
