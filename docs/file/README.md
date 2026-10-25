@@ -74,8 +74,13 @@ icon: folder
 
   写入可序列化数据为 JSON
   - `path`: 写入文件的路径，若父文件夹不存在会自动创建
-  - `data`: 写入文件的数据，可接受任意可序列化的数据
+  - `data`: 写入文件的数据，必须是可 JSON 序列化的数据
   - `encoding`: 文件编码选项，默认 `utf-8`
+
+  ::: warning
+
+  `undefined`、函数、Symbol 以及循环引用无法被 `JSON.stringify` 正确表示，`writeJSON` 会抛出 `MpError` 而不是静默写入 `undefined`/`null`。
+  :::
 
 - `saveFile(tempFilePath: string, path: string): void`
 
