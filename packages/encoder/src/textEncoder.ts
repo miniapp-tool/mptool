@@ -38,12 +38,7 @@ export class TextEncoder {
       fatal?: boolean;
     } = {},
   ) {
-    // Web IDL conventions
-    if (!(this instanceof TextEncoder))
-      throw new TypeError("Called as a function. Did you forget 'new'?");
-
     // Non-standard
-    this.#doNotFlush = false;
     if (options.fatal) this.#fatal = true;
 
     // 1. Let encoding be the result of getting an encoding from label.
