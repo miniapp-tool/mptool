@@ -120,7 +120,13 @@ const ASSIGNMENT_OPERATORS: Readonly<Set<string>> = new Set([
  * @param token - Token to read / 待读取的 token
  * @returns The token value / token 的值
  */
-const tokenValue = (token: Token): string => ("value" in token ? token.value : "");
+const tokenValue = (token: Token): string => {
+  // quoted property names carry their source text in `value`; the semantic name is `cooked`
+  // 带引号的属性名原始文本在 `value` 中，语义名称应取 `cooked`
+  if (token.type === "string") return token.cooked;
+
+  return "value" in token ? token.value : "";
+};
 
 /**
  * Whether the token can be a property name (identifier/keyword/string/number/bigint).
