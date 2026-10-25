@@ -81,5 +81,7 @@ export const saveDocument = (url: string, filename?: string): void => {
           broken_url: url,
         });
       });
+  } else {
+    logger.warn(`saveDocument skipped: addFileToFavorites is not supported (${url})`);
   }
 };

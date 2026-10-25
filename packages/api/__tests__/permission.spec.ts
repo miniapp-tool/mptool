@@ -130,3 +130,29 @@ describe(withScope, () => {
     expect(calls.count).toBe(0);
   });
 });
+
+describe("withScope modal failure", () => {
+  it("should reject when the denial modal fails to open", async () => {
+    const mockWx = wx as unknown as {
+      getSetting: (option: {
+        success: (result: { authSetting: Record<string, boolean> }) => void;
+      }) => void;
+      authorize: (option: { scope: string; fail?: () => void }) => void;
+      showModal: (option: { fail?: () => void }) => void;
+    };
+
+    mockWx.getSetting = (option): void => {
+      option.success({ authSetting: {} });
+    };
+    mockWx.authorize = (option): void => {
+      option.fail?.();
+    };
+    mockWx.showModal = (option): void => {
+      option.fail?.();
+    };
+
+    await expect(withScope("scope.camera", () => Promise.resolve(), "测试权限")).rejects.toThrow(
+      "权限提示框打开失败",
+    );
+  });
+});

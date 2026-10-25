@@ -47,6 +47,8 @@ icon: puzzle-piece
 
 - 类型: `(versionA: string, versionB: string) => number`
 
+- 说明: 版本号必须由非负整数段组成（如 `1.2.0`）；包含非数字段（如 `1.0.0-beta`）会抛 `TypeError`，避免 `NaN` 比较静默判等。
+
 - 参数:
   - `versionA`: 版本号 A
   - `versionB`: 版本号 B
@@ -110,13 +112,14 @@ icon: puzzle-piece
 
 ### showModal
 
-- 类型: `(title: string, content: string, confirmAction?: () => void | Promise<void>, cancelAction?: () => void | Promise<void>) => void`
+- 类型: `(title: string, content: string, confirmAction?: () => void | Promise<void>, cancelAction?: () => void | Promise<void>, failAction?: () => void | Promise<void>) => void`
 
 - 参数:
   - `title`: 弹窗标题
   - `content`: 弹窗内容
   - `confirmAction`: 点击确定的回调
   - `cancelAction`: 点击取消的回调（不填则不显示取消按钮）
+  - `failAction`: 弹窗打开失败的回调（不填则退回 `cancelAction`）
 
 显示模态对话框。
 
