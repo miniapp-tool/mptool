@@ -111,14 +111,19 @@ installGlobal();
 
 ### 选项 `RunOptions`
 
-| 选项       | 默认值   | 说明                                               |
-| ---------- | -------- | -------------------------------------------------- |
-| `globals`  | `{}`     | 注入宿主能力（`wx`、`console` 等，默认不暴露）     |
-| `global`   | `false`  | 自动暴露宿主全局对象（`globalThis`）的全部自有属性 |
-| `maxSteps` | `1e6`    | 步数上限，防止死循环                               |
-| `maxStack` | `512`    | 调用栈深度上限，防止深递归                         |
-| `strict`   | `false`  | 是否以严格模式执行                                 |
-| `features` | 全部开启 | 特性开关：`class`、`forOf`、`async`、`bigint`      |
+| 选项              | 默认值   | 说明                                                     |
+| ----------------- | -------- | -------------------------------------------------------- |
+| `globals`         | `{}`     | 注入宿主能力（`wx`、`console` 等，默认不暴露）           |
+| `global`          | `false`  | 自动暴露宿主全局对象（`globalThis`）的全部自有属性       |
+| `maxSteps`        | `1e6`    | 步数上限，防止死循环                                     |
+| `maxStack`        | `512`    | 调用栈深度上限，防止深递归                               |
+| `strict`          | `false`  | 是否以严格模式执行                                       |
+| `features`        | 全部开启 | 特性开关：`class`、`forOf`、`async`、`bigint`            |
+| `maxSourceLength` | 不限制   | 源码长度上限（UTF-16 code unit），超出抛 `ParseError`    |
+| `maxParseDepth`   | 不限制   | 表达式/语句最大嵌套深度，超出抛 `ParseError`             |
+| `maxBacktracks`   | `5000`   | 解析回溯期间允许消费的最大 token 数，超出抛 `ParseError` |
+
+> 解析预算由宿主按需开启（`maxSourceLength` / `maxParseDepth` 默认不限制）；解析阶段在解释执行之前完成，`maxSteps` 不覆盖解析开销。热更新等执行远程代码的场景建议显式设置这几个上限。
 
 ::: tip 如何在代码中访问外部变量
 

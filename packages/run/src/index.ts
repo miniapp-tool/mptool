@@ -1,4 +1,5 @@
 import { ASYNC_UNSUPPORTED_MESSAGE, Runtime } from "./interpreter.js";
+import type { ParserLimits } from "./parser.js";
 import { parse } from "./parser.js";
 
 /**
@@ -42,6 +43,27 @@ export interface RunOptions {
    * 是否以严格模式解析执行，默认 `false`
    */
   strict?: boolean;
+
+  /**
+   * Maximum source length in code units, unlimited by default
+   *
+   * 源码长度上限（UTF-16 code unit），默认不限制
+   */
+  maxSourceLength?: number;
+
+  /**
+   * Maximum expression/statement nesting depth, unlimited by default
+   *
+   * 表达式/语句最大嵌套深度，默认不限制
+   */
+  maxParseDepth?: number;
+
+  /**
+   * Maximum tokens consumed while backtracking, `5000` by default
+   *
+   * 回溯期间允许消费的最大 token 数，默认 `5000`
+   */
+  maxBacktracks?: number;
 
   /**
    * Feature toggles
@@ -115,6 +137,20 @@ export interface Sandbox {
 }
 
 /**
+ * Extract parser budgets from the run options.
+ *
+ * 从运行选项中提取解析器预算。
+ *
+ * @param options - Run options / 运行选项
+ * @returns Parser limits / 解析器预算
+ */
+const parseLimits = (options?: RunOptions): ParserLimits => ({
+  maxSourceLength: options?.maxSourceLength,
+  maxParseDepth: options?.maxParseDepth,
+  maxBacktracks: options?.maxBacktracks,
+});
+
+/**
  * Run code once, returns a `Promise` when the code contains async operations
  *
  * 一次性执行（含 async 时返回 Promise）
@@ -126,7 +162,7 @@ export interface Sandbox {
 export const run = (code: string, options?: RunOptions): RunResult => {
   const runtime = new Runtime(options);
 
-  return runtime.run(parse(code, runtime.features));
+  return runtime.run(parse(code, runtime.features, parseLimits(options)));
 };
 
 /**
@@ -140,7 +176,9 @@ export const run = (code: string, options?: RunOptions): RunResult => {
  */
 export const runSync = (code: string, options?: RunOptions): unknown => {
   const runtime = new Runtime({ ...options, forbidAsync: true });
-  const { value, asyncStarted } = runtime.runWithStatus(parse(code, runtime.features));
+  const { value, asyncStarted } = runtime.runWithStatus(
+    parse(code, runtime.features, parseLimits(options)),
+  );
 
   // only a real async invocation is rejected; a synchronous value that happens to be a Promise
   // (`Promise.resolve(1)`, `new Promise(() => {})`, ...) is a normal return value
@@ -162,7 +200,8 @@ export const createSandbox = (options?: RunOptions): Sandbox => {
   const runtime = new Runtime(options);
 
   return {
-    run: (code: string): RunResult => runtime.run(parse(code, runtime.features)),
+    run: (code: string): RunResult =>
+      runtime.run(parse(code, runtime.features, parseLimits(options))),
     setGlobal: (name: string, value: unknown): void => {
       runtime.setGlobal(name, value);
     },
@@ -194,9 +233,9 @@ export const createFunction = (
 
   // `(function(a, b) { ... })` — an independent function with its own sandbox
   // `(function(a, b) { ... })` —— 拥有独立沙箱的函数
-  const fn = runtime.run(parse(`(function(${args.join(", ")}) { ${body} })`, runtime.features)) as (
-    ...callArgs: unknown[]
-  ) => unknown;
+  const fn = runtime.run(
+    parse(`(function(${args.join(", ")}) { ${body} })`, runtime.features, parseLimits(options)),
+  ) as (...callArgs: unknown[]) => unknown;
 
   // a plain (non-arrow) function preserves `this` from the call site and forwards it to the
   // interpreter function, so `.call(page)` exposes the page instance to the body
