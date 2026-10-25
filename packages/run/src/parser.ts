@@ -247,16 +247,45 @@ export class ParseError extends SyntaxError {
 }
 
 /**
- * Maximum number of tokens consumed while speculatively parsing (backtracking).
+ * Parser budgets. They are opt-in (except the backtracking budget) so hosts can decide how much
+ * untrusted dynamic code may consume while parsing.
+ *
+ * 解析器预算。除回溯预算外均为可选开启，由宿主决定解析不可信动态代码时允许的开销。
+ */
+export interface ParserLimits {
+  /**
+   * Maximum source length in code units, unlimited when omitted
+   *
+   * 源码长度上限（UTF-16 code unit），省略时不限制
+   */
+  maxSourceLength?: number;
+
+  /**
+   * Maximum expression/statement nesting depth, unlimited when omitted
+   *
+   * 表达式/语句最大嵌套深度，省略时不限制
+   */
+  maxParseDepth?: number;
+
+  /**
+   * Maximum number of tokens consumed while backtracking, `5000` by default
+   *
+   * 回溯期间允许消费的最大 token 数，默认 `5000`
+   */
+  maxBacktracks?: number;
+}
+
+/**
+ * Default speculative parsing budget (tokens).
  *
  * The `async (...) => ...` cover-grammar probe parses a parenthesized group and rewinds when it is
  * not an arrow. Nested `async(` calls make that work grow exponentially, so speculative token
  * consumption is bounded and aborted with a `ParseError` instead of blocking the host thread.
  *
- * 回溯解析（试探）期间允许消费的最大 token 数。`async (...) => ...` 的 cover 语法探测会先整体解析括号 再回滚；嵌套 `async(`
- * 会使其指数增长，因此为试探期间的 token 消费设置上限，超限抛出 `ParseError`，避免阻塞宿主线程。
+ * 默认回溯解析预算（token 数）。`async (...) => ...` 的 cover 语法探测会先整体解析括号再回滚；嵌套 `async(` 会使其指数增长，因此为试探期间的 token
+ * 消费设置上限，超限抛出 `ParseError`，避免阻塞宿主线程。
  */
-const MAX_SPECULATIVE_TOKENS = 5000;
+const DEFAULT_MAX_BACKTRACKS = 5000;
 
 /**
  * Recursive descent parser producing an AST.
@@ -272,19 +301,29 @@ export class Parser {
   private inAsyncFunction = false;
   /** Nesting depth of speculative (backtracked) parses / 试探（回溯）解析的嵌套深度 */
   private speculationDepth = 0;
-  /** Tokens consumed while speculating, bounded by `MAX_SPECULATIVE_TOKENS` / 试探期间已消费的 token 数 */
+  /** Tokens consumed while speculating, bounded by `maxBacktracks` / 试探期间已消费的 token 数 */
   private speculativeTokens = 0;
+  /** Current expression/statement nesting depth / 当前表达式/语句嵌套深度 */
+  private parseDepth = 0;
+  private readonly maxSourceLength: number;
+  private readonly maxParseDepth: number;
+  private readonly maxBacktracks: number;
 
   /**
    * @param source - Source code to parse / 待解析的源码
    * @param features - Feature toggles / 特性开关
+   * @param limits - Parser budgets / 解析器预算
    */
   constructor(
     private readonly source: string,
     features?: Partial<FeatureOptions>,
+    limits: ParserLimits = {},
   ) {
     this.lexer = new Lexer(source);
     this.features = { ...DEFAULT_FEATURES, ...features };
+    this.maxSourceLength = limits.maxSourceLength ?? Number.POSITIVE_INFINITY;
+    this.maxParseDepth = limits.maxParseDepth ?? Number.POSITIVE_INFINITY;
+    this.maxBacktracks = limits.maxBacktracks ?? DEFAULT_MAX_BACKTRACKS;
   }
 
   /**
@@ -295,6 +334,15 @@ export class Parser {
    * @returns The parsed program / 解析出的 program
    */
   parseProgram(): Program {
+    if (this.source.length > this.maxSourceLength) {
+      throw new ParseError(
+        `Source code length ${this.source.length} exceeds the limit of ${this.maxSourceLength}`,
+        this.source,
+        0,
+        this.source.length,
+      );
+    }
+
     const { start } = this.current();
     const body: Statement[] = [];
 
@@ -350,7 +398,7 @@ export class Parser {
     if (this.speculationDepth > 0) {
       this.speculativeTokens += 1;
 
-      if (this.speculativeTokens > MAX_SPECULATIVE_TOKENS)
+      if (this.speculativeTokens > this.maxBacktracks)
         throw this.error("Parser backtracking limit exceeded", token);
     }
 
@@ -468,6 +516,19 @@ export class Parser {
   // ---------------------------------------------------------------------------
 
   private parseStatement(): Statement {
+    this.parseDepth += 1;
+
+    if (this.parseDepth > this.maxParseDepth)
+      throw this.error(`Maximum parse depth of ${this.maxParseDepth} exceeded`);
+
+    try {
+      return this.parseStatementInner();
+    } finally {
+      this.parseDepth -= 1;
+    }
+  }
+
+  private parseStatementInner(): Statement {
     const token = this.current();
 
     if (this.match("{")) return this.parseBlock();
@@ -1471,6 +1532,19 @@ export class Parser {
    * @returns The parsed expression / 解析出的表达式
    */
   private parseAssignment(allowIn: boolean): Expression {
+    this.parseDepth += 1;
+
+    if (this.parseDepth > this.maxParseDepth)
+      throw this.error(`Maximum parse depth of ${this.maxParseDepth} exceeded`);
+
+    try {
+      return this.parseAssignmentInner(allowIn);
+    } finally {
+      this.parseDepth -= 1;
+    }
+  }
+
+  private parseAssignmentInner(allowIn: boolean): Expression {
     const token = this.current();
 
     // single-parameter arrow: `x => ...`
@@ -2604,7 +2678,11 @@ export class Parser {
  *
  * @param source - Source code / 源码
  * @param features - Feature toggles (all default to `true`) / 特性开关（默认全开）
+ * @param limits - Parser budgets / 解析器预算
  * @returns The parsed program / 解析出的 program
  */
-export const parse = (source: string, features: FeatureOptions = DEFAULT_FEATURES): Program =>
-  new Parser(source, features).parseProgram();
+export const parse = (
+  source: string,
+  features: FeatureOptions = DEFAULT_FEATURES,
+  limits: ParserLimits = {},
+): Program => new Parser(source, features, limits).parseProgram();
