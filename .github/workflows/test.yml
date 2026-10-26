@@ -18,10 +18,12 @@ jobs:
     name: Linter and Unit test
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Supersede the previous run when a PR is pushed again; the old run can never be useful.
+    # PRs supersede their previous run; pushes to main must never cancel or replace each other,
+    # otherwise a fast merge sequence leaves older main commits with a cancelled/red run. Each main
+    # push gets its own group (keyed by SHA) and never cancels an in-progress run.
     concurrency:
-      group: test-${{ github.ref }}
-      cancel-in-progress: true
+      group: test-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.sha || 'latest' }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
