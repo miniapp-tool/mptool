@@ -732,6 +732,12 @@ export class Runtime {
   /** Whether async invocation is rejected synchronously / 是否同步拒绝 async 调用 */
   private readonly forbidAsync: boolean;
 
+  /** Number of in-flight `run()` calls / 进行中的 `run()` 数量 */
+  private activeRuns = 0;
+
+  /** Number of async invocations that have not settled yet / 尚未结算的 async 调用数 */
+  private pendingAsync = 0;
+
   /** @param options - Runtime options / 运行时选项 */
   constructor(options: RuntimeOptions = {}) {
     this.features = {
@@ -807,6 +813,16 @@ export class Runtime {
    * @returns The completion value and the async flag / 完成值与 async 标记
    */
   runWithStatus(program: Program): { value: unknown; asyncStarted: boolean } {
+    // one Runtime owns one execution state (step/stack/context); concurrent or nested runs would
+    // reset it mid-execution, so the contract is strictly serial
+    // 一个 Runtime 只有一份执行状态（步数/栈/上下文），并发或嵌套 run 会中途重置它，因此契约是严格串行
+    if (this.activeRuns > 0 || this.pendingAsync > 0) {
+      throw new Error(
+        "Runtime is not reentrant: await the previous run() before starting another one",
+      );
+    }
+
+    this.activeRuns += 1;
     this.stepCount = 0;
     this.stackDepth = 0;
     this.asyncStarted = false;
@@ -823,20 +839,26 @@ export class Runtime {
       this.hoistProgram(program.body, this.globalEnv);
       this.predeclareLexical(program.body, this.globalEnv);
 
-      let completion: unknown = void 0;
-
       try {
-        for (const stmt of program.body) completion = this.evalStatement(stmt, this.globalEnv);
-      } catch (err) {
-        // unwrap the user's thrown value at the top-level boundary
-        // 在顶层边界解包用户抛出的值
-        if (err instanceof ThrowSignalError) throw err.value;
-        throw err;
-      }
+        this.hoistProgram(program.body, this.globalEnv);
 
-      return { value: completion, asyncStarted: this.asyncStarted };
+        let completion: unknown = void 0;
+
+        try {
+          for (const stmt of program.body) completion = this.evalStatement(stmt, this.globalEnv);
+        } catch (err) {
+          // unwrap the user's thrown value at the top-level boundary
+          // 在顶层边界解包用户抛出的值
+          if (err instanceof ThrowSignalError) throw err.value;
+          throw err;
+        }
+
+        return { value: completion, asyncStarted: this.asyncStarted };
+      } finally {
+        this.contextStack.length = 0;
+      }
     } finally {
-      this.contextStack.length = 0;
+      this.activeRuns -= 1;
     }
   }
 
@@ -3905,12 +3927,14 @@ export class Runtime {
     args: unknown[],
     thisArg: unknown,
   ): Promise<unknown> {
+    this.pendingAsync += 1;
     this.stackDepth += 1;
 
     if (this.stackDepth > this.maxStack) {
-      // undo the increment before throwing, so the guard does not leak depth
-      // 抛出前先撤销递增，避免守卫泄漏深度
+      // undo the increments before throwing, so the guards do not leak state
+      // 抛出前先撤销递增，避免守卫泄漏状态
       this.stackDepth -= 1;
+      this.pendingAsync -= 1;
 
       throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
     }
@@ -3922,6 +3946,7 @@ export class Runtime {
     return new Promise<unknown>((resolve, reject) => {
       const settle = (): void => {
         this.stackDepth -= 1;
+        this.pendingAsync -= 1;
       };
 
       const step = (method: "next" | "throw", arg: unknown): void => {
