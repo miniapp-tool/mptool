@@ -110,6 +110,28 @@ order: 2
 
 允许进行跳转据页面首屏渲染后的最小间隔时间，单位 ms
 
+## hotReloadPattern
+
+- 类型: `string`
+
+- 必填: 否
+
+页面热更新代码地址模板，`$name` 会被替换为页面名称。
+
+设置后，框架会在页面**注册**时异步请求该地址，用 `globalThis.createFunction` 执行返回的代码（`global: true`），并把返回的方法对象合并到页面实例上。拉取只在注册时发生一次，不会阻塞页面注册与加载；拉取或执行失败会静默跳过。需要获取新部署的代码时，重启小程序即可。
+
+```ts
+$Config({
+  hotReloadPattern: "https://example.com/hotReloadCode/$name",
+});
+```
+
+::: tip
+
+热更新代码需要先在 `app.js` 中调用 `@mptool/run` 的 `installGlobal()` 挂载 `createFunction`，否则热更新会被跳过。详见「页面热更新」。
+
+:::
+
 ## extendComponent
 
 - 类型: `(options: TrivialComponentOptions): void`
