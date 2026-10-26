@@ -111,7 +111,7 @@ export const PUNCTS = [
   ".",
 ] as const;
 
-export const REGEXP_FLAGS: Set<string> = new Set<string>(["g", "i", "m", "s", "u", "y"]);
+export const REGEXP_FLAGS: Set<string> = new Set<string>(["d", "g", "i", "m", "s", "u", "v", "y"]);
 
 const HEX_STRING_REGEX = /^[0-9a-fA-F]+$/u;
 
