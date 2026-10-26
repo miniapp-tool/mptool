@@ -136,6 +136,12 @@ describe("async expression edge coverage", () => {
     await runBoth("async function f(o) { return o[await 'm'](); } f({ m: () => 2 })");
     await runBoth("async function f(o) { return o?.[await 'm'](); } f({ m: () => 5 })");
   });
+
+  it("should read a non-computed member of an awaited object", async () => {
+    await runBoth(
+      "async function f() { const o = { a: 1 }; return (await Promise.resolve(o)).a; } f()",
+    );
+  });
 });
 
 describe("further async branch coverage", () => {

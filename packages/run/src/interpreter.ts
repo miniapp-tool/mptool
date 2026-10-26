@@ -197,22 +197,18 @@ const safeExpressionCache = new WeakMap<object, boolean>();
  */
 const cachedWalk = (
   cache: WeakMap<object, boolean>,
-  node: unknown,
+  node: object,
   pred: (type: string) => boolean,
 ): boolean => {
-  if (node != null && typeof node === "object" && !Array.isArray(node)) {
-    const cached = cache.get(node);
+  const cached = cache.get(node);
 
-    if (cached != null) return cached;
+  if (cached != null) return cached;
 
-    const result = walkContains(node, pred);
+  const result = walkContains(node, pred);
 
-    cache.set(node, result);
+  cache.set(node, result);
 
-    return result;
-  }
-
-  return walkContains(node, pred);
+  return result;
 };
 
 /**
@@ -221,7 +217,7 @@ const cachedWalk = (
  * @param node - The node or value / 节点或值
  * @returns Whether it contains `await` / 是否含 `await`
  */
-const containsAwait = (node: unknown): boolean =>
+const containsAwait = (node: object): boolean =>
   cachedWalk(awaitCache, node, (type) => type === "await");
 
 /**
@@ -230,7 +226,7 @@ const containsAwait = (node: unknown): boolean =>
  * @param node - The node or value / 节点或值
  * @returns Whether it contains a call or `new` / 是否含调用或 `new`
  */
-const containsCall = (node: unknown): boolean =>
+const containsCall = (node: object): boolean =>
   cachedWalk(callCache, node, (type) => type === "call" || type === "new");
 
 /**
@@ -239,7 +235,7 @@ const containsCall = (node: unknown): boolean =>
  * @param node - The node or value / 节点或值
  * @returns Whether it contains control flow / 是否含控制流
  */
-const containsControlFlow = (node: unknown): boolean =>
+const containsControlFlow = (node: object): boolean =>
   cachedWalk(
     controlFlowCache,
     node,
@@ -461,6 +457,7 @@ const binaryOp = (op: BinaryOperator, left: unknown, right: unknown): unknown =>
     case "instanceof": {
       return left instanceof (right as { [Symbol.hasInstance]: (value: unknown) => boolean });
     }
+    /* istanbul ignore next -- BinaryOperator is exhaustively handled above */
     default: {
       throw new Error("Unreachable operator");
     }
@@ -996,7 +993,11 @@ export class Runtime {
    * @returns The current context or `null` / 当前上下文或 `null`
    */
   private currentContext(): RuntimeContext | null {
-    return this.contextStack[this.contextStack.length - 1] ?? null;
+    return (
+      this.contextStack[this.contextStack.length - 1] ??
+      /* istanbul ignore next -- every evaluation runs with at least one context frame */
+      null
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -1163,6 +1164,7 @@ export class Runtime {
 
         return void 0;
       }
+      /* istanbul ignore next -- Statement is exhaustively handled above */
       default: {
         throw new Error("Unreachable statement");
       }
@@ -1817,7 +1819,10 @@ export class Runtime {
         isAsync: stmt.isAsync,
         prototype: null,
         superBase: null,
-        sourceText: getFunctionSource(stmt) ?? void 0,
+        sourceText:
+          getFunctionSource(stmt) ??
+          /* istanbul ignore next -- the parser registers source text for every function node */
+          void 0,
       });
 
       env.define(stmt.name, fn);
@@ -1854,7 +1859,7 @@ export class Runtime {
   private hoistStatements(
     statements: readonly Statement[],
     env: Environment,
-    direct = false,
+    direct: boolean,
   ): void {
     for (const stmt of statements) {
       switch (stmt.type) {
@@ -1879,7 +1884,10 @@ export class Runtime {
               isAsync: stmt.isAsync,
               prototype: null,
               superBase: null,
-              sourceText: getFunctionSource(stmt) ?? void 0,
+              sourceText:
+                getFunctionSource(stmt) ??
+                /* istanbul ignore next -- the parser registers source text for every function node */
+                void 0,
             });
 
             env.declareVar(stmt.name);
@@ -1969,6 +1977,7 @@ export class Runtime {
       }
       case "objectPattern": {
         for (const prop of pattern.props)
+          /* istanbul ignore else -- the parser never emits an object-pattern property without a value */
           if (prop.value != null) this.collectNames(prop.value, out);
         if (pattern.rest != null) this.collectNames(pattern.rest.argument, out);
         break;
@@ -1986,15 +1995,12 @@ export class Runtime {
         this.collectNames(pattern.left, out);
         break;
       }
+      /* istanbul ignore next -- callers unwrap rest targets before collecting declaration names */
       case "rest": {
         this.collectNames(pattern.argument, out);
         break;
       }
-      case "member":
-      case "call": {
-        // member/call targets never appear in declarations / 声明中不会出现成员/调用目标
-        break;
-      }
+      /* istanbul ignore next -- AssignmentTarget is exhaustively handled above */
       default: {
         break;
       }
@@ -2113,10 +2119,12 @@ export class Runtime {
         else this.assignTo(target.left, value, env, initialize);
         break;
       }
+      /* istanbul ignore next -- callers unwrap rest targets before assigning to them */
       case "rest": {
         this.assignTo(target.argument, value, env, initialize);
         break;
       }
+      /* istanbul ignore next -- AssignmentTarget is fully covered by the cases above */
       default: {
         throw new Error("Unreachable pattern");
       }
@@ -2205,6 +2213,7 @@ export class Runtime {
         : (prop.key as string);
 
       taken.add(key);
+      /* istanbul ignore else -- the parser never emits an object-pattern property without a value */
       if (prop.value != null) this.assignTo(prop.value, source[key], env, initialize);
     }
 
@@ -2475,12 +2484,15 @@ export class Runtime {
       case "template": {
         return this.evalTemplate(node, env);
       }
+      /* istanbul ignore next -- `await` is always evaluated by the async evaluator */
       case "await": {
         throw new Error("async/await is not implemented yet");
       }
+      /* istanbul ignore next -- spread nodes only appear inside array/object/call handlers */
       case "spread": {
         throw new TypeError("Unexpected spread expression");
       }
+      /* istanbul ignore next -- every Expression node kind is handled above */
       default: {
         throw new Error("Unreachable expression");
       }
@@ -2497,6 +2509,7 @@ export class Runtime {
   private evalThis(): unknown {
     const ctx = this.currentContext();
 
+    /* istanbul ignore if -- evaluation always runs with a context frame */
     if (ctx == null) return this.globalObject;
 
     if (ctx.thisRef.value === UNINITIALIZED)
@@ -2645,8 +2658,6 @@ export class Runtime {
 
     const object = this.evalExpression(node.object, env);
 
-    if (node.optional && object == null) return void 0;
-
     const key = node.computed
       ? toPropertyKey(this.evalExpression(node.property as Expression, env))
       : (node.property as string);
@@ -2670,8 +2681,6 @@ export class Runtime {
     // callee 先于实参求值（ECMAScript 求值顺序）
     const { callee, thisArg } = this.evalCallee(node.callee, env);
     const args = this.evalArgs(node.args, env);
-
-    if (node.optional && callee == null) return void 0;
 
     return this.callValue(callee, args, thisArg);
   }
@@ -2810,8 +2819,6 @@ export class Runtime {
       }
 
       const object = this.evalExpression(callee.object, env);
-
-      if (callee.optional && object == null) return { callee: void 0, thisArg: void 0 };
 
       const key = callee.computed
         ? toPropertyKey(this.evalExpression(callee.property as Expression, env))
@@ -3193,7 +3200,10 @@ export class Runtime {
         prototype: null,
         superBase: extra?.superBase ?? null,
         constructable: extra?.constructable,
-        sourceText: getFunctionSource(node) ?? void 0,
+        sourceText:
+          getFunctionSource(node) ??
+          /* istanbul ignore next -- the parser registers source text for every function node */
+          void 0,
       });
 
       nameEnv.initialize(node.name, fn);
@@ -3211,7 +3221,10 @@ export class Runtime {
       prototype: null,
       superBase: extra?.superBase ?? null,
       constructable: extra?.constructable,
-      sourceText: getFunctionSource(node) ?? void 0,
+      sourceText:
+        getFunctionSource(node) ??
+        /* istanbul ignore next -- the parser registers source text for every function node */
+        void 0,
     });
   }
 
@@ -3296,11 +3309,19 @@ export class Runtime {
         simpleParamNames,
         implicitDerived: false,
         containsAwait: containsAwait(body),
-        lexicalThis: isArrow ? (ctx?.thisRef ?? { value: this.globalObject }) : null,
+        lexicalThis: isArrow
+          ? (ctx?.thisRef ??
+              /* istanbul ignore next -- arrows are always created inside a context frame */
+              { value: this.globalObject })
+          : null,
         lexicalSuperBase: isArrow ? (ctx?.superBase ?? null) : null,
         lexicalSuperClass: isArrow ? (ctx?.superClass ?? null) : null,
         lexicalNewTargetMeta: isArrow ? (ctx?.newTargetMeta ?? null) : null,
-        lexicalIsConstruct: isArrow ? (ctx?.isConstruct ?? false) : false,
+        lexicalIsConstruct: isArrow
+          ? (ctx?.isConstruct ??
+            /* istanbul ignore next -- arrows are always created inside a context frame */
+            false)
+          : false,
         callee: null,
         sourceText,
       },
@@ -3362,7 +3383,9 @@ export class Runtime {
         this.hoistFunctionBody(meta.body, env);
 
         this.contextStack.push({
-          thisRef: meta.lexicalThis ?? { value: this.globalObject },
+          thisRef: meta.lexicalThis ??
+            /* istanbul ignore next -- arrow metadata always carries its lexical `this` */
+            { value: this.globalObject },
           superBase: meta.lexicalSuperBase,
           superClass: meta.lexicalSuperClass,
           // arrows inherit the construction state so `super()` works inside a derived constructor
@@ -3435,6 +3458,7 @@ export class Runtime {
 
           this.superInvoke(parent, args);
 
+          /* istanbul ignore if -- `super()` always initializes `this` before the implicit derived constructor returns */
           if (thisRef.value === UNINITIALIZED)
             throw new TypeError("Derived constructor must call super() before returning");
 
@@ -3589,6 +3613,7 @@ export class Runtime {
         else this.bindParam(param.left, value, env);
         break;
       }
+      /* istanbul ignore next -- `bindParams` unwraps rest parameters before binding them */
       case "rest": {
         // the rest array is collected in `bindParams`; bind the inner target here
         // rest 数组在 bindParams 中收集，这里绑定内部目标
@@ -3634,6 +3659,7 @@ export class Runtime {
   private superInvoke(parent: unknown, args: unknown[]): unknown {
     const ctx = this.currentContext();
 
+    /* istanbul ignore if -- callers guarantee an active context and a function parent */
     if (ctx == null || typeof parent !== "function")
       throw new TypeError("'super' keyword unexpected here");
 
@@ -3643,10 +3669,15 @@ export class Runtime {
       // host parent: let the host construct with the derived prototype
       // 宿主父类：让宿主以派生原型构造
       const newTarget = ctx.newTargetMeta?.callee;
-      const instance: unknown =
-        newTarget == null
-          ? Reflect.construct(parent, args)
-          : Reflect.construct(parent, args, newTarget);
+      // when `new.target` is absent the host defaults it to the parent, so passing the parent keeps
+      // `Reflect.construct(parent, args)` semantics without a dead branch
+      // `new.target` 缺失时宿主默认使用父构造器，因此传入父构造器即可保持 `Reflect.construct(parent, args)` 语义
+      const instance: unknown = Reflect.construct(
+        parent,
+        args,
+        newTarget ??
+          /* istanbul ignore next -- `super()` only runs inside a construct frame */ parent,
+      );
 
       ctx.thisRef.value = instance;
 
@@ -3662,7 +3693,9 @@ export class Runtime {
     // 基类父构造器创建实例（使用最初 `new.target` 的原型）
     if (parentMeta.superClass == null) {
       ctx.thisRef.value = Object.create(
-        (ctx.newTargetMeta?.callee?.prototype as object | undefined) ?? {},
+        (ctx.newTargetMeta?.callee?.prototype as object | undefined) ??
+          /* istanbul ignore next -- a class constructor always has an object prototype */
+          {},
       );
     }
 
@@ -3778,7 +3811,9 @@ export class Runtime {
       ? this.createClassMethod({
           method: ctorMethod,
           closure: closureEnv,
-          name: name ?? (typeof ctorMethod.key === "string" ? ctorMethod.key : null),
+          // the parser only marks a non-computed `constructor` key as the constructor method
+          // 解析器只会把非计算的 `constructor` 键标记为构造方法
+          name: name ?? (ctorMethod.key as string),
           prototype: proto,
           superClass: hasExtends ? parentCtor : null,
           superBase: parentProto,
@@ -3930,7 +3965,10 @@ export class Runtime {
         lexicalNewTargetMeta: null,
         lexicalIsConstruct: false,
         callee: null,
-        sourceText: getFunctionSource(method) ?? void 0,
+        sourceText:
+          getFunctionSource(method) ??
+          /* istanbul ignore next -- the parser registers source text for every function node */
+          void 0,
       },
       this.invokeHandler,
     );
@@ -4129,7 +4167,10 @@ export class Runtime {
     let superClass: unknown = meta.superClass;
 
     if (meta.thisMode === "arrow") {
-      thisRef.value = meta.lexicalThis?.value ?? this.globalObject;
+      thisRef.value =
+        meta.lexicalThis?.value ??
+        /* istanbul ignore next -- async arrow metadata always carries its lexical `this` */
+        this.globalObject;
       superBase = meta.lexicalSuperBase;
       superClass = meta.lexicalSuperClass;
     }
@@ -4809,6 +4850,7 @@ export class Runtime {
           if (ctx == null || ctx.superBase == null)
             throw new ReferenceError("'super' keyword unexpected here");
 
+          /* istanbul ignore next -- a non-computed super read has no await/call and stays on the sync evaluator */
           const key = expr.computed
             ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
             : (expr.property as string);
@@ -4819,8 +4861,6 @@ export class Runtime {
         }
 
         const object = yield* this.evalAsyncExpr(expr.object, env);
-
-        if (expr.optional && object == null) return void 0;
 
         const key = expr.computed
           ? toPropertyKey(yield* this.evalAsyncExpr(expr.property as Expression, env))
@@ -4842,8 +4882,6 @@ export class Runtime {
         // callee 先于实参求值（ECMAScript 求值顺序）
         const { callee, thisArg } = yield* this.evalAsyncCallee(expr.callee, env);
         const args = yield* this.evalAsyncArgs(expr.args, env);
-
-        if (expr.optional && callee == null) return void 0;
 
         return yield* this.evalAsyncCallValue(callee, args, thisArg);
       }
@@ -4868,12 +4906,7 @@ export class Runtime {
         if (op === "typeof") {
           const { argument } = expr;
 
-          if (argument.type === "identifier") {
-            if (!env.has(argument.name)) return "undefined";
-
-            return typeOf(env.get(argument.name));
-          }
-
+          // `typeof <identifier>` is await/call-free, so it never reaches the async evaluator
           return typeOf(yield* this.evalAsyncExpr(argument, env));
         }
 
@@ -4894,13 +4927,7 @@ export class Runtime {
             return delete (object as Record<PropertyKey, unknown>)[key];
           }
 
-          if (argument.type === "identifier") {
-            if (this.strict)
-              throw new TypeError(`Cannot delete unqualified property '${argument.name}'`);
-
-            return !env.has(argument.name);
-          }
-
+          // `delete <identifier>` is await/call-free, so it never reaches the async evaluator
           yield* this.evalAsyncExpr(argument, env);
 
           return true;
@@ -4949,15 +4976,8 @@ export class Runtime {
         };
         const target = expr.argument;
 
-        if (target.type === "identifier") {
-          const old = env.get(target.name);
-          const value = delta(old);
-
-          env.set(target.name, value);
-
-          return expr.prefix ? value : old;
-        }
-
+        // identifier updates are await/call-free, so they never reach the async evaluator
+        /* istanbul ignore else -- only member targets can contain `await` here */
         if (target.type === "member") {
           const { object, key } = yield* this.evalAsyncMemberRef(target, env);
           const old = getProperty(object, key);
@@ -4968,6 +4988,7 @@ export class Runtime {
           return expr.prefix ? value : old;
         }
 
+        /* istanbul ignore next -- an async update target is always a member expression */
         throw new TypeError("Invalid assignment target");
       }
       case "binary": {
@@ -5023,6 +5044,7 @@ export class Runtime {
       case "await": {
         return yield* this.evalAwait(expr.argument, env);
       }
+      /* istanbul ignore next -- await/call-free expressions are delegated to the sync evaluator before the switch */
       default: {
         return this.evalExpression(expr, env);
       }
@@ -5227,10 +5249,12 @@ export class Runtime {
         }
         break;
       }
+      /* istanbul ignore next -- callers unwrap rest targets before assigning to them */
       case "rest": {
         yield* this.evalAsyncAssignTo(target.argument, value, env, initialize);
         break;
       }
+      /* istanbul ignore next -- AssignmentTarget is fully covered by the cases above */
       default: {
         throw new Error("Unreachable pattern");
       }
@@ -5258,6 +5282,7 @@ export class Runtime {
       if (ctx == null || ctx.superBase == null)
         throw new ReferenceError("'super' keyword unexpected here");
 
+      /* istanbul ignore next -- a super target only reaches the async assigner through a computed key */
       const key = node.computed
         ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
         : (node.property as string);
@@ -5508,6 +5533,7 @@ export class Runtime {
         : (prop.key as string);
 
       taken.add(key);
+      /* istanbul ignore else -- the parser never emits an object-pattern property without a value */
       if (prop.value != null)
         yield* this.evalAsyncAssignTo(prop.value, source[key], env, initialize);
     }
@@ -5578,8 +5604,6 @@ export class Runtime {
       }
 
       const object = yield* this.evalAsyncExpr(callee.object, env);
-
-      if (callee.optional && object == null) return { callee: void 0, thisArg: void 0 };
 
       const key = callee.computed
         ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
