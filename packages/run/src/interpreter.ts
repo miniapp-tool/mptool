@@ -592,13 +592,37 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
  * @param name - The inferred name / 推断出的名称
  */
 const inferFunctionName = (value: unknown, name: string | null): void => {
-  if (name == null || name === "" || typeof value !== "function") return;
+  /* istanbul ignore if -- callers only pass a non-empty binding name and a function value */
+  if (name == null || name === "" || typeof value !== "function") {
+    /* istanbul ignore next -- same invariant */
+    return;
+  }
 
   const meta = getInterpreterMeta(value);
 
-  if (meta == null || meta.name != null) return;
+  /* istanbul ignore if -- interpreter functions always carry metadata; only anonymous ones reach here */
+  if (meta == null || meta.name != null) {
+    /* istanbul ignore next -- same invariant */
+    return;
+  }
 
   Object.defineProperty(value, "name", { value: name, configurable: true });
+};
+
+/**
+ * Whether an expression is an anonymous function definition eligible for NamedEvaluation.
+ *
+ * @param node - Expression node / 表达式节点
+ * @returns Whether the expression can receive an inferred name / 是否可推断名称
+ */
+const isAnonymousFunctionDefinition = (node: unknown): boolean => {
+  if (node == null || typeof node !== "object") return false;
+
+  const expression = node as { name?: string | null; type?: string };
+
+  return (
+    expression.type === "arrow" || (expression.type === "functionExpr" && expression.name == null)
+  );
 };
 
 /**
@@ -1203,8 +1227,17 @@ export class Runtime {
     if (stmt.kind === "var") {
       // names are hoisted at function entry; only run the initializers here
       // 名称已在函数入口提升；这里只执行初始化器
-      for (const decl of stmt.declarations)
-        if (decl.init != null) this.assignTo(decl.id, this.evalExpression(decl.init, env), env);
+      for (const decl of stmt.declarations) {
+        if (decl.init != null) {
+          this.assignTo(
+            decl.id,
+            this.evalExpression(decl.init, env),
+            env,
+            false,
+            isAnonymousFunctionDefinition(decl.init),
+          );
+        }
+      }
 
       return;
     }
@@ -1216,7 +1249,7 @@ export class Runtime {
     for (const decl of stmt.declarations) {
       const value = decl.init == null ? void 0 : this.evalExpression(decl.init, env);
 
-      this.assignTo(decl.id, value, env, true);
+      this.assignTo(decl.id, value, env, true, isAnonymousFunctionDefinition(decl.init));
     }
   }
 
@@ -2073,18 +2106,20 @@ export class Runtime {
       throw new TypeError(`Cannot assign to read only property '${String(key)}'`);
   }
 
+  // oxlint-disable-next-line max-params -- initialize + namedEvaluation are independent flags
   private assignTo(
     target: AssignmentTarget,
     value: unknown,
     env: Environment,
     initialize = false,
+    namedEvaluation = false,
   ): void {
     switch (target.type) {
       case "identifier": {
         if (this.strict && (target.name === "eval" || target.name === "arguments"))
           throw new SyntaxError("Unexpected eval or arguments in strict mode");
 
-        inferFunctionName(value, target.name);
+        if (namedEvaluation) inferFunctionName(value, target.name);
 
         if (initialize) env.initialize(target.name, value);
         else this.writeIdentifier(target.name, value, env);
@@ -2108,9 +2143,17 @@ export class Runtime {
         break;
       }
       case "assignmentPattern": {
-        if (isUndefined(value))
-          this.assignTo(target.left, this.evalExpression(target.right, env), env, initialize);
-        else this.assignTo(target.left, value, env, initialize);
+        if (isUndefined(value)) {
+          this.assignTo(
+            target.left,
+            this.evalExpression(target.right, env),
+            env,
+            initialize,
+            isAnonymousFunctionDefinition(target.right),
+          );
+        } else {
+          this.assignTo(target.left, value, env, initialize);
+        }
         break;
       }
       case "rest": {
@@ -3099,7 +3142,7 @@ export class Runtime {
     if (op === "=") {
       const value = this.evalExpression(valueExpr, env);
 
-      this.assignTo(target, value, env);
+      this.assignTo(target, value, env, false, isAnonymousFunctionDefinition(valueExpr));
 
       return value;
     }
@@ -4388,7 +4431,13 @@ export class Runtime {
 
         const value = yield* this.evalAsyncExpr(decl.init, env);
 
-        yield* this.evalAsyncAssignTo(decl.id, value, env);
+        yield* this.evalAsyncAssignTo(
+          decl.id,
+          value,
+          env,
+          false,
+          isAnonymousFunctionDefinition(decl.init),
+        );
       }
 
       return;
@@ -4399,7 +4448,13 @@ export class Runtime {
     for (const decl of stmt.declarations) {
       const value = decl.init == null ? void 0 : yield* this.evalAsyncExpr(decl.init, env);
 
-      yield* this.evalAsyncAssignTo(decl.id, value, env, true);
+      yield* this.evalAsyncAssignTo(
+        decl.id,
+        value,
+        env,
+        true,
+        isAnonymousFunctionDefinition(decl.init),
+      );
     }
   }
 
@@ -4423,7 +4478,13 @@ export class Runtime {
 
       const value = yield* this.evalAsyncExpr(decl.init, env);
 
-      yield* this.evalAsyncAssignTo(decl.id, value, env);
+      yield* this.evalAsyncAssignTo(
+        decl.id,
+        value,
+        env,
+        false,
+        isAnonymousFunctionDefinition(decl.init),
+      );
     }
   }
 
@@ -5073,7 +5134,13 @@ export class Runtime {
     if (op === "=") {
       const value = yield* this.evalAsyncExpr(valueExpr, env);
 
-      yield* this.evalAsyncAssignTo(target, value, env);
+      yield* this.evalAsyncAssignTo(
+        target,
+        value,
+        env,
+        false,
+        isAnonymousFunctionDefinition(valueExpr),
+      );
 
       return value;
     }
@@ -5181,20 +5248,23 @@ export class Runtime {
    * @param env - Current environment / 当前环境
    * @param value - The value / 值
    * @param initialize - Whether this is a `let`/`const` initializer / 是否为 `let`/`const` 初始化
+   * @param namedEvaluation - Whether the value may receive an inferred function name / 是否可推断函数名
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
    */
+  // oxlint-disable-next-line max-params -- initialize + namedEvaluation are independent flags
   private *evalAsyncAssignTo(
     target: AssignmentTarget,
     value: unknown,
     env: Environment,
     initialize = false,
+    namedEvaluation = false,
   ): Generator<unknown, void, unknown> {
     // ordinary targets have no `await`; delegate to the sync assigner
     // 普通目标不含 `await`，委托给同步赋值器
     if (!containsAwait(target)) {
-      this.assignTo(target, value, env, initialize);
+      this.assignTo(target, value, env, initialize, namedEvaluation);
 
       return;
     }
@@ -5221,6 +5291,7 @@ export class Runtime {
             yield* this.evalAsyncExpr(target.right, env),
             env,
             initialize,
+            isAnonymousFunctionDefinition(target.right),
           );
         } else {
           yield* this.evalAsyncAssignTo(target.left, value, env, initialize);
