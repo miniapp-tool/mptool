@@ -101,10 +101,15 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
   // oxlint-disable-next-line typescript/consistent-return
   return async (pageNameWithArg: string): Promise<unknown> => {
     if (canNavigate) {
+      // Resolve the target before taking the lock: `getPathDetail` can throw (e.g. `$Config` is not
+      // called, or a custom `getPath` throws), and a failed resolution must not leave navigation
+      // locked for the full timeout.
+      // 先解析目标再获取导航锁：`getPathDetail` 可能抛错（未调用 `$Config`、自定义 getPath 抛错等），
+      // 解析失败不应让导航锁占用到超时。
+      const { path, url, query: queries } = getPathDetail(pageNameWithArg);
+
       // set navigate lock
       acquireNavigationLock();
-
-      const { path, url, query: queries } = getPathDetail(pageNameWithArg);
 
       try {
         await Promise.race([
