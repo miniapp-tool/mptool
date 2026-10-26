@@ -1,3 +1,4 @@
+import { eventApi } from "./apis/events.js";
 import { deviceApi } from "./device.js";
 import { fileApi, getFileSystemManager } from "./fileSystem.js";
 import { frameworkApiMethods, setFrameworkMock } from "./framework.js";
@@ -92,6 +93,7 @@ const wxMock: {
   ...wxmlApi,
   ...fileApi,
   ...frameworkApiMethods,
+  ...eventApi,
 
   getRealtimeLogManager(): Pick<
     Console,

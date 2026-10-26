@@ -623,6 +623,25 @@ expect(listener).toHaveBeenCalledWith({ theme: "dark" });
 
 `off*` API 传入监听函数可移除对应监听器，不传参数则移除该事件的全部监听器。
 
+### 全量事件 API（A1）
+
+除上表外，`miniprogram-api-typings` 里 `interface Wx` 声明的所有事件对都已补齐（共 71 个 `onXxx`、其中 62 个有对应 `offXxx`），包括 `onError`、`onUnhandledRejection`、`onPageNotFound`、`onMemoryWarning`、`onAppRoute`、`onBeforePageLoad`/`onAfterPageLoad`、`onBLEConnectionStateChange`、`onBeaconUpdate`、`onVoIPChatStateChanged`、`onWifiConnected`、`onKeyDown`/`onKeyUp`、`onScreenRecordingStateChanged` 等。
+
+- 事件名 = 去掉 `on` 后的后缀，首字母小写；连续大写缩写按常见读法转小写（`BLE`→`ble`、`VoIP`→`voip`、`HCE`→`hce`、`NFC`→`nfc`、`SOTER`→`soter`、`WiFi`→`wifi`）。
+- 用 `mockWx.emit(<事件名>, ...参数)` 触发；`offXxx()` 不传监听器会清空该事件的全部监听器。
+- 没有对应 `offXxx` 的事件（如 `onError`）只能注册，测试间可用 `mockWx.reset()` 或 `scope()` 隔离。
+
+```ts
+wx.onError((error) => {
+  console.log(error);
+});
+
+mockWx.emit("error", "boom");
+
+wx.onBLEConnectionStateChange(listener);
+mockWx.emit("bleConnectionStateChange", { deviceId: "d1", connected: true });
+```
+
 ## 管理器对象
 
 `wx.createInnerAudioContext()`、`wx.createVideoContext()`、`wx.createCanvasContext()`、`wx.getRecorderManager()` 等管理器 API 返回的对象，其方法均为空实现（noop），保证调用不报错：
