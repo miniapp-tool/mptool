@@ -147,6 +147,32 @@ describe(Environment, () => {
     expect(() => a.initialize("nope", 1)).toThrow(ReferenceError);
   });
 
+  it("should default to a non-function scope and fall back to itself", () => {
+    // `new Environment(null)` uses the default `isFunctionScope = false`
+    // `new Environment(null)` 使用默认的 `isFunctionScope = false`
+    const root = new Environment(null);
+
+    expect(root.functionScope).toBe(root);
+    expect(root.hasOwn("missing")).toBe(false);
+
+    root.setOwn("x", 1);
+    expect(root.get("x")).toBe(1);
+  });
+
+  it("should skip global-object mirroring when no sandbox object is given", () => {
+    const env = new Environment(null, true);
+
+    env.setOwn("x", 1);
+    env.define("y", 2);
+    env.declareVar("z");
+
+    expect(env.get("x")).toBe(1);
+    expect(env.get("y")).toBe(2);
+    expect(env.get("z")).toBeUndefined();
+    expect(env.delete("x")).toBe(true);
+    expect(env.has("x")).toBe(false);
+  });
+
   it("should keep mutability when re-defining an existing binding", () => {
     const a = new Environment(null, true, {});
 
