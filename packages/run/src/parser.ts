@@ -390,11 +390,24 @@ export class Parser {
       if (
         (node.type === "functionDeclaration" ||
           node.type === "functionExpr" ||
-          node.type === "arrow") &&
+          node.type === "arrow" ||
+          node.type === "classMethod") &&
         typeof node.start === "number" &&
         typeof node.end === "number"
-      )
-        functionSources.set(node, this.source.slice(node.start, node.end));
+      ) {
+        let text = this.source.slice(node.start, node.end);
+        const { kind } = node as { kind?: string };
+
+        // V8's Function.prototype.toString omits the `static` modifier
+        // V8 的 Function.prototype.toString 会省略 `static` 修饰符
+        if (
+          node.type === "classMethod" &&
+          (kind === "static" || kind === "staticGet" || kind === "staticSet")
+        )
+          text = text.slice("static".length).trimStart();
+
+        functionSources.set(node, text);
+      }
 
       for (const key of Object.keys(node)) {
         const child = (node as Record<string, unknown>)[key];
