@@ -1,3 +1,4 @@
+import { a2ExtraApi } from "./apis/a2-extra.js";
 import { baseApi } from "./apis/base.js";
 import { eventApi } from "./apis/events.js";
 import { deviceApi } from "./device.js";
@@ -72,7 +73,8 @@ const wxMock: {
   typeof wxmlApi &
   typeof fileApi &
   typeof frameworkApiMethods &
-  typeof baseApi & {
+  typeof baseApi &
+  typeof a2ExtraApi & {
     canIUse: (schema: string) => boolean;
   } = {
   version: "8.0.30",
@@ -97,6 +99,7 @@ const wxMock: {
   ...frameworkApiMethods,
   ...eventApi,
   ...baseApi,
+  ...a2ExtraApi,
 
   getRealtimeLogManager(): Pick<
     Console,

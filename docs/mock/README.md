@@ -606,6 +606,25 @@ wx.requestIdleCallback(({ timeRemaining }) => {
 
 > 这些 API 的失败分支同样支持 `mockWx.failNext(...)` 注入；`canIUse` 对它们返回 `true`。媒体 / 分享 / 音频类 API 见下一个 PR。
 
+### 媒体 / 分享 / 音频（A2 批次 2）
+
+- **媒体**：`chooseAddress` / `chooseContact` / `chooseInvoice` / `chooseInvoiceTitle` / `choosePoi`（返回内置的 mock 选择结果）、`previewMedia`、`compressVideo` / `cropImage` / `editImage` / `openVideoEditor`（返回 `mock://tmp/...` 临时路径）、`saveFileToDisk`、`openPrivacyContract`。
+- **分享 / 小程序生命周期**：`shareAppMessageToGroup`、`shareEmojiToGroup`、`shareFileMessage`、`shareFileToGroup`、`shareImageToGroup`、`shareToOfficialAccount`、`shareToWeRun`、`shareVideoMessage`、`shareVideoToGroup`、`restartMiniProgram`、`updateWeChatApp`、`exitMiniProgram`、`postMessageToReferrerPage`、`postMessageToReferrerMiniProgram`。
+- **音频**：`playVoice` / `pauseVoice` / `stopVoice`、`playBackgroundAudio` / `pauseBackgroundAudio` / `stopBackgroundAudio` / `seekBackgroundAudio`、`getBackgroundAudioPlayerState`、`setInnerAudioOption`、`getAvailableAudioSources`、`getAudioFileInfo`、`startRecord` / `stopRecord`。
+
+```ts
+await wx.chooseAddress({});
+await wx.compressVideo({ src: "a.mp4" }); // { tempFilePath: "mock://tmp/compressed.mp4" }
+await wx.playVoice({ filePath: "a.mp3" });
+await wx.getBackgroundAudioPlayerState({}); // { status: 0, downloadPercent: 100, ... }
+
+mockWx.failNext("chooseAddress", { type: "cancel" });
+```
+
+- 媒体选择类返回固定的示例数据（地址、联系人、发票、POI）；压缩/裁剪/编辑只返回 mock 临时路径，不处理真实文件。
+- 音频类只保证回调/字段形状，不播放真实音频；`startRecord` 立即成功、`stopRecord` 返回 mock 临时路径。
+- 失败/取消分支同样支持 `mockWx.failNext`，`canIUse` 对它们返回 `true`。
+
 ### canIUse / nextTick
 
 ```ts
