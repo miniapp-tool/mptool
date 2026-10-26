@@ -453,6 +453,8 @@ class RequestExecution<T extends RequestData> {
   }
 
   private finishResolve(response: RequestResponse<T>): void {
+    // Re-entrancy guard only: every caller already bails out when the request is settled.
+    /* istanbul ignore if */
     if (this.settled) return;
 
     this.settled = true;
@@ -461,6 +463,8 @@ class RequestExecution<T extends RequestData> {
   }
 
   private finishReject(error: RequestError): void {
+    // Re-entrancy guard only: every caller already bails out when the request is settled.
+    /* istanbul ignore if */
     if (this.settled) return;
 
     this.settled = true;
@@ -789,32 +793,33 @@ export const createRequest = ({
     const baseRequest = request<T>(link, options);
     let tracked = false;
 
-    const abortable: AbortableRequest = {
-      abort: (): void => {
-        baseRequest.abort();
-      },
-    };
-
-    const untrack = (): void => {
+    const untrack = (target: AbortableRequest): void => {
       if (!tracked) return;
 
       tracked = false;
-      pendingRequests.delete(abortable);
+      pendingRequests.delete(target);
 
       const key = options.cancelKey;
 
       if (key) {
         const requests = keyedRequests.get(key);
 
-        requests?.delete(abortable);
+        requests?.delete(target);
 
         if (requests?.size === 0) keyedRequests.delete(key);
       }
     };
 
-    abortable.abort = (): void => {
-      baseRequest.abort();
-      untrack();
+    const abortable: AbortableRequest = {
+      abort: (): void => {
+        baseRequest.abort();
+        untrack(abortable);
+      },
+    };
+
+    // Untrack when the request settles on its own, so a finished request never leaks tracking.
+    const untrackOnSettle = (): void => {
+      untrack(abortable);
     };
 
     const responsePromise = baseRequest
@@ -847,7 +852,7 @@ export const createRequest = ({
       requests.add(abortable);
     }
 
-    void responsePromise.then(untrack, untrack);
+    void responsePromise.then(untrackOnSettle, untrackOnSettle);
 
     return responsePromise;
   };
