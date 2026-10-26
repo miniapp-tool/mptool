@@ -194,4 +194,30 @@ describe($Page, () => {
     // skyline-enhance 不注册上述生命周期的任何监听
     expect(appEmitter.all.size).toBe(listenerCount);
   });
+
+  it("should log a rejected async onAwake instead of leaving it unhandled", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const error = new Error("onAwake failed");
+    const onAwake = vi.fn<() => Promise<void>>().mockRejectedValue(error);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const getOptions = capturePageOptions();
+
+      $Page("index", { onAwake });
+
+      // 触发 onLoad，注册 onAwake 监听器
+      void getOptions()?.onLoad?.({});
+
+      appEmitter.emit(ON_APP_AWAKE, 1000);
+
+      // 等待 rejection 处理器执行
+      await vi.waitFor(() => {
+        expect(errorSpy).toHaveBeenCalledWith("Page index: onAwake rejected", error);
+      });
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
 });
