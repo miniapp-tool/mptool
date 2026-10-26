@@ -3,25 +3,61 @@ title: "@mptool/mock"
 icon: flask
 ---
 
-`wx` API 模拟，用于在 Node.js / vitest 等环境中直接运行小程序代码。
+`wx` API 模拟，用于在 Node.js / vitest 等环境中直接运行小程序代码。它既实现 storage / 文件系统 / 路由 / 权限 / 网络 / 系统信息等状态语义，也提供 `mockWx` 控制面来注入失败、配置用户决策与预置状态。
 
-引入后，`@mptool/mock` 会：
+## 安装
 
-- 在 `globalThis` 上注册 `Page` / `App` / `Component` / `Behavior` / `getCurrentPages`
-- 导出完整的 `wx` 对象，覆盖绝大部分常用 API
-- 提供事件手动触发能力，方便测试
+```bash
+pnpm add -D @mptool/mock
+```
 
-## 使用
+## 快速开始
+
+在测试环境的 setup 文件中引入一次（例如 `vitest.setup.ts`）：
 
 ```ts
-import { emitEvent, wx } from "@mptool/mock";
-
-// 多数 API 同时支持 Promise 与回调两种风格
-const res = await wx.getStorage({ key: "foo" });
-
-// 同步 API 直接返回
-const info = wx.getWindowInfo();
+import "@mptool/mock";
 ```
+
+引入后会：
+
+- 在 `globalThis` 上注册 `Page` / `App` / `Component` / `Behavior` / `getCurrentPages`
+- 安装全局 `wx` 对象，并导出同一份 `wx`
+- 提供 `mockWx` 控制面与事件触发能力
+
+```ts
+// example.spec.ts
+import "@mptool/mock";
+import { mockWx, wx } from "@mptool/mock";
+import { beforeEach, describe, expect, it } from "vitest";
+
+describe("example", () => {
+  beforeEach(() => {
+    mockWx.reset();
+  });
+
+  it("reads storage", async () => {
+    wx.setStorageSync("token", "abc");
+
+    await expect(wx.getStorage({ key: "token" })).resolves.toMatchObject({ data: "abc" });
+  });
+});
+```
+
+### 测试隔离
+
+`mockWx.reset()` 会恢复默认环境（storage / FSM / 事件 / 页面栈 / system / network / `USER_DATA_PATH` 等）并还原被替换的 `wx` 方法；推荐在 `beforeEach` 中调用。局部状态可以用 `scope()` 自动还原：
+
+```ts
+const scope = mockWx.scope();
+
+mockWx.network({ networkType: "4g" });
+// ...
+
+scope.restore(); // 只还原 scope 内的改动
+```
+
+也可以在支持 `afterEach` 的测试框架里使用 `mockWx.autoRestore(afterEach)`；`mockWx.run(callback)` 会在执行完后自动还原。
 
 ## 调用约定
 
@@ -53,15 +89,103 @@ const task = wx.request({
 task.abort();
 ```
 
-> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；`respond()` / `route()` 支持 `delay` 模拟慢响应（`wx.request` 自身 `option.timeout` 的自然超时仍属于后续版本的能力）。
+> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；`respond()` / `route()` 支持 `delay` 模拟慢响应（mock 不会按 `option.timeout` 自动超时；需要超时分支可用 `mockWx.failNext("request", { type: "timeout" })`）。
 
 任务还提供 `onHeadersReceived` / `offHeadersReceived`（在 `success` 之前触发）以及 `onChunkReceived` / `offChunkReceived`（mock 不会产生数据分片，仅保证接口可用）。
 
-> `wx.downloadFile` / `wx.uploadFile` 同样返回任务对象，其 Task 契约（进度、abort、落盘）会在后续版本补齐。
+> `wx.downloadFile` / `wx.uploadFile` 同样返回任务对象；mock 不产生真实进度（进度回调不触发），`abort` 可用，失败/取消通过 `mockWx.failNext` 注入。
 
 ### 同步 API
 
 `wx.getWindowInfo`、`wx.getStorageSync` 等同步 API 直接返回对象。
+
+## 常用场景
+
+以下是最常见的测试写法；每类行为的完整语义在后续章节展开。
+
+### 失败注入
+
+```ts
+mockWx.failNext("getNetworkType", { type: "network" });
+await expect(wx.getNetworkType({})).rejects.toMatchObject({
+  errMsg: expect.stringContaining("fail"),
+});
+
+const handle = mockWx.fail("request", { type: "timeout" });
+// ...
+handle.dispose();
+```
+
+### 用户决策 / 权限
+
+```ts
+mockWx.user({ modal: "cancel", actionSheet: 1, payment: "cancel" });
+mockWx.auth({ "scope.camera": false });
+mockWx.authorize("deny");
+mockWx.clipboard("copied");
+```
+
+### 网络 / 系统信息
+
+```ts
+mockWx.system({ platform: "ios", brand: "Apple", windowWidth: 414, windowHeight: 896 });
+mockWx.network({ networkType: "4g", signalStrength: 42, weakNet: true });
+mockWx.system({ userDataPath: "wxfile://usr" });
+```
+
+### Storage
+
+```ts
+wx.setStorageSync("key", { a: 1 });
+mockWx.storage({ limitSize: 1 }); // KB，便于构造超限
+mockWx.failNext("setStorage", { type: "quota" });
+```
+
+### 文件系统（FSM）
+
+```ts
+const fs = wx.getFileSystemManager();
+
+fs.mkdirSync(`${wx.env.USER_DATA_PATH}/tmp`, true);
+fs.writeFileSync(`${wx.env.USER_DATA_PATH}/tmp/a.txt`, "hello");
+fs.readFileSync(`${wx.env.USER_DATA_PATH}/tmp/a.txt`, "utf-8"); // "hello"
+```
+
+### 页面栈
+
+```ts
+Page({ route: "/pages/detail", onLoad() {} });
+
+await wx.navigateTo({ url: "/pages/detail?id=1" });
+getCurrentPages(); // [{ route: "/pages/detail", ... }]
+await wx.navigateBack();
+```
+
+### 事件
+
+```ts
+const listener = vi.fn();
+
+wx.onThemeChange(listener);
+mockWx.emit("themeChange", { theme: "dark" });
+
+// 导航失败会自动触发 onPageNotFound
+wx.onPageNotFound(listener);
+await wx.navigateTo({ url: "/pages/missing" }).catch(() => {});
+```
+
+### WXML 夹具 / SelectorQuery
+
+```ts
+mockWx.node("#card", { left: 0, top: 0, width: 300, height: 120 });
+
+wx.createSelectorQuery()
+  .select("#card")
+  .boundingClientRect((rect) => {
+    console.log(rect); // { left: 0, top: 0, width: 300, height: 120, ... }
+  })
+  .exec();
+```
 
 ## 控制面 `mockWx`（强制失败与响应注入）
 
@@ -198,7 +322,7 @@ mockWx.dir("data");
 mockWx.compat({ storageResolveMissingKey: true });
 ```
 
-> `pages()` / `file()` / `dir()` 与 `storage()` 会立即生效；`auth` / `authorize` / `user` / `system` / `network` / `clipboard` / `login` / `compat` 只保存状态，供后续版本（权限 / UI / 系统信息归一化）消费。这样可以在不改动其余行为的前提下先把测试写法定下来。
+> 这些配置都会立即被对应的 mock 行为读取：`auth` / `authorize` / `user` 影响权限与 UI，`system` / `network` 影响系统信息与网络 API，`clipboard` / `login` 影响剪贴板与登录，`pages` / `file` / `dir` 直接预置页面栈与文件系统；`scope()` / `reset()` 可还原。
 
 ## Storage 语义（真机对齐）
 
@@ -782,7 +906,7 @@ mockWx.emit("bleConnectionStateChange", { deviceId: "d1", connected: true });
 
 ## 管理器对象
 
-`wx.createInnerAudioContext()`、`wx.createVideoContext()`、`wx.createCanvasContext()`、`wx.getRecorderManager()` 等管理器 API 返回的对象，其方法均为空实现（noop），保证调用不报错：
+`wx.createInnerAudioContext()`、`wx.createVideoContext()`、`wx.createCanvasContext()`、`wx.getRecorderManager()` 等常用管理器返回可调用的对象；A3 的 `createAnimation` / `createCameraContext` / `createMediaRecorder` / `createWorker` / socket / cache manager 等也已提供桩实现（能创建、方法齐全、事件可注册），见 [A3 管理器桩](#a3-管理器桩-能创建方法齐全事件可注册)。
 
 ```ts
 const audio = wx.createInnerAudioContext();
@@ -796,3 +920,66 @@ audio.pause();
 
 - `wx` 存储 API（`getStorage` / `setStorage` / `getStorageSync` 等）基于内存实现，测试间可通过 `wx.clearStorageSync()` 清理。
 - `wx.getFileSystemManager()` 返回基于内存的文件系统管理器，支持 `readFileSync` / `writeFileSync` / `mkdirSync` / `statSync` 等操作。
+
+## 支持范围
+
+| 类别                   | 状态     | 说明                                                                                                         |
+| ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `wx` 常用 API          | 已支持   | storage、FSM、路由/页面栈、UI/权限/剪贴板、网络/系统信息、更新、事件、A2 通用 API、A3 管理器桩               |
+| 页面生命周期           | 部分模拟 | `onLoad` / `onShow` / `onReady` / `onHide` / `onUnload` 按导航顺序同步触发；不模拟渲染、动画与切后台生命周期 |
+| 网络 / 系统信息        | 已支持   | 可配置类型、信号强度、弱网、系统字段与授权状态                                                               |
+| WXML / SelectorQuery   | 部分模拟 | 节点夹具 + 异步 `exec`；无真实布局引擎与选择器解析                                                           |
+| 压缩 / 解压 / 摘要     | 部分模拟 | `unzip` 使用 JSON 条目表；`getFileInfo().digest` 为占位值；`readCompressedFile` 不真实解压                   |
+| 硬件 / 生态 API        | 非目标   | BLE、Beacon、NFC/HCE/交通卡、支付、视频号/直播/广告、VoIP、SOTER/人脸/VK/XR 等，见 `A4_UNSUPPORTED_APIS`     |
+| 渠道 / 聊天 / 日历长尾 | 非目标   | 见 `DEFERRED_APIS`；两者合并为 `UNSUPPORTED_APIS`，`canIUse` 返回 false                                      |
+
+非目标清单维护在 `packages/mock/src/unsupported.ts`，并由 `packages/mock/__tests__/coverage.spec.ts` 与 typings 做严格比对。
+
+## 与开发者工具 / 真机的差异和已知限制
+
+- **`USER_DATA_PATH`**：mock 使用真机值 `wxfile://usr`；开发者工具可能显示 `http://usr`。文件系统同时接受 `wxfile://` / `http://` 两种 scheme。
+- **文件系统**：异步失败结果额外暴露 `errCode` / `errno`（开发者工具通常只有 `errMsg`）；错误文案按官方错误表，不保证与工具逐字一致。
+- **`unzip` / `readZipEntry`**：不解析真实 zip 二进制，使用 JSON 条目表（`{"a.txt":"a"}` 或 `{"a.bin":{"base64":"..."}}`）；zip-slip 会被拒绝。
+- **`getFileInfo().digest`**：确定性占位哈希，不能当真实 md5/sha1/sha256 使用。
+- **`readCompressedFile`**：忽略压缩算法，直接返回文件字节（无 Brotli 解压）。
+- **事件**：事件总线**同步派发**（真机异步）；`onPageNotFound` / 路由事件 / 网络事件等已接真实行为，硬件类事件仍需 `mockWx.emit`。
+- **导航**：`Page({ route })` 与 `tabBar` 标记是 mock 扩展；无 `route` 时按 `$name` 与 URL 末段匹配。生命周期同步执行，无渲染时序与 enhance 导航锁。
+- **`canIUse`**：按 API 名判定（实现为 true、非目标为 false），不是基础库版本能力矩阵。
+- **管理器**：只保证可创建、方法存在、回调/事件形状；不执行真实渲染、音视频、Worker、Socket 协议或 canvas 绘制。
+- **网络**：不启动真实 HTTP 服务；`request` / `downloadFile` / `uploadFile` 通过 `mockWx.route/respond/fail` 构造响应，Task 形态与真机一致。
+- **系统信息**：默认 `platform = devtools`、`brand = devtools`、`system = macOS 14.0`；可通过 `mockWx.system()` 覆盖。
+- **mock-only**：`getFileInfo`、`saveFile`、`getSavedFileList`、`showKeyboard`、`offSocket*` 等历史 API/属性仍在 mock 中，但当前 typings 可能未声明，见 `MOCK_ONLY_APIS`。
+- **进程副作用**：`mockWx` 不监听宿主 `process`，`unhandledRejection` / `memoryWarning` / `error` 通过显式 helper 触发。
+
+## 从旧 mock 迁移
+
+如果旧测试使用手写 `wx` mock 或 `vi.stubGlobal("wx", {...})`，可以按下面方式迁移；**直接替换单个 `wx.xxx` 仍然可用且优先级最高**，但优先用 `mockWx` 能保留真实状态与失败语义。
+
+| 旧写法                                                                 | 新写法                                                                               |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `vi.stubGlobal("wx", { getStorage: ... })`                             | `import "@mptool/mock"` + `wx.setStorageSync(...)` / `mockWx.storage(...)`           |
+| `wx.showModal = vi.fn(({ success }) => success({ confirm: false }))`   | `mockWx.user({ modal: "cancel" })`                                                   |
+| `wx.getSetting = vi.fn(({ success }) => success({ authSetting: {} }))` | `mockWx.auth({})` / `mockWx.authorize("deny")`                                       |
+| `wx.authorize = vi.fn(({ fail }) => fail())`                           | `mockWx.authorize("deny")` 或 `mockWx.failNext("authorize", { type: "permission" })` |
+| `wx.getNetworkType = vi.fn(...)`                                       | `mockWx.network({ networkType: "4g" })`                                              |
+| `wx.getSystemInfoSync = vi.fn(...)`                                    | `mockWx.system({ platform: "ios", ... })`                                            |
+| 手写请求返回 / 失败                                                    | `mockWx.route()` / `mockWx.respond()` / `mockWx.fail()`                              |
+| 手动 `emitEvent("networkStatusChange")`                                | `mockWx.network(...)` 自动派发                                                       |
+| 手动构造页面栈 / 替换 `wx.navigateTo`                                  | `Page({ route })` + 真实 `wx.navigateTo` / `navigateBack`                            |
+| 手动替换 `wx.createSelectorQuery`                                      | `mockWx.node()` + 真实 `SelectorQuery`                                               |
+
+```ts
+// before
+const original = wx.showModal;
+
+wx.showModal = ({ success }) => success({ confirm: false });
+// afterEach: wx.showModal = original
+
+// after
+import "@mptool/mock";
+import { mockWx } from "@mptool/mock";
+
+mockWx.user({ modal: "cancel" });
+```
+
+> 不要用 `vi.stubGlobal("wx", ...)` 替换整个对象：模块内已经捕获了 mock 的 `wx` 引用，替换全局对象会让两者分叉。需要精确结果时优先用 `mockWx`，必要时只替换单个方法。
