@@ -1816,7 +1816,6 @@ export class Runtime {
           // 直接位于 program / 函数体的函数声明连同值一起提升；块内函数是块级绑定（进入块时创建），
           // 仅在 sloppy 模式下额外获得 Annex B 的 var 绑定
           if (direct) {
-            console.log("DEBUG source", stmt.name, JSON.stringify(getFunctionSource(stmt)));
             const fn = this.createFunction({
               name: stmt.name,
               params: stmt.params,
