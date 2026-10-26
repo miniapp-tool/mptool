@@ -86,6 +86,7 @@ export interface MockStateSnapshot {
   fileSystem: FileSystemSnapshot;
   events: EventListenerSnapshot;
   pages: unknown[];
+  tabBarPages: string[];
   registrations: {
     app: unknown;
     pages: unknown[];
@@ -248,6 +249,7 @@ export const snapshotState = (): MockStateSnapshot => ({
   events: snapshotEventListeners(),
   fileSystem: getFileSystemManager().snapshot(),
   pages: [...(frameworkApi.currentPages as unknown[])],
+  tabBarPages: [...frameworkApi.tabBarPages],
   registrations: {
     app: frameworkApi.app,
     behaviors: [...(frameworkApi.behaviors as unknown[])],
@@ -291,6 +293,7 @@ export const restoreState = (snapshot: MockStateSnapshot): void => {
   restoreEventListeners(snapshot.events);
 
   replaceArray(frameworkApi.currentPages, snapshot.pages);
+  replaceArray(frameworkApi.tabBarPages, snapshot.tabBarPages);
   replaceArray(frameworkApi.pages, snapshot.registrations.pages);
   replaceArray(frameworkApi.components, snapshot.registrations.components);
   replaceArray(frameworkApi.behaviors, snapshot.registrations.behaviors);
@@ -319,6 +322,8 @@ export const resetState = (): void => {
   clearEventListeners();
 
   frameworkApi.currentPages.length = 0;
+  frameworkApi.tabBarPages.length = 0;
+  frameworkApi.tabPages.clear();
   frameworkApi.pages.length = 0;
   frameworkApi.components.length = 0;
   frameworkApi.behaviors.length = 0;

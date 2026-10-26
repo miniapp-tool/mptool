@@ -1,7 +1,7 @@
 // oxlint-disable promise/prefer-await-to-callbacks
 
 import { getApiKind } from "./failure.js";
-import { frameworkApi } from "./framework.js";
+import { frameworkApi, normalizeRoute } from "./framework.js";
 import {
   addRule,
   clearCalls,
@@ -293,6 +293,8 @@ export interface MockWx {
   network: (options: MockNetworkOptions) => void;
   clipboard: (text: string) => void;
   pages: (pages: unknown[]) => void;
+  /** Configure which routes are tabBar pages (kept alive across `switchTab`). */
+  tabBar: (pages: string[]) => void;
   login: (state: { code?: string; sessionValid?: boolean }) => void;
   file: (path: string, content: string | ArrayBuffer | Uint8Array) => void;
   dir: (path: string) => void;
@@ -412,6 +414,11 @@ export const mockWx: MockWx = {
   pages(pages: unknown[]): void {
     frameworkApi.currentPages.length = 0;
     frameworkApi.currentPages.push(...pages);
+  },
+
+  tabBar(pages: string[]): void {
+    frameworkApi.tabBarPages = pages.map((page) => normalizeRoute(page));
+    frameworkApi.tabPages.clear();
   },
 
   reset(): void {
