@@ -86,8 +86,28 @@ const pendingOnReadyInstances = new WeakSet<object>();
 type CreateFunction = (
   args: string[],
   body: string,
-  options?: { global?: boolean },
+  options?: {
+    global?: boolean;
+    maxSteps?: number;
+    maxStack?: number;
+    maxSourceLength?: number;
+  },
 ) => (...args: unknown[]) => unknown;
+
+/**
+ * Execution budgets for remote hot-reload code.
+ *
+ * Remote code is bounded even though it is considered trusted: a buggy payload must not block the
+ * page lifecycle forever, recurse without limit or make parsing unbounded.
+ *
+ * 远程热更新代码的执行预算。即使代码可信也要限制：有 bug 的载荷不应永久阻塞页面生命周期、无限递归或让解析无界。
+ */
+const HOT_RELOAD_RUN_OPTIONS = {
+  global: true,
+  maxSteps: 200_000,
+  maxStack: 128,
+  maxSourceLength: 512 * 1024,
+} satisfies Parameters<CreateFunction>[2];
 
 /**
  * Read `createFunction` from `globalThis`.
@@ -252,7 +272,7 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       }
 
       try {
-        const fn = createFunction([], data, { global: true });
+        const fn = createFunction([], data, HOT_RELOAD_RUN_OPTIONS);
         const result = fn();
 
         if (result == null || typeof result !== "object") {
