@@ -141,6 +141,16 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
         // Clear the racing timer once the race settles, otherwise it keeps the event loop alive
         // for up to `maxDelay` ms after a fast `onNavigate`.
         // 竞速结束后清理定时器，避免快速完成 onNavigate 时残留 timer。
+        //
+        // A promise executor runs synchronously while the `Promise.race` arguments are built, and
+        // `emitAsync` is an async function (it turns a synchronous throw into a rejection), so the
+        // timer is always assigned before the race can settle. The guard stays for a `Promise`
+        // implementation that defers the executor, and because `clearTimeout` is typed to take a
+        // timer id, not `undefined`.
+        // 构造 `Promise.race` 参数时 executor 同步执行，且 `emitAsync` 是 async 函数（同步抛错也会转为
+        // rejection），因此竞速结束前定时器必定已赋值。保留判断用于防范延迟执行 executor 的 Promise 实现，
+        // 同时 `clearTimeout` 的类型不接受 `undefined`。
+        /* istanbul ignore else */
         if (maxDelayTimer != null) clearTimeout(maxDelayTimer);
       }
 
