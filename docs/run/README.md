@@ -117,13 +117,16 @@ installGlobal();
 | `global`          | `false`  | 自动暴露宿主全局对象（`globalThis`）的全部自有属性       |
 | `maxSteps`        | `1e6`    | 步数上限，防止死循环                                     |
 | `maxStack`        | `512`    | 调用栈深度上限，防止深递归                               |
+| `maxDuration`     | 不限制   | 单次运行挂钟预算（毫秒），超时抛 `Error`                 |
 | `strict`          | `false`  | 是否以严格模式执行                                       |
 | `features`        | 全部开启 | 特性开关：`class`、`forOf`、`async`、`bigint`            |
 | `maxSourceLength` | 不限制   | 源码长度上限（UTF-16 code unit），超出抛 `ParseError`    |
 | `maxParseDepth`   | 不限制   | 表达式/语句最大嵌套深度，超出抛 `ParseError`             |
 | `maxBacktracks`   | `5000`   | 解析回溯期间允许消费的最大 token 数，超出抛 `ParseError` |
 
-> 解析预算由宿主按需开启（`maxSourceLength` / `maxParseDepth` 默认不限制）；解析阶段在解释执行之前完成，`maxSteps` 不覆盖解析开销。热更新等执行远程代码的场景建议显式设置这几个上限。
+> 解析预算由宿主按需开启（`maxSourceLength` / `maxParseDepth` 默认不限制）；解析阶段在解释执行之前完成，`maxSteps` / `maxDuration` 都不覆盖解析开销。热更新等执行远程代码的场景建议显式设置这几个上限。
+>
+> `maxDuration` 也是 opt-in（默认不限制）：只在解释步进与宿主调用边界检查截止时间，**无法中断单个宿主调用的内部**（例如一次很慢的 `wx` 同步调用），也无法打断一个永不结算的宿主 Promise。
 
 ::: tip 如何在代码中访问外部变量
 
@@ -287,7 +290,7 @@ installGlobal();
 
 **ASI（自动分号插入）**：只实现受限产生式——`return`/`throw`/`break`/`continue` 后换行、`++`/`--` 前换行、`async` 后换行按标准处理（`return\n42` 返回 `undefined`，`throw\n` 抛 `ParseError`，`async\nfunction` 不再视为 async 函数）。**不强制语句边界**：`let x = 1 let y = 2`、漏写分号的续行写法仍会被接受（标准引擎会报 `SyntaxError`）。
 
-**资源上限边界**：`maxSteps` 只约束解释执行，不覆盖解析阶段、宿主函数调用（如 `Array(1e8)`）与宿主正则回溯；解析阶段可用 `maxSourceLength` / `maxParseDepth` / `maxBacktracks` 单独约束（默认仅回溯有 5000 上限，其余不限制）。
+**资源上限边界**：`maxSteps` 约束解释步数；`maxDuration`（opt-in）在解释步进与宿主调用前后检查挂钟时间，超时抛 `Execution aborted: exceeded N ms time limit`，但无法中断单个宿主调用的内部或永不结算的宿主 Promise。解析阶段用 `maxSourceLength` / `maxParseDepth` / `maxBacktracks` 单独约束（默认仅回溯有 5000 上限，其余不限制）。
 
 ## async/await
 

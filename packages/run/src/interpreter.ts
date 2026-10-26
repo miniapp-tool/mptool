@@ -98,6 +98,13 @@ export interface RuntimeOptions {
   /** Max call stack depth before aborting, `512` by default / 调用栈深度上限，默认 `512` */
   maxStack?: number;
 
+  /**
+   * Wall-clock budget in milliseconds for one run, unlimited by default
+   *
+   * 单次运行的挂钟时间预算（毫秒），默认不限制
+   */
+  maxDuration?: number;
+
   /** Whether the program runs in strict mode, `false` by default / 是否严格模式，默认 `false` */
   strict?: boolean;
 
@@ -751,6 +758,12 @@ export class Runtime {
   /** Whether async invocation is rejected synchronously / 是否同步拒绝 async 调用 */
   private readonly forbidAsync: boolean;
 
+  /** Wall-clock budget in milliseconds, `Infinity` when disabled / 挂钟预算（毫秒），关闭时为 `Infinity` */
+  private readonly maxDuration: number;
+
+  /** Absolute deadline timestamp, `Infinity` when disabled / 绝对截止时间，关闭时为 `Infinity` */
+  private deadline = Number.POSITIVE_INFINITY;
+
   /** Number of in-flight `run()` calls / 进行中的 `run()` 数量 */
   private activeRuns = 0;
 
@@ -768,6 +781,7 @@ export class Runtime {
     this.strict = options.strict ?? false;
     this.maxSteps = options.maxSteps ?? 1_000_000;
     this.maxStack = options.maxStack ?? 512;
+    this.maxDuration = options.maxDuration ?? Number.POSITIVE_INFINITY;
     this.forbidAsync = options.forbidAsync ?? false;
 
     this.globalObject = {};
@@ -832,6 +846,11 @@ export class Runtime {
    * @returns The completion value and the async flag / 完成值与 async 标记
    */
   runWithStatus(program: Program): { value: unknown; asyncStarted: boolean } {
+    this.deadline =
+      this.maxDuration === Number.POSITIVE_INFINITY
+        ? Number.POSITIVE_INFINITY
+        : Date.now() + this.maxDuration;
+
     // one Runtime owns one execution state (step/stack/context); concurrent or nested runs would
     // reset it mid-execution, so the contract is strictly serial
     // 一个 Runtime 只有一份执行状态（步数/栈/上下文），并发或嵌套 run 会中途重置它，因此契约是严格串行
@@ -946,6 +965,23 @@ export class Runtime {
 
     if (this.stepCount > this.maxSteps)
       throw new Error(`Execution aborted: exceeded ${this.maxSteps} steps`);
+
+    this.checkDeadline();
+  }
+
+  /**
+   * Abort when the wall-clock budget is exhausted.
+   *
+   * 挂钟预算耗尽时中止执行。
+   *
+   * The deadline can only be observed between interpreted steps and around host calls: a single
+   * host call (or a pending promise the host never settles) cannot be interrupted.
+   *
+   * 截止时间只能解释步进之间与宿主调用前后观测；单个宿主调用（或永不结算的宿主 Promise）无法被打断。
+   */
+  private checkDeadline(): void {
+    if (this.deadline !== Number.POSITIVE_INFINITY && Date.now() > this.deadline)
+      throw new Error(`Execution aborted: exceeded ${this.maxDuration} ms time limit`);
   }
 
   // -------------------------------------------------------------------------
@@ -2838,7 +2874,15 @@ export class Runtime {
 
       if (meta != null) return this.invokeFunction(meta, args, thisArg, false);
 
-      return Reflect.apply(callee, this.hostThis(thisArg), args);
+      this.checkDeadline();
+
+      const result: unknown = Reflect.apply(callee, this.hostThis(thisArg), args);
+
+      // a host call can consume the whole budget; it cannot be interrupted, so check after it
+      // 宿主调用可能耗尽全部预算且无法打断，因此调用后再检查一次
+      this.checkDeadline();
+
+      return result;
     }
 
     throw new TypeError(`${typeOf(callee)} is not a function`);
@@ -5691,7 +5735,15 @@ export class Runtime {
 
     const meta = getInterpreterMeta(callee);
 
-    if (meta == null) return Reflect.apply(callee, this.hostThis(thisArg), args) as unknown;
+    if (meta == null) {
+      this.checkDeadline();
+
+      const result: unknown = Reflect.apply(callee, this.hostThis(thisArg), args);
+
+      this.checkDeadline();
+
+      return result;
+    }
 
     // async functions return a host Promise; async-context arrows run inline
     // async 函数返回宿主 Promise；async 上下文箭头内联运行
