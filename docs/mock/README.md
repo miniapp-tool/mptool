@@ -635,6 +635,56 @@ wx.canIUse("openBluetoothAdapter"); // false（非目标 API）
 wx.nextTick(() => {}); // 下一时间片执行（不再同步）
 ```
 
+## A3 管理器桩 / A4 非目标 / 覆盖守护
+
+### A3 管理器桩（能创建、方法齐全、事件可注册）
+
+已补齐以下工厂 / 管理器：`createAnimation`、`createCameraContext`、`createMediaRecorder`、`createWebAudioContext`、`createAudioContext`、`createVideoDecoder`、`createWorker`、`createOffscreenCanvas`、`createTCPSocket` / `createUDPSocket`、`createBufferURL` / `revokeBufferURL`、`createCacheManager`、`getPluginUpdateManager`、`getUserCryptoManager`、`loadFontFace` / `loadBuiltInFontFace`、`preDownloadSubpackage` / `preloadAssets` / `preloadWebview` / `preloadSkylineView`、`openEmbeddedMiniProgram`。
+
+```ts
+const animation = wx.createAnimation({ duration: 100 });
+
+animation.translate(10, 20).opacity(0).step().export();
+
+const recorder = wx.createMediaRecorder();
+
+recorder.onStart(() => {});
+mockWx.emit("mediaRecorderStart");
+
+const worker = wx.createWorker("worker.js");
+
+worker.onMessage((message) => {});
+mockWx.emit("workerMessage", { message: "hi" });
+
+const cache = wx.createCacheManager();
+
+cache.set("key", "value");
+cache.get("key"); // "value"
+```
+
+- 管理器事件（`cameraFrame`、`mediaRecorder*`、`workerMessage`、`socketMessage`、`pluginUpdate*`）通过 `mockWx.emit(<事件名>, ...)` 触发，与通用事件总线一致。
+- 只保证「可创建、方法存在、回调/事件形状正确」，不实现真实渲染、音视频、Worker、Socket 协议或缓存持久化。
+
+### A4 非目标（明确不模拟）
+
+以下 API 属于硬件 / 生态能力，mock **不实现**，`canIUse` 返回 `false`，也不伪造成功：
+
+- 蓝牙 / BLE、Beacon、NFC / HCE / 交通卡、Secure Element / 支付卡；
+- 视频号 / 直播 / 广告、公众号 / 表情 / 贴纸、聊天工具；
+- 支付 / 卡券 / 门店 / 离线支付、Employee / 设备 VoIP、SOTER / 人脸 / VK / XR 等。
+
+完整名单见 `packages/mock/src/unsupported.ts` 的 `A4_UNSUPPORTED_APIS`（97 个）与 `DEFERRED_APIS`（24 个，渠道 / 聊天工具 / 日历等长尾）；两者合并为 `UNSUPPORTED_APIS`（121 个）。另有 `MOCK_ONLY_APIS`（15 个）列出 mock 暴露但 typings 没有（或已移除）的 API，例如 `getFileInfo`、`saveFile`、`getSavedFileList`、`showKeyboard`、`offSocket*`。
+
+### 覆盖守护
+
+`packages/mock/__tests__/coverage.spec.ts` 会解析 `miniprogram-api-typings` 的 `interface Wx`：
+
+- 断言「typings 方法 − `Object.keys(wx)`」**恰好等于** `UNSUPPORTED_APIS`；
+- 断言「`Object.keys(wx)` − typings 方法」**恰好等于** `MOCK_ONLY_APIS`；
+- 断言所有 `UNSUPPORTED_APIS` 的 `canIUse` 返回 `false`，已实现 API 返回 `true`。
+
+typings 升级导致方法增减时，这个测试会变红，从而把「补 API / 更新 allowlist」变成显式动作。
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：

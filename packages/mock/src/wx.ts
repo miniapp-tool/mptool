@@ -1,6 +1,8 @@
 import { a2ExtraApi } from "./apis/a2-extra.js";
 import { baseApi } from "./apis/base.js";
 import { eventApi } from "./apis/events.js";
+import { managersApi } from "./apis/managers.js";
+import { miscApi } from "./apis/misc.js";
 import { deviceApi } from "./device.js";
 import { fileApi, getFileSystemManager } from "./fileSystem.js";
 import { frameworkApiMethods, setFrameworkMock } from "./framework.js";
@@ -74,7 +76,8 @@ const wxMock: {
   typeof fileApi &
   typeof frameworkApiMethods &
   typeof baseApi &
-  typeof a2ExtraApi & {
+  typeof a2ExtraApi &
+  typeof miscApi & {
     canIUse: (schema: string) => boolean;
   } = {
   version: "8.0.30",
@@ -100,6 +103,8 @@ const wxMock: {
   ...eventApi,
   ...baseApi,
   ...a2ExtraApi,
+  ...managersApi,
+  ...miscApi,
 
   getRealtimeLogManager(): Pick<
     Console,

@@ -453,6 +453,10 @@ export const storageApi = {
     return undefined as never;
   },
 
+  batchGetStorageSync(keys: string[]): unknown[] {
+    return keys.map((key) => storageApi.getStorageSync(key));
+  },
+
   getStorageSync<T = any>(key: string): T {
     if (storage.has(key)) return deserialize(storage.get(key)) as T;
 
