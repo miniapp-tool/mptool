@@ -442,3 +442,109 @@ describe("file error contract", () => {
     expect(readJSON("tmp/missing-contract-json")).toBeUndefined();
   });
 });
+
+const throwNonError = (value: unknown): never => {
+  throw value;
+};
+
+describe("file error normalization", () => {
+  it("should normalize a string thrown by statSync", () => {
+    const fs = wx.getFileSystemManager() as unknown as { statSync: (path: string) => unknown };
+    const original = fs.statSync;
+
+    fs.statSync = (): never => throwNonError("stat offline");
+
+    try {
+      expect(getThrownError(() => void exists("tmp/string-throw.txt"))).toMatchObject({
+        name: "MpError",
+        message: 'File "tmp/string-throw.txt" failed: stat offline',
+      });
+    } finally {
+      fs.statSync = original;
+    }
+  });
+
+  it("should normalize a non-Error value thrown by statSync", () => {
+    const fs = wx.getFileSystemManager() as unknown as { statSync: (path: string) => unknown };
+    const original = fs.statSync;
+
+    fs.statSync = (): never => throwNonError(null);
+
+    try {
+      expect(getThrownError(() => void exists("tmp/null-throw.txt"))).toMatchObject({
+        name: "MpError",
+        message: 'File "tmp/null-throw.txt" failed: null',
+      });
+    } finally {
+      fs.statSync = original;
+    }
+  });
+
+  it("should use the message of a plain Error thrown by statSync", () => {
+    const fs = wx.getFileSystemManager() as unknown as { statSync: (path: string) => unknown };
+    const original = fs.statSync;
+
+    fs.statSync = (): never => throwNonError(new Error("plain io failure"));
+
+    try {
+      expect(getThrownError(() => void exists("tmp/error-instance.txt"))).toMatchObject({
+        name: "MpError",
+        message: 'File "tmp/error-instance.txt" failed: plain io failure',
+      });
+    } finally {
+      fs.statSync = original;
+    }
+  });
+
+  it("should treat a string 'not found' error as a missing target", () => {
+    const fs = wx.getFileSystemManager() as unknown as { statSync: (path: string) => unknown };
+    const original = fs.statSync;
+
+    fs.statSync = (): never => throwNonError("ENOENT: no such file or directory");
+
+    try {
+      expect(exists("tmp/string-missing.txt")).toBe(false);
+      expect(readFile("tmp/string-missing.txt")).toBeUndefined();
+    } finally {
+      fs.statSync = original;
+    }
+  });
+});
+
+describe("file optional branches", () => {
+  it("should fall back to tempFilePath when the download has no filePath", async () => {
+    const wxAny = wx as unknown as {
+      downloadFile: (option: {
+        success?: (result: { statusCode: number; tempFilePath?: string }) => void;
+      }) => void;
+    };
+    const original = wxAny.downloadFile;
+
+    wxAny.downloadFile = (option): void => {
+      option.success?.({ statusCode: 200, tempFilePath: "wxfile://tmp/downloaded.tmp" });
+    };
+
+    try {
+      await expect(
+        saveOnlineFile("https://example.com/file", "tmp/temp-fallback.txt"),
+      ).resolves.toBe("wxfile://tmp/downloaded.tmp");
+    } finally {
+      wxAny.downloadFile = original;
+    }
+  });
+
+  it("should write an empty string when JSON.stringify returns undefined", () => {
+    writeFile("tmp/unserializable.txt", undefined);
+
+    expect(readFile("tmp/unserializable.txt")).toBe("");
+  });
+
+  it("should normalize a non-Error thrown while serializing JSON", () => {
+    const value = { toJSON: (): never => throwNonError("serialize exploded") };
+
+    expect(getThrownError(() => writeJSON("tmp/non-error-json", value))).toMatchObject({
+      name: "MpError",
+      message: 'writeJSON("tmp/non-error-json") failed: serialize exploded',
+    });
+  });
+});

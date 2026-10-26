@@ -478,3 +478,78 @@ describe("memory storage cleanup", () => {
     expect(storage.has("memory-check-async-key")).toBe(false);
   });
 });
+
+const rejectWith = <T>(value: T): Promise<never> =>
+  // oxlint-disable-next-line typescript/prefer-promise-reject-errors -- reproduce wx APIs that reject with non-Error values
+  Promise.reject(value);
+
+describe("storage non-Error failures", () => {
+  it("should normalize a string rejection from setStorage", async () => {
+    const wxAny = wx as unknown as { setStorage: (option: unknown) => Promise<never> };
+    const original = wxAny.setStorage;
+
+    wxAny.setStorage = (): Promise<never> => rejectWith("storage offline");
+
+    try {
+      const error = await setAsync("string-reject-key", "value").catch((err: unknown) => err);
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error as MpError).toMatchObject({
+        code: null,
+        message: 'Write storage "string-reject-key" failed: storage offline',
+      });
+    } finally {
+      wxAny.setStorage = original;
+    }
+  });
+
+  it("should normalize a non-Error rejection from setStorage", async () => {
+    const wxAny = wx as unknown as { setStorage: (option: unknown) => Promise<never> };
+    const original = wxAny.setStorage;
+
+    wxAny.setStorage = (): Promise<never> => rejectWith(42);
+
+    try {
+      const error = await setAsync("number-reject-key", "value").catch((err: unknown) => err);
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error as MpError).toMatchObject({
+        code: null,
+        message: 'Write storage "number-reject-key" failed: 42',
+      });
+    } finally {
+      wxAny.setStorage = original;
+    }
+  });
+});
+
+describe("keep mode edge cases", () => {
+  it("should reuse a permanent expiry when keeping a value", () => {
+    set("keep-zero-key", "first", 0);
+    set("keep-zero-key", "second", "keep");
+
+    expect(wx.getStorageSync("_cache_keep-zero-key")).toMatchObject({
+      data: "second",
+      expired: 0,
+    });
+    expect(get("keep-zero-key")).toBe("second");
+  });
+
+  it("should resolve without writing when keep has no previous value", async () => {
+    await expect(setAsync("async-keep-none-key", "value", "keep")).resolves.toBeUndefined();
+    expect(wx.getStorageSync("_cache_async-keep-none-key")).toBeFalsy();
+    expect(get("async-keep-none-key")).toBeUndefined();
+  });
+});
+
+describe("check non-cache keys", () => {
+  it("should leave keys outside the cache namespace untouched", () => {
+    const value = { data: "keep" };
+
+    wx.setStorageSync("plain-storage-key", value);
+
+    check();
+
+    expect(wx.getStorageSync("plain-storage-key")).toStrictEqual(value);
+  });
+});
