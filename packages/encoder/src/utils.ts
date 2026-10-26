@@ -52,39 +52,39 @@ export const stringToCodePoints = (content: string): number[] => {
       // Append to codePoints a U+FFFD REPLACEMENT CHARACTER.
       unicodeCodePoints.push(0xfffd);
     }
-    // 0xD800 ≤ char ≤ 0xDBFF
-    else if (char >= 0xd800 && char <= 0xdbff) {
-      if (i === strLength - 1) {
-        // 1. i is the last one then append to codePoints a U+FFFD REPLACEMENT
-        // CHARACTER.
-        unicodeCodePoints.push(0xfffd);
+    // 0xD800 ≤ char ≤ 0xDBFF: the two conditions above already handle every other code unit, so
+    // this is the remaining high surrogate. Hoisting the "last code unit" test into the chain keeps
+    // the partitioning explicit without a redundant range check.
+    else if (i === strLength - 1) {
+      // 1. i is the last one then append to codePoints a U+FFFD REPLACEMENT
+      // CHARACTER.
+      unicodeCodePoints.push(0xfffd);
+    }
+    // 2. Otherwise
+    else {
+      // 1. Let d be the code unit in S at index i+1.
+      const nextChar = str.charCodeAt(i + 1);
+
+      // 2. If 0xDC00 ≤ nextChar ≤ 0xDFFF, then:
+      if (nextChar >= 0xdc00 && nextChar <= 0xdfff) {
+        // 1. Let highSurrogate be char & 0x3FF.
+        const highSurrogate = char & 0x3ff;
+
+        // 2. Let lowSurrogate be nextChar & 0x3FF.
+        const lowSurrogate = nextChar & 0x3ff;
+
+        // 3. Append to codePoints the Unicode character with code point
+        // 2^16+2^10*highSurrogate+lowSurrogate.
+        unicodeCodePoints.push(0x10000 + (highSurrogate << 10) + lowSurrogate);
+
+        // 4. Set i to i+1.
+        i += 1;
       }
-      // 2. Otherwise
+
+      // 3. Otherwise, nextChar < 0xDC00 or nextChar > 0xDFFF. Append to codePoints a
+      // U+FFFD REPLACEMENT CHARACTER.
       else {
-        // 1. Let d be the code unit in S at index i+1.
-        const nextChar = str.charCodeAt(i + 1);
-
-        // 2. If 0xDC00 ≤ nextChar ≤ 0xDFFF, then:
-        if (nextChar >= 0xdc00 && nextChar <= 0xdfff) {
-          // 1. Let highSurrogate be char & 0x3FF.
-          const highSurrogate = char & 0x3ff;
-
-          // 2. Let lowSurrogate be nextChar & 0x3FF.
-          const lowSurrogate = nextChar & 0x3ff;
-
-          // 3. Append to codePoints the Unicode character with code point
-          // 2^16+2^10*highSurrogate+lowSurrogate.
-          unicodeCodePoints.push(0x10000 + (highSurrogate << 10) + lowSurrogate);
-
-          // 4. Set i to i+1.
-          i += 1;
-        }
-
-        // 3. Otherwise, nextChar < 0xDC00 or nextChar > 0xDFFF. Append to codePoints a
-        // U+FFFD REPLACEMENT CHARACTER.
-        else {
-          unicodeCodePoints.push(0xfffd);
-        }
+        unicodeCodePoints.push(0xfffd);
       }
     }
 

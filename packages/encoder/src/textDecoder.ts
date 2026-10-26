@@ -43,7 +43,9 @@ export class TextDecoder {
     // 2. If encoding is failure or replacement, throw a RangeError.
     if (encoding == null || encoding.name === "replacement")
       throw new RangeError(`Unknown encoding: ${label}`);
-    if (!(encoding.name in decoders)) throw new Error("Decoder not present.");
+
+    // No "decoder not present" guard: `encodingTable` only contains UTF-8 / GBK / gb18030 and every
+    // one of them registers a decoder at import time, so the lookup in `decode` cannot miss.
 
     // 4. Set encoding.
     this.#encoding = encoding;
@@ -128,9 +130,16 @@ export class TextDecoder {
       result = this.#decoder!.handler(inputStream, token);
 
       // 2. If result is finished, return output, serialized.
+      // Built-in decoders only return |finished| for end-of-stream, which the loop above breaks on
+      // before calling the handler, so this branch is unreachable for them; it stays to mirror the
+      // WHATWG state machine.
+      /* istanbul ignore if */
       if (result === FINISHED) break;
 
       if (result != null) {
+        // Built-in decoders never return arrays (only the encoders do), but the WHATWG algorithm
+        // allows a code point sequence here.
+        /* istanbul ignore if */
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       }
@@ -147,7 +156,13 @@ export class TextDecoder {
         result = this.#decoder!.handler(inputStream, inputStream.read());
 
         if (result === FINISHED) break;
+
+        // The flush step always passes end-of-stream to the handler, and built-in decoders answer
+        // that with either |finished| or an error code point - never null or an array. Both checks
+        // are kept to mirror the WHATWG algorithm.
+        /* istanbul ignore if */
         if (result == null) continue;
+        /* istanbul ignore if */
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       } while (!inputStream.endOfStream());

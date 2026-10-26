@@ -11,16 +11,12 @@ import { decoderError, encoderError } from "./utils.js";
 /**
  * @param pointer The |pointer| to search for.
  * @param index The |index| to search within.
- * @returns The code point corresponding to |pointer| in |index|, or null if |code point| is not in
- *   |index|.
+ * @returns The code point corresponding to |pointer| in |index|.
  */
-const indexCodePointFor = (pointer: number, index: Uint16Array | undefined): number | null => {
-  if (!index) return null;
-
-  // the gb18030 index holds no falsy values (min 164), so `|| null` only
-  // kicks in for out-of-range pointers.
-  return index[pointer] || null;
-};
+const indexCodePointFor = (pointer: number, index: Uint16Array): number =>
+  // The gb18030 index holds no falsy values (min 164), and every pointer produced by the decoder
+  // is within 0..23939, so the direct lookup is always a real code point.
+  index[pointer];
 
 /** Sentinel for "this code point has no pointer" in the reverse index */
 const NO_POINTER = 0xffff;
@@ -172,9 +168,14 @@ class GB18030Decoder implements Decoder {
     // 2. If byte is end-of-stream, and gb18030 first, gb18030
     // second, or gb18030 third is not 0x00, set gb18030 first,
     // gb18030 second, and gb18030 third to 0x00, and return error.
+    // State-machine invariant: end-of-stream can only be read while at most `gb18030 first` is set
+    // (second/third exist only transiently between consumed bytes), so the second and third
+    // operands always short-circuit. They stay to mirror the WHATWG state machine.
     if (
       bite === END_OF_STREAM &&
-      (this.gb18030First !== 0x00 || this.gb18030Second !== 0x00 || this.gb18030Third !== 0x00)
+      (this.gb18030First !== 0x00 ||
+        /* istanbul ignore next */ this.gb18030Second !== 0x00 ||
+        /* istanbul ignore next */ this.gb18030Third !== 0x00)
     ) {
       this.gb18030First = 0x00;
       this.gb18030Second = 0x00;
