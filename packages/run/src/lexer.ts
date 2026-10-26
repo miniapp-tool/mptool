@@ -54,9 +54,9 @@ export type Token = TokenBase &
   (
     | { type: "identifier"; value: string }
     | { type: "keyword"; value: string }
-    | { type: "number"; value: string; numericValue?: number }
+    | { type: "number"; value: string; numericValue?: number; legacyOctal?: boolean }
     | { type: "bigint"; value: string } // value 不含 'n' 后缀
-    | { type: "string"; value: string; cooked: string }
+    | { type: "string"; value: string; cooked: string; legacyOctal?: boolean }
     | { type: "regexp"; value: string; pattern: string; flags: string }
     | { type: "templateNoSubstitution"; value: string; cooked: string } // `...`
     | { type: "templateHead"; value: string; cooked: string } // `...${
@@ -452,7 +452,14 @@ export class Lexer {
     // octal interpretation (`83`), not `Number("0123")` (`123`).
     // 旧式八进制字面量（`0123`）保留原始文本，但 ECMAScript 取值是八进制解释（`83`）。
     const token: Token = legacyOctal
-      ? { type: "number", value: raw, numericValue: Number.parseInt(raw, 8), start, end: pos }
+      ? {
+          type: "number",
+          value: raw,
+          numericValue: Number.parseInt(raw, 8),
+          legacyOctal: true,
+          start,
+          end: pos,
+        }
       : { type: "number", value: raw, start, end: pos };
 
     this.pos = pos;
@@ -474,6 +481,7 @@ export class Lexer {
     const quote = source[this.pos];
     let pos = this.pos + 1;
     let cooked = "";
+    let legacyOctal = false;
 
     while (pos < source.length) {
       const ch = source[pos];
@@ -484,6 +492,7 @@ export class Lexer {
           type: "string",
           value: source.slice(start, pos),
           cooked,
+          ...(legacyOctal ? { legacyOctal } : {}),
           start,
           end: pos,
         };
@@ -496,6 +505,8 @@ export class Lexer {
 
       if (ch === "\\") {
         const escape = this.readEscape(pos);
+
+        if (escape.legacyOctal) legacyOctal = true;
 
         cooked += escape.value;
         pos = escape.next;
@@ -526,7 +537,7 @@ export class Lexer {
    * @param pos - Position of the backslash / 反斜杠位置
    * @returns The cooked value and the position after the escape / 转义后的值与结束位置
    */
-  private readEscape(pos: number): { value: string; next: number } {
+  private readEscape(pos: number): { value: string; next: number; legacyOctal?: boolean } {
     const { source } = this;
 
     if (pos + 1 >= source.length) throw this.error("Invalid escape sequence", pos, pos + 1);
@@ -564,7 +575,7 @@ export class Lexer {
         // otherwise up to 3 octal digits (e.g. `\1` → U+0001, `\012` → "\n").
         // 旧式八进制转义（sloppy）：单独的 `\0` 是 NUL，否则最多 3 位八进制。
         if (escaped === "0" && !isOctalDigit(source[pos + 2]))
-          return { value: "\0", next: pos + 2 };
+          return { value: "\0", next: pos + 2, legacyOctal: true };
 
         let value = 0;
         let digits = 0;
@@ -578,7 +589,7 @@ export class Lexer {
           digits += 1;
         }
 
-        return { value: String.fromCharCode(value), next: pos + 1 + digits };
+        return { value: String.fromCharCode(value), next: pos + 1 + digits, legacyOctal: true };
       }
       case "x": {
         return this.readHexEscape(pos);

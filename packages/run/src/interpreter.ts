@@ -2045,6 +2045,9 @@ export class Runtime {
   ): void {
     switch (target.type) {
       case "identifier": {
+        if (this.strict && (target.name === "eval" || target.name === "arguments"))
+          throw new SyntaxError("Unexpected eval or arguments in strict mode");
+
         inferFunctionName(value, target.name);
 
         if (initialize) env.initialize(target.name, value);

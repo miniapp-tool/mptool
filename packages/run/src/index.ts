@@ -148,6 +148,7 @@ const parseLimits = (options?: RunOptions): ParserLimits => ({
   maxSourceLength: options?.maxSourceLength,
   maxParseDepth: options?.maxParseDepth,
   maxBacktracks: options?.maxBacktracks,
+  strict: options?.strict,
 });
 
 /**
