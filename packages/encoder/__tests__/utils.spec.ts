@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { decoderError, encoderError } from "../src/implements/utils.js";
 import { codePointsToString, stringToCodePoints } from "../src/utils.js";
@@ -24,6 +24,18 @@ describe(stringToCodePoints, () => {
   it("replaces a high surrogate that is not followed by a low surrogate", () => {
     expect(stringToCodePoints("\uD800A")).toStrictEqual([0xfffd, 0x41]);
     expect(stringToCodePoints("\uD800\uD800")).toStrictEqual([0xfffd, 0xfffd]);
+  });
+
+  it("skips the surrogate branches when charCodeAt yields an impossible value", () => {
+    // `charCodeAt` can only return 0x0000..0xFFFF, so the final `else if` always matches once the
+    // first two branches reject the value. Return NaN to exercise the defensive fall-through.
+    const spy = vi.spyOn(String.prototype, "charCodeAt").mockReturnValue(Number.NaN);
+
+    try {
+      expect(stringToCodePoints("A")).toStrictEqual([]);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
 
