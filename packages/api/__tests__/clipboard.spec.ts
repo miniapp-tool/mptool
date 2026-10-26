@@ -12,6 +12,10 @@ describe(writeClipboard, () => {
     await expect(writeClipboard("")).rejects.toThrow("data is empty");
   });
 
+  it("should reject when called without data", async () => {
+    await expect(writeClipboard()).rejects.toThrow("data is empty");
+  });
+
   it("should reject on fail", async () => {
     const mockSetClipboardData = wx as unknown as {
       setClipboardData: (option: { fail?: (result: { errMsg: string }) => void }) => void;

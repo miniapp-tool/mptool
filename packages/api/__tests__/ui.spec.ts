@@ -84,4 +84,44 @@ describe("showModal failure", () => {
 
     expect(called).toBe(true);
   });
+
+  it("should fall back to the cancel action when no failure action is given", () => {
+    const mockShowModal = wx as unknown as {
+      showModal: (option: { fail?: () => void }) => void;
+    };
+
+    mockShowModal.showModal = (option): void => {
+      option.fail?.();
+    };
+
+    let called = false;
+
+    showModal("title", "content", undefined, () => {
+      called = true;
+    });
+
+    expect(called).toBe(true);
+  });
+});
+
+describe("getWindowInfo fallback", () => {
+  it("should fall back to getSystemInfoSync when getWindowInfo is unavailable", () => {
+    const wxApi = wx as unknown as {
+      getWindowInfo?: () => { windowWidth: number; windowHeight: number };
+      getSystemInfoSync: () => { windowWidth: number; windowHeight: number };
+    };
+    const originalGetWindowInfo = wxApi.getWindowInfo;
+    const originalGetSystemInfoSync = wxApi.getSystemInfoSync;
+
+    wxApi.getWindowInfo = undefined;
+    wxApi.getSystemInfoSync = (): { windowWidth: number; windowHeight: number } => ({
+      windowWidth: 320,
+      windowHeight: 568,
+    });
+
+    expect(getWindowInfo()).toStrictEqual({ windowWidth: 320, windowHeight: 568 });
+
+    wxApi.getWindowInfo = originalGetWindowInfo;
+    wxApi.getSystemInfoSync = originalGetSystemInfoSync;
+  });
 });

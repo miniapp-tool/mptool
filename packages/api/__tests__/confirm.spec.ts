@@ -49,4 +49,18 @@ describe(confirm, () => {
     ]);
     expect(action).not.toHaveBeenCalled();
   });
+
+  it("should use the default no-op cancel action", () => {
+    const mockShowModalApi = wx as unknown as {
+      showModal: (option: { success?: (result: { confirm: boolean }) => void }) => void;
+    };
+
+    mockShowModalApi.showModal = (option): void => {
+      option.success?.({ confirm: false });
+    };
+    const action = vi.fn<() => void>();
+
+    expect(() => confirm("删除", action)).not.toThrow();
+    expect(action).not.toHaveBeenCalled();
+  });
 });

@@ -101,6 +101,50 @@ describe(openDocument, () => {
     expect(titles).toStrictEqual(["下载文档失败"]);
     expect(events).toStrictEqual(["resource_load_failed"]);
   });
+
+  it("should run the openDocument success callback", async () => {
+    let succeeded = false;
+    const mockOpenDocumentApi = wx as unknown as {
+      openDocument: (option: {
+        filePath: string;
+        success?: () => void;
+        fail?: (result: { errMsg: string }) => void;
+      }) => void;
+    };
+
+    mockOpenDocumentApi.openDocument = (option): void => {
+      succeeded = true;
+      option.success?.();
+    };
+    mockDownloadFile();
+
+    openDocument("https://example.com/doc.pdf");
+    await flush();
+
+    expect(succeeded).toBe(true);
+  });
+
+  it("should run the openDocument failure callback", async () => {
+    let failed = false;
+    const mockOpenDocumentApi = wx as unknown as {
+      openDocument: (option: {
+        filePath: string;
+        success?: () => void;
+        fail?: (result: { errMsg: string }) => void;
+      }) => void;
+    };
+
+    mockOpenDocumentApi.openDocument = (option): void => {
+      failed = true;
+      option.fail?.({ errMsg: "open fail" });
+    };
+    mockDownloadFile();
+
+    openDocument("https://example.com/doc.pdf");
+    await flush();
+
+    expect(failed).toBe(true);
+  });
 });
 
 describe(saveDocument, () => {
@@ -250,5 +294,31 @@ describe(saveDocument, () => {
     await flush();
 
     expect(saved).toStrictEqual([{ fileName: "custom.pdf" }]);
+  });
+
+  it("should log and not show a modal when adding to favorites fails", async () => {
+    let failed = false;
+    const mockAddFileToFavoritesApi = wx as unknown as {
+      addFileToFavorites: (option: {
+        fileName: string;
+        filePath: string;
+        success?: () => void;
+        fail?: (result: { errMsg: string }) => void;
+      }) => void;
+    };
+
+    mockAddFileToFavoritesApi.addFileToFavorites = (option): void => {
+      failed = true;
+      option.fail?.({ errMsg: "favorites fail" });
+    };
+    const modalTitles = mockShowModal();
+    mockCanIUse(true);
+    mockDownloadFile();
+
+    saveDocument("https://example.com/doc.pdf");
+    await flush();
+
+    expect(failed).toBe(true);
+    expect(modalTitles).toStrictEqual([]);
   });
 });
