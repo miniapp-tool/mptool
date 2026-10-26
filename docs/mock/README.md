@@ -631,6 +631,44 @@ expect(listener).toHaveBeenCalledWith({ theme: "dark" });
 - 用 `mockWx.emit(<事件名>, ...参数)` 触发；`offXxx()` 不传监听器会清空该事件的全部监听器。
 - 没有对应 `offXxx` 的事件（如 `onError`）只能注册，测试间可用 `mockWx.reset()` 或 `scope()` 隔离。
 
+### 事件触发时机
+
+以下事件已接到 mock 的真实行为上，不需要手动 `emit`：
+
+| 事件                    | 触发时机                                                                                        | payload                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `onPageNotFound`        | `navigateTo` / `redirectTo` / `switchTab` / `reLaunch` 目标页面未注册时（导航失败回调仍然保留） | `{ path, query, isEntryPage: false }`（`path` 带前导 `/`） |
+| `onBeforeAppRoute`      | 成功导航、页面生命周期之前                                                                      | `{ path, query, openType }`                                |
+| `onAppRoute`            | 成功导航、目标页面打开（`onLoad`/`onShow`/`onReady`）之后                                       | `{ path, query, openType }`                                |
+| `onAppRouteDone`        | 成功导航、`success`/`complete` 回调之后                                                         | `{ path, query, openType }`                                |
+| `onNetworkStatusChange` | `mockWx.network()` 改变了网络类型 / 连接状态                                                    | `{ isConnected, networkType }`                             |
+| `onWifiConnected`       | `mockWx.network()` 切到 `wifi` 时                                                               | `{ wifi }`（与 `getConnectedWifi` 一致）                   |
+| `onNetworkWeakChange`   | `mockWx.network({ weakNet })` 改变时                                                            | `{ networkType, weakNet }`                                 |
+| `onGetWifiList`         | 调用 `wx.getWifiList()` 后                                                                      | `{ wifiList }`（`mockWx.network({ wifiList })`）           |
+| `onUnhandledRejection`  | `mockWx.unhandledRejection(reason, promise?)`                                                   | `{ reason, promise }`                                      |
+| `onMemoryWarning`       | `mockWx.memoryWarning(level?)`                                                                  | `{ level }`（默认 10）                                     |
+| `onError`               | `mockWx.error(message)`                                                                         | `message`（string）                                        |
+
+`openType` 取值为 `navigateTo` / `redirectTo` / `switchTab` / `reLaunch` / `navigateBack`。
+
+```ts
+const calls: string[] = [];
+
+wx.onBeforeAppRoute(({ openType }) => calls.push(`before:${openType}`));
+wx.onAppRoute(({ openType }) => calls.push(`route:${openType}`));
+wx.onAppRouteDone(({ openType }) => calls.push(`done:${openType}`));
+
+await wx.navigateTo({ url: "/pages/detail?id=1" });
+
+// calls: before:navigateTo → route:navigateTo → done:navigateTo
+
+mockWx.unhandledRejection("boom", Promise.resolve());
+mockWx.memoryWarning(15);
+mockWx.error("script error");
+```
+
+> 其余事件（BLE / Beacon / VoIP / 传感器 / 键盘 / 录屏等硬件或平台事件）仍通过 `mockWx.emit(<事件名>, ...)` 手动触发；mock 不伪造没有真实来源的硬件行为。
+
 ```ts
 wx.onError((error) => {
   console.log(error);

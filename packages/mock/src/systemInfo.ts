@@ -1,6 +1,7 @@
 // oxlint-disable typescript/no-unnecessary-boolean-literal-compare -- missing auth keys must differ from an explicit `false`
 
 import { systemState } from "./systemState.js";
+import type { MockWifiInfo } from "./typings.js";
 import { uiDecisions } from "./uiState.js";
 
 type Platform = "android" | "devtools" | "ios" | "mac" | "ohos" | "windows";
@@ -169,6 +170,20 @@ export const buildSystemInfo = (): Record<string, unknown> => {
     windowHeight: options.windowHeight,
     windowWidth: options.windowWidth,
     theme: options.theme,
+  };
+};
+
+/** Connected Wi-Fi details, consistent with `getNetworkType().signalStrength`. */
+export const buildWifiInfo = (): MockWifiInfo => {
+  const { signalStrength } = getNetworkInfo();
+  const custom = systemState.network.wifi ?? {};
+
+  return {
+    BSSID: custom.BSSID ?? "",
+    SSID: custom.SSID ?? "",
+    frequency: custom.frequency ?? 0,
+    secure: custom.secure ?? true,
+    signalStrength,
   };
 };
 

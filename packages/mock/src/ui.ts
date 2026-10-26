@@ -8,9 +8,11 @@ import {
   buildDeviceInfo,
   buildSystemInfo,
   buildSystemSetting,
+  buildWifiInfo,
   buildWindowInfo,
   getNetworkInfo,
 } from "./systemInfo.js";
+import { systemState } from "./systemState.js";
 import { uiDecisions, uiRuntime } from "./uiState.js";
 
 interface CallbackOption {
@@ -300,23 +302,20 @@ export const uiApi = {
     });
   },
 
+  getWifiList(option: unknown): unknown {
+    const wifiList = systemState.network.wifiList ?? [];
+
+    emitEvent("getWifiList", { wifiList });
+
+    return callCallback(option, { errMsg: "getWifiList:ok" });
+  },
+
   startWifi(option: unknown): unknown {
     return callCallback(option, { errMsg: "startWifi:ok" });
   },
 
   getConnectedWifi(option: unknown): unknown {
-    const { signalStrength } = getNetworkInfo();
-
-    return callCallback(option, {
-      wifi: {
-        SSID: "",
-        BSSID: "",
-        secure: true,
-        signalStrength,
-        frequency: 0,
-      },
-      errMsg: "getConnectedWifi:ok",
-    });
+    return callCallback(option, { wifi: buildWifiInfo(), errMsg: "getConnectedWifi:ok" });
   },
 
   setClipboardData(option: unknown): unknown {

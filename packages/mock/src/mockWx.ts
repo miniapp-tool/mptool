@@ -13,7 +13,7 @@ import {
   snapshotState,
 } from "./state.js";
 import type { MockRule, RouteEntry } from "./state.js";
-import { getNetworkInfo } from "./systemInfo.js";
+import { buildWifiInfo, getNetworkInfo } from "./systemInfo.js";
 import { systemState } from "./systemState.js";
 import type {
   MockCompatFlags,
@@ -311,6 +311,13 @@ export interface MockWx {
   /** Read-only UI state (toast / loading / modal / update manager). */
   ui: () => MockUiState;
 
+  /** Trigger `onError` with the given message. */
+  error: (message: string) => void;
+  /** Trigger `onUnhandledRejection`; `promise` defaults to a resolved promise. */
+  unhandledRejection: (reason: string, promise?: Promise<unknown>) => void;
+  /** Trigger `onMemoryWarning` (default level 10). */
+  memoryWarning: (level?: 5 | 10 | 15) => void;
+
   /** Register a SelectorQuery node fixture; `null` clears the selector. */
   node: (selector: string, info: MockNodeInfo | null) => void;
   /** Trigger the IntersectionObservers watching `selector`. */
@@ -431,6 +438,16 @@ export const mockWx: MockWx = {
         networkType: next.networkType,
       });
     }
+
+    if (next.networkType === "wifi" && previous.networkType !== "wifi")
+      emitEvent("wifiConnected", { wifi: buildWifiInfo() });
+
+    if (previous.weakNet !== next.weakNet) {
+      emitEvent("networkWeakChange", {
+        networkType: next.networkType,
+        weakNet: next.weakNet,
+      });
+    }
   },
 
   pages(pages: unknown[]): void {
@@ -520,6 +537,18 @@ export const mockWx: MockWx = {
 
   ui(): MockUiState {
     return getUiState();
+  },
+
+  error(message: string): void {
+    emitEvent("error", message);
+  },
+
+  memoryWarning(level: 5 | 10 | 15 = 10): void {
+    emitEvent("memoryWarning", { level });
+  },
+
+  unhandledRejection(reason: string, promise?: Promise<unknown>): void {
+    emitEvent("unhandledRejection", { promise: promise ?? Promise.resolve(), reason });
   },
 
   node(selector: string, info: MockNodeInfo | null): void {
