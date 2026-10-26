@@ -140,6 +140,15 @@ export interface MockSystemOptions {
   userDataPath?: string;
 }
 
+/** A Wi-Fi entry returned by `getConnectedWifi` / `getWifiList`. */
+export interface MockWifiInfo {
+  SSID: string;
+  BSSID: string;
+  secure: boolean;
+  frequency: number;
+  signalStrength: number;
+}
+
 /** `mockWx.network()` options. */
 export interface MockNetworkOptions {
   /** `wifi` / `2g` / `3g` / `4g` / `5g` / `none` / `unknown`. */
@@ -148,6 +157,10 @@ export interface MockNetworkOptions {
   weakNet?: boolean;
   /** Simulate a disconnected network. */
   offline?: boolean;
+  /** Connected Wi-Fi details; `signalStrength` still comes from the network options. */
+  wifi?: Partial<Omit<MockWifiInfo, "signalStrength">>;
+  /** Wi-Fi list returned by `getWifiList` / `onGetWifiList`. */
+  wifiList?: MockWifiInfo[];
 }
 
 /** Compatibility switches for the 0.x migration period; removed in 1.0. */

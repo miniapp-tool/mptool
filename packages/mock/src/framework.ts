@@ -3,6 +3,8 @@
 // oxlint-disable unicorn/no-immediate-mutation -- page instances are built incrementally
 // oxlint-disable no-undefined -- navigation helpers use an explicit undefined return
 
+import { emitEvent } from "./ui.js";
+
 interface FrameworkApi {
   pages: any[];
   app: any;
@@ -70,15 +72,24 @@ const createNavigationError = (errMsg: string): Error & { errMsg: string } =>
   Object.assign(new Error(errMsg), { errMsg });
 
 /** Deliver a success / failure in callback style, or as a Promise. */
-const settle = (option: NavigationOption | undefined, errMsg: string, ok: boolean): unknown => {
-  if (!hasCallbacks(option))
+const settle = (
+  option: NavigationOption | undefined,
+  errMsg: string,
+  ok: boolean,
+  onDone?: () => void,
+): unknown => {
+  if (!hasCallbacks(option)) {
+    onDone?.();
+
     return ok ? Promise.resolve({ errMsg }) : Promise.reject(createNavigationError(errMsg));
+  }
 
   setTimeout(() => {
     if (ok) option?.success?.({ errMsg });
     else option?.fail?.({ errMsg });
 
     option?.complete?.({ errMsg });
+    onDone?.();
   }, 0);
 
   return undefined;
@@ -110,6 +121,27 @@ const parseRoute = (url: unknown): { query: Record<string, string>; route: strin
 
   return { query: parseQuery(rawQuery), route: route === "/" ? "/" : route };
 };
+
+type OpenType = "navigateBack" | "navigateTo" | "redirectTo" | "reLaunch" | "switchTab";
+
+const emitPageNotFound = (route: string, query: Record<string, string>): void => {
+  emitEvent("pageNotFound", { isEntryPage: false, path: route, query });
+};
+
+const emitRouteEvent = (
+  event: "appRoute" | "appRouteDone" | "beforeAppRoute",
+  route: string,
+  query: Record<string, string>,
+  openType: OpenType,
+): void => {
+  emitEvent(event, { openType, path: route, query });
+};
+
+const routeDone =
+  (route: string, query: Record<string, string>, openType: OpenType): (() => void) =>
+  () => {
+    emitRouteEvent("appRouteDone", route, query, openType);
+  };
 
 const findPageDefinition = (route: string): PageDefinition | undefined => {
   const definitions = frameworkApi.pages as PageDefinition[];
@@ -223,6 +255,7 @@ const openPage = (
 };
 
 /** `switchTab` handler, extracted to keep `createNavigator` readable. */
+// oxlint-disable-next-line max-statements -- the tab-stack rules need the explicit steps
 const openTabPage = (option: NavigationOption = {}): unknown => {
   const parsed = parseRoute(option.url);
 
@@ -231,18 +264,32 @@ const openTabPage = (option: NavigationOption = {}): unknown => {
 
   const definition = findPageDefinition(parsed.route);
 
-  if (!definition)
+  if (!definition) {
+    emitPageNotFound(parsed.route, parsed.query);
+
     return settle(option, `switchTab:fail page "${parsed.route}" is not found`, false);
+  }
 
   if (hasTabBarPages() && !isTabBarTarget(parsed.route, definition))
     return settle(option, "switchTab:fail can not switch to no-tabBar page", false);
+
+  emitRouteEvent("beforeAppRoute", parsed.route, parsed.query, "switchTab");
 
   const stack = currentStack();
   const current = topPage();
 
   // Keep the current tab page alive: only hide it, never unload it.
   if (current && isTabPageInstance(current)) {
-    if (current.route === parsed.route) return settle(option, "switchTab:ok", true);
+    if (current.route === parsed.route) {
+      emitRouteEvent("appRoute", parsed.route, parsed.query, "switchTab");
+
+      return settle(
+        option,
+        "switchTab:ok",
+        true,
+        routeDone(parsed.route, parsed.query, "switchTab"),
+      );
+    }
 
     invokeLifecycle(current, "onHide");
   }
@@ -274,9 +321,12 @@ const openTabPage = (option: NavigationOption = {}): unknown => {
     invokeLifecycle(page, "onReady");
   }
 
-  return settle(option, "switchTab:ok", true);
+  emitRouteEvent("appRoute", parsed.route, parsed.query, "switchTab");
+
+  return settle(option, "switchTab:ok", true, routeDone(parsed.route, parsed.query, "switchTab"));
 };
 
+// oxlint-disable-next-line max-lines-per-function -- one explicit handler per navigation API
 const createNavigator = (type: string): ((option?: NavigationOption) => unknown) => {
   switch (type) {
     case "navigateTo": {
@@ -288,8 +338,11 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
 
         const definition = findPageDefinition(parsed.route);
 
-        if (!definition)
+        if (!definition) {
+          emitPageNotFound(parsed.route, parsed.query);
+
           return settle(option, `navigateTo:fail page "${parsed.route}" is not found`, false);
+        }
 
         if (isTabBarTarget(parsed.route, definition))
           return settle(option, "navigateTo:fail can not navigateTo a tabbar page", false);
@@ -297,10 +350,18 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
         if (currentStack().length >= MAX_PAGE_STACK)
           return settle(option, "navigateTo:fail webview count limit exceed", false);
 
+        emitRouteEvent("beforeAppRoute", parsed.route, parsed.query, "navigateTo");
+
         invokeLifecycle(topPage(), "onHide");
         openPage(definition, parsed.route, parsed.query);
+        emitRouteEvent("appRoute", parsed.route, parsed.query, "navigateTo");
 
-        return settle(option, "navigateTo:ok", true);
+        return settle(
+          option,
+          "navigateTo:ok",
+          true,
+          routeDone(parsed.route, parsed.query, "navigateTo"),
+        );
       };
     }
 
@@ -313,18 +374,29 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
 
         const definition = findPageDefinition(parsed.route);
 
-        if (!definition)
+        if (!definition) {
+          emitPageNotFound(parsed.route, parsed.query);
+
           return settle(option, `redirectTo:fail page "${parsed.route}" is not found`, false);
+        }
 
         if (isTabBarTarget(parsed.route, definition))
           return settle(option, "redirectTo:fail can not redirectTo a tabbar page", false);
+
+        emitRouteEvent("beforeAppRoute", parsed.route, parsed.query, "redirectTo");
 
         const previous = currentStack().pop();
 
         invokeLifecycle(previous, "onUnload");
         openPage(definition, parsed.route, parsed.query);
+        emitRouteEvent("appRoute", parsed.route, parsed.query, "redirectTo");
 
-        return settle(option, "redirectTo:ok", true);
+        return settle(
+          option,
+          "redirectTo:ok",
+          true,
+          routeDone(parsed.route, parsed.query, "redirectTo"),
+        );
       };
     }
 
@@ -341,8 +413,13 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
 
         const definition = findPageDefinition(parsed.route);
 
-        if (!definition)
+        if (!definition) {
+          emitPageNotFound(parsed.route, parsed.query);
+
           return settle(option, `reLaunch:fail page "${parsed.route}" is not found`, false);
+        }
+
+        emitRouteEvent("beforeAppRoute", parsed.route, parsed.query, "reLaunch");
 
         clearTabPages();
         unloadAll();
@@ -353,7 +430,14 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
         if (tabPage && isTabBarTarget(parsed.route, definition))
           frameworkApi.tabPages.set(parsed.route, tabPage);
 
-        return settle(option, "reLaunch:ok", true);
+        emitRouteEvent("appRoute", parsed.route, parsed.query, "reLaunch");
+
+        return settle(
+          option,
+          "reLaunch:ok",
+          true,
+          routeDone(parsed.route, parsed.query, "reLaunch"),
+        );
       };
     }
 
@@ -373,6 +457,10 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
         if (stack.length <= delta)
           return settle(option, "navigateBack:fail cannot navigate back at first page", false);
 
+        const target = stack[stack.length - delta - 1];
+
+        emitRouteEvent("beforeAppRoute", target.route, {}, "navigateBack");
+
         for (let index = 0; index < delta; index += 1) {
           const page = stack.pop();
 
@@ -380,8 +468,9 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
         }
 
         invokeLifecycle(topPage(), "onShow");
+        emitRouteEvent("appRoute", target.route, {}, "navigateBack");
 
-        return settle(option, "navigateBack:ok", true);
+        return settle(option, "navigateBack:ok", true, routeDone(target.route, {}, "navigateBack"));
       };
     }
 
