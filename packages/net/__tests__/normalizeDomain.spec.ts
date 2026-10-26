@@ -11,4 +11,8 @@ describe(normalizeDomain, () => {
     expect(normalizeDomain(".example.com.")).toBe(".example.com");
     expect(normalizeDomain("abc.example.com.")).toBe(".abc.example.com");
   });
+
+  it("should default to an empty domain", () => {
+    expect(normalizeDomain()).toBe("");
+  });
 });

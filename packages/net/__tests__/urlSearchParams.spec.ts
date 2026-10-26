@@ -270,6 +270,19 @@ describe(URLSearchParams, () => {
         c: "3",
       });
     });
+
+    it("binds the given this argument", () => {
+      const a = getSimpleObj();
+      const context = { seen: [] as string[] };
+
+      // oxlint-disable-next-line unicorn/no-array-method-this-argument -- the polyfill binds thisArg itself
+      a.forEach(function collect(this: typeof context, value, name, iterable) {
+        expect(iterable).toBe(a);
+        this.seen.push(`${name}=${value}`);
+      }, context);
+
+      expect(context.seen).toStrictEqual(["a=1", "b=2", "c=3"]);
+    });
   });
 
   describe("iterator", () => {
@@ -437,6 +450,36 @@ describe(URLSearchParams, () => {
       const a = new URLSearchParams("p=%E4%B8%AD%E4%B8");
 
       expect(a.get("p")).toBe("中\uFFFD");
+    });
+
+    it("decodes a two-byte UTF-8 sequence", () => {
+      const a = new URLSearchParams("p=%C3%A9");
+
+      expect(a.get("p")).toBe("é");
+    });
+
+    it("decodes a four-byte UTF-8 sequence", () => {
+      const a = new URLSearchParams("p=%F0%9F%98%80");
+
+      expect(a.get("p")).toBe("😀");
+    });
+
+    it("replaces an invalid leading byte with U+FFFD", () => {
+      expect(new URLSearchParams("p=%FF").get("p")).toBe("\uFFFD");
+      expect(new URLSearchParams("p=%80").get("p")).toBe("\uFFFD");
+    });
+
+    it("rejects overlong encodings", () => {
+      expect(new URLSearchParams("p=%E0%80%80").get("p")).toBe("\uFFFD");
+      expect(new URLSearchParams("p=%F0%80%80%80").get("p")).toBe("\uFFFD");
+    });
+
+    it("rejects a surrogate code point", () => {
+      expect(new URLSearchParams("p=%ED%A0%80").get("p")).toBe("\uFFFD");
+    });
+
+    it("rejects a code point beyond U+10FFFF", () => {
+      expect(new URLSearchParams("p=%F4%90%80%80").get("p")).toBe("\uFFFD");
     });
   });
 });
