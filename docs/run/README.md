@@ -278,6 +278,8 @@ installGlobal();
 
 **全局对象**：沙箱全局对象继承 `Object.prototype`，因此 `toString`、`hasOwnProperty`、`constructor` 等可作为全局标识符访问（顶层 `let`/`const` 仍可遮蔽它们）；`global: true` 注入宿主全局时会跳过 `eval` 与 `Function`。
 
+**函数反射**：函数声明/表达式/箭头函数的 `name`、`length`、`toString()` 与源码一致；但箭头函数与方法仍拥有值为 `undefined` 的自有 `prototype` 属性（宿主函数无法移除不可配置属性），匿名函数表达式也不会推断绑定名（`const f = function () {}` 的 `f.name` 为 `""`）。
+
 错误路径只保证「能抛错」，错误类型与消息可能与标准引擎不同。例如顶层 `super.x` 在 Node 抛 `SyntaxError`、在本解释器抛 `ReferenceError`；基类方法内使用 `super`，Node 读取 `Object.prototype`、本解释器报错。
 
 **ASI（自动分号插入）**：只实现受限产生式——`return`/`throw`/`break`/`continue` 后换行、`++`/`--` 前换行、`async` 后换行按标准处理（`return\n42` 返回 `undefined`，`throw\n` 抛 `ParseError`，`async\nfunction` 不再视为 async 函数）。**不强制语句边界**：`let x = 1 let y = 2`、漏写分号的续行写法仍会被接受（标准引擎会报 `SyntaxError`）。

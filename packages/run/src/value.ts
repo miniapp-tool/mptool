@@ -101,6 +101,12 @@ export interface InterpreterFunctionMeta {
    * `makeInterpreterFunction` 回填）
    */
   callee: InterpreterFunction | null;
+
+  /**
+   * Original source text of the function, used by `Function.prototype.toString` / 函数源码原文，供
+   * `Function.prototype.toString` 使用
+   */
+  readonly sourceText?: string;
 }
 
 /**
@@ -187,12 +193,51 @@ export const makeInterpreterFunction = (
     writable: false,
   });
 
+  // function reflection: name / length / toString / prototype follow the source function
+  // 函数反射：name / length / toString / prototype 与源码函数一致
+  Object.defineProperty(wrapper, "name", {
+    value: meta.name ?? "",
+    enumerable: false,
+    configurable: true,
+  });
+
+  let length = 0;
+
+  // `Function.length` only counts parameters before the first default / rest / destructuring
+  // `Function.length` 只统计第一个默认值/rest/解构之前的参数
+  for (const param of meta.params) {
+    // destructuring patterns still count; only defaults and rest stop the count
+    // 解构参数仍计入；只有默认值与 rest 会终止计数
+    if (param.type === "assignmentPattern" || param.type === "rest") break;
+
+    length += 1;
+  }
+
+  Object.defineProperty(wrapper, "length", {
+    value: length,
+    enumerable: false,
+    configurable: true,
+  });
+
+  // host functions always own a `prototype` data property (it is non-configurable), so arrows and
+  // methods cannot truly omit it; it is set to `undefined` instead of an object
+  // 宿主函数总自带不可配置的 `prototype` 数据属性，箭头函数/方法无法真正移除，只能置为 `undefined`
   Object.defineProperty(wrapper, "prototype", {
     value: meta.constructable ? (meta.prototype ?? { constructor: wrapper }) : void 0,
     enumerable: false,
     configurable: false,
     writable: true,
   });
+
+  const { sourceText } = meta;
+
+  if (sourceText != null) {
+    Object.defineProperty(wrapper, "toString", {
+      value: () => sourceText,
+      enumerable: false,
+      configurable: true,
+    });
+  }
 
   interpreterFunctionSet.add(wrapper);
 
