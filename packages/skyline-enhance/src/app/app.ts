@@ -24,6 +24,29 @@ const appHideHandler = (): void => {
 };
 
 /**
+ * Invoke the optional `onAwake` handler and report a rejected promise instead of leaving it
+ * unhandled.
+ *
+ * The mini-program runtime has no `unhandledrejection` hook, so a rejected async `onAwake` would
+ * otherwise vanish silently (or surface as an unhandled rejection in tests/Node).
+ *
+ * 触发可选的 `onAwake` 处理函数，并捕获其 Promise 拒绝（记录日志），避免产生 unhandled rejection。
+ *
+ * @param handler - Awake handler / 唤醒处理函数
+ * @param time - Sleep duration in ms / 休眠时间（ms）
+ */
+const invokeAsyncAwake = async (
+  handler: (time: number) => void | Promise<void>,
+  time: number,
+): Promise<void> => {
+  try {
+    await handler(time);
+  } catch (err) {
+    logger.error(`App: onAwake rejected after ${time}ms`, err);
+  }
+};
+
+/**
  * Application wrapper
  *
  * @param appOptions App Option
@@ -35,11 +58,13 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
   appOptions.onHide = wrapFunction(appOptions.onHide, appHideHandler);
 
   // 注册 onAwake 监听
-  if (appOptions.onAwake) {
+  const { onAwake } = appOptions;
+
+  if (onAwake) {
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      appOptions.onAwake!(time);
+
+      void invokeAsyncAwake(onAwake, time);
     });
     logger.debug("App: registered onAwake");
   }

@@ -119,12 +119,13 @@ const bindBack = async function bindBack(
 /**
  * 获得页面实例
  *
- * @returns 页面实例对象
+ * @returns 页面实例对象，页面栈为空时返回 `undefined`
  */
 const getPage = <
   Data extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject = WechatMiniprogram.IAnyObject,
->(): PageInstance<Data, Custom> => [...getCurrentPages()].pop() as PageInstance<Data, Custom>;
+>(): PageInstance<Data, Custom> | undefined =>
+  [...getCurrentPages()].pop() as PageInstance<Data, Custom> | undefined;
 
 export const bind = function (
   this: TrivialComponentInstance,

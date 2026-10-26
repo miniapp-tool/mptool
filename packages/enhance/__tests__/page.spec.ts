@@ -271,4 +271,51 @@ describe($Page, () => {
     expect(onAwakeA).toHaveBeenCalledTimes(1);
     expect(onAwakeB).toHaveBeenCalledTimes(2);
   });
+
+  it("should log a rejected async onAwake instead of leaving it unhandled", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const error = new Error("onAwake failed");
+    const onAwake = vi.fn<() => Promise<void>>().mockRejectedValue(error);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      const getOptions = capturePageOptions();
+
+      $Page("index", { onAwake });
+
+      // 触发 onLoad，注册 onAwake 监听器
+      void getOptions()?.onLoad?.({});
+
+      appEmitter.emit(ON_APP_AWAKE, 1000);
+
+      // 等待 rejection 处理器执行
+      await vi.waitFor(() => {
+        expect(errorSpy).toHaveBeenCalledWith("Page index: onAwake rejected", error);
+      });
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("should log a rejected async onAppLaunch instead of leaving it unhandled", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    appState.launch = true;
+
+    const error = new Error("onAppLaunch failed");
+    const onAppLaunch = vi.fn<() => Promise<void>>().mockRejectedValue(error);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      $Page("index", { onAppLaunch });
+
+      await vi.waitFor(() => {
+        expect(errorSpy).toHaveBeenCalledWith("Page index: onAppLaunch rejected", error);
+      });
+    } finally {
+      errorSpy.mockRestore();
+      appState.launch = false;
+    }
+  });
 });

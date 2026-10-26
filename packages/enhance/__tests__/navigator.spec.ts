@@ -279,4 +279,34 @@ describe("navigator", () => {
       appEmitter.emit(ON_PAGE_UNLOAD);
     }
   });
+
+  it("should not keep the navigate lock when path resolution fails", async () => {
+    await setup({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    // 自定义 getPath 抛错：解析目标失败时不应获取导航锁
+    $Config({
+      minInterval: 0,
+      getPath: () => {
+        throw new Error("bad route");
+      },
+    });
+
+    await expect(go("unknown")).rejects.toThrow("bad route");
+    expect(navigateTo).not.toHaveBeenCalled();
+
+    // 恢复合法配置：锁没有被占用，下一次导航应立即执行
+    $Config({ minInterval: 0, defaultPage: "/pages/$name" });
+
+    await expect(go("main")).resolves.toBeUndefined();
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/main" });
+
+    // 清理导航锁，避免影响其它用例
+    appEmitter.emit(ON_PAGE_UNLOAD);
+  });
 });

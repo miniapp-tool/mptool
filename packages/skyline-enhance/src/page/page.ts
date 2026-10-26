@@ -17,6 +17,31 @@ let shouldBeFirstPage = true;
 /** 页面实例到其 onAwake 监听器的映射，按实例隔离，避免多实例共享闭包 */
 const onAwakeHandlers = new WeakMap<object, (time: number) => void>();
 
+/**
+ * Invoke an optional page lifecycle and report a rejected promise instead of leaving it unhandled.
+ *
+ * The mini-program runtime has no `unhandledrejection` hook, so a rejected async `onAwake` would
+ * otherwise vanish silently (or surface as an unhandled rejection in tests/Node).
+ *
+ * 触发可选的页面生命周期，并捕获其 Promise 拒绝（记录日志），避免产生 unhandled rejection。 小程序运行时没有 `unhandledrejection` 钩子，异步
+ * `onAwake` 的拒绝否则会被静默吞掉。
+ *
+ * @param name - Page name / 页面名称
+ * @param lifeCycle - Lifecycle name / 生命周期名称
+ * @param handler - Lifecycle handler / 生命周期处理函数
+ */
+const invokeAsyncLifecycle = async (
+  name: string,
+  lifeCycle: string,
+  handler: () => void | Promise<void>,
+): Promise<void> => {
+  try {
+    await handler();
+  } catch (err) {
+    logger.error(`Page ${name}: ${lifeCycle} rejected`, err);
+  }
+};
+
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
@@ -64,11 +89,11 @@ export const $Page: PageConstructor = <
 
       // After onLoad, onAwake is valid if defined
       if (options.onAwake) {
+        const { onAwake } = options;
         const onAwakeHandler = (time: number): void => {
           callLog("onAwake");
 
-          // oxlint-disable-next-line typescript/no-non-null-assertion
-          void options.onAwake!(time);
+          void invokeAsyncLifecycle(name, "onAwake", () => onAwake(time));
         };
 
         onAwakeHandlers.set(this, onAwakeHandler);

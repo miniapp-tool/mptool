@@ -181,6 +181,35 @@ $Component({
 
 提供了通过 `binding="$"` 形式建立父子组件/页面与组件沟通的能力
 
+### $currentPage
+
+- 类型:
+
+  ```ts
+  function $currentPage(): PageInstance | undefined;
+  ```
+
+获取当前页面实例。
+
+::: warning
+
+页面栈为空时（例如冷启动阶段或所有页面均已关闭）返回 `undefined`，调用方需要判空。
+
+:::
+
+### $getPath
+
+- 类型:
+
+  ```ts
+  function $getPath(name: string): string;
+  ```
+
+- 参数:
+  - `name`: 页面简称
+
+获取传入页面简称的页面路径
+
 ### $preload
 
 - 类型:

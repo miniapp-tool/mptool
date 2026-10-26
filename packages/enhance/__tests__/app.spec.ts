@@ -67,4 +67,23 @@ describe($App, () => {
     expect(onAwake).toHaveBeenCalledTimes(1);
     expect(appState.hide).toBe(0);
   });
+
+  it("should log a rejected async onAwake instead of leaving it unhandled", async () => {
+    const error = new Error("app awake failed");
+    const onAwake = vi.fn<(time: number) => Promise<void>>().mockRejectedValue(error);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      $App({ onAwake });
+
+      appEmitter.emit(ON_APP_AWAKE, 1000);
+
+      // 等待 rejection 处理器执行
+      await vi.waitFor(() => {
+        expect(errorSpy).toHaveBeenCalledWith("App: onAwake rejected after 1000ms", error);
+      });
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
 });
