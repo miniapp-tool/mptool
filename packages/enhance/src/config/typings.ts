@@ -22,6 +22,15 @@ export interface AppConfigCommonOptions {
   minInterval?: number;
 
   /**
+   * 导航锁的最长持有时间，单位 ms
+   *
+   * 目标页未能触发 `onReady` / `onUnload` 时，锁会在该时间后强制释放，避免导航永久失效。
+   *
+   * @default 5000
+   */
+  lockTimeout?: number;
+
+  /**
    * 自定义扩展组件
    *
    * 时机在框架执行扩展之前，可为每个组件挂载实例方法

@@ -139,6 +139,8 @@ $App({
 
 在导航锁未释放期间调用 `$go` / `$redirect` / `$switch` / `$reLaunch` 会被忽略：返回的 Promise 解析为 `undefined`（不会 reject，也不会执行跳转）。
 
+导航锁默认最多持有 5000ms，超时后会强制释放（目标页始终没有触发 `onReady` / `onUnload` 时的兜底）。你可以通过 `lockTimeout` 调整这个时长。
+
 ### 构造器扩展
 
 你可以通过以下扩展方法为每个组件和页面注入实例方法或属性。
@@ -309,6 +311,12 @@ go("play?vid=xxx");
 - `data-url` 跳转到的页面简称或绝对路径
 - `data-before` 跳转前执行
 - `data-after` 跳转后执行
+
+::: warning
+
+只有跳转真正发生（`wx` 跳转 API 成功返回）时才会执行 `data-after`：被导航锁拦截（解析为 `undefined`）或跳转失败时不会执行；跳转失败会被捕获并记录错误日志，不会产生未处理的 Promise rejection。
+
+:::
 
 ::: tip 例子
 

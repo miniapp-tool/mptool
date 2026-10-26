@@ -110,6 +110,15 @@ order: 2
 
 允许进行跳转据页面首屏渲染后的最小间隔时间，单位 ms
 
+## lockTimeout
+
+- 类型: `number`
+- 默认: `5000`
+
+导航锁的最长持有时间，单位 ms。
+
+正常情况下导航锁会在目标页 `onReady` / `onUnload` 后释放；若目标页始终没有触发这两个生命周期（例如 `switchTab` 回到已加载的 tab 页），锁会在 `lockTimeout` 后强制释放，避免导航永久失效。
+
 ## hotReloadPattern
 
 - 类型: `string`

@@ -151,7 +151,7 @@ go("/pages/play?vid=xxx");
 此外还提供：
 
 - `$back(delta = 1)`：`wx.navigateBack` 的简单封装；页面栈不足时会回退到 `$Config` 的 `home`
-- 视图层代理：`$bindGo` / `$bindRedirect` / `$bindSwitch` / `$bindRelaunch` / `$bindBack`，通过 `data-url`、`data-delta`、`data-before`、`data-after` 配置
+- 视图层代理：`$bindGo` / `$bindRedirect` / `$bindSwitch` / `$bindRelaunch` / `$bindBack`，通过 `data-url`、`data-delta`、`data-before`、`data-after` 配置；只有真正跳转成功才执行 `data-after`
 
 ::: warning 没有导航锁
 

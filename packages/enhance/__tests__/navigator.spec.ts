@@ -253,6 +253,60 @@ describe("navigator", () => {
     appEmitter.emit(ON_PAGE_UNLOAD);
   });
 
+  it("should honor a custom lockTimeout", async () => {
+    await setup({ defaultPage: "/pages/$name", minInterval: 0, lockTimeout: 30 });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    vi.useFakeTimers();
+
+    try {
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+
+      // 未达到自定义 lockTimeout：锁仍然有效
+      await vi.advanceTimersByTimeAsync(29);
+
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+
+      // 达到 lockTimeout：锁被强制释放，下一次导航可执行
+      await vi.advanceTimersByTimeAsync(1);
+
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(2);
+    } finally {
+      appEmitter.emit(ON_PAGE_UNLOAD);
+      vi.useRealTimers();
+    }
+  });
+
+  it("should clear the maxDelay timer once navigation resolves", async () => {
+    await setup({ defaultPage: "/pages/$name", minInterval: 0, maxDelay: 1000 });
+
+    const navigateTo = vi.fn<() => void>();
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    vi.useFakeTimers();
+
+    try {
+      await expect(go("main")).resolves.toBeUndefined();
+
+      // 只剩导航锁的超时定时器：maxDelay 的竞速定时器已在 Promise.race 结束后清理
+      expect(vi.getTimerCount()).toBe(1);
+    } finally {
+      appEmitter.emit(ON_PAGE_UNLOAD);
+      vi.useRealTimers();
+    }
+  });
+
   it("should force release the navigate lock when the target page never becomes ready", async () => {
     await setup({ defaultPage: "/pages/$name", minInterval: 0, maxDelay: 0 });
 

@@ -73,7 +73,9 @@ describe("$bindGo", () => {
   it("should call before and after hooks around navigation", async () => {
     $Config({ defaultPage: "/pages/$name" });
 
-    const navigateTo = vi.fn<() => void>();
+    const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "navigateTo:ok",
+    });
 
     (wx as any).navigateTo = navigateTo;
 
@@ -111,6 +113,47 @@ describe("$bindGo", () => {
     expect(afterNavigate).toHaveBeenCalledWith(event);
   });
 
+  it("should log a failed navigation instead of rejecting", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const error = new Error("navigate fail");
+    const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockRejectedValue(error);
+
+    (wx as any).navigateTo = navigateTo;
+
+    let pageOptions:
+      | { $bindGo?: (event: unknown) => Promise<void>; afterNavigate?: ReturnType<typeof vi.fn> }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const afterNavigate = vi.fn<() => void>();
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      $Page("index", { afterNavigate } as never);
+
+      const event = {
+        currentTarget: {
+          dataset: {
+            after: "afterNavigate",
+            url: "play",
+          },
+        },
+      };
+
+      // 失败被吞掉（不产生 unhandled rejection），after 不执行
+      await expect(pageOptions?.$bindGo?.(event)).resolves.toBeUndefined();
+
+      expect(afterNavigate).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith('Navigation to "play" failed', error);
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
   it("should not navigate when url is missing", async () => {
     $Config({ defaultPage: "/pages/$name" });
 
@@ -142,6 +185,38 @@ describe("$bindGo", () => {
 
     expect(beforeNavigate).toHaveBeenCalledWith(event);
     expect(navigateTo).not.toHaveBeenCalled();
+  });
+});
+
+describe("$getPath", () => {
+  const capturePageOptions = (): (() => { $getPath?: (name: string) => string } | undefined) => {
+    let pageOptions: { $getPath?: (name: string) => string } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    return () => pageOptions;
+  };
+
+  it("should add a leading slash for a relative defaultPage", () => {
+    $Config({ defaultPage: "pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    expect(getOptions()?.$getPath?.("main")).toBe("/pages/main");
+  });
+
+  it("should add a leading slash for a relative pages map", () => {
+    $Config({ defaultPage: "/pages/$name", pages: { main: "pages/main" } });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    expect(getOptions()?.$getPath?.("main")).toBe("/pages/main");
   });
 });
 

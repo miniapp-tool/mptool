@@ -210,6 +210,8 @@ $Component({
 
 获取传入页面简称的页面路径
 
+返回值始终是带前导 `/` 的绝对路径：即使 `defaultPage` / `pages` 配置为 `pages/main` 这样的相对路径，也会返回 `/pages/main`，与 `$go` 及页面注册使用的事件 key 保持一致。
+
 ### $preload
 
 - 类型:
@@ -353,6 +355,12 @@ this.$reLaunch("main?user=mrhope");
 - `data-url` 跳转到的页面简称或绝对路径，可带参数
 - `data-before` 跳转前执行
 - `data-after` 跳转后执行
+
+::: warning
+
+只有跳转真正发生（`wx` 跳转 API 成功返回）时才会执行 `data-after`：被导航锁拦截（解析为 `undefined`）或跳转失败时不会执行；跳转失败会被捕获并记录错误日志，不会产生未处理的 Promise rejection。其余代理方法（`$bindRedirect` / `$bindSwitch` / `$bindRelaunch` / `$bindBack`）行为相同。
+
+:::
 
 ::: tip
 
