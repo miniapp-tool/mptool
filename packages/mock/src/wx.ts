@@ -1,3 +1,4 @@
+import { baseApi } from "./apis/base.js";
 import { eventApi } from "./apis/events.js";
 import { deviceApi } from "./device.js";
 import { fileApi, getFileSystemManager } from "./fileSystem.js";
@@ -70,7 +71,8 @@ const wxMock: {
   typeof deviceApi &
   typeof wxmlApi &
   typeof fileApi &
-  typeof frameworkApiMethods & {
+  typeof frameworkApiMethods &
+  typeof baseApi & {
     canIUse: (schema: string) => boolean;
   } = {
   version: "8.0.30",
@@ -94,6 +96,7 @@ const wxMock: {
   ...fileApi,
   ...frameworkApiMethods,
   ...eventApi,
+  ...baseApi,
 
   getRealtimeLogManager(): Pick<
     Console,

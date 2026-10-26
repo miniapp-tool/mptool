@@ -575,6 +575,37 @@ mockWx.network({ networkType: "5g" }); // 变化时派发事件
 - 只有网络类型/连接状态实际变化时 `onNetworkStatusChange` 才派发；离线用 `offline: true` 或 `networkType: "none"`。
 - `mockWx.scope()` / `reset()` 会还原 system / network / `USER_DATA_PATH`。
 
+### 通用 API（A2 批次 1）
+
+除系统信息外，以下通用 API 也已实现：
+
+- **基础工具**：`base64ToArrayBuffer` / `arrayBufferToBase64` / `getRandomValues`。
+- **系统/配置**：`getSystemInfoAsync`（与 `getSystemInfoSync` 同源）、`getSkylineInfo(Sync)`、`getApiCategory`、`getDeviceBenchmarkInfo`、`getRendererUserAgent`、`getCommonConfig`、`getExtConfig(Sync)`。
+- **性能**：`getPerformance`（`getEntries*` / `now` / `timeOrigin` / `setBufferSize` / `createObserver` 桩）、`reportPerformance`、`reportMonitor`、`requestIdleCallback` / `cancelIdleCallback`（异步回调，可用 `cancelIdleCallback` 取消）。
+- **页面**：`enableAlertBeforeUnload` / `disableAlertBeforeUnload`、`showNavigationBarLoading` / `hideNavigationBarLoading`、`startPullDownRefresh`、`setTopBarText`、`rewriteRoute`。
+
+```ts
+const base64 = wx.arrayBufferToBase64(new Uint8Array([0, 1, 2]).buffer);
+const bytes = wx.base64ToArrayBuffer(base64);
+
+await wx.getSystemInfoAsync({});
+await wx.getRendererUserAgent(); // "Mozilla/5.0 ... MicroMessenger/8.0.30"
+
+mockWx.system({
+  apiCategory: "native",
+  benchmark: { benchmarkLevel: 30, modelLevel: 1 },
+  extConfig: { channel: "test" },
+  rendererUserAgent: "custom-agent",
+  skyline: { isSupported: true, version: "0.9.7" },
+});
+
+wx.requestIdleCallback(({ timeRemaining }) => {
+  timeRemaining();
+});
+```
+
+> 这些 API 的失败分支同样支持 `mockWx.failNext(...)` 注入；`canIUse` 对它们返回 `true`。媒体 / 分享 / 音频类 API 见下一个 PR。
+
 ### canIUse / nextTick
 
 ```ts

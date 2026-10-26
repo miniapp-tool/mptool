@@ -138,6 +138,16 @@ export interface MockSystemOptions {
   wifiEnabled?: boolean;
   /** `wx.env.USER_DATA_PATH`，默认 `wxfile://usr`。 */
   userDataPath?: string;
+  /** `wx.getApiCategory()` 返回值；默认 `default`。 */
+  apiCategory?: string;
+  /** `wx.getRendererUserAgent()` 返回值。 */
+  rendererUserAgent?: string;
+  /** `wx.getSkylineInfo(Sync)()` 返回值。 */
+  skyline?: { isSupported?: boolean; version?: string; reason?: string };
+  /** `wx.getDeviceBenchmarkInfo()` 返回值。 */
+  benchmark?: { benchmarkLevel?: number; modelLevel?: number };
+  /** `wx.getExtConfig(Sync)()` 返回值。 */
+  extConfig?: Record<string, unknown>;
 }
 
 /** A Wi-Fi entry returned by `getConnectedWifi` / `getWifiList`. */
