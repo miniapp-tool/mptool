@@ -55,6 +55,20 @@ describe("instrumentation edge cases", () => {
     await expect(wxAny.getNetworkType()).resolves.toStrictEqual({ networkType: "3g" });
   });
 
+  it("should keep a callback API pending when its async responder rejects", async () => {
+    mockWx.respond("getNetworkType", () => Promise.reject(new Error("boom")));
+
+    const success = vi.fn<(result: unknown) => void>();
+    const fail = vi.fn<(result: unknown) => void>();
+
+    wxAny.getNetworkType({ fail, success });
+
+    await tick();
+
+    expect(success).not.toHaveBeenCalled();
+    expect(fail).not.toHaveBeenCalled();
+  });
+
   it("should reject async responders for sync / manager APIs", () => {
     mockWx.respond("getWindowInfo", () => Promise.resolve({ windowWidth: 1 }));
 

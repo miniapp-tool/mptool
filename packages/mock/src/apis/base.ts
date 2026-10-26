@@ -23,32 +23,22 @@ interface PerformanceLike {
   timeOrigin: number;
 }
 
-const createPerformance = (): PerformanceLike => {
-  const entries: Record<string, unknown>[] = [];
-  let bufferSize = 30;
-
-  return {
-    createObserver: () => ({
-      disconnect: (): void => void 0,
-      observe: (): void => void 0,
-    }),
-    getEntries: () => entries.slice(0, bufferSize),
-    getEntriesByName: (name: string, entryType = "") => {
-      const targetType = entryType ?? "";
-
-      return entries.filter(
-        (entry) => entry.name === name && (!targetType || entry.entryType === targetType),
-      );
-    },
-    getEntriesByType: (entryType: string) =>
-      entries.filter((entry) => entry.entryType === entryType),
-    now: () => Date.now(),
-    setBufferSize: (size: number): void => {
-      bufferSize = size;
-    },
-    timeOrigin: Date.now(),
-  };
-};
+/**
+ * The mock records no performance entries, so every list getter returns an empty list and the
+ * `name` / `entryType` filters of the real API have nothing to match.
+ */
+const createPerformance = (): PerformanceLike => ({
+  createObserver: () => ({
+    disconnect: (): void => void 0,
+    observe: (): void => void 0,
+  }),
+  getEntries: (): Record<string, unknown>[] => [],
+  getEntriesByName: (): Record<string, unknown>[] => [],
+  getEntriesByType: (): Record<string, unknown>[] => [],
+  now: () => Date.now(),
+  setBufferSize: (): void => void 0,
+  timeOrigin: Date.now(),
+});
 
 /** Base64 / random / system-config / performance / page APIs (A2 batch 1). */
 export const baseApi = {

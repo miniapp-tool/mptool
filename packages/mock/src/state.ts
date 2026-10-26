@@ -43,7 +43,7 @@ export interface MockRule {
   readonly failure?: WxFailure;
   readonly failures?: WxFailure[];
   readonly responder?: WxResponder;
-  readonly routes?: RouteEntry[];
+  readonly routes: RouteEntry[];
   remaining: number;
   count: number;
   disposed: boolean;
@@ -225,7 +225,7 @@ export const consumeRule = (api: string, arg: unknown): MatchedRule | null => {
     let route: RouteEntry | undefined;
 
     if (rule.kind === "route") {
-      route = findRoute(rule.routes ?? [], arg);
+      route = findRoute(rule.routes, arg);
       if (!route) continue;
     }
 

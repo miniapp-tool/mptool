@@ -175,7 +175,8 @@ const createRule = (input: RuleInput): MockRule => {
     match: input.match,
     remaining: input.remaining,
     responder: input.responder,
-    routes: input.routes,
+    // Only `route()` rules carry a table; the empty list keeps the field always present.
+    routes: input.routes ?? [],
     seq,
   };
 };
@@ -219,7 +220,8 @@ const parseRouteKey = (
   const regexpMatch = /^\/(.*)\/([a-z]*)$/u.exec(target);
 
   if (regexpMatch)
-    return { method, regexp: new RegExp(regexpMatch[1] ?? "", regexpMatch[2]), response };
+    // `(.*)` always participates in the match, so the pattern is always a string.
+    return { method, regexp: new RegExp(regexpMatch[1], regexpMatch[2]), response };
 
   return { method, response, url: target };
 };

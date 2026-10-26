@@ -86,7 +86,8 @@ const wxMock: {
   },
 
   canIUse(schema: string): boolean {
-    const name = schema.split(".")[0] ?? "";
+    // `split` always yields at least one element, so the namespace is always a string.
+    const [name] = schema.split(".");
 
     if (!name) return false;
 
