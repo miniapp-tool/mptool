@@ -10,7 +10,7 @@ import { getRef } from "./component/store";
 import { getConfig } from "./config/index.js";
 import { ON_PAGE_PRELOAD } from "./constant.js";
 import { routeEmitter, userEmitter } from "./emitter/index.js";
-import { getPathDetail, getTrigger } from "./navigator/index.js";
+import { getPathDetail, getTrigger, normalizePath } from "./navigator/index.js";
 import type {
   ExtendedPageMethods,
   PageInstance,
@@ -51,21 +51,36 @@ const clickHandlerFactory = function (
       { before?: string; after?: string; url?: string }
     >,
   ): Promise<void> {
-    if (event) {
-      const { before, after, url } = event.currentTarget.dataset;
+    if (!event) return;
 
-      // oxlint-disable-next-line typescript/strict-boolean-expressions
-      if (this && before && typeof this[before] === "function")
-        (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
+    const { before, after, url } = event.currentTarget.dataset;
 
-      if (url) {
-        await action(url);
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    if (this && before && typeof this[before] === "function")
+      (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-        // oxlint-disable-next-line typescript/strict-boolean-expressions
-        if (this && after && typeof this[after] === "function")
-          (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
-      }
+    if (!url) return;
+
+    let result: unknown;
+
+    try {
+      result = await action(url);
+    } catch (err) {
+      // Never let a rejected navigation escape the click handler as an unhandled rejection.
+      // 导航失败时记录日志，避免 click handler 产生 unhandled rejection。
+      logger.error(`Navigation to "${url}" failed`, err);
+
+      return;
     }
+
+    // A locked / skipped navigation resolves to `undefined`; only run `after` for a real jump.
+    // 被导航锁拦截或未真正跳转时解析为 `undefined`，此时不执行 after。
+    // oxlint-disable-next-line no-undefined -- locked navigations resolve to undefined
+    if (result === undefined) return;
+
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    if (this && after && typeof this[after] === "function")
+      (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
   };
 };
 
@@ -107,19 +122,31 @@ const bindBack = async function bindBack(
     { before?: string; after?: string; delta?: number | string }
   >,
 ): Promise<void> {
-  if (event) {
-    const { before, after, delta = 1 } = event.currentTarget.dataset;
+  if (!event) return;
 
-    // oxlint-disable-next-line typescript/strict-boolean-expressions
-    if (this && before && typeof this[before] === "function")
-      (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
+  const { before, after, delta = 1 } = event.currentTarget.dataset;
 
-    await Promise.resolve(back(Number(delta)));
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
+  if (this && before && typeof this[before] === "function")
+    (this[before] as (event: WechatMiniprogram.Touch) => void)(event);
 
-    // oxlint-disable-next-line typescript/strict-boolean-expressions
-    if (this && after && typeof this[after] === "function")
-      (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
+  let result: WechatMiniprogram.GeneralCallbackResult | undefined;
+
+  try {
+    result = await back(Number(delta));
+  } catch (err) {
+    logger.error("Navigation back failed", err);
+
+    return;
   }
+
+  // `reLaunch` inside `back` can be skipped by the navigation lock and resolve to `undefined`.
+  // oxlint-disable-next-line no-undefined -- a locked reLaunch resolves to undefined
+  if (result === undefined) return;
+
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
+  if (this && after && typeof this[after] === "function")
+    (this[after] as (event: WechatMiniprogram.Touch) => void)(event);
 };
 
 /**
@@ -241,7 +268,7 @@ export function mount(
 
   // 页面信息
   ctx.$currentPage = getPage;
-  ctx.$getPath = config.getPath;
+  ctx.$getPath = (name: string): string => normalizePath(config.getPath(name));
 
   // 点击跳转代理
   ctx.$bindGo = bindGo;

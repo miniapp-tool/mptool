@@ -144,7 +144,7 @@ $Page({
 
 - 类型: `(name: string): string`
 
-获取传入页面简称的页面路径。
+获取传入页面简称的页面路径。返回值始终是带前导 `/` 的绝对路径（例如配置为 `pages/main` 时返回 `/pages/main`），与 `$go` 保持一致的规范化。
 
 ## 导航方法
 
@@ -224,6 +224,12 @@ this.$reLaunch("main?user=mrhope");
 - `data-after`：跳转后执行
 
 可用的代理方法：`$bindGo`、`$bindRedirect`、`$bindSwitch`、`$bindRelaunch`、`$bindBack`。
+
+::: warning
+
+只有跳转真正发生（`wx` 跳转 API 成功返回）时才会执行 `data-after`；跳转失败或未真正跳转（解析为 `undefined`）时不会执行。跳转失败会被捕获并记录错误日志，不会产生未处理的 Promise rejection。
+
+:::
 
 ::: tip
 

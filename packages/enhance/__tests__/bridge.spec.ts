@@ -2,7 +2,7 @@ import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
 import { $Config } from "../src/config/index.js";
-import { ON_PAGE_PRELOAD, ON_PAGE_READY } from "../src/constant.js";
+import { ON_PAGE_PRELOAD, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../src/constant.js";
 import { appEmitter, routeEmitter } from "../src/emitter/index.js";
 import { $Page } from "../src/page/index.js";
 
@@ -90,7 +90,9 @@ describe("bridge", () => {
     it("should call before and after hooks around navigation", async () => {
       await setup({ defaultPage: "/pages/$name" });
 
-      const navigateTo = vi.fn<() => void>();
+      const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+        errMsg: "navigateTo:ok",
+      });
 
       (wx as any).navigateTo = navigateTo;
 
@@ -128,6 +130,93 @@ describe("bridge", () => {
       expect(afterNavigate).toHaveBeenCalledWith(event);
     });
 
+    it("should skip after when the navigation is locked", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+        errMsg: "navigateTo:ok",
+      });
+
+      (wx as any).navigateTo = navigateTo;
+
+      let pageOptions:
+        | { $bindGo?: (event: unknown) => Promise<void>; afterNavigate?: ReturnType<typeof vi.fn> }
+        | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      const afterNavigate = vi.fn<() => void>();
+
+      $Page("index", { afterNavigate } as never);
+
+      const event = {
+        currentTarget: {
+          dataset: {
+            after: "afterNavigate",
+            url: "play",
+          },
+        },
+      };
+
+      // 第一次跳转成功：after 执行
+      await pageOptions?.$bindGo?.(event);
+
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+      expect(afterNavigate).toHaveBeenCalledTimes(1);
+
+      // 导航锁未释放：锁定期间的跳转解析为 undefined，after 不应执行
+      await pageOptions?.$bindGo?.(event);
+
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+      expect(afterNavigate).toHaveBeenCalledTimes(1);
+
+      // 清理导航锁，避免影响其它用例
+      appEmitter.emit(ON_PAGE_UNLOAD);
+    });
+
+    it("should log a failed navigation instead of rejecting", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const error = new Error("navigate fail");
+      const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockRejectedValue(error);
+
+      (wx as any).navigateTo = navigateTo;
+
+      let pageOptions:
+        | { $bindGo?: (event: unknown) => Promise<void>; afterNavigate?: ReturnType<typeof vi.fn> }
+        | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      const afterNavigate = vi.fn<() => void>();
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      try {
+        $Page("index", { afterNavigate } as never);
+
+        const event = {
+          currentTarget: {
+            dataset: {
+              after: "afterNavigate",
+              url: "play",
+            },
+          },
+        };
+
+        // 失败被吞掉（不产生 unhandled rejection），after 不执行
+        await expect(pageOptions?.$bindGo?.(event)).resolves.toBeUndefined();
+
+        expect(afterNavigate).not.toHaveBeenCalled();
+        expect(errorSpy).toHaveBeenCalledWith('Navigation to "play" failed', error);
+      } finally {
+        errorSpy.mockRestore();
+      }
+    });
+
     it("should not navigate when url is missing", async () => {
       await setup({ defaultPage: "/pages/$name" });
 
@@ -159,6 +248,48 @@ describe("bridge", () => {
 
       expect(beforeNavigate).toHaveBeenCalledWith(event);
       expect(navigateTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("$getPath", () => {
+    const capturePageOptions = (): (() => { $getPath?: (name: string) => string } | undefined) => {
+      let pageOptions: { $getPath?: (name: string) => string } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      return () => pageOptions;
+    };
+
+    it("should add a leading slash for a relative defaultPage", async () => {
+      await setup({ defaultPage: "pages/$name" });
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      expect(getOptions()?.$getPath?.("main")).toBe("/pages/main");
+    });
+
+    it("should add a leading slash for a relative pages map", async () => {
+      await setup({ defaultPage: "/pages/$name", pages: { main: "pages/main" } });
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      expect(getOptions()?.$getPath?.("main")).toBe("/pages/main");
+    });
+
+    it("should keep an absolute path unchanged", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      expect(getOptions()?.$getPath?.("main")).toBe("/pages/main");
     });
   });
 

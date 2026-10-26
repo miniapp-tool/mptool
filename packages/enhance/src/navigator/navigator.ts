@@ -13,14 +13,17 @@ export interface NavigatorTriggerOptions {
 }
 
 /**
- * How long a navigation may hold the lock before it is force released.
+ * Default time (ms) a navigation may hold the lock before it is force released.
  *
  * The lock is normally released by `ON_PAGE_READY` / `ON_PAGE_UNLOAD`, but neither event is
  * guaranteed: `wx.switchTab` back to an already loaded tab page never fires `onReady` again, and a
  * page can be closed while it is still loading. This timeout is a safety net so a missed event can
- * never block navigation forever.
+ * never block navigation forever. Override it with `$Config({ lockTimeout })`.
+ *
+ * 导航锁的默认最长持有时间（ms）。目标页未能触发 `onReady` / `onUnload` 时，锁会在该时间后强制释放， 避免导航永久失效。可通过 `$Config({
+ * lockTimeout })` 覆盖。
  */
-const NAVIGATION_LOCK_TIMEOUT = 5000;
+const DEFAULT_NAVIGATION_LOCK_TIMEOUT = 5000;
 
 let canNavigate = true;
 let releaseTimer: ReturnType<typeof setTimeout> | null = null;
@@ -59,7 +62,7 @@ const acquireNavigationLock = (): void => {
     releaseTimer = null;
     canNavigate = true;
     logger.warn("Navigation lock released by timeout, target page never became ready");
-  }, NAVIGATION_LOCK_TIMEOUT);
+  }, getConfig().lockTimeout ?? DEFAULT_NAVIGATION_LOCK_TIMEOUT);
 };
 
 export type NavigatorType = "navigateTo" | "redirectTo" | "switchTab" | "reLaunch";
@@ -70,11 +73,20 @@ export interface PathDetails {
   url: string;
 }
 
+/**
+ * Normalize a page path to a single leading slash.
+ *
+ * 统一页面路径为带前导斜杠的形式，避免相对路径被按当前页面解析，并保证与路由事件 key 一致。
+ *
+ * @param path - Page path / 页面路径
+ * @returns Normalized path / 规范化后的路径
+ */
+export const normalizePath = (path: string): string => `/${path.replace(/^\//u, "")}`;
+
 export const getPathDetail = (pageNameWithArg: string): PathDetails => {
   const config = getConfig();
   const [pageName, queryString] = pageNameWithArg.split("?");
-  // 统一为带前导斜杠的路径，保证与页面注册时的事件 key 一致
-  const path = `/${(pageName.startsWith("/") ? pageName : config.getPath(pageName)).replace(/^\//u, "")}`;
+  const path = normalizePath(pageName.startsWith("/") ? pageName : config.getPath(pageName));
 
   return {
     path,
@@ -111,18 +123,25 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
       // set navigate lock
       acquireNavigationLock();
 
+      let maxDelayTimer: ReturnType<typeof setTimeout> | undefined;
+
       try {
         await Promise.race([
           routeEmitter.emitAsync(`${ON_PAGE_NAVIGATE}:${path}`, queries),
           // 等待最小延迟
           new Promise<void>((resolve) => {
-            setTimeout(() => {
+            maxDelayTimer = setTimeout(() => {
               resolve();
             }, getConfig().maxDelay ?? 200);
           }),
         ]);
       } catch {
         // 忽略 onNavigate 处理器抛出的错误，导航不应被阻塞
+      } finally {
+        // Clear the racing timer once the race settles, otherwise it keeps the event loop alive
+        // for up to `maxDelay` ms after a fast `onNavigate`.
+        // 竞速结束后清理定时器，避免快速完成 onNavigate 时残留 timer。
+        if (maxDelayTimer != null) clearTimeout(maxDelayTimer);
       }
 
       // Keep the navigate lock until the target page is ready (ON_PAGE_READY)

@@ -18,6 +18,7 @@ import {
   fetchHotReload,
   markHotReloadReady,
 } from "../hotReload.js";
+import { normalizePath } from "../navigator/index.js";
 import type { PageConstructor, PageInstance, PageOptions, PageQuery } from "./typings.js";
 
 let shouldBeFirstPage = true;
@@ -60,7 +61,7 @@ export const $Page: PageConstructor = <
 ): void => {
   const { getPath: getRoute, extendPage, injectPage, hotReloadPattern } = getConfig();
   // 统一为带前导斜杠的路径，保证与导航触发端的事件 key 一致
-  const route = `/${getRoute(name).replace(/^\//u, "")}`;
+  const route = normalizePath(getRoute(name));
 
   // 启动页面热更新拉取（异步，不阻塞注册）
   // start the async hot-reload fetch (does not block registration)
