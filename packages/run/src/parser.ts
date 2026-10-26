@@ -427,7 +427,15 @@ export class Parser {
     const { start } = this.current();
     const body: Statement[] = [];
 
-    while (this.current().type !== "eof") body.push(this.parseStatement());
+    for (;;) {
+      // a statement may start with a regex literal (`if (x) /re/`, `{ } /re/`)
+      // 语句可以以正则字面量开头（`if (x) /re/`、`{ } /re/`）
+      if (this.pos >= this.tokens.length) this.lexer.expectRegex();
+
+      if (this.current().type === "eof") break;
+
+      body.push(this.parseStatement());
+    }
 
     this.recordFunctionSources(body);
 
@@ -599,6 +607,11 @@ export class Parser {
   // ---------------------------------------------------------------------------
 
   private parseStatement(): Statement {
+    // a statement may begin with a regex literal, even after `)` / `}` where the lexer's
+    // last-token heuristic would treat `/` as division (`if (x) /re/.test(y)`)
+    // 语句可以以正则字面量开头：`if (x) /re/.test(y)` 中 `)` 之后的 `/` 必须按正则处理
+    if (this.pos >= this.tokens.length) this.lexer.expectRegex();
+
     this.parseDepth += 1;
 
     if (this.parseDepth > this.maxParseDepth)
@@ -709,13 +722,18 @@ export class Parser {
 
     const body: Statement[] = [];
 
-    while (!this.match("}")) {
+    for (;;) {
+      if (this.pos >= this.tokens.length) this.lexer.expectRegex();
+
+      if (this.match("}")) {
+        this.advance();
+        break;
+      }
+
       if (this.current().type === "eof") throw this.error("Unexpected end of input, expected '}'");
 
       body.push(this.parseStatement());
     }
-
-    this.expect("}");
 
     return { type: "block", body, start, end: this.lastEnd };
   }
@@ -1077,8 +1095,13 @@ export class Parser {
 
       const body: Statement[] = [];
 
-      while (!this.match("case") && !this.match("default") && !this.match("}")) {
+      for (;;) {
+        if (this.pos >= this.tokens.length) this.lexer.expectRegex();
+
+        if (this.match("case") || this.match("default") || this.match("}")) break;
+
         if (this.current().type === "eof") throw this.error("Unexpected end of input");
+
         body.push(this.parseStatement());
       }
 
@@ -1101,6 +1124,8 @@ export class Parser {
     let handler: { param: Pattern | null; body: BlockStatement } | null = null;
     let finalizer: BlockStatement | null = null;
 
+    if (this.pos >= this.tokens.length) this.lexer.expectRegex();
+
     if (this.match("catch")) {
       this.advance();
 
@@ -1114,6 +1139,8 @@ export class Parser {
 
       handler = { param, body: this.parseBlock() };
     }
+
+    if (this.pos >= this.tokens.length) this.lexer.expectRegex();
 
     if (this.match("finally")) {
       this.advance();

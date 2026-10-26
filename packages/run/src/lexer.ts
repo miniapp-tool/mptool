@@ -153,7 +153,23 @@ export class Lexer {
   private lastToken: Token | null = null;
 
   /** @param source - Source code to lex / 待分析的源码 */
+  /**
+   * Pending parser override: the next token starts an expression position / 解析器覆盖：下一个 token
+   * 处于表达式起始位置
+   */
+  private regexOverride: boolean | null = null;
+
   constructor(private readonly source: string) {}
+
+  /**
+   * Tell the lexer that the next fetched token is at an expression position, so a leading `/`
+   * starts a regular expression literal even after `)` / `}`.
+   *
+   * 告诉词法分析器下一个 token 处于表达式起始位置：即使前面是 `)` / `}`，开头的 `/` 也按正则字面量处理。
+   */
+  expectRegex(): void {
+    this.regexOverride = true;
+  }
 
   /**
    * Whether the next `/` should start a regular expression literal.
@@ -173,6 +189,9 @@ export class Lexer {
    */
   next(): Token {
     const newlineBefore = this.skipTrivia();
+    const regexAllowed = this.regexOverride ?? this.regexAllowed;
+
+    this.regexOverride = null;
 
     const start = this.pos;
     const { source } = this;
@@ -195,7 +214,7 @@ export class Lexer {
     if (ch === "`") return withNewline(this.readTemplateStart(start), newlineBefore);
     if (ch === "/") {
       return withNewline(
-        this.regexAllowed ? this.readRegexp(start) : this.readPunct(start),
+        regexAllowed ? this.readRegexp(start) : this.readPunct(start),
         newlineBefore,
       );
     }
