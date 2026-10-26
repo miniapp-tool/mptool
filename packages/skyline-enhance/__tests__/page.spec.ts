@@ -201,6 +201,94 @@ describe($Page, () => {
     expect(appEmitter.all.size).toBe(listenerCount);
   });
 
+  it("should run extendPage before the framework extension", () => {
+    const extended: {
+      name: string;
+      options: CapturedPageOptions;
+      hasName: boolean;
+      hasGo: boolean;
+    }[] = [];
+
+    $Config({
+      defaultPage: "/pages/$name",
+      extendPage: (name, options) => {
+        const raw = options as Record<string, unknown>;
+
+        // 记录调用瞬间的状态：options 在后续步骤中会被就地修改
+        extended.push({
+          name,
+          options,
+          hasName: "$name" in raw,
+          hasGo: "$go" in raw,
+        });
+      },
+    });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    expect(extended).toHaveLength(1);
+    expect(extended[0].name).toBe("index");
+    expect(extended[0].options).toBe(getOptions());
+
+    // extendPage 早于框架扩展：此时选项上还没有框架注入的字段
+    expect(extended[0].hasName).toBe(false);
+    expect(extended[0].hasGo).toBe(false);
+  });
+
+  it("should run injectPage after the framework extension", () => {
+    let injectedOptions: CapturedPageOptions | undefined;
+
+    $Config({
+      defaultPage: "/pages/$name",
+      injectPage: (name, options) => {
+        expect(name).toBe("index");
+        injectedOptions = options;
+      },
+    });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    // injectPage 在 mount 之后执行，可以覆盖框架方法
+    expect(injectedOptions).toBe(getOptions());
+    expect(injectedOptions?.$name).toBe("index");
+    expect(injectedOptions?.$go).toBeTypeOf("function");
+  });
+
+  it("should call onRegister before registering the page", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const calls: string[] = [];
+
+    (globalThis as any).Page = (): void => {
+      calls.push("register");
+    };
+
+    const onRegister = (): void => {
+      calls.push("onRegister");
+    };
+
+    $Page("index", { onRegister } as never);
+
+    expect(calls).toStrictEqual(["onRegister", "register"]);
+  });
+
+  it("should call the user onReady without a hot reload pattern", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+    const onReady = vi.fn<() => void>();
+
+    $Page("index", { onReady });
+
+    // 未配置 hotReloadPattern 时 onReady 包装直接放行
+    expect(() => getOptions()?.onReady?.()).not.toThrow();
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
   it("should log a rejected async onAwake instead of leaving it unhandled", async () => {
     $Config({ defaultPage: "/pages/$name" });
 

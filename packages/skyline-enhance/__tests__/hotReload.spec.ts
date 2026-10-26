@@ -715,6 +715,271 @@ describe("page hot reload", () => {
     expect(requestCount).toBe(2);
   });
 
+  it("should ignore a response that arrives after the fetch timed out", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+      hotReloadTimeout: 50,
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    vi.useFakeTimers();
+
+    try {
+      $Page("hotReloadLateSuccess", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      // 超时已经释放实例；随后到达的响应必须被忽略，不能补挂已放弃的页面
+      vi.advanceTimersByTime(50);
+      expect(getPendingHotReloadCount()).toBe(0);
+
+      handlers.success("return { late() { return 1; } };");
+
+      expect((instance as { late?: () => number }).late).toBeUndefined();
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should ignore a failure that arrives after the fetch timed out", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const handlers = captureRequestHandlers();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+      hotReloadTimeout: 50,
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    vi.useFakeTimers();
+
+    try {
+      $Page("hotReloadLateFail", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      vi.advanceTimersByTime(50);
+      expect(getPendingHotReloadCount()).toBe(0);
+
+      // 迟到的失败回调同样被忽略（拉取已结束），不得重复标记
+      expect(() => {
+        handlers.fail("request:fail timeout");
+      }).not.toThrow();
+
+      expect(getPendingHotReloadCount()).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should clear the pending timeout timer of a single page", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (): void => {};
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+      hotReloadTimeout: 1000,
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    vi.useFakeTimers();
+    vi.clearAllTimers();
+
+    $Page("hotReloadClearTimer", {});
+
+    getOptions().onLoad?.call(instance);
+    expect(vi.getTimerCount()).toBe(1);
+
+    // 清理单个页面时必须一并清理它的超时定时器，避免遗留的 timeout 改动状态
+    clearHotReloadCache("hotReloadClearTimer");
+
+    expect(vi.getTimerCount()).toBe(0);
+    expect(getPendingHotReloadCount()).toBe(0);
+
+    expect(() => {
+      vi.advanceTimersByTime(1000);
+    }).not.toThrow();
+  });
+
+  it("should not fetch again when the methods are already cached", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    let requestCount = 0;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (option: {
+      success?: (result: { statusCode: number; data: string }) => void;
+    }): void => {
+      requestCount += 1;
+      option.success?.({ statusCode: 200, data: "return { cached() { return 1; } };" });
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const firstInstance = {};
+    const secondInstance = {};
+
+    try {
+      $Page("hotReloadCached", {});
+      getOptions().onLoad?.call(firstInstance);
+
+      // 已缓存：重新注册同一页面不再发请求，但仍会应用缓存中的方法
+      $Page("hotReloadCached", {});
+      getOptions().onLoad?.call(secondInstance);
+
+      expect(requestCount).toBe(1);
+      expect((secondInstance as { cached?: () => number }).cached?.()).toBe(1);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should patch every instance waiting for the same page", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const resolveRequest = captureRequest();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const firstInstance = { data: {} };
+    const secondInstance = { data: {} };
+
+    try {
+      $Page("hotReloadMultiPending", {});
+
+      // 同一页面的两个实例各自等待：第二个复用已存在的登记集合
+      getOptions().onLoad?.call(firstInstance);
+      getOptions().onLoad?.call(secondInstance);
+
+      expect(getPendingHotReloadCount()).toBe(2);
+
+      resolveRequest("return { shared() { return 1; } };");
+
+      expect(getPendingHotReloadCount()).toBe(0);
+      expect((firstInstance as { shared?: () => number }).shared?.()).toBe(1);
+      expect((secondInstance as { shared?: () => number }).shared?.()).toBe(1);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should keep other pending instances when an unknown instance unloads", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (): void => {};
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+    const otherInstance = { data: {} };
+
+    try {
+      $Page("hotReloadUnknownUnload", {});
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      // 卸载一个没有登记过的实例：不得误删其它等待中的实例
+      getOptions().onUnload?.call(otherInstance);
+
+      expect(getPendingHotReloadCount()).toBe(1);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should ignore a stale timeout callback after the fetch settled", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const resolveRequest = captureRequest();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+      hotReloadTimeout: 1000,
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadStaleTimer", {});
+
+      const [[timeoutCallback]] = setTimeoutSpy.mock.calls;
+
+      getOptions().onLoad?.call(instance);
+
+      // 响应先到并结束拉取，超时定时器被清理；即使其回调仍然被触发，也必须被忽略
+      resolveRequest("return { settled() { return 1; } };");
+      expect(getPendingHotReloadCount()).toBe(0);
+
+      expect(timeoutCallback).toBeTypeOf("function");
+      expect(() => {
+        timeoutCallback();
+      }).not.toThrow();
+
+      expect((instance as { settled?: () => number }).settled?.()).toBe(1);
+    } finally {
+      setTimeoutSpy.mockRestore();
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should skip a hook that is no longer a function at onReady", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    mockRequest("return { onHotReload() { this.data.applied = true; } };");
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance: { data: Record<string, unknown>; onHotReload?: unknown } = { data: {} };
+
+    try {
+      $Page("hotReloadHookRemoved", {});
+
+      getOptions().onLoad?.call(instance);
+
+      // 页面在 ready 之前覆盖掉钩子：onReady 时必须跳过，而不是调用非函数值
+      instance.onHotReload = undefined;
+
+      expect(() => {
+        getOptions().onReady?.call(instance);
+      }).not.toThrow();
+
+      expect(instance.data.applied).toBeUndefined();
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
   it("should refetch after clearHotReloadCache", () => {
     (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
     let requestCount = 0;

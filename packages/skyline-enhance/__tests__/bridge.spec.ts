@@ -186,6 +186,273 @@ describe("$bindGo", () => {
     expect(beforeNavigate).toHaveBeenCalledWith(event);
     expect(navigateTo).not.toHaveBeenCalled();
   });
+
+  it("should ignore a missing event", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => void>();
+
+    (wx as any).navigateTo = navigateTo;
+
+    let pageOptions: { $bindGo?: (event: unknown) => Promise<void> } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    $Page("index", {});
+
+    // 事件对象缺失（如手动调用）时应直接返回，不触发任何导航
+    await expect(pageOptions?.$bindGo?.(undefined)).resolves.toBeUndefined();
+
+    expect(navigateTo).not.toHaveBeenCalled();
+  });
+
+  it("should skip after when the navigation resolves to undefined", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    // 宿主未真正跳转时 wx.* 可能解析为 undefined，此时不应执行 after
+    const navigateTo = vi.fn<() => Promise<undefined>>().mockResolvedValue(undefined);
+
+    (wx as any).navigateTo = navigateTo;
+
+    let pageOptions:
+      | { $bindGo?: (event: unknown) => Promise<void>; afterNavigate?: ReturnType<typeof vi.fn> }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const afterNavigate = vi.fn<() => void>();
+
+    $Page("index", { afterNavigate } as never);
+
+    const event = {
+      currentTarget: {
+        dataset: {
+          after: "afterNavigate",
+          url: "play",
+        },
+      },
+    };
+
+    await pageOptions?.$bindGo?.(event);
+
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play" });
+    expect(afterNavigate).not.toHaveBeenCalled();
+  });
+
+  it("should navigate without running an after hook", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "navigateTo:ok",
+    });
+
+    (wx as any).navigateTo = navigateTo;
+
+    let pageOptions: { $bindGo?: (event: unknown) => Promise<void> } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    $Page("index", {});
+
+    const event = {
+      currentTarget: {
+        dataset: {
+          url: "play",
+        },
+      },
+    };
+
+    await pageOptions?.$bindGo?.(event);
+
+    expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play" });
+  });
+});
+
+describe("$bindBack", () => {
+  it("should ignore a missing event", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateBack = vi.fn<() => void>();
+
+    (wx as any).navigateBack = navigateBack;
+
+    let pageOptions: { $bindBack?: (event: unknown) => Promise<void> } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    $Page("index", {});
+
+    await expect(pageOptions?.$bindBack?.(undefined)).resolves.toBeUndefined();
+
+    expect(navigateBack).not.toHaveBeenCalled();
+  });
+
+  it("should run before / after hooks around navigateBack with a custom delta", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateBack = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "navigateBack:ok",
+    });
+
+    (wx as any).navigateBack = navigateBack;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+
+    let pageOptions:
+      | {
+          $bindBack?: (event: unknown) => Promise<void>;
+          beforeBack?: ReturnType<typeof vi.fn>;
+          afterBack?: ReturnType<typeof vi.fn>;
+        }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const beforeBack = vi.fn<() => void>();
+    const afterBack = vi.fn<() => void>();
+
+    $Page("index", { beforeBack, afterBack } as never);
+
+    const event = {
+      currentTarget: {
+        dataset: {
+          before: "beforeBack",
+          after: "afterBack",
+          // dataset values are always strings in the mini-program runtime
+          delta: "2",
+        },
+      },
+    };
+
+    await pageOptions?.$bindBack?.(event);
+
+    expect(beforeBack).toHaveBeenCalledWith(event);
+    expect(navigateBack).toHaveBeenCalledWith({ delta: 2 });
+    expect(afterBack).toHaveBeenCalledWith(event);
+  });
+
+  it("should default to a delta of 1", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateBack = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "navigateBack:ok",
+    });
+
+    (wx as any).navigateBack = navigateBack;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+
+    let pageOptions: { $bindBack?: (event: unknown) => Promise<void> } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    $Page("index", {});
+
+    await pageOptions?.$bindBack?.({ currentTarget: { dataset: {} } });
+
+    expect(navigateBack).toHaveBeenCalledWith({ delta: 1 });
+  });
+
+  it("should fall back to home when the page stack is too short", async () => {
+    $Config({ defaultPage: "/pages/$name", home: "main" });
+
+    const reLaunch = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "reLaunch:ok",
+    });
+
+    (wx as any).reLaunch = reLaunch;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+
+    let pageOptions:
+      | { $bindBack?: (event: unknown) => Promise<void>; afterBack?: ReturnType<typeof vi.fn> }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const afterBack = vi.fn<() => void>();
+
+    $Page("index", { afterBack } as never);
+
+    await pageOptions?.$bindBack?.({ currentTarget: { dataset: { after: "afterBack" } } });
+
+    expect(reLaunch).toHaveBeenCalledWith({ url: "/pages/main" });
+    expect(afterBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("should resolve without navigateBack when already at the first page without home", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const navigateBack = vi.fn<() => void>();
+
+    (wx as any).navigateBack = navigateBack;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+
+    let pageOptions:
+      | { $bindBack?: (event: unknown) => Promise<void>; afterBack?: ReturnType<typeof vi.fn> }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const afterBack = vi.fn<() => void>();
+
+    $Page("index", { afterBack } as never);
+
+    await expect(
+      pageOptions?.$bindBack?.({ currentTarget: { dataset: { after: "afterBack" } } }),
+    ).resolves.toBeUndefined();
+
+    expect(navigateBack).not.toHaveBeenCalled();
+    expect(afterBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("should log a failed navigateBack instead of rejecting", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const error = new Error("navigateBack:fail");
+    const navigateBack = vi.fn<() => Promise<never>>().mockRejectedValue(error);
+
+    (wx as any).navigateBack = navigateBack;
+    (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+
+    let pageOptions:
+      | { $bindBack?: (event: unknown) => Promise<void>; afterBack?: ReturnType<typeof vi.fn> }
+      | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    const afterBack = vi.fn<() => void>();
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      $Page("index", { afterBack } as never);
+
+      // 失败被吞掉（不产生 unhandled rejection），after 不执行
+      await expect(
+        pageOptions?.$bindBack?.({ currentTarget: { dataset: { after: "afterBack" } } }),
+      ).resolves.toBeUndefined();
+
+      expect(errorSpy).toHaveBeenCalledWith("Navigation back failed", error);
+      expect(afterBack).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
 });
 
 describe("$getPath", () => {
