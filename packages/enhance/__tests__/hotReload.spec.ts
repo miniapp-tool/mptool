@@ -131,6 +131,48 @@ describe("page hot reload", () => {
     }
   });
 
+  it("should bound the execution options of remote code", () => {
+    const received: unknown[] = [];
+
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = (
+      args: string[],
+      body: string,
+      options?: {
+        global?: boolean;
+        maxSteps?: number;
+        maxStack?: number;
+        maxSourceLength?: number;
+      },
+    ): ((...callArgs: unknown[]) => unknown) => {
+      received.push(options);
+
+      return createFunction(args, body, options);
+    };
+    mockRequest("return { bounded() { return 1; } };");
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = {};
+
+    try {
+      $Page("hotBounded", {});
+      getOptions().onLoad?.call(instance);
+
+      expect(received[0]).toStrictEqual({
+        global: true,
+        maxSteps: 200_000,
+        maxStack: 128,
+        maxSourceLength: 512 * 1024,
+      });
+      expect((instance as unknown as { bounded: () => number }).bounded()).toBe(1);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
   it("should apply the returned method object directly", () => {
     (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
     mockRequest("return { extra() { return this.data.v; } };");
