@@ -21,6 +21,12 @@ describe(decodeBase64, () => {
     expect(decodeBase64("Zg==")).toHaveLength(1);
     expect(decodeBase64("Zm8=")).toHaveLength(2);
   });
+
+  it("stops at the first character outside the base64 alphabet", () => {
+    // The lookup table only covers char codes below 128, and non-alphabet characters map to -1.
+    expect(bytes(decodeBase64("Zm9v\u00E9"))).toStrictEqual([0x66, 0x6f, 0x6f]);
+    expect(bytes(decodeBase64("Zm9v!"))).toStrictEqual([0x66, 0x6f, 0x6f]);
+  });
 });
 
 describe("gb18030 index", () => {

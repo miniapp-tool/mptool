@@ -90,3 +90,28 @@ describe(TextDecoder, () => {
     }
   });
 });
+
+describe("utf-8 - error handling", () => {
+  const decodeBytes = (values: number[], fatal = false): string =>
+    new TextDecoder("utf-8", { fatal }).decode(Uint8Array.from(values));
+
+  it("replaces an incomplete trailing sequence with U+FFFD", () => {
+    // 0xE4 starts a three-byte sequence, but only one continuation byte follows.
+    expect(decodeBytes([0xe4, 0xb8])).toBe("\uFFFD");
+  });
+
+  it("replaces an invalid lead byte", () => {
+    expect(decodeBytes([0xc0])).toBe("\uFFFD");
+    expect(decodeBytes([0xf5])).toBe("\uFFFD");
+  });
+
+  it("re-emits a byte that is not a valid continuation byte", () => {
+    expect(decodeBytes([0xe4, 0x41])).toBe("\uFFFDA");
+  });
+
+  it("throws in fatal mode", () => {
+    expect(() => decodeBytes([0xe4, 0xb8], true)).toThrow(TypeError);
+    expect(() => decodeBytes([0xc0], true)).toThrow(TypeError);
+    expect(() => decodeBytes([0xe4, 0x41], true)).toThrow(TypeError);
+  });
+});

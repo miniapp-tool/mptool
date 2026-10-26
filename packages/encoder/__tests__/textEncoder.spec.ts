@@ -54,4 +54,44 @@ describe(TextEncoder, () => {
   it("throws a RangeError for an unknown label", () => {
     expect(() => new TextEncoder("not-an-encoding")).toThrow(RangeError);
   });
+
+  it("encodes an empty string when called without arguments", () => {
+    expect(bytes(new TextEncoder().encode())).toStrictEqual([]);
+  });
+
+  it("accepts the fatal option", () => {
+    // Encoders never replace, so the flag only has to be accepted and stored.
+    expect(bytes(new TextEncoder("utf-8", { fatal: true }).encode("A"))).toStrictEqual([0x41]);
+  });
+
+  it("encodes ASCII unchanged", () => {
+    expect(bytes(new TextEncoder("gbk").encode("A\u007F"))).toStrictEqual([0x41, 0x7f]);
+  });
+
+  it("supports non-standard streaming encodes", () => {
+    const encoder = new TextEncoder("gbk");
+
+    expect(bytes(encoder.encode("中", { stream: true }))).toStrictEqual([0xd6, 0xd0]);
+    expect(bytes(encoder.encode("文"))).toStrictEqual([0xce, 0xc4]);
+  });
+
+  it("rejects U+E5E5 for every encoding", () => {
+    expect(() => new TextEncoder("gb18030").encode("\uE5E5")).toThrow(TypeError);
+    expect(() => new TextEncoder("gbk").encode("\uE5E5")).toThrow(TypeError);
+  });
+
+  it("rejects code points that GBK cannot encode", () => {
+    expect(() => new TextEncoder("gbk").encode("💩")).toThrow(TypeError);
+    expect(() => new TextEncoder("gbk").encode("\uFFFE")).toThrow(TypeError);
+  });
+
+  it("encodes the euro sign as 0x80 under a GBK label", () => {
+    expect(bytes(new TextEncoder("gbk").encode("€"))).toStrictEqual([0x80]);
+  });
+
+  it("round-trips the euro sign through gb18030", () => {
+    const encoded = new TextEncoder("gb18030").encode("€");
+
+    expect(new TextDecoder("gb18030").decode(encoded)).toBe("€");
+  });
 });
