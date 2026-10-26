@@ -296,6 +296,13 @@ export interface ParserLimits {
    * 回溯期间允许消费的最大 token 数，默认 `5000`
    */
   maxBacktracks?: number;
+
+  /**
+   * Whether to apply strict-mode early errors (octal literals/escapes, duplicate parameters)
+   *
+   * 是否启用严格模式早错误（八进制字面量/转义、重复形参）
+   */
+  strict?: boolean;
 }
 
 /**
@@ -328,6 +335,43 @@ const isIterationTarget = (statement: Statement): boolean => {
 };
 
 /**
+ * Collect the binding names of a pattern.
+ *
+ * 收集模式绑定的名称。
+ *
+ * @param pattern - The pattern / 模式
+ * @param out - Collected names / 收集结果
+ */
+const patternNames = (pattern: AssignmentTarget, out: string[]): void => {
+  switch (pattern.type) {
+    case "identifier": {
+      out.push(pattern.name);
+      break;
+    }
+    case "assignmentPattern": {
+      patternNames(pattern.left, out);
+      break;
+    }
+    case "rest": {
+      patternNames(pattern.argument, out);
+      break;
+    }
+    case "arrayPattern": {
+      for (const element of pattern.elements) if (element != null) patternNames(element, out);
+      break;
+    }
+    case "objectPattern": {
+      for (const prop of pattern.props) if (prop.value != null) patternNames(prop.value, out);
+      if (pattern.rest != null) patternNames(pattern.rest.argument, out);
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+};
+
+/**
  * Recursive descent parser producing an AST.
  *
  * 递归下降解析器，产出 AST。
@@ -353,6 +397,7 @@ export class Parser {
   private switchDepth = 0;
   /** Labels currently in scope / 当前作用域内的标签 */
   private readonly labels: { name: string; token: Token; needsIteration: boolean }[] = [];
+  private readonly strict: boolean;
   private readonly maxSourceLength: number;
   private readonly maxParseDepth: number;
   private readonly maxBacktracks: number;
@@ -369,6 +414,7 @@ export class Parser {
   ) {
     this.lexer = new Lexer(source);
     this.features = { ...DEFAULT_FEATURES, ...features };
+    this.strict = limits.strict ?? false;
     this.maxSourceLength = limits.maxSourceLength ?? Number.POSITIVE_INFINITY;
     this.maxParseDepth = limits.maxParseDepth ?? Number.POSITIVE_INFINITY;
     this.maxBacktracks = limits.maxBacktracks ?? DEFAULT_MAX_BACKTRACKS;
@@ -1329,6 +1375,7 @@ export class Parser {
 
     if (this.match(")")) {
       this.advance();
+      this.validateParams(params);
 
       return params;
     }
@@ -1342,6 +1389,7 @@ export class Parser {
 
       params.push({ type: "rest", argument, start: restStart, end: argument.end });
       this.expect(")");
+      this.validateParams(params);
 
       return params;
     }
@@ -1387,8 +1435,31 @@ export class Parser {
     }
 
     this.expect(")");
+    this.validateParams(params);
 
     return params;
+  }
+
+  /**
+   * Reject duplicate parameter names (always for non-simple lists, in strict mode for simple ones).
+   *
+   * 拒绝重复形参（非简单参数列表始终拒绝；简单列表仅严格模式拒绝）。
+   *
+   * @param params - Parsed parameters / 已解析参数
+   */
+  private validateParams(params: readonly Pattern[]): void {
+    const names: string[] = [];
+    const seen = new Set<string>();
+    const nonSimple = params.some((param) => param.type !== "identifier");
+
+    for (const param of params) patternNames(param, names);
+
+    for (const name of names) {
+      if (seen.has(name) && (this.strict || nonSimple))
+        throw this.error(`Duplicate parameter name '${name}'`);
+
+      seen.add(name);
+    }
   }
 
   /**
@@ -2380,6 +2451,9 @@ export class Parser {
 
     switch (token.type) {
       case "number": {
+        if (this.strict && token.legacyOctal)
+          throw this.error("Octal literals are not allowed in strict mode", token);
+
         this.advance();
 
         return {
@@ -2397,6 +2471,9 @@ export class Parser {
         return { type: "literal", value: BigInt(token.value), start: token.start, end: token.end };
       }
       case "string": {
+        if (this.strict && token.legacyOctal)
+          throw this.error("Octal escape sequences are not allowed in strict mode", token);
+
         this.advance();
 
         return { type: "literal", value: token.cooked, start: token.start, end: token.end };
