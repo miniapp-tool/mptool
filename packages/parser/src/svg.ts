@@ -28,7 +28,9 @@ const MUST_ENCODE: Record<string, string> = {
  */
 export const convertSVGToDataURI = (content: string): string =>
   `data:image/svg+xml,${content
-    .replace(/[%#&"<>]/gu, (character) => MUST_ENCODE[character] ?? character)
+    // the character class below matches exactly the keys of `MUST_ENCODE`, so every lookup hits
+    // 下方字符类与 `MUST_ENCODE` 的键完全一致，因此查表必然命中，无需回退原字符
+    .replace(/[%#&"<>]/gu, (character) => MUST_ENCODE[character])
     .replace(
       /\s/gu,
       (character) => `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`,

@@ -13,11 +13,9 @@ const removeScript = (nodes: AnyNode[]): void => {
   // 使用显式栈而非递归：深嵌套输入不得撑爆宿主调用栈
   const stack: AnyNode[][] = [nodes];
 
-  while (stack.length > 0) {
-    const list = stack.pop();
-
-    if (list == null) continue;
-
+  // drain the stack until it is empty; the undefined result only ends the loop, it is never processed
+  // 逐个弹出直到栈空：undefined 仅用于结束循环，不会被处理
+  for (let list = stack.pop(); list != null; list = stack.pop()) {
     for (let i = list.length - 1; i >= 0; i -= 1) {
       const node = list[i];
 
