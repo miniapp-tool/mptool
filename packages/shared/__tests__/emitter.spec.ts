@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import type { EmitterInstance, EventHandlerMap } from "../src/emitter";
+import type { EmitterInstance, EventHandlerMap, WildcardHandler } from "../src/emitter";
 import { Emitter } from "../src/emitter";
 
 describe(Emitter, () => {
@@ -27,6 +27,20 @@ describe(Emitter, () => {
 
   it("should default export be a function", () => {
     expectTypeOf(Emitter).toBeFunction();
+  });
+
+  it("should create an empty event handler map by default", () => {
+    const emitter = Emitter<{ foo: unknown }>();
+    const foo = vi.fn<() => void>();
+
+    expect(emitter.all).toBeInstanceOf(Map);
+    expect(emitter.all.size).toBe(0);
+
+    emitter.on("foo", foo);
+    emitter.emit("foo", "arg");
+
+    expect(emitter.all.get("foo")).toStrictEqual([foo]);
+    expect(foo).toHaveBeenCalledWith("arg");
   });
 
   it("should accept an optional event handler map", () => {
@@ -257,6 +271,51 @@ describe(Emitter, () => {
         });
 
         expect(syncHandler).toHaveBeenCalledTimes(1);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("should continue to invoke remaining * handlers when one throws", () => {
+      const first = vi.fn<WildcardHandler<Events>>(() => {
+        throw new Error("first * handler error");
+      });
+      const second = vi.fn<WildcardHandler<Events>>();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      try {
+        inst.on("*", first);
+        inst.on("*", second);
+
+        expect(() => inst.emit("foo", "arg")).not.toThrow();
+        expect(first).toHaveBeenCalledWith("foo", "arg");
+        expect(second).toHaveBeenCalledWith("foo", "arg");
+        expect(spy).toHaveBeenCalledTimes(1);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("should swallow rejected promises from async * handlers", async () => {
+      const starHandler = vi.fn<WildcardHandler<Events>>(() =>
+        Promise.reject(new Error("async * handler error")),
+      );
+      const syncHandler = vi.fn<WildcardHandler<Events>>();
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      try {
+        inst.on("*", starHandler);
+        inst.on("*", syncHandler);
+
+        inst.emit("foo", "arg");
+
+        // wait for the catch microtask to settle
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 0);
+        });
+
+        expect(syncHandler).toHaveBeenCalledWith("foo", "arg");
+        expect(spy).toHaveBeenCalledTimes(1);
       } finally {
         spy.mockRestore();
       }

@@ -24,6 +24,22 @@ describe(env, () => {
     }
   });
 
+  it("should be donut when wx exposes a miniapp namespace", async () => {
+    const globalRecord = globalThis as { wx?: unknown };
+    const originalWx = globalRecord.wx;
+
+    globalRecord.wx = { miniapp: {} };
+
+    try {
+      // @ts-expect-error: query suffix for fresh module evaluation
+      const { env: donutEnv } = (await import("../src/env.js?donut")) as { env: Env };
+
+      expect(donutEnv).toBe("donut");
+    } finally {
+      globalRecord.wx = originalWx;
+    }
+  });
+
   it("should ignore the qq global", async () => {
     const globalRecord = globalThis as { qq?: unknown; wx?: unknown };
     const originalQq = globalRecord.qq;
