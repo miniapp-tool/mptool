@@ -1,13 +1,25 @@
 /* oxlint-disable typescript/no-dynamic-delete -- test cleanup of the global hook via dynamic key */
 import "@mptool/mock";
 import { createFunction } from "@mptool/run";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { $Config } from "../src/config/index.js";
-import { HOT_RELOAD_FUNCTION_KEY, getPendingHotReloadCount } from "../src/hotReload.js";
+import {
+  HOT_RELOAD_FUNCTION_KEY,
+  clearHotReloadCache,
+  getPendingHotReloadCount,
+} from "../src/hotReload.js";
 import { $Page } from "../src/page/index.js";
 
 describe("page hot reload", () => {
+  // oxlint-disable-next-line vitest/no-hooks -- reset hot-reload cache and timers between cases
+  afterEach(() => {
+    // 清理缓存、定时器与全局钩子，避免用例之间的状态泄漏（shuffle-safe）
+    clearHotReloadCache();
+    vi.useRealTimers();
+    delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+  });
+
   /**
    * 模拟 wx.request 立即返回指定代码
    *
@@ -645,5 +657,89 @@ describe("page hot reload", () => {
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
+  });
+
+  it("should dedupe concurrent fetches for the same page", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    let requestCount = 0;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (): void => {
+      requestCount += 1;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    capturePageOptions();
+
+    $Page("hotReloadInflight", {});
+
+    // 拉取未返回时再次注册同一页面：不应重复发请求
+    $Page("hotReloadInflight", {});
+
+    expect(requestCount).toBe(1);
+  });
+
+  it("should release pending instances and allow a retry when the fetch times out", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    let requestCount = 0;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (): void => {
+      requestCount += 1;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+      hotReloadTimeout: 50,
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    vi.useFakeTimers();
+
+    $Page("hotReloadTimeout", {});
+
+    getOptions().onLoad?.call(instance);
+    expect(getPendingHotReloadCount()).toBe(1);
+
+    // 超时：等待中的实例被释放，晚到的响应不会再补挂
+    vi.advanceTimersByTime(50);
+    expect(getPendingHotReloadCount()).toBe(0);
+
+    // 超时后允许重新注册并重新拉取
+    $Page("hotReloadTimeout", {});
+    expect(requestCount).toBe(2);
+  });
+
+  it("should refetch after clearHotReloadCache", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    let requestCount = 0;
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (option: {
+      success?: (result: { statusCode: number; data: string }) => void;
+    }): void => {
+      requestCount += 1;
+      option.success?.({ statusCode: 200, data: "return { method() { return 1; } };" });
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    capturePageOptions();
+
+    $Page("hotReloadClear", {});
+    expect(requestCount).toBe(1);
+
+    // OTA 场景：清掉缓存后重新注册会再次拉取
+    clearHotReloadCache("hotReloadClear");
+
+    $Page("hotReloadClear", {});
+    expect(requestCount).toBe(2);
   });
 });

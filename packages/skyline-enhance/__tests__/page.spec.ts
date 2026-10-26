@@ -1,5 +1,5 @@
 import "@mptool/mock";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { $Config } from "../src/config/index.js";
 import { ON_APP_AWAKE } from "../src/constant.js";
@@ -50,6 +50,12 @@ const loadPageState = (options: CapturedPageOptions | undefined): PageState => {
 };
 
 describe($Page, () => {
+  // oxlint-disable-next-line vitest/no-hooks -- reset singleton emitter listeners between cases
+  afterEach(() => {
+    // 清理全局 emitter 监听器，避免用例之间互相影响（shuffle-safe）
+    appEmitter.all.clear();
+  });
+
   const capturePageOptions = (): (() => CapturedPageOptions | undefined) => {
     let pageOptions: CapturedPageOptions | undefined;
 

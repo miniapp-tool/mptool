@@ -1,5 +1,5 @@
 import "@mptool/mock";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { appState } from "../src/app/index.js";
 import { $Config } from "../src/config/index.js";
@@ -59,6 +59,13 @@ const loadPageState = (options: CapturedPageOptions | undefined): PageState => {
 };
 
 describe($Page, () => {
+  // oxlint-disable-next-line vitest/no-hooks -- reset singleton emitter listeners between cases
+  afterEach(() => {
+    // 清理全局 emitter 监听器，避免用例之间互相影响（shuffle-safe）
+    appEmitter.all.clear();
+    routeEmitter.all.clear();
+  });
+
   const capturePageOptions = (): (() => CapturedPageOptions | undefined) => {
     let pageOptions: CapturedPageOptions | undefined;
 
@@ -316,6 +323,41 @@ describe($Page, () => {
     } finally {
       errorSpy.mockRestore();
       appState.launch = false;
+    }
+  });
+
+  it("should not accumulate lifecycle listeners when a page is registered twice", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    appState.launch = false;
+
+    const onAppLaunch = vi.fn<(options: WechatMiniprogram.App.LaunchShowOption) => void>();
+    const onNavigate = vi.fn<(query: PageQuery) => void>();
+    const onPreload = vi.fn<(query: PageQuery) => void>();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      $Page("duplicate", { onAppLaunch, onNavigate, onPreload });
+      $Page("duplicate", { onAppLaunch, onNavigate, onPreload });
+
+      appEmitter.emit(ON_APP_LAUNCH, {
+        path: "/pages/duplicate",
+        query: {},
+        scene: 1001,
+        shareTicket: "",
+        referrerInfo: {},
+      } as WechatMiniprogram.App.LaunchShowOption);
+
+      routeEmitter.emit(`${ON_PAGE_NAVIGATE}:/pages/duplicate`, { from: "home" });
+      routeEmitter.emit(`${ON_PAGE_PRELOAD}:/pages/duplicate`, { from: "home" });
+
+      // 重复注册会先注销旧监听器：每个生命周期只触发一次
+      expect(onAppLaunch).toHaveBeenCalledTimes(1);
+      expect(onNavigate).toHaveBeenCalledTimes(1);
+      expect(onPreload).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("registered more than once"));
+    } finally {
+      warnSpy.mockRestore();
     }
   });
 });

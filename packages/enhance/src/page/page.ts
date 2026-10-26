@@ -26,6 +26,16 @@ let shouldBeFirstPage = true;
 const onAwakeHandlers = new WeakMap<object, (time: number) => void>();
 
 /**
+ * Cleanup callbacks for page-definition level listeners (`onAppLaunch` / `onNavigate` /
+ * `onPreload`), keyed by page name. A page module can be evaluated twice, which would otherwise
+ * register the same listeners again and invoke them twice per event.
+ *
+ * 页面定义级监听器（`onAppLaunch` / `onNavigate` / `onPreload`）的清理函数，按页面名登记。
+ * 页面模块可能被执行两次，否则同一监听器会被重复注册并在每次事件中重复触发。
+ */
+const pageLifecycleCleanups = new Map<string, () => void>();
+
+/**
  * Invoke an optional page lifecycle and report a rejected promise instead of leaving it unhandled.
  *
  * The mini-program runtime has no `unhandledrejection` hook, so a rejected async `onAppLaunch` /
@@ -50,7 +60,106 @@ const invokeAsyncLifecycle = async (
   }
 };
 
-// oxlint-disable-next-line eslint/max-statements -- hot reload integration adds two statements to $Page
+/**
+ * Register page-definition lifecycle listeners (`onAppLaunch` / `onNavigate` / `onPreload`) and
+ * unregister a previous registration of the same page name first: a page module can be evaluated
+ * twice, which would otherwise accumulate listeners and fire each lifecycle handler twice.
+ *
+ * 注册页面定义级生命周期监听器（`onAppLaunch` / `onNavigate` / `onPreload`），并先注销同名页面上一次
+ * 注册的监听器：页面模块可能被执行两次，否则监听器会累积并让生命周期重复触发。
+ *
+ * @param name - Page name / 页面名称
+ * @param route - Normalized route key / 规范化后的路由 key
+ * @param options - Page options / 页面选项
+ * @param callLog - Lifecycle debug logger / 生命周期调试日志
+ */
+const registerPageLifecycleListeners = <
+  Data extends WechatMiniprogram.IAnyObject,
+  Custom extends WechatMiniprogram.IAnyObject,
+>(
+  name: string,
+  route: string,
+  options: PageOptions<Data, Custom>,
+  callLog: (lifeCycle: string, args?: unknown) => void,
+): void => {
+  // Unregister the listeners of a previous registration for the same page name, otherwise a page
+  // module evaluated twice accumulates listeners and fires each lifecycle handler twice.
+  // 同一页面被重复注册时，先注销上一次注册的监听器，避免监听器累积导致生命周期重复触发。
+  const previousLifecycleCleanup = pageLifecycleCleanups.get(name);
+
+  if (previousLifecycleCleanup) {
+    logger.warn(`Page ${name}: registered more than once, replacing its lifecycle listeners`);
+    previousLifecycleCleanup();
+    pageLifecycleCleanups.delete(name);
+  }
+
+  const lifecycleCleanups: (() => void)[] = [];
+  const { onAppLaunch } = options;
+
+  if (onAppLaunch) {
+    if (appState.launch) {
+      const { lOpt: onLaunchOptions } = appState;
+
+      callLog("onAppLaunch");
+
+      void invokeAsyncLifecycle(name, "onAppLaunch", () =>
+        onAppLaunch(onLaunchOptions as WechatMiniprogram.App.LaunchShowOption),
+      );
+    } else {
+      const onLaunchHandler = (onLaunchOptions: WechatMiniprogram.App.LaunchShowOption): void => {
+        callLog("onAppLaunch");
+
+        void invokeAsyncLifecycle(name, "onAppLaunch", () => onAppLaunch(onLaunchOptions));
+      };
+
+      appEmitter.on(ON_APP_LAUNCH, onLaunchHandler);
+      lifecycleCleanups.push(() => {
+        appEmitter.off(ON_APP_LAUNCH, onLaunchHandler);
+      });
+    }
+
+    logger.debug(`Page ${name}: registered onAppLaunch`);
+  }
+
+  if (options.onNavigate) {
+    const { onNavigate } = options;
+    const onNavigateHandler = (query: PageQuery): Promise<void> | void => {
+      callLog("onNavigate", query);
+
+      return onNavigate(query);
+    };
+
+    routeEmitter.on(`${ON_PAGE_NAVIGATE}:${route}`, onNavigateHandler);
+    lifecycleCleanups.push(() => {
+      routeEmitter.off(`${ON_PAGE_NAVIGATE}:${route}`, onNavigateHandler);
+    });
+
+    logger.debug(`Page ${name}: registered onNavigate`);
+  }
+
+  if (options.onPreload) {
+    const { onPreload } = options;
+    const onPreloadHandler = (query: PageQuery): void | Promise<void> => {
+      callLog("onPreload", query);
+
+      return onPreload(query);
+    };
+
+    routeEmitter.on(`${ON_PAGE_PRELOAD}:${route}`, onPreloadHandler);
+    lifecycleCleanups.push(() => {
+      routeEmitter.off(`${ON_PAGE_PRELOAD}:${route}`, onPreloadHandler);
+    });
+
+    logger.debug(`Page ${name}: registered onPreload`);
+  }
+
+  if (lifecycleCleanups.length > 0) {
+    pageLifecycleCleanups.set(name, () => {
+      for (const dispose of lifecycleCleanups) dispose();
+    });
+  }
+};
+
 export const $Page: PageConstructor = <
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
@@ -83,49 +192,7 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
-  const { onAppLaunch } = options;
-
-  if (onAppLaunch) {
-    if (appState.launch) {
-      const { lOpt: onLaunchOptions } = appState;
-
-      callLog("onAppLaunch");
-
-      void invokeAsyncLifecycle(name, "onAppLaunch", () =>
-        onAppLaunch(onLaunchOptions as WechatMiniprogram.App.LaunchShowOption),
-      );
-    } else {
-      appEmitter.on(ON_APP_LAUNCH, (onLaunchOptions) => {
-        callLog("onAppLaunch");
-
-        void invokeAsyncLifecycle(name, "onAppLaunch", () => onAppLaunch(onLaunchOptions));
-      });
-    }
-
-    registerLog("onAppLaunch");
-  }
-
-  if (options.onNavigate) {
-    routeEmitter.on(`${ON_PAGE_NAVIGATE}:${route}`, (query: PageQuery): Promise<void> | void => {
-      callLog("onNavigate", query);
-
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      return options.onNavigate!(query);
-    });
-
-    registerLog("onNavigate");
-  }
-
-  if (options.onPreload) {
-    routeEmitter.on(`${ON_PAGE_PRELOAD}:${route}`, (query: PageQuery): void | Promise<void> => {
-      callLog("onPreload", query);
-
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      return options.onPreload!(query);
-    });
-
-    registerLog("onPreload");
-  }
+  registerPageLifecycleListeners(name, route, options, callLog);
 
   /* oxlint-disable typescript/no-misused-promises */
   options.onLoad = wrapFunction(

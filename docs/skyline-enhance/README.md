@@ -210,6 +210,20 @@ installGlobal();
 
 拉取时机、`onHotReload` 钩子、服务端部署（返回 200 空响应体避免 404）等细节与 enhance 完全一致，请参阅 [enhance 的「页面热更新」章节](../enhance/README.md)。
 
+::: tip 并发注册、超时与缓存
+
+- 同一页面的在途请求会去重：页面模块重复执行时不会重复拉取；
+- 拉取默认 10s 超时，可通过 `$Config({ hotReloadTimeout })` 调整；超时后释放等待中的页面实例；
+- OTA 部署新代码后，可用 `clearHotReloadCache()` / `clearHotReloadCache(name)` 清除缓存。
+
+```ts
+import { clearHotReloadCache } from "@mptool/skyline-enhance";
+
+clearHotReloadCache("main");
+```
+
+:::
+
 ## 从 @mptool/enhance 迁移
 
 将包名替换为 `@mptool/skyline-enhance` 后，按以下清单调整：

@@ -8,6 +8,7 @@ export {
   HOT_RELOAD_FUNCTION_KEY,
   HOT_RELOAD_ON_READY_KEY,
   applyHotReload,
+  clearHotReloadCache,
   fetchHotReload,
   markHotReloadReady,
 } from "./hotReload.js";

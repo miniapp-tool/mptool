@@ -157,6 +157,21 @@ $App({
 拉取只在页面**注册**（页面模块执行）时发生一次，之后不会再自动刷新：进入一个已经注册过的页面不会重新拉取，需要获取新部署的热更新代码时，**重启小程序**即可（重启会重新注册页面并再次拉取）。
 :::
 
+::: tip 并发注册、超时与缓存
+
+- 同一页面的拉取请求在途时，重复注册（例如页面模块被执行两次）**不会重复发请求**；
+- 拉取默认 10s 超时，可通过 `hotReloadTimeout` 调整；超时后视为该页面没有可用热更新，并释放等待中的页面实例，晚到的响应会被忽略；
+- OTA 部署新代码后，可调用 `clearHotReloadCache()`（全部页面）或 `clearHotReloadCache(name)`（单个页面）清除缓存，让页面在下次注册时重新拉取。
+
+```ts
+import { clearHotReloadCache } from "@mptool/enhance";
+
+clearHotReloadCache(); // 清除所有页面的热更新缓存
+clearHotReloadCache("main"); // 只清除 main 页面
+```
+
+:::
+
 ```ts
 $Config({
   hotReloadPattern: "https://example.com/hotReloadCode/$name",

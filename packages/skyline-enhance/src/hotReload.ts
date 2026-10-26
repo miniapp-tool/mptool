@@ -1,3 +1,5 @@
+import { getConfig } from "./config/index.js";
+
 /**
  * Page hot reload
  *
@@ -43,6 +45,15 @@ const pendingInstances = new Map<string, Set<object>>();
  */
 const unavailableHotReload = new Set<string>();
 
+/** Page names whose hot-reload fetch is currently in flight / 正在拉取热更新的页面名 */
+const inFlightHotReload = new Set<string>();
+
+/** Pending fetch timeout timers, keyed by page name / 每个页面热更新拉取的超时定时器 */
+const hotReloadTimeoutTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** Default timeout (ms) for a hot-reload fetch / 热更新拉取的默认超时时间（ms） */
+const DEFAULT_HOT_RELOAD_TIMEOUT = 10_000;
+
 /**
  * Number of page instances still waiting for a hot reload.
  *
@@ -71,6 +82,64 @@ export const getPendingHotReloadCount = (): number => {
 const markHotReloadUnavailable = (name: string): void => {
   pendingInstances.delete(name);
   unavailableHotReload.add(name);
+};
+
+/**
+ * Mark a hot-reload fetch as settled: clear its timeout timer and in-flight marker.
+ *
+ * Returns `false` when the fetch had already settled, so a late response arriving after the timeout
+ * is ignored instead of patching pages with stale code.
+ *
+ * 标记热更新拉取已结束：清理超时定时器与在途标记。已结束（如超时后才到达的响应）时返回 `false`， 避免用过期代码补挂页面。
+ *
+ * @param name - Page name / 页面名称
+ * @returns Whether this call settled the fetch / 本次调用是否真正结束了拉取
+ */
+const settleHotReload = (name: string): boolean => {
+  if (!inFlightHotReload.delete(name)) return false;
+
+  const timer = hotReloadTimeoutTimers.get(name);
+
+  if (timer != null) {
+    clearTimeout(timer);
+    hotReloadTimeoutTimers.delete(name);
+  }
+
+  return true;
+};
+
+/**
+ * Clear cached hot-reload methods so a later registration (or an explicit `fetchHotReload` call)
+ * fetches the code again — e.g. after deploying new hot-reload code (OTA).
+ *
+ * 清除热更新缓存，使后续页面注册（或手动调用 `fetchHotReload`）重新拉取，例如 OTA 部署新代码后。
+ *
+ * @param name - Page name, or omit to clear every page / 页面名称；省略时清除所有页面
+ */
+export const clearHotReloadCache = (name?: string): void => {
+  if (name == null) {
+    hotReloadCache.clear();
+    unavailableHotReload.clear();
+    pendingInstances.clear();
+    inFlightHotReload.clear();
+
+    for (const timer of hotReloadTimeoutTimers.values()) clearTimeout(timer);
+    hotReloadTimeoutTimers.clear();
+
+    return;
+  }
+
+  hotReloadCache.delete(name);
+  unavailableHotReload.delete(name);
+  pendingInstances.delete(name);
+  inFlightHotReload.delete(name);
+
+  const timer = hotReloadTimeoutTimers.get(name);
+
+  if (timer != null) {
+    clearTimeout(timer);
+    hotReloadTimeoutTimers.delete(name);
+  }
 };
 
 /** Page instances that have fired `onReady` / 已触发 onReady 的页面实例 */
@@ -250,6 +319,11 @@ export const fetchHotReload = (name: string, pattern: string): void => {
   // 该页面已拉取过
   if (hotReloadCache.has(name)) return;
 
+  // A fetch for this page is already in flight: registering the same page again (e.g. the module is
+  // evaluated twice) must not send a duplicate request.
+  // 同一页面的拉取已在途：重复注册同一页面（如模块被重复执行）时不要重复发请求。
+  if (inFlightHotReload.has(name)) return;
+
   // No createFunction mounted: the code can never be executed, so no page instance should wait for
   // it. Without this the page instance registered in `onLoad` leaks forever.
   // 未挂载 createFunction：代码永远无法执行，不应让页面实例继续等待。
@@ -258,9 +332,28 @@ export const fetchHotReload = (name: string, pattern: string): void => {
     return;
   }
 
+  inFlightHotReload.add(name);
+
+  const timeout = getConfig().hotReloadTimeout ?? DEFAULT_HOT_RELOAD_TIMEOUT;
+
+  hotReloadTimeoutTimers.set(
+    name,
+    setTimeout(() => {
+      // Release the page instances waiting for this page: a fetch that never settles must not keep
+      // them (and the whole page instance) alive forever.
+      // 超时后释放等待中的页面实例，避免请求永不返回时页面实例泄漏。
+      if (settleHotReload(name)) markHotReloadUnavailable(name);
+    }, timeout),
+  );
+
   wx.request({
     url: pattern.replace(/\$name/gu, name),
+    timeout,
     success: ({ statusCode, data }) => {
+      // Ignore a response that arrives after the timeout already settled this fetch.
+      // 忽略超时结束后才到达的响应。
+      if (!settleHotReload(name)) return;
+
       // in wx.request, `success` fires for any completed response regardless of the HTTP status
       // code, so the status code must be checked explicitly. When no hot-reload file exists, the
       // nginx config serves a 200 response with an empty body, so empty bodies are skipped too.
@@ -299,6 +392,8 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       }
     },
     fail: () => {
+      if (!settleHotReload(name)) return;
+
       // silent: fetch failed, keep the page as-is, but do not keep page instances waiting
       // 静默：拉取失败，页面保持不变，但不再让页面实例继续等待
       markHotReloadUnavailable(name);
