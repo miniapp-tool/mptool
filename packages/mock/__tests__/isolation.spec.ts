@@ -73,7 +73,9 @@ describe("mockWx isolation", () => {
     expect(frameworkApi.currentPages).toStrictEqual([]);
     expect(wx.env.USER_DATA_PATH).toBe("wxfile://");
     expect(envRecord().DEBUG).toBeUndefined();
-    expect(() => wx.getFileSystemManager().readFileSync("scoped/file.txt")).toThrow(/ENOENT/u);
+    expect(() => wx.getFileSystemManager().readFileSync("scoped/file.txt")).toThrow(
+      /no such file or directory/u,
+    );
 
     emitEvent("themeChange", { theme: "dark" });
     expect(listener).toHaveBeenCalledTimes(2);
@@ -198,7 +200,9 @@ describe("mockWx isolation", () => {
     expect(frameworkApi.currentPages).toStrictEqual([]);
     expect(wx.env.USER_DATA_PATH).toBe("wxfile://");
     expect(envRecord().DEBUG).toBeUndefined();
-    expect(() => wx.getFileSystemManager().readFileSync("reset/file.txt")).toThrow(/ENOENT/u);
+    expect(() => wx.getFileSystemManager().readFileSync("reset/file.txt")).toThrow(
+      /no such file or directory/u,
+    );
 
     emitEvent("themeChange", { theme: "dark" });
     expect(listener).not.toHaveBeenCalled();
