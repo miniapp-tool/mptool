@@ -12,6 +12,7 @@ const config: ViteUserConfigExport = defineConfig({
     // Tests resolve workspace packages through their `dist/`, so make `pnpm test` self-contained on a
     // clean checkout by building only when the output is missing (a no-op in CI and normal local runs).
     globalSetup: ["./scripts/vitest-setup.ts"],
+    setupFiles: ["./scripts/vitest-silence.ts"],
 
     coverage: {
       enabled: true,
