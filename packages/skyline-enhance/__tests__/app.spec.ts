@@ -51,6 +51,27 @@ describe($App, () => {
     expect(appState.hide).toBeGreaterThan(0);
   });
 
+  it("should not emit onAwake when the app shows without a hide", () => {
+    const onAwake = vi.fn<(time: number) => void>();
+
+    $App({ onAwake });
+
+    const app = frameworkApi.app as WechatMiniprogram.App.Options<WechatMiniprogram.IAnyObject>;
+
+    // 冷启动（未经历 onHide）时不应触发 onAwake
+    appState.hide = 0;
+    app.onShow?.({
+      path: "/pages/main",
+      query: {},
+      scene: 1001,
+      shareTicket: "",
+      referrerInfo: {},
+    } as WechatMiniprogram.App.LaunchShowOption);
+
+    expect(onAwake).not.toHaveBeenCalled();
+    expect(appState.hide).toBe(0);
+  });
+
   it("should emit onAwake when app shows after hide", () => {
     const onAwake = vi.fn<(time: number) => void>();
 
