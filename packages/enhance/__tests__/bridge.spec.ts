@@ -217,6 +217,50 @@ describe("bridge", () => {
       }
     });
 
+    it("should ignore a missing touch event", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateTo = vi.fn<() => void>();
+
+      (wx as any).navigateTo = navigateTo;
+
+      let pageOptions: { $bindGo?: (event?: unknown) => Promise<void> } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      await expect(pageOptions?.$bindGo?.()).resolves.toBeUndefined();
+
+      expect(navigateTo).not.toHaveBeenCalled();
+    });
+
+    it("should not run an after hook that is missing", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+        errMsg: "navigateTo:ok",
+      });
+
+      (wx as any).navigateTo = navigateTo;
+
+      let pageOptions: { $bindGo?: (event: unknown) => Promise<void> } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      await expect(
+        pageOptions?.$bindGo?.({ currentTarget: { dataset: { url: "play" } } }),
+      ).resolves.toBeUndefined();
+
+      expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/play" });
+    });
+
     it("should not navigate when url is missing", async () => {
       await setup({ defaultPage: "/pages/$name" });
 
@@ -248,6 +292,182 @@ describe("bridge", () => {
 
       expect(beforeNavigate).toHaveBeenCalledWith(event);
       expect(navigateTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("$bindBack", () => {
+    interface BackPageOptions {
+      $back?: (delta?: number) => Promise<unknown>;
+      $bindBack?: (event?: unknown) => Promise<void>;
+      $bindGo?: (event: unknown) => Promise<void>;
+      afterBack?: ReturnType<typeof vi.fn>;
+      beforeBack?: ReturnType<typeof vi.fn>;
+    }
+
+    const capturePageOptions = (): (() => BackPageOptions | undefined) => {
+      let pageOptions: BackPageOptions | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      return () => pageOptions;
+    };
+
+    it("should call before and after hooks around navigateBack", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateBack = vi
+        .fn<() => Promise<{ errMsg: string }>>()
+        .mockResolvedValue({ errMsg: "navigateBack:ok" });
+
+      (wx as any).navigateBack = navigateBack;
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+
+      const beforeBack = vi.fn<(event: unknown) => void>();
+      const afterBack = vi.fn<(event: unknown) => void>();
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", { afterBack, beforeBack } as never);
+
+      const event = {
+        currentTarget: {
+          dataset: {
+            after: "afterBack",
+            before: "beforeBack",
+            delta: "2",
+          },
+        },
+      };
+
+      await getOptions()?.$bindBack?.(event);
+
+      expect(beforeBack).toHaveBeenCalledWith(event);
+      expect(navigateBack).toHaveBeenCalledWith({ delta: 2 });
+      expect(afterBack).toHaveBeenCalledWith(event);
+    });
+
+    it("should default delta to 1", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateBack = vi
+        .fn<() => Promise<{ errMsg: string }>>()
+        .mockResolvedValue({ errMsg: "navigateBack:ok" });
+
+      (wx as any).navigateBack = navigateBack;
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}, {}];
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      await getOptions()?.$bindBack?.({ currentTarget: { dataset: {} } });
+
+      expect(navigateBack).toHaveBeenCalledWith({ delta: 1 });
+    });
+
+    it("should ignore a missing touch event", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateBack = vi.fn<() => void>();
+
+      (wx as any).navigateBack = navigateBack;
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      await expect(getOptions()?.$bindBack?.()).resolves.toBeUndefined();
+
+      expect(navigateBack).not.toHaveBeenCalled();
+    });
+
+    it("should ignore a before hook that is not a method", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const navigateBack = vi
+        .fn<() => Promise<{ errMsg: string }>>()
+        .mockResolvedValue({ errMsg: "navigateBack:ok" });
+
+      (wx as any).navigateBack = navigateBack;
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}, {}];
+
+      const getOptions = capturePageOptions();
+
+      $Page("index", {});
+
+      await expect(
+        getOptions()?.$bindBack?.({ currentTarget: { dataset: { before: "missing" } } }),
+      ).resolves.toBeUndefined();
+
+      expect(navigateBack).toHaveBeenCalledWith({ delta: 1 });
+    });
+
+    it("should log a failed back instead of rejecting", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      const error = new Error("page stack error");
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      (globalThis as any).getCurrentPages = (): unknown[] => {
+        throw error;
+      };
+
+      const afterBack = vi.fn<() => void>();
+
+      try {
+        const getOptions = capturePageOptions();
+
+        $Page("index", { afterBack } as never);
+
+        await expect(
+          getOptions()?.$bindBack?.({ currentTarget: { dataset: { after: "afterBack" } } }),
+        ).resolves.toBeUndefined();
+
+        expect(afterBack).not.toHaveBeenCalled();
+        expect(errorSpy).toHaveBeenCalledWith("Navigation back failed", error);
+      } finally {
+        errorSpy.mockRestore();
+      }
+    });
+
+    it("should skip after when the home reLaunch is blocked by the navigation lock", async () => {
+      await setup({ defaultPage: "/pages/$name", home: "main" });
+
+      (globalThis as any).getCurrentPages = (): unknown[] => [{}];
+
+      const reLaunch = vi
+        .fn<() => Promise<{ errMsg: string }>>()
+        .mockResolvedValue({ errMsg: "reLaunch:ok" });
+      const navigateTo = vi
+        .fn<() => Promise<{ errMsg: string }>>()
+        .mockResolvedValue({ errMsg: "navigateTo:ok" });
+
+      (wx as any).reLaunch = reLaunch;
+      (wx as any).navigateTo = navigateTo;
+
+      const afterBack = vi.fn<() => void>();
+      const getOptions = capturePageOptions();
+
+      $Page("index", { afterBack } as never);
+
+      try {
+        // 第一次跳转取得导航锁，且目标页不触发 onReady，锁保持
+        await getOptions()?.$bindGo?.({ currentTarget: { dataset: { url: "play" } } });
+
+        expect(navigateTo).toHaveBeenCalledTimes(1);
+
+        // 栈内只有当前页且配置了 home：$back 通过 reLaunch 回主页，但被导航锁拦截
+        await expect(
+          getOptions()?.$bindBack?.({ currentTarget: { dataset: { after: "afterBack" } } }),
+        ).resolves.toBeUndefined();
+
+        expect(reLaunch).not.toHaveBeenCalled();
+        expect(afterBack).not.toHaveBeenCalled();
+      } finally {
+        appEmitter.emit(ON_PAGE_UNLOAD);
+      }
     });
   });
 

@@ -334,6 +334,78 @@ describe("navigator", () => {
     }
   });
 
+  it("should release the navigate lock after the default minInterval when none is configured", async () => {
+    // 不配置 minInterval：使用默认值 100ms
+    $Config({ defaultPage: "/pages/$name" });
+
+    // 确保用例开始前没有残留的导航锁
+    appEmitter.emit(ON_PAGE_UNLOAD);
+
+    const navigateTo = vi
+      .fn<() => Promise<{ errMsg: string }>>()
+      .mockResolvedValue({ errMsg: "navigateTo:ok" });
+
+    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+
+    const go = getTrigger("navigateTo");
+
+    vi.useFakeTimers();
+
+    try {
+      await expect(go("main")).resolves.toStrictEqual({ errMsg: "navigateTo:ok" });
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+
+      // 目标页 ready 后按默认 minInterval 延迟释放：期间导航仍被拦截
+      appEmitter.emit(ON_PAGE_READY);
+
+      await vi.advanceTimersByTimeAsync(99);
+
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(navigateTo).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(1);
+
+      await expect(go("main")).resolves.toStrictEqual({ errMsg: "navigateTo:ok" });
+      expect(navigateTo).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+      appEmitter.emit(ON_PAGE_UNLOAD);
+    }
+  });
+
+  it("should use the default minInterval when switchTab succeeds without config", async () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    appEmitter.emit(ON_PAGE_UNLOAD);
+
+    const switchTab = vi
+      .fn<() => Promise<{ errMsg: string }>>()
+      .mockResolvedValue({ errMsg: "switchTab:ok" });
+
+    wx.switchTab = switchTab as unknown as typeof wx.switchTab;
+
+    const go = getTrigger("switchTab");
+
+    vi.useFakeTimers();
+
+    try {
+      await expect(go("main")).resolves.toStrictEqual({ errMsg: "switchTab:ok" });
+      expect(switchTab).toHaveBeenCalledTimes(1);
+
+      // 已加载过的 tab 页不会再触发 onReady / onUnload：成功回调按默认 minInterval 释放锁
+      await expect(go("main")).resolves.toBeUndefined();
+      expect(switchTab).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      await expect(go("main")).resolves.toStrictEqual({ errMsg: "switchTab:ok" });
+      expect(switchTab).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+      appEmitter.emit(ON_PAGE_UNLOAD);
+    }
+  });
+
   it("should not keep the navigate lock when path resolution fails", async () => {
     await setup({ defaultPage: "/pages/$name" });
 

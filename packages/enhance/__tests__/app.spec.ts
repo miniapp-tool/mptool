@@ -68,6 +68,28 @@ describe($App, () => {
     expect(appState.hide).toBe(0);
   });
 
+  it("should not emit onAwake when the app shows without a previous hide", () => {
+    appState.hide = 0;
+
+    const onAwake = vi.fn<(time: number) => void>();
+
+    $App({ onAwake });
+
+    const app = frameworkApi.app as WechatMiniprogram.App.Options<WechatMiniprogram.IAnyObject>;
+
+    // 首次启动后的 onShow 没有休眠时间：不视为唤醒
+    app.onShow?.({
+      path: "/pages/main",
+      query: {},
+      scene: 1001,
+      shareTicket: "",
+      referrerInfo: {},
+    } as WechatMiniprogram.App.LaunchShowOption);
+
+    expect(onAwake).not.toHaveBeenCalled();
+    expect(appState.hide).toBe(0);
+  });
+
   it("should log a rejected async onAwake instead of leaving it unhandled", async () => {
     const error = new Error("app awake failed");
     const onAwake = vi.fn<(time: number) => Promise<void>>().mockRejectedValue(error);

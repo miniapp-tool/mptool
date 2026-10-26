@@ -144,6 +144,67 @@ describe("should handle dynamic ref", () => {
     expect(parent.$refs.has("oldRef")).toBe(false);
     expect(parent.$refs.get("newRef")).toBe(instance);
   });
+
+  it("should ignore an unchanged ref", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const sentinel = { sentinel: true };
+    const parent = {
+      $refs: new Map<string, unknown>([["sameRef", sentinel]]),
+    };
+    const instance = {
+      $id: 1,
+      $refID: "sameRef",
+      $parent: parent,
+      data: { ref: "sameRef" },
+    };
+
+    componentOptions?.observers?.ref?.call(instance, "sameRef");
+
+    // 值未变化：不重复登记，也不影响父级已有的引用
+    expect(instance.$refID).toBe("sameRef");
+    expect(parent.$refs.get("sameRef")).toBe(sentinel);
+    expect(parent.$refs.size).toBe(1);
+  });
+
+  it("should unregister the ref when it is cleared", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const parent = {
+      $refs: new Map<string, unknown>(),
+    };
+    const instance = {
+      $id: 1,
+      $refID: "childRef",
+      $parent: parent,
+      data: { ref: "childRef" },
+    };
+
+    parent.$refs.set("childRef", instance);
+
+    componentOptions?.observers?.ref?.call(instance, "");
+
+    // 清空 ref：从父级引用中移除，且不登记空名
+    expect(instance.$refID).toBe("");
+    expect(parent.$refs.has("childRef")).toBe(false);
+    expect(parent.$refs.size).toBe(0);
+  });
 });
 
 describe("should handle component lifetimes", () => {
@@ -211,6 +272,24 @@ describe("should handle component lifetimes", () => {
     expect(parent.$refs.has("childRef")).toBe(false);
     expect(instance.$parent).toBeUndefined();
   });
+
+  it("should ignore a detached component without parent or ref", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const instance: Record<string, unknown> = { $id: 4242 };
+
+    // 组件没有父级、也没有 ref 时，detached 不应抛错
+    expect(() => componentOptions?.lifetimes?.detached?.call(instance)).not.toThrow();
+    expect(instance.$parent).toBeUndefined();
+  });
 });
 
 describe("should handle component methods", () => {
@@ -258,6 +337,27 @@ describe("should handle component methods", () => {
     componentOptions?.methods?.$attached?.call(instance, parent);
 
     expect(instance.$root).toBe(page);
+    expect(instance.$parent).toBe(parent);
+  });
+
+  it("should use the parent as root when it has no root yet", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const parent = { $refs: new Map<string, unknown>() };
+    const instance: Record<string, unknown> = {};
+
+    componentOptions?.methods?.$attached?.call(instance, parent);
+
+    // 直接挂在页面下的组件：父级就是根
+    expect(instance.$root).toBe(parent);
     expect(instance.$parent).toBe(parent);
   });
 });
@@ -364,6 +464,73 @@ describe("$ (bind)", () => {
         detail: { id: 999, event: "$attached", args: [] },
       }),
     ).not.toThrow();
+  });
+
+  it("should not register an anonymous component in parent refs", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    let componentOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      componentOptions = options;
+    };
+
+    $Component({});
+
+    const childInstance = {
+      $id: 0,
+      $refID: "",
+      data: { ref: "" },
+      triggerEvent: vi.fn<() => void>(),
+      $attached: vi.fn<(parent: unknown) => void>(),
+    };
+
+    getAttached(componentOptions)?.call(childInstance);
+
+    const parent = { $refs: new Map<string, unknown>() };
+
+    getBind(componentOptions)?.call(parent, {
+      detail: { id: childInstance.$id, event: "$attached", args: [] },
+    });
+
+    // 未命名组件只挂载父子关系，不写入 refs
+    expect(parent.$refs.size).toBe(0);
+    expect(childInstance.$attached).toHaveBeenCalledWith(parent);
+  });
+});
+
+describe("should extend component config", () => {
+  it("should run extendComponent before the framework extension", () => {
+    const calls: string[] = [];
+    let extendedOptions: TrivialComponentOptions | undefined,
+      registeredOptions: TrivialComponentOptions | undefined;
+
+    (globalThis as any).Component = (options: any): void => {
+      calls.push("register");
+      registeredOptions = options;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      extendComponent: (options) => {
+        calls.push("extend");
+        extendedOptions = options;
+
+        // extendComponent 在框架扩展之前执行：此时还没有框架挂载的方法
+        options.methods = {
+          ...options.methods,
+          fromExtend: (): string => "extended",
+        };
+      },
+    });
+
+    $Component({});
+
+    expect(calls).toStrictEqual(["extend", "register"]);
+    expect(extendedOptions).toBe(registeredOptions);
+    // 扩展的选项与框架挂载的方法都会进入最终注册项
+    expect(registeredOptions?.methods?.fromExtend?.()).toBe("extended");
+    expect(registeredOptions?.methods?.$call).toBeTypeOf("function");
   });
 });
 
