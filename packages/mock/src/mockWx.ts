@@ -13,6 +13,8 @@ import {
   snapshotState,
 } from "./state.js";
 import type { MockRule, RouteEntry } from "./state.js";
+import { getNetworkInfo } from "./systemInfo.js";
+import { systemState } from "./systemState.js";
 import type {
   MockCompatFlags,
   MockNetworkOptions,
@@ -416,7 +418,19 @@ export const mockWx: MockWx = {
   },
 
   network(options: MockNetworkOptions): void {
+    const previous = getNetworkInfo();
+
     mockState.config.network = { ...mockState.config.network, ...options };
+    systemState.network = { ...systemState.network, ...options };
+
+    const next = getNetworkInfo();
+
+    if (previous.isConnected !== next.isConnected || previous.networkType !== next.networkType) {
+      emitEvent("networkStatusChange", {
+        isConnected: next.isConnected,
+        networkType: next.networkType,
+      });
+    }
   },
 
   pages(pages: unknown[]): void {
@@ -494,6 +508,9 @@ export const mockWx: MockWx = {
 
   system(options: MockSystemOptions): void {
     mockState.config.system = { ...mockState.config.system, ...options };
+    systemState.system = { ...systemState.system, ...options };
+
+    if (options.userDataPath) wx.env.USER_DATA_PATH = options.userDataPath;
   },
 
   user(decisions: UserDecisions): void {

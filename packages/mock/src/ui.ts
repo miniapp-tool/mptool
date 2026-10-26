@@ -2,6 +2,15 @@
 // oxlint-disable typescript/no-explicit-any
 // oxlint-disable typescript/no-unnecessary-boolean-literal-compare -- missing auth keys must stay distinguishable from an explicit `false`
 
+import {
+  buildAppAuthorizeSetting,
+  buildAppBaseInfo,
+  buildDeviceInfo,
+  buildSystemInfo,
+  buildSystemSetting,
+  buildWindowInfo,
+  getNetworkInfo,
+} from "./systemInfo.js";
 import { uiDecisions, uiRuntime } from "./uiState.js";
 
 interface CallbackOption {
@@ -239,36 +248,11 @@ export const uiApi = {
   },
 
   getWindowInfo(): Record<string, unknown> {
-    return {
-      windowWidth: 375,
-      windowHeight: 667,
-      screenWidth: 375,
-      screenHeight: 667,
-      pixelRatio: 2,
-      statusBarHeight: 20,
-      safeArea: {
-        left: 0,
-        right: 375,
-        top: 20,
-        bottom: 667,
-        width: 375,
-        height: 647,
-      },
-    };
+    return buildWindowInfo();
   },
 
   getAppBaseInfo(): Record<string, unknown> {
-    return {
-      PCKernelVersion: "",
-      SDKVersion: "3.8.0",
-      enableDebug: false,
-      fontSizeScaleFactor: 1,
-      fontSizeSetting: 16,
-      host: { appId: "" },
-      language: "zh_CN",
-      theme: "light",
-      version: "8.0.0",
-    };
+    return buildAppBaseInfo();
   },
 
   getAccountInfoSync(): Record<string, unknown> {
@@ -283,17 +267,7 @@ export const uiApi = {
   },
 
   getDeviceInfo(): Record<string, unknown> {
-    return {
-      abi: "",
-      benchmarkLevel: 0,
-      brand: "devtools",
-      cpuType: "",
-      deviceAbi: "",
-      memorySize: "",
-      model: "test",
-      platform: "devtools",
-      system: "macOS 14.0",
-    };
+    return buildDeviceInfo();
   },
 
   getMenuButtonBoundingClientRect(): Record<string, number> {
@@ -308,30 +282,22 @@ export const uiApi = {
   },
 
   getSystemSetting(): Record<string, unknown> {
-    return {
-      bluetoothEnabled: true,
-      deviceOrientation: "portrait",
-      locationEnabled: true,
-      wifiEnabled: true,
-    };
+    return buildSystemSetting();
   },
 
   getSystemInfoSync(): Record<string, unknown> {
-    return {
-      windowWidth: 375,
-      windowHeight: 667,
-      screenWidth: 375,
-      screenHeight: 667,
-      pixelRatio: 2,
-      statusBarHeight: 20,
-      system: "iOS 16.0",
-      platform: "ios",
-      SDKVersion: "3.0.0",
-    };
+    return buildSystemInfo();
   },
 
   getNetworkType(option: unknown): unknown {
-    return callCallback(option, { networkType: "wifi", errMsg: "getNetworkType:ok" });
+    const { networkType, signalStrength, weakNet } = getNetworkInfo();
+
+    return callCallback(option, {
+      networkType,
+      signalStrength,
+      weakNet,
+      errMsg: "getNetworkType:ok",
+    });
   },
 
   startWifi(option: unknown): unknown {
@@ -339,13 +305,14 @@ export const uiApi = {
   },
 
   getConnectedWifi(option: unknown): unknown {
+    const { signalStrength } = getNetworkInfo();
+
     return callCallback(option, {
       wifi: {
         SSID: "",
         BSSID: "",
         secure: true,
-        // iOS 下 signalStrength 取值范围 0~1，1 表示信号最强
-        signalStrength: 1,
+        signalStrength,
         frequency: 0,
       },
       errMsg: "getConnectedWifi:ok",
@@ -388,12 +355,8 @@ export const uiApi = {
     return callCallback(option, { errMsg: "addFileToFavorites:ok" });
   },
 
-  canIUse(): boolean {
-    return true;
-  },
-
   nextTick(callback: () => void): void {
-    callback();
+    setTimeout(callback, 0);
   },
 
   reportEvent(_eventName: string, _data?: Record<string, unknown>): void {
@@ -580,19 +543,7 @@ export const uiApi = {
   },
 
   getAppAuthorizeSetting(): Record<string, unknown> {
-    return {
-      albumAuthorized: "authorized",
-      bluetoothAuthorized: "authorized",
-      cameraAuthorized: "authorized",
-      locationAuthorized: "authorized",
-      locationReducedAccuracy: false,
-      microphoneAuthorized: "authorized",
-      notificationAlertAuthorized: "authorized",
-      notificationAuthorized: "authorized",
-      notificationBadgeAuthorized: "authorized",
-      notificationSoundAuthorized: "authorized",
-      phoneCalendarAuthorized: "authorized",
-    };
+    return buildAppAuthorizeSetting();
   },
 
   getPrivacySetting(option: unknown): unknown {

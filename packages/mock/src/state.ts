@@ -3,6 +3,8 @@ import type { FileSystemSnapshot } from "./fileSystem.js";
 import { frameworkApi } from "./framework.js";
 import { resetStorage, restoreStorage, snapshotStorage } from "./storageState.js";
 import type { StorageSnapshot } from "./storageState.js";
+import { resetSystem, restoreSystem, snapshotSystem } from "./systemState.js";
+import type { SystemSnapshot } from "./systemState.js";
 import type {
   MockCompatFlags,
   MockNetworkOptions,
@@ -86,6 +88,8 @@ export interface MockStateSnapshot {
   ui: UiSnapshot;
   /** SelectorQuery node fixtures and IntersectionObserver entries. */
   wxml: WxmlSnapshot;
+  /** System / network options. */
+  system: SystemSnapshot;
   storage: StorageSnapshot;
   fileSystem: FileSystemSnapshot;
   events: EventListenerSnapshot;
@@ -268,6 +272,7 @@ export const snapshotState = (): MockStateSnapshot => ({
   })),
   ruleSeq: mockState.ruleSeq,
   storage: snapshotStorage(),
+  system: snapshotSystem(),
   ui: snapshotUi(),
   wxml: snapshotWxml(),
 });
@@ -293,6 +298,7 @@ export const restoreState = (snapshot: MockStateSnapshot): void => {
   mockState.config = cloneConfig(snapshot.config);
 
   restoreStorage(snapshot.storage);
+  restoreSystem(snapshot.system);
   restoreUi(snapshot.ui);
   restoreWxml(snapshot.wxml);
   getFileSystemManager().restore(snapshot.fileSystem);
@@ -323,6 +329,7 @@ export const resetState = (): void => {
   mockState.config = createConfig();
 
   resetStorage();
+  resetSystem();
   resetUi();
   resetWxml();
   getFileSystemManager().reset();

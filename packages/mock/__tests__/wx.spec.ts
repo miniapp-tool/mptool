@@ -652,13 +652,13 @@ describe("wx mock", () => {
 
   describe("env", () => {
     it("should have correct USER_DATA_PATH", () => {
-      expect(wx.env.USER_DATA_PATH).toBe("wxfile://");
+      expect(wx.env.USER_DATA_PATH).toBe("wxfile://usr");
     });
   });
 
   describe("version", () => {
-    it("should have test version", () => {
-      expect(wx.version).toBe("test");
+    it("should expose the client version", () => {
+      expect(wx.version).toBe("8.0.30");
     });
   });
 });

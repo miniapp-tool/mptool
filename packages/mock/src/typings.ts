@@ -114,10 +114,29 @@ export interface MockSystemOptions {
   language?: string;
   windowWidth?: number;
   windowHeight?: number;
+  screenWidth?: number;
+  screenHeight?: number;
+  statusBarHeight?: number;
+  safeArea?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+    width: number;
+    height: number;
+  };
   pixelRatio?: number;
   brand?: string;
   model?: string;
-  /** `wx.env.USER_DATA_PATH`; defaults to `wxfile://usr` once PR-8 lands. */
+  /** 用户字体大小（px）；默认 16。 */
+  fontSizeSetting?: number;
+  /** 是否已打开调试；默认 false。 */
+  enableDebug?: boolean;
+  bluetoothEnabled?: boolean;
+  deviceOrientation?: "portrait" | "landscape";
+  locationEnabled?: boolean;
+  wifiEnabled?: boolean;
+  /** `wx.env.USER_DATA_PATH`，默认 `wxfile://usr`。 */
   userDataPath?: string;
 }
 

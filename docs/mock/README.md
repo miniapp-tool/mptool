@@ -521,6 +521,70 @@ observer.disconnect(); // 之后不再回调
 
 > 夹具按 selector **精确匹配**，不解析 class / 后代选择器，也不模拟布局引擎；`in(component)` 仍共享全局夹具注册表。
 
+## 系统信息 / 网络状态 / env
+
+`wx.getSystemInfo(Sync)` / `getWindowInfo` / `getDeviceInfo` / `getAppBaseInfo` / `getSystemSetting` / `getAppAuthorizeSetting` 现在由同一份 `mockWx.system()` 配置生成，字段与量纲一致。
+
+```ts
+mockWx.system({
+  platform: "ios", // ios / android / devtools / windows / mac / ohos
+  system: "iOS 17.0",
+  brand: "Apple",
+  model: "iPhone 15",
+  SDKVersion: "3.9.0",
+  version: "8.0.20",
+  language: "zh_CN",
+  theme: "dark", // light / dark
+  windowWidth: 414,
+  windowHeight: 896,
+  pixelRatio: 3,
+  statusBarHeight: 44,
+  safeArea: { top: 44, bottom: 896, left: 0, right: 414, width: 414, height: 852 },
+  fontSizeSetting: 20,
+  enableDebug: true,
+  bluetoothEnabled: true,
+  locationEnabled: true,
+  wifiEnabled: true,
+  deviceOrientation: "portrait",
+  userDataPath: "wxfile://usr", // 同时更新 wx.env.USER_DATA_PATH 与文件系统根目录
+});
+```
+
+- 默认 `platform = "devtools"`、`brand = "devtools"`、`model = "test"`、`system = "macOS 14.0"`、`SDKVersion = "3.8.0"`、`version = "8.0.0"`、窗口 375×667、`pixelRatio = 2`、`statusBarHeight = 20`。
+- `safeArea` 未配置时按 `statusBarHeight` / 窗口尺寸推导；`getWindowInfo().screenTop` 为 0。
+- `getSystemInfo` 返回 32 个官方字段 + `theme`，`getSystemInfoSync` 与异步版本一致（异步多 `errMsg`）。
+- 默认 `wx.env.USER_DATA_PATH = "wxfile://usr"`（真机取值；开发者工具可能显示 `http://usr`，文件 API 两种 scheme 都接受），`wx.version = "8.0.30"`。
+- `mockWx.auth({ scope: false })` 会同时反映到 `getAppAuthorizeSetting()` 与 `getSystemInfo().*Authorized`（未配置的 scope 默认 authorized，保持旧行为）。
+
+### 网络状态
+
+```ts
+mockWx.network({
+  networkType: "4g", // wifi / 2g / 3g / 4g / 5g / none / unknown
+  signalStrength: 42, // iOS 0~1，其他平台 0~100；未配置时按 platform 推导
+  weakNet: true,
+  offline: true, // 等价于 networkType: "none"
+});
+
+wx.onNetworkStatusChange(({ isConnected, networkType }) => {});
+mockWx.network({ networkType: "5g" }); // 变化时派发事件
+```
+
+- `getNetworkType` 返回 `networkType` / `signalStrength` / `weakNet`；`getConnectedWifi` 的 `signalStrength` 使用同一配置。
+- 默认平台为 `devtools`，默认 `signalStrength = 100`（iOS 平台默认 1，与 report 等消费方的量纲判断一致）。
+- 只有网络类型/连接状态实际变化时 `onNetworkStatusChange` 才派发；离线用 `offline: true` 或 `networkType: "none"`。
+- `mockWx.scope()` / `reset()` 会还原 system / network / `USER_DATA_PATH`。
+
+### canIUse / nextTick
+
+```ts
+wx.canIUse("request"); // true
+wx.canIUse("totallyNotAnApi.method"); // false
+wx.canIUse("openBluetoothAdapter"); // false（非目标 API）
+
+wx.nextTick(() => {}); // 下一时间片执行（不再同步）
+```
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：

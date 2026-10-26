@@ -4,9 +4,10 @@ import { emitEvent, wx } from "../src/index.js";
 
 describe("device mock", () => {
   it("getSystemInfo should resolve", async () => {
-    const res = (await wx.getSystemInfo({})) as { platform: string };
+    const res = (await wx.getSystemInfo({})) as { errMsg: string; platform: string };
 
-    expect(res.platform).toBe("ios");
+    expect(res.platform).toBe("devtools");
+    expect(res.errMsg).toBe("getSystemInfo:ok");
   });
 
   it("getBatteryInfo should resolve", async () => {
