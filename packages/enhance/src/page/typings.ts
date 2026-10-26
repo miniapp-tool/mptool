@@ -8,6 +8,18 @@ export type PageQuery = Record<string, string>;
 export interface PageState {
   /** 是否是打开的第一个页面 */
   firstOpen: boolean;
+
+  /**
+   * 业务自定义状态
+   *
+   * 每个页面实例会在 `onLoad` 时得到一份独立的 `$state`，初始值取自页面定义上由实例创建前生命周期（`onAppLaunch` / `onPreload` /
+   * `onNavigate`）写入的状态，因此这里可以安全地存放页面数据。
+   *
+   * Custom page state. Every page instance receives its own copy of `$state` when `onLoad` fires,
+   * seeded from the state written by the pre-instance lifecycles (`onAppLaunch` / `onPreload` /
+   * `onNavigate`), so it is safe to store per-instance data here.
+   */
+  [key: string]: unknown;
 }
 
 export interface ExtendedPageLifeCycles {

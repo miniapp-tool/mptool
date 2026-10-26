@@ -103,6 +103,16 @@ export const $Page: PageConstructor = <
   options.onLoad = wrapFunction(
     options.onLoad,
     function handleOnLoad(this: PageInstance<Data, Custom>): void {
+      // Give every page instance its own `$state`, seeded from the page definition so data prepared
+      // by the pre-instance lifecycles (`onAppLaunch` / `onPreload` / `onNavigate`, whose `this` is
+      // the page options) is inherited by this instance.
+      // 为每个页面实例创建独立的 `$state`，并以页面定义上的状态为初始值：实例创建前的生命周期
+      // （`onAppLaunch` / `onPreload` / `onNavigate`，其 `this` 为页面选项对象）写入的数据会由此继承。
+      const isFirstPage = shouldBeFirstPage;
+
+      shouldBeFirstPage = false;
+      this.$state = { ...options.$state, firstOpen: isFirstPage };
+
       // 将已就绪的热更新方法挂到实例（未就绪时登记，拉取完成后补挂）
       // apply hot-reload methods to the instance (register when not ready, patch on resolve)
       if (hotReloadPattern) applyHotReload(name, this);
@@ -119,13 +129,6 @@ export const $Page: PageConstructor = <
         onAwakeHandlers.set(this, onAwakeHandler);
         appEmitter.on(ON_APP_AWAKE, onAwakeHandler);
         registerLog("onAwake");
-      }
-
-      if (shouldBeFirstPage) {
-        shouldBeFirstPage = false;
-
-        // oxlint-disable-next-line typescript/no-non-null-assertion
-        options.$state!.firstOpen = true;
       }
     },
   );

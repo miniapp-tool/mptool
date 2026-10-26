@@ -6,6 +6,16 @@ import type { NavigatorMethods } from "../navigator/index.js";
 export interface PageState {
   /** 是否是打开的第一个页面 */
   firstOpen: boolean;
+
+  /**
+   * 业务自定义状态
+   *
+   * 每个页面实例会在 `onLoad` 时得到一份独立的 `$state`，初始值取自页面定义上的状态，因此这里可以安全地存放页面数据。
+   *
+   * Custom page state. Every page instance receives its own copy of `$state` when `onLoad` fires,
+   * seeded from the state of the page definition, so it is safe to store per-instance data here.
+   */
+  [key: string]: unknown;
 }
 
 export interface ExtendedPageLifeCycles {

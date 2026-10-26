@@ -275,5 +275,15 @@ describe($Page, () => {
         expectTypeOf(this).not.toHaveProperty("$all");
       },
     });
+
+    $Page("example", {
+      f() {
+        // `$state` is a framework managed object that also accepts custom data
+        expectTypeOf(this.$state.firstOpen).toEqualTypeOf<boolean>();
+        this.$state.custom = { id: "1" };
+        expectTypeOf(this.$state.custom).toEqualTypeOf<unknown>();
+        expectTypeOf(this.$state.id).toEqualTypeOf<unknown>();
+      },
+    });
   });
 });

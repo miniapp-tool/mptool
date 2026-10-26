@@ -636,11 +636,13 @@ $Page("main", {
 
 - `$name`: 当前页面名称
 
-- `$state`: 框架生成的页面状态
+- `$state`: 框架生成的页面状态，类型为 `PageState & Record<string, unknown>`
 
-  ::: tip
+  ::: tip 每个实例独立
 
-  你可以考虑将部分自定义扩展的数据注入到此处
+  每个页面实例都会在 `onLoad` 时得到一份独立的 `$state`（以页面定义上的状态为初始值），因此可以安全地把业务数据放在这里，同一页面的多个实例之间不会互相影响。
+
+  在实例创建前执行的生命周期（`onAppLaunch` / `onPreload` / `onNavigate`）以页面选项对象作为 `this`，在其中写入的 `$state` 会在实例 `onLoad` 时被继承。
 
   :::
   - `$state.firstOpen`: 是否是第一个打开的页面
