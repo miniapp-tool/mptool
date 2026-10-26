@@ -78,6 +78,15 @@ export interface AppConfigCommonOptions {
    *   `https://example.com/hotReloadCode/$name`;
    */
   hotReloadPattern?: string;
+
+  /**
+   * 页面热更新拉取的超时时间，单位 ms
+   *
+   * 超时后视为该页面没有可用热更新，并释放等待中的页面实例；晚到的响应会被忽略。
+   *
+   * @default 10000
+   */
+  hotReloadTimeout?: number;
 }
 export interface RoutePathConfig {
   /**
