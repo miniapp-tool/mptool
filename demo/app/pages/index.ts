@@ -20,7 +20,7 @@ $Page("index", {
   },
 
   onShow() {
-    void this.$preload("play?cid=456");
+    this.$preload("play?cid=456");
   },
 
   onReady() {

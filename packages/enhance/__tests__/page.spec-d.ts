@@ -271,6 +271,7 @@ describe($Page, () => {
       f() {
         // $preload is enhance-only (skyline-enhance has no onPreload lifecycle)
         expectTypeOf(this).toHaveProperty("$preload");
+        expectTypeOf(this.$preload("main")).toEqualTypeOf<void>();
         // $all is a raw event map, it is not exposed on instances
         expectTypeOf(this).not.toHaveProperty("$all");
       },

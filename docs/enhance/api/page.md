@@ -133,7 +133,13 @@ order: 4
 
 每个页面实例都会在 `onLoad` 时得到一份独立的 `$state`：框架以页面定义上的状态为初始值复制出实例自己的对象，因此可以在 `onLoad` 及之后的生命周期里安全地读写业务数据，同一页面的多个实例之间不会互相影响。
 
-在页面实例创建前触发的生命周期（`onAppLaunch` / `onPreload` / `onNavigate`）以页面选项对象作为 `this`，在其中写入的 `$state` 数据会作为初始值被紧随其后的实例 `onLoad` 继承，可用于预加载或跳转前准备数据。
+在页面实例创建前触发的生命周期（`onAppLaunch` / `onPreload` / `onNavigate`）以页面选项对象作为 `this`，其中**同步**写入的 `$state` 数据会作为初始值被紧随其后的实例 `onLoad` 继承，可用于预加载或跳转前准备数据。
+
+::: warning 只保证同步写入被继承
+
+在 `await` / `.then` / `setTimeout` 等异步回调中写入的 `$state` 发生在实例创建之后，不会被实例的 `$state` 继承；异步数据请在 `onLoad`（或之后的生命周期）中直接赋给实例。
+
+:::
 
 :::
 
@@ -217,13 +223,13 @@ $Component({
 - 类型:
 
   ```ts
-  function $preload(pageName: string): void | Promise<void>;
+  function $preload(pageName: string): void;
   ```
 
 - 参数:
   - `pageName`: 页面简称，可以带上 `queryString`
 
-提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期。该方法是同步的，返回 `void`。
 
 ### $go
 
