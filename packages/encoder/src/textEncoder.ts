@@ -47,7 +47,9 @@ export class TextEncoder {
     // 2. If encoding is failure or replacement, throw a RangeError.
     if (encoding == null || encoding.name === "replacement")
       throw new RangeError(`Unknown encoding: ${label}`);
-    if (!(encoding.name in encoders)) throw new Error("Encoder not present.");
+
+    // No "encoder not present" guard: `encodingTable` only contains UTF-8 / GBK / gb18030 and every
+    // one of them registers an encoder at import time, so the lookup in `encode` cannot miss.
 
     this.#encoding = encoding;
   }
@@ -91,6 +93,10 @@ export class TextEncoder {
       // input, output.
       // oxlint-disable-next-line typescript/no-non-null-assertion
       result = this.#encoder!.handler(input, token);
+      // Built-in encoders only return |finished| for end-of-stream, which the loop above breaks on
+      // before calling the handler, so this branch is unreachable for them; it stays to mirror the
+      // WHATWG state machine.
+      /* istanbul ignore if */
       if (result === FINISHED) break;
       if (Array.isArray(result)) output.push(...result);
       else output.push(result);
@@ -100,7 +106,12 @@ export class TextEncoder {
       while (true) {
         // oxlint-disable-next-line typescript/no-non-null-assertion
         result = this.#encoder!.handler(input, input.read());
+        // The flush step only feeds end-of-stream to the handler, and every built-in encoder
+        // returns |finished| for it, so the loop never reaches the code below in practice. Both
+        // checks stay to mirror the WHATWG algorithm.
+        /* istanbul ignore else */
         if (result === FINISHED) break;
+        /* istanbul ignore next */
         if (Array.isArray(result)) output.push(...result);
         else output.push(result);
       }

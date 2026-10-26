@@ -177,8 +177,13 @@ class UTF8Encoder implements Encoder {
       count = 2;
       offset = 0xe0;
     }
-    // U+10000 to U+10FFFF, inclusive:
-    else if (inRange(codePoint, 0x10000, 0x10ffff)) {
+
+    // U+10000 to U+10FFFF, inclusive. Kept as a separate check (the ranges above are disjoint, so
+    // it behaves exactly like the spec's `else if`): its condition is always true for code points
+    // produced by `stringToCodePoints`, because U+0800..U+FFFF is handled above and no surrogate or
+    // value above U+10FFFF can occur. The explicit bound stays to mirror the WHATWG encoder.
+    /* istanbul ignore else */
+    if (inRange(codePoint, 0x10000, 0x10ffff)) {
       // 3 and 0xF0
       count = 3;
       offset = 0xf0;
