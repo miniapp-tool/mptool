@@ -577,6 +577,24 @@ const bindArguments = (meta: InterpreterFunctionMeta, args: unknown[], env: Envi
 };
 
 /**
+ * Apply NamedEvaluation to an anonymous function assigned to a binding / property.
+ *
+ * 对赋值给绑定/属性的匿名函数应用 NamedEvaluation。
+ *
+ * @param value - The assigned value / 赋值
+ * @param name - The inferred name / 推断出的名称
+ */
+const inferFunctionName = (value: unknown, name: string | null): void => {
+  if (name == null || name === "" || typeof value !== "function") return;
+
+  const meta = getInterpreterMeta(value);
+
+  if (meta == null || meta.name != null) return;
+
+  Object.defineProperty(value, "name", { value: name, configurable: true });
+};
+
+/**
  * Close an iterator on abrupt loop exit (`break` / `return` / throw), per IteratorClose.
  *
  * 循环异常退出（`break` / `return` / 抛出）时按 IteratorClose 关闭迭代器。
@@ -2028,6 +2046,8 @@ export class Runtime {
   ): void {
     switch (target.type) {
       case "identifier": {
+        inferFunctionName(value, target.name);
+
         if (initialize) env.initialize(target.name, value);
         else this.writeIdentifier(target.name, value, env);
         break;
@@ -2534,6 +2554,8 @@ export class Runtime {
           superBase: Object.getPrototypeOf(obj) as object | null,
           constructable: !prop.method,
         });
+
+        inferFunctionName(fn, typeof key === "string" ? key : null);
 
         Object.defineProperty(obj, key, {
           value: fn,
@@ -3862,6 +3884,7 @@ export class Runtime {
         lexicalNewTargetMeta: null,
         lexicalIsConstruct: false,
         callee: null,
+        sourceText: getFunctionSource(method) ?? void 0,
       },
       this.invokeHandler,
     );
@@ -5325,6 +5348,8 @@ export class Runtime {
           superBase: Object.getPrototypeOf(obj) as object | null,
           constructable: !prop.method,
         });
+
+        inferFunctionName(fn, typeof key === "string" ? key : null);
 
         Object.defineProperty(obj, key, {
           value: fn,
