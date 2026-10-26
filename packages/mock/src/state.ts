@@ -18,6 +18,8 @@ import { clearEventListeners, restoreEventListeners, snapshotEventListeners } fr
 import type { EventListenerSnapshot } from "./ui.js";
 import { resetUi, restoreUi, snapshotUi } from "./uiState.js";
 import type { UiSnapshot } from "./uiState.js";
+import { resetWxml, restoreWxml, snapshotWxml } from "./wxmlState.js";
+import type { WxmlSnapshot } from "./wxmlState.js";
 
 /** One entry of a `mockWx.route()` table. */
 export interface RouteEntry {
@@ -82,6 +84,8 @@ export interface MockStateSnapshot {
   calls: Map<string, number>;
   /** UI decisions / runtime state (toast, loading, modal, update manager). */
   ui: UiSnapshot;
+  /** SelectorQuery node fixtures and IntersectionObserver entries. */
+  wxml: WxmlSnapshot;
   storage: StorageSnapshot;
   fileSystem: FileSystemSnapshot;
   events: EventListenerSnapshot;
@@ -265,6 +269,7 @@ export const snapshotState = (): MockStateSnapshot => ({
   ruleSeq: mockState.ruleSeq,
   storage: snapshotStorage(),
   ui: snapshotUi(),
+  wxml: snapshotWxml(),
 });
 
 const replaceArray = <T>(target: T[], next: readonly T[]): void => {
@@ -289,6 +294,7 @@ export const restoreState = (snapshot: MockStateSnapshot): void => {
 
   restoreStorage(snapshot.storage);
   restoreUi(snapshot.ui);
+  restoreWxml(snapshot.wxml);
   getFileSystemManager().restore(snapshot.fileSystem);
   restoreEventListeners(snapshot.events);
 
@@ -318,6 +324,7 @@ export const resetState = (): void => {
 
   resetStorage();
   resetUi();
+  resetWxml();
   getFileSystemManager().reset();
   clearEventListeners();
 

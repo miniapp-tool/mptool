@@ -432,6 +432,95 @@ await new Promise((resolve, reject) => {
 
 > 用开发者工具实测确认：不传 encoding 返回 `ArrayBuffer`、`binary` 返回 string、`stat` 字段为 `size/mode/lastAccessedTime/lastModifiedTime`；开发者工具里 `wx.env.USER_DATA_PATH` 实测为 `http://usr`，错误文案细节与 mock 有差异（mock 以官方错误码 + `<api>:fail` 前缀为准）。
 
+## WXML 节点夹具 / SelectorQuery / IntersectionObserver
+
+mock 不渲染 WXML，但可以用节点夹具让 `SelectorQuery` 和 `IntersectionObserver` 驱动布局/曝光逻辑。
+
+### 节点夹具
+
+```ts
+mockWx.node("#card", {
+  id: "card",
+  dataset: { uid: 1 },
+  left: 10,
+  top: 20,
+  width: 300,
+  height: 120,
+  scrollLeft: 0,
+  scrollTop: 0,
+  node: { tagName: "view" },
+  context: { kind: "rendering-context" },
+  ref: { kind: "component" },
+  fields: { custom: "value" }, // 会合并进 fields() 结果
+});
+
+// 同一个 selector 多次注册 => selectAll 返回多个
+mockWx.node(".item", { width: 10, height: 10 });
+mockWx.node(".item", { width: 20, height: 20 });
+
+// 清空某个 selector
+mockWx.node("#card", null);
+```
+
+- `selectViewport()` 读取 `mockWx.node("viewport", info)` 注册的夹具。
+- 未注册 `select` → `null`，未注册 `selectAll` → `[]`；`mockWx.scope()` / `reset()` 会一并还原夹具。
+
+### SelectorQuery
+
+```ts
+wx.createSelectorQuery()
+  .in(this)
+  .select("#card")
+  .boundingClientRect((rect) => {
+    console.log(rect); // { id, dataset, left, top, right, bottom, width, height }
+  })
+  .selectAll(".item")
+  .fields(
+    {
+      id: true,
+      dataset: true,
+      rect: true,
+      size: true,
+      scrollOffset: true,
+      node: true,
+      context: true,
+      ref: true,
+    },
+    (items) => {},
+  )
+  .selectViewport()
+  .scrollOffset((offset) => {})
+  .exec((results) => {
+    // 节点回调先触发，exec 回调最后触发，全部异步（setTimeout 0）
+  });
+```
+
+- 支持 `select` / `selectAll` / `selectViewport` / `in`，以及 `boundingClientRect` / `scrollOffset` / `fields` / `node` / `context` / `ref`。
+- `fields` 支持 `id` / `dataset` / `rect` / `size` / `scrollOffset` / `node` / `context` / `ref` / `properties`；夹具里的 `fields` 对象会覆盖/补充结果。
+
+### IntersectionObserver
+
+```ts
+const observer = wx.createIntersectionObserver();
+
+observer.relativeToViewport().observe("#card", (result) => {
+  // { intersectionRatio, intersectionRect, boundingClientRect, relativeRect, time }
+});
+
+mockWx.intersection("#card", {
+  intersectionRatio: 0.5,
+  intersectionRect: { left: 0, top: 0, right: 100, bottom: 50, width: 100, height: 50 },
+});
+
+observer.takeRecords(); // 触发过且未取走的记录
+observer.disconnect(); // 之后不再回调
+```
+
+- `mockWx.intersection(selector, result?)` 只触发监听同一 selector 的 observer；回调异步（setTimeout 0）。
+- `relativeTo` / `relativeToViewport` 仅记录，不参与几何计算。
+
+> 夹具按 selector **精确匹配**，不解析 class / 后代选择器，也不模拟布局引擎；`in(component)` 仍共享全局夹具注册表。
+
 ## 事件监听与手动触发
 
 `wx` 的事件监听 API（如 `onThemeChange`、`onAppShow`、`onWindowResize` 等）默认**不会自动触发**，你需要通过导出的 `emitEvent` 手动触发，以模拟真实场景：

@@ -175,6 +175,53 @@ export interface MockUiState {
   };
 }
 
+/** A rectangle returned by `SelectorQuery.boundingClientRect`. */
+export interface MockNodeRect {
+  left?: number;
+  top?: number;
+  right?: number;
+  bottom?: number;
+  width?: number;
+  height?: number;
+}
+
+/** Fixture registered through `mockWx.node(selector, info)` for `SelectorQuery`. */
+export interface MockNodeInfo extends MockNodeRect {
+  id?: string;
+  dataset?: Record<string, unknown>;
+  /** Overrides for `fields()`; merged over the derived values. */
+  fields?: Record<string, unknown>;
+  /** Value returned by `fields({ node: true })` and `node(callback)`. */
+  node?: unknown;
+  /** Value returned by `fields({ context: true })` and `context(callback)`. */
+  context?: unknown;
+  /** Value returned by `fields({ ref: true })` and `ref(callback)`. */
+  ref?: unknown;
+  scrollLeft?: number;
+  scrollTop?: number;
+  scrollWidth?: number;
+  scrollHeight?: number;
+}
+
+/** A viewport-relative rectangle used by `IntersectionObserver` results. */
+export interface MockIntersectionRect {
+  bottom: number;
+  height: number;
+  left: number;
+  right: number;
+  top: number;
+  width: number;
+}
+
+/** Result delivered to `IntersectionObserver.observe` callbacks. */
+export interface MockIntersectionResult {
+  boundingClientRect: MockIntersectionRect;
+  intersectionRatio: number;
+  intersectionRect: MockIntersectionRect;
+  relativeRect: MockIntersectionRect;
+  time: number;
+}
+
 /** A reversible state scope created by `mockWx.scope()`. */
 export interface MockWxScope {
   /** Restore the state captured when the scope was created; idempotent. */

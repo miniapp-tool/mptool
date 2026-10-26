@@ -17,6 +17,8 @@ import type {
   MockCompatFlags,
   MockNetworkOptions,
   MockStorageOptions,
+  MockIntersectionResult,
+  MockNodeInfo,
   MockSystemOptions,
   MockUiState,
   MockWxScope,
@@ -32,6 +34,7 @@ import type {
 import { emitEvent } from "./ui.js";
 import { getUiState, uiDecisions } from "./uiState.js";
 import { DEFAULT_USER_DATA_PATH, wx, wxApiWrappers } from "./wx.js";
+import { registerNode, triggerIntersection } from "./wxmlState.js";
 
 /** APIs whose failures can be injected. */
 const FAILABLE_KINDS = new Set<WxApiKind>(["callback", "sync", "task"]);
@@ -306,6 +309,11 @@ export interface MockWx {
   /** Read-only UI state (toast / loading / modal / update manager). */
   ui: () => MockUiState;
 
+  /** Register a SelectorQuery node fixture; `null` clears the selector. */
+  node: (selector: string, info: MockNodeInfo | null) => void;
+  /** Trigger the IntersectionObservers watching `selector`. */
+  intersection: (selector: string, result?: Partial<MockIntersectionResult>) => void;
+
   // ---- isolation ----
   scope: () => MockWxScope;
   run: <T>(callback: () => T | Promise<T>) => Promise<T>;
@@ -495,5 +503,13 @@ export const mockWx: MockWx = {
 
   ui(): MockUiState {
     return getUiState();
+  },
+
+  node(selector: string, info: MockNodeInfo | null): void {
+    registerNode(selector, info);
+  },
+
+  intersection(selector: string, result?: Partial<MockIntersectionResult>): void {
+    triggerIntersection(selector, result);
   },
 };
