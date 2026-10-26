@@ -145,4 +145,77 @@ describe(reportNetworkStatus, () => {
 
     expect(titles).toStrictEqual(["网络连接出现问题，请稍后重试"]);
   });
+
+  it("should show toast when connected wifi info cannot be read", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    const mockWifiApi = wx as unknown as {
+      startWifi: (option: { success?: () => void; fail?: () => void }) => void;
+      getConnectedWifi: (option: {
+        success?: (result: { wifi: { signalStrength: number } }) => void;
+        fail?: () => void;
+      }) => void;
+    };
+
+    mockWifiApi.startWifi = (option): void => {
+      option.success?.();
+    };
+    mockWifiApi.getConnectedWifi = (option): void => {
+      option.fail?.();
+    };
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["无法连接网络"]);
+  });
+
+  it("should fall back to getSystemInfoSync when getDeviceInfo is unavailable", () => {
+    const titles = mockShowToast();
+    mockNetworkType("wifi");
+    const mockWifiApi = wx as unknown as {
+      getDeviceInfo?: () => { platform: string };
+      getSystemInfoSync: () => { platform: string };
+      startWifi: (option: { success?: () => void; fail?: () => void }) => void;
+      getConnectedWifi: (option: {
+        success?: (result: { wifi: { signalStrength: number } }) => void;
+        fail?: () => void;
+      }) => void;
+    };
+    const originalGetDeviceInfo = mockWifiApi.getDeviceInfo;
+    const originalGetSystemInfoSync = mockWifiApi.getSystemInfoSync;
+
+    mockWifiApi.getDeviceInfo = undefined;
+    mockWifiApi.getSystemInfoSync = (): { platform: string } => ({ platform: "android" });
+    mockWifiApi.startWifi = (option): void => {
+      option.success?.();
+    };
+    mockWifiApi.getConnectedWifi = (option): void => {
+      option.success?.({ wifi: { signalStrength: 30 } });
+    };
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["Wifi 信号不佳"]);
+
+    mockWifiApi.getDeviceInfo = originalGetDeviceInfo;
+    mockWifiApi.getSystemInfoSync = originalGetSystemInfoSync;
+  });
+
+  it("should show toast when the network type cannot be read", () => {
+    const titles = mockShowToast();
+    const mockGetNetworkType = wx as unknown as {
+      getNetworkType: (option: {
+        success?: (result: { networkType: string }) => void;
+        fail?: () => void;
+      }) => void;
+    };
+
+    mockGetNetworkType.getNetworkType = (option): void => {
+      option.fail?.();
+    };
+
+    reportNetworkStatus();
+
+    expect(titles).toStrictEqual(["网络连接出现问题，请稍后重试"]);
+  });
 });

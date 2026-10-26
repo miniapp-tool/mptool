@@ -48,4 +48,23 @@ describe(updateApp, () => {
 
     expect(mockWx.ui().toast).toMatchObject({ title: "小程序更新下载失败，请检查您的网络!" });
   });
+
+  it("should do nothing when getUpdateManager is unavailable", () => {
+    const wxApi = wx as unknown as { getUpdateManager?: () => unknown };
+    const originalGetUpdateManager = wxApi.getUpdateManager;
+
+    delete wxApi.getUpdateManager;
+
+    expect(() => updateApp(() => {})).not.toThrow();
+
+    wxApi.getUpdateManager = originalGetUpdateManager;
+  });
+
+  it("should not show toast when no update is found", () => {
+    updateApp(() => {});
+
+    mockWx.emit("updateCheck", { hasUpdate: false });
+
+    expect(mockWx.ui().toast).toBeNull();
+  });
 });
