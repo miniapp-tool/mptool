@@ -344,17 +344,31 @@ export const mkdir = (path: string, recursive = true): void => {
  *
  * @param tempFilePath 缓存文件路径
  * @param path 保存文件路径
+ * @returns 保存后的文件路径
+ * @throws {MpError} 保存失败时抛出
  */
-export const saveFile = (tempFilePath: string, path: string): void => {
+export const saveFile = (tempFilePath: string, path: string): string => {
   const target = resolvePath(path);
 
   mkdir(dirname(path));
 
   try {
-    getFileManager().saveFileSync(tempFilePath, target);
+    return getFileManager().saveFileSync(tempFilePath, target);
   } catch (err) {
     logger.error(`Saving to ${path} failed:`, err);
+
+    throw new MpError({ message: `saveFile:fail ${path}` });
   }
+};
+
+/**
+ * Promise returned by `saveOnlineFile`, with the underlying download task attached.
+ *
+ * 保存在线文件返回的 Promise，附带底层下载任务。
+ */
+export type SaveOnlineFilePromise = Promise<string> & {
+  /** 底层下载任务，可用于取消或监听进度 / Underlying task for abort or progress */
+  readonly task: WechatMiniprogram.DownloadTask;
 };
 
 /**
@@ -362,15 +376,17 @@ export const saveFile = (tempFilePath: string, path: string): void => {
  *
  * @param onlinePath 在线文件路径
  * @param localPath 本地保存路径
- * @returns 本地文件路径
+ * @returns 本地文件路径，并附带底层下载任务
  */
-export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<string> => {
+export const saveOnlineFile = (onlinePath: string, localPath: string): SaveOnlineFilePromise => {
   const target = resolvePath(localPath);
 
   mkdir(dirname(localPath));
 
-  return new Promise((resolve, reject) => {
-    wx.downloadFile({
+  let downloadTask: WechatMiniprogram.DownloadTask | undefined;
+
+  const promise = new Promise<string>((resolve, reject) => {
+    downloadTask = wx.downloadFile({
       url: onlinePath,
       filePath: target,
       // 传入 filePath 时微信返回 filePath 字段，未传入时返回 tempFilePath
@@ -392,7 +408,17 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): Promise<s
         reject(new MpError({ message: errMsg }));
       },
     });
+  }) as SaveOnlineFilePromise;
+
+  void Object.defineProperty(promise, "task", {
+    configurable: true,
+    enumerable: false,
+    get: (): WechatMiniprogram.DownloadTask =>
+      // oxlint-disable-next-line typescript/no-non-null-assertion
+      downloadTask!,
   });
+
+  return promise;
 };
 
 /**
