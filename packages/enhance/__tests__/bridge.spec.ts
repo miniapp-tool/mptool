@@ -178,6 +178,22 @@ describe("bridge", () => {
 
       expect(pageOptions?.$currentPage?.()).toStrictEqual({ name: "b" });
     });
+
+    it("should return undefined when the page stack is empty", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      (globalThis as any).getCurrentPages = (): unknown[] => [];
+
+      let pageOptions: { $currentPage?: () => unknown } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      expect(pageOptions?.$currentPage?.()).toBeUndefined();
+    });
   });
 
   describe("$preload", () => {

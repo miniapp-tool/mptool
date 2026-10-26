@@ -130,9 +130,15 @@ $Page({
 
 #### $currentPage
 
-- 类型: `(): PageInstance`
+- 类型: `(): PageInstance | undefined`
 
 获取当前页面实例。
+
+::: warning
+
+页面栈为空时（例如冷启动阶段或所有页面均已关闭）返回 `undefined`，调用方需要判空。
+
+:::
 
 #### $getPath
 

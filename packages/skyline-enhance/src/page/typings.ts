@@ -68,8 +68,8 @@ export interface ExtendedPageMethods<
   /** 绑定组件函数 */
   // oxlint-disable-next-line id-length
   $: typeof bind;
-  /** 获取当前页面实例。 */
-  $currentPage: () => PageInstance<Data, Custom>;
+  /** 获取当前页面实例，页面栈为空时返回 `undefined`。 */
+  $currentPage: () => PageInstance<Data, Custom> | undefined;
 
   /**
    * 获得页面路径

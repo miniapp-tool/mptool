@@ -118,7 +118,7 @@ $Page("main", {
 
 - 属性：`$name`、`$state.firstOpen`、`$refs`
 - 导航：`$go` / `$redirect` / `$switch` / `$reLaunch` / `$back`
-- 信息：`$currentPage` / `$getPath`
+- 信息：`$currentPage`（页面栈为空时返回 `undefined`）/ `$getPath`
 - 通信：`$`（父子组件沟通器）、`$on` / `$off` / `$emit` / `$emitAsync`
 
 ::: warning skyline 版本不提供

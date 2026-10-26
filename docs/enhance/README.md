@@ -671,7 +671,7 @@ $Page("main", {
 
   `pageName` 为页面简称，可以带上 `queryString`，也可填入带有可选参数的小程序绝对路径
 
-- `$currentPage(): PageInstance`: 获取当前页面实例
+- `$currentPage(): PageInstance | undefined`: 获取当前页面实例（页面栈为空时返回 `undefined`）
 
 - `$getPath(name: string): string`: 获取传入页面简称的页面路径
 
