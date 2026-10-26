@@ -35,13 +35,14 @@ fn(1, 2); // 3
 | `global`          | `false`  | 暴露宿主 `globalThis` 自有属性（不会注入 `eval` / `Function`）           |
 | `maxSteps`        | `1e6`    | 解释执行步数上限（不覆盖解析与宿主调用）                                 |
 | `maxStack`        | `512`    | 调用栈深度上限                                                           |
+| `maxDuration`     | 不限制   | 单次运行挂钟预算（毫秒），超时抛错；无法中断单个宿主调用内部             |
 | `strict`          | `false`  | 严格模式：`this` 不装箱、未声明赋值抛错、重复形参/八进制/`eval` 赋值报错 |
 | `features`        | 全部开启 | 特性开关：`class`、`forOf`、`async`、`bigint`                            |
 | `maxSourceLength` | 不限制   | 源码长度上限（UTF-16 code unit）                                         |
 | `maxParseDepth`   | 不限制   | 解析嵌套深度上限                                                         |
 | `maxBacktracks`   | `5000`   | 解析回溯 token 预算                                                      |
 
-> `maxSteps` 只约束解释执行；解析用 `maxSourceLength`/`maxParseDepth`/`maxBacktracks`，宿主同步调用与宿主正则回溯无法被抢占（热更新链路已显式限制远程代码的步数/栈/源码长度）。
+> `maxSteps` 只约束解释执行；`maxDuration`（opt-in）在解释步进与宿主调用边界检查挂钟时间。解析用 `maxSourceLength`/`maxParseDepth`/`maxBacktracks`；单个宿主调用内部与永不结算的宿主 Promise 无法被打断（热更新链路已显式限制远程代码的步数/栈/源码长度）。
 
 ## 串行执行
 

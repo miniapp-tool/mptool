@@ -38,6 +38,18 @@ export interface RunOptions {
   maxStack?: number;
 
   /**
+   * Wall-clock budget in milliseconds for one run, unlimited by default
+   *
+   * 单次运行的挂钟时间预算（毫秒），默认不限制
+   *
+   * Only interpreted stepping and host call boundaries are checked: a single long-running host call
+   * (or a pending host promise) cannot be interrupted.
+   *
+   * 只在解释步进与宿主调用边界检查：单个长时间宿主调用（或挂起的宿主 Promise）无法被打断。
+   */
+  maxDuration?: number;
+
+  /**
    * Whether to parse and run in strict mode, `false` by default
    *
    * 是否以严格模式解析执行，默认 `false`
