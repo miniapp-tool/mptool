@@ -11,7 +11,7 @@ import { wxmlApi } from "./wxml.js";
 setFrameworkMock();
 
 /** Default `wx.env.USER_DATA_PATH` used by the mock (PR-8 switches it to `wxfile://usr`). */
-export const DEFAULT_USER_DATA_PATH = "wxfile://";
+export const DEFAULT_USER_DATA_PATH = "wxfile://usr";
 
 interface MockDownloadTask {
   onProgressUpdate: (callback: (result: { progress: number }) => void) => void;
@@ -28,6 +28,16 @@ const downloadTask = (): MockDownloadTask => ({
   offHeadersReceived: (): void => void 0,
   abort: (): void => void 0,
 });
+
+/** APIs intentionally not implemented by the mock (`canIUse` returns false). */
+const NON_TARGET_API = new Set<string>([
+  "openBluetoothAdapter",
+  "startBluetoothDevicesDiscovery",
+  "createBLEConnection",
+  "createNFCMessage",
+  "joinVoIPChat",
+  "getChannelsLiveInfo",
+]);
 
 const wxMock: {
   version: string;
@@ -59,10 +69,20 @@ const wxMock: {
   typeof deviceApi &
   typeof wxmlApi &
   typeof fileApi &
-  typeof frameworkApiMethods = {
-  version: "test",
+  typeof frameworkApiMethods & {
+    canIUse: (schema: string) => boolean;
+  } = {
+  version: "8.0.30",
   env: {
     USER_DATA_PATH: DEFAULT_USER_DATA_PATH,
+  },
+
+  canIUse(schema: string): boolean {
+    const name = schema.split(".")[0] ?? "";
+
+    if (!name) return false;
+
+    return name in wxMock && !NON_TARGET_API.has(name);
   },
 
   ...storageApi,

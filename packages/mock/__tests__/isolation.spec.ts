@@ -71,7 +71,7 @@ describe("mockWx isolation", () => {
     expect(wx.getStorageInfoSync().keys).toStrictEqual(["kept"]);
     expect(mockState.config.storage).toStrictEqual({});
     expect(frameworkApi.currentPages).toStrictEqual([]);
-    expect(wx.env.USER_DATA_PATH).toBe("wxfile://");
+    expect(wx.env.USER_DATA_PATH).toBe("wxfile://usr");
     expect(envRecord().DEBUG).toBeUndefined();
     expect(() => wx.getFileSystemManager().readFileSync("scoped/file.txt")).toThrow(
       /no such file or directory/u,
@@ -198,7 +198,7 @@ describe("mockWx isolation", () => {
     expect(mockState.config.storage).toStrictEqual({});
     expect(wx.getStorageInfoSync().keys).toStrictEqual([]);
     expect(frameworkApi.currentPages).toStrictEqual([]);
-    expect(wx.env.USER_DATA_PATH).toBe("wxfile://");
+    expect(wx.env.USER_DATA_PATH).toBe("wxfile://usr");
     expect(envRecord().DEBUG).toBeUndefined();
     expect(() => wx.getFileSystemManager().readFileSync("reset/file.txt")).toThrow(
       /no such file or directory/u,

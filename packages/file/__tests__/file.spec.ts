@@ -129,7 +129,7 @@ describe("file operations", () => {
     const path = await saveOnlineFile("https://example.com/file", "tmp/online.txt");
 
     // 传入 filePath 时返回 filePath（而非 tempFilePath）
-    expect(path).toBe("wxfile:///tmp/online.txt");
+    expect(path).toBe("wxfile://usr/tmp/online.txt");
   });
 
   it("should return a promise with the download task attached", async () => {

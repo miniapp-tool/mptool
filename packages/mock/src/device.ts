@@ -1,3 +1,4 @@
+import { buildSystemInfo } from "./systemInfo.js";
 // oxlint-disable typescript/no-unnecessary-boolean-literal-compare -- a missing auth scope must differ from an explicit `false`
 import { callCallback, callFail, offEvent, onEvent } from "./ui.js";
 import { uiDecisions } from "./uiState.js";
@@ -17,18 +18,7 @@ const createManager = (
 /** 设备、媒体、位置、用户、支付等相关 wx API mock */
 export const deviceApi = {
   getSystemInfo(option: unknown): unknown {
-    return callCallback(option, {
-      windowWidth: 375,
-      windowHeight: 667,
-      screenWidth: 375,
-      screenHeight: 667,
-      pixelRatio: 2,
-      statusBarHeight: 20,
-      system: "iOS 16.0",
-      platform: "ios",
-      SDKVersion: "3.8.0",
-      errMsg: "getSystemInfo:ok",
-    });
+    return callCallback(option, { ...buildSystemInfo(), errMsg: "getSystemInfo:ok" });
   },
 
   getBatteryInfo(option: unknown): unknown {

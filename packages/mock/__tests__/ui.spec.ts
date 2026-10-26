@@ -64,7 +64,12 @@ describe("ui mock", () => {
   });
 
   it("getSystemInfoSync should return system info", () => {
-    expect(wx.getSystemInfoSync().platform).toBe("ios");
+    const info = wx.getSystemInfoSync();
+
+    expect(info.platform).toBe("devtools");
+    expect(info.brand).toBe("devtools");
+    expect(info.SDKVersion).toBe("3.8.0");
+    expect(info.windowWidth).toBe(375);
   });
 
   it("getAppBaseInfo should return app base info", () => {
@@ -118,7 +123,7 @@ describe("ui mock", () => {
   it("getConnectedWifi should return full wifi info", async () => {
     const res = (await wx.getConnectedWifi({})) as { wifi: Record<string, unknown> };
 
-    expect(res.wifi.signalStrength).toBe(1);
+    expect(res.wifi.signalStrength).toBe(100);
     expect(res.wifi.SSID).toBe("");
     expect(res.wifi.frequency).toBe(0);
   });
@@ -159,8 +164,11 @@ describe("ui mock", () => {
     });
   });
 
-  it("canIUse should return true", () => {
-    expect(wx.canIUse()).toBe(true);
+  it("canIUse should check known APIs", () => {
+    expect(wx.canIUse("request")).toBe(true);
+    expect(wx.canIUse("getSystemInfo")).toBe(true);
+    expect(wx.canIUse("totallyNotAnApi.method")).toBe(false);
+    expect(wx.canIUse("openBluetoothAdapter")).toBe(false);
   });
 
   it("reportEvent should not throw", () => {
@@ -417,10 +425,16 @@ describe("ui mock", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it("nextTick should call the callback", () => {
+  it("nextTick should call the callback asynchronously", async () => {
     const callback = vi.fn<() => void>();
 
     wx.nextTick(callback);
+    expect(callback).not.toHaveBeenCalled();
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
