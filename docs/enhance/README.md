@@ -444,24 +444,20 @@ $Page("main", {
     },
 
     onPreload({ id }: { id: string }) {
-      // 此处 getData 可以为你自己的耗时逻辑
-      getData(id).then((data) => {
-        this.$state.id = id;
-        this.$state.data = data;
-      });
+      // 只做同步准备：异步结果不会被 onLoad 继承，异步数据请在 onLoad 中获取
+      this.$state.id = id;
     },
 
     onLoad({ id }: { id: string }) {
-      // 数据已经预加载
-      if (this.$state.id === id) {
-        // 直接设置，跳过加载
-        this.setData({ loading: false, data });
-      } else {
-        // 自行获取
-        getData(id).then((data) => {
-          this.setData({ loading: false, data });
-        });
+      // onPreload 中同步写入的 $state 已继承到实例
+      if (this.$state.id !== id) {
+        // 未触发 onPreload：可以在这里做兜底
       }
+
+      // 异步数据在 onLoad 中获取、直接设置到实例
+      getData(id).then((data) => {
+        this.setData({ loading: false, data });
+      });
     },
 
     // ...
@@ -497,24 +493,20 @@ $Page("main", {
     },
 
     onPreload({ id }) {
-      // 此处 getData 可以为你自己的耗时逻辑
-      getData(id).then((data) => {
-        this.$state.id = id;
-        this.$state.data = data;
-      });
+      // 只做同步准备：异步结果不会被 onLoad 继承，异步数据请在 onLoad 中获取
+      this.$state.id = id;
     },
 
     onLoad({ id }) {
-      // 数据已经预加载
-      if (this.$state.id === id) {
-        // 直接设置，跳过加载
-        this.setData({ loading: false, data });
-      } else {
-        // 自行获取
-        getData(id).then((data) => {
-          this.setData({ loading: false, data });
-        });
+      // onPreload 中同步写入的 $state 已继承到实例
+      if (this.$state.id !== id) {
+        // 未触发 onPreload：可以在这里做兜底
       }
+
+      // 异步数据在 onLoad 中获取、直接设置到实例
+      getData(id).then((data) => {
+        this.setData({ loading: false, data });
+      });
     },
 
     // ...
@@ -665,7 +657,11 @@ $Page("main", {
 
   每个页面实例都会在 `onLoad` 时得到一份独立的 `$state`（以页面定义上的状态为初始值），因此可以安全地把业务数据放在这里，同一页面的多个实例之间不会互相影响。
 
-  在实例创建前执行的生命周期（`onAppLaunch` / `onPreload` / `onNavigate`）以页面选项对象作为 `this`，在其中写入的 `$state` 会在实例 `onLoad` 时被继承。
+  在实例创建前执行的生命周期（`onAppLaunch` / `onPreload` / `onNavigate`）以页面选项对象作为 `this`，其中**同步**写入的 `$state` 会在实例 `onLoad` 时被继承。
+
+  ::: warning 只有同步写入会被继承
+  在 `await` / `.then` / `setTimeout` 等异步回调中写入的 `$state` 发生在实例创建之后，**不会**进入实例的 `$state`。异步数据请在 `onLoad`（或之后的生命周期）中直接赋给实例。
+  :::
 
   :::
   - `$state.firstOpen`: 是否是第一个打开的页面

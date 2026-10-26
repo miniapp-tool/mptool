@@ -13,7 +13,7 @@ export interface PageState {
    * 业务自定义状态
    *
    * 每个页面实例会在 `onLoad` 时得到一份独立的 `$state`，初始值取自页面定义上由实例创建前生命周期（`onAppLaunch` / `onPreload` /
-   * `onNavigate`）写入的状态，因此这里可以安全地存放页面数据。
+   * `onNavigate`）**同步**写入的状态；异步回调中写入的状态不会在 `onLoad` 时被继承。
    *
    * Custom page state. Every page instance receives its own copy of `$state` when `onLoad` fires,
    * seeded from the state written by the pre-instance lifecycles (`onAppLaunch` / `onPreload` /
@@ -113,6 +113,8 @@ export interface ExtendedPageMethods<
    * 预加载依赖 `onPreload` 生命周期，仅 `@mptool/enhance` 提供；`@mptool/skyline-enhance` 不支持 预加载，因此该成员只声明在
    * enhance 的页面类型上。
    *
+   * 该方法是**同步**的：只负责派发 `onPreload` 事件，不返回 Promise。
+   *
    * @param pageName 页面名称或页面的路径，可以带上 `queryString`
    *
    *   示例：
@@ -122,7 +124,7 @@ export interface ExtendedPageMethods<
    *   this.$preload("/page/main?userName=xxx&action=xxx");
    *   ```
    */
-  $preload: (pageName: string) => void | Promise<void>;
+  $preload: (pageName: string) => void;
 }
 
 export type PageInstance<

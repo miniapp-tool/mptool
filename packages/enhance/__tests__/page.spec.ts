@@ -133,6 +133,34 @@ describe($Page, () => {
     expect(secondState.custom).toBeUndefined();
   });
 
+  it("should inherit synchronous $state written by onPreload", async () => {
+    vi.resetModules();
+
+    const [{ $Config: freshConfig }, { $Page: freshPage }, { routeEmitter: freshRouteEmitter }] =
+      await Promise.all([
+        import("../src/config/index.js"),
+        import("../src/page/index.js"),
+        import("../src/emitter/index.js"),
+      ]);
+
+    freshConfig({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    freshPage("index", {
+      onPreload({ id }: PageQuery) {
+        this.$state.preloaded = id;
+      },
+    });
+
+    const options = getOptions()!;
+
+    // 实例创建前的生命周期以页面选项对象作为 this；同步写入会在 onLoad 时继承
+    freshRouteEmitter.emit(`${ON_PAGE_PRELOAD}:/pages/index`, { id: "42" });
+
+    expect(loadPageState(options).preloaded).toBe("42");
+  });
+
   it("should call onAppLaunch immediately when app has launched", () => {
     $Config({ defaultPage: "/pages/$name" });
 

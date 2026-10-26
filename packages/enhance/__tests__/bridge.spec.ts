@@ -343,7 +343,8 @@ describe("bridge", () => {
 
       $Page("index", {});
 
-      pageOptions?.$preload?.("target?a=1");
+      // $preload is synchronous: it dispatches the event and returns nothing
+      expect(pageOptions?.$preload?.("target?a=1")).toBeUndefined();
 
       expect(handler).toHaveBeenCalledWith({ a: "1" });
     });

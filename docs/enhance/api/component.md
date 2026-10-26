@@ -125,13 +125,13 @@ $Component({
 - 类型:
 
   ```ts
-  function $preload(pageName: string): void | Promise<void>;
+  function $preload(pageName: string): void;
   ```
 
 - 参数:
   - `pageName`: 页面简称，可以带上 `queryString`
 
-提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期
+提前预加载指定页面，即触发对应页面的 `onPreload` 生命周期。该方法是同步的，返回 `void`。
 
 ### $go
 

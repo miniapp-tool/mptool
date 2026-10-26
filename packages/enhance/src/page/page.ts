@@ -104,13 +104,15 @@ const registerPageLifecycleListeners = <
       callLog("onAppLaunch");
 
       void invokeAsyncLifecycle(name, "onAppLaunch", () =>
-        onAppLaunch(onLaunchOptions as WechatMiniprogram.App.LaunchShowOption),
+        onAppLaunch.call(options, onLaunchOptions as WechatMiniprogram.App.LaunchShowOption),
       );
     } else {
       const onLaunchHandler = (onLaunchOptions: WechatMiniprogram.App.LaunchShowOption): void => {
         callLog("onAppLaunch");
 
-        void invokeAsyncLifecycle(name, "onAppLaunch", () => onAppLaunch(onLaunchOptions));
+        void invokeAsyncLifecycle(name, "onAppLaunch", () =>
+          onAppLaunch.call(options, onLaunchOptions),
+        );
       };
 
       appEmitter.on(ON_APP_LAUNCH, onLaunchHandler);
@@ -127,7 +129,10 @@ const registerPageLifecycleListeners = <
     const onNavigateHandler = (query: PageQuery): Promise<void> | void => {
       callLog("onNavigate", query);
 
-      return onNavigate(query);
+      // Pre-instance lifecycles run with the page options as `this`, so synchronous `$state`
+      // writes are inherited by the instance at `onLoad`.
+      // 实例创建前的生命周期以页面选项对象作为 this，同步写入的 $state 会在 onLoad 时被继承。
+      return onNavigate.call(options, query);
     };
 
     routeEmitter.on(`${ON_PAGE_NAVIGATE}:${route}`, onNavigateHandler);
@@ -143,7 +148,10 @@ const registerPageLifecycleListeners = <
     const onPreloadHandler = (query: PageQuery): void | Promise<void> => {
       callLog("onPreload", query);
 
-      return onPreload(query);
+      // Pre-instance lifecycles run with the page options as `this`, so synchronous `$state`
+      // writes are inherited by the instance at `onLoad`.
+      // 实例创建前的生命周期以页面选项对象作为 this，同步写入的 $state 会在 onLoad 时被继承。
+      return onPreload.call(options, query);
     };
 
     routeEmitter.on(`${ON_PAGE_PRELOAD}:${route}`, onPreloadHandler);
