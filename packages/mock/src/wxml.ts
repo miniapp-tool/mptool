@@ -27,7 +27,8 @@ type NodeKind = "boundingClientRect" | "context" | "fields" | "node" | "ref" | "
 
 interface QueryNode {
   callback?: (result: unknown) => void;
-  fieldsSpec?: Record<string, unknown>;
+  /** `fields()` specification; `{}` until that binding is selected. */
+  fieldsSpec: Record<string, unknown>;
   kind?: NodeKind;
   multiple: boolean;
   selector: string;
@@ -99,7 +100,7 @@ const createSelectorQueryMock = (): SelectorQueryMock => {
   let current: QueryNode | undefined;
 
   const selectNode = (selector: string, multiple: boolean): SelectorQueryMock => {
-    current = { multiple, selector };
+    current = { fieldsSpec: {}, multiple, selector };
     nodes.push(current);
 
     return query;
@@ -161,7 +162,7 @@ const createSelectorQueryMock = (): SelectorQueryMock => {
                 return scrollOffsetOf(info);
               }
               case "fields": {
-                return fieldsOf(info, node.fieldsSpec ?? {});
+                return fieldsOf(info, node.fieldsSpec);
               }
               case "node": {
                 return info.node ?? null;

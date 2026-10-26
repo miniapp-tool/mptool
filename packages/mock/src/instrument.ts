@@ -95,16 +95,12 @@ const deliverSuccess = (injection: Injection, option: CallbackOption, result: un
 };
 
 const createListenerSlot = (): {
-  clear: () => void;
   off: (listener?: TaskListener) => void;
   on: (listener: TaskListener) => void;
 } => {
   const listeners = new Set<TaskListener>();
 
   return {
-    clear(): void {
-      listeners.clear();
-    },
     off(listener?: TaskListener): void {
       if (listener) listeners.delete(listener);
       else listeners.clear();
@@ -337,8 +333,8 @@ const applyFailure = (injection: Injection, failure: WxFailure): unknown => {
       return failCallback(injection, failure);
     }
 
+    // istanbul ignore next -- `assertInjectable` rejects event / void rules at registration time
     default: {
-      // event / void rules are rejected at registration time.
       throw new TypeError(
         `[mockWx] failures cannot be injected into ${injection.kind} API "${injection.api}"`,
       );
@@ -379,6 +375,8 @@ const applyMatched = (injection: Injection, matched: MatchedRule): unknown => {
   // oxlint-disable-next-line no-undefined -- a response value can be falsy, so presence must be checked against `undefined`
   if (matched.responder !== undefined) return applyRespond(injection, matched.responder);
 
+  // istanbul ignore next -- a `fail` / `sequence` rule always carries a failure, so the default
+  // payload is only a fallback for a rule that matched without a route or responder.
   return applyFailure(
     injection,
     matched.failure ?? { errMsg: `${injection.api}:fail`, type: "fail" },

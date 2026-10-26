@@ -101,7 +101,8 @@ const parseQuery = (queryString: string): Record<string, string> => {
   for (const pair of queryString.split("&")) {
     if (!pair) continue;
 
-    const [rawKey = "", rawValue = ""] = pair.split("=");
+    // `split` always yields at least one element, so the key is always defined.
+    const [rawKey, rawValue = ""] = pair.split("=");
 
     try {
       query[decodeURIComponent(rawKey)] = decodeURIComponent(rawValue);
@@ -116,7 +117,8 @@ const parseQuery = (queryString: string): Record<string, string> => {
 const parseRoute = (url: unknown): { query: Record<string, string>; route: string } | null => {
   if (typeof url !== "string" || url.trim() === "") return null;
 
-  const [rawPath = "", rawQuery = ""] = url.split("?");
+  // `split` always yields at least one element, so the path is always defined.
+  const [rawPath, rawQuery = ""] = url.split("?");
   const route = `/${rawPath.replace(/^\/+/u, "").replace(/\/+$/u, "")}`;
 
   return { query: parseQuery(rawQuery), route: route === "/" ? "/" : route };
@@ -159,7 +161,8 @@ const isTabBarDefinition = (definition: PageDefinition): boolean =>
 
 /** Normalize a route or URL to `/a/b` form for tabBar configuration. */
 export const normalizeRoute = (route: string): string => {
-  const [rawPath = ""] = route.split("?");
+  // `split` always yields at least one element, so the path is always defined.
+  const [rawPath] = route.split("?");
   let start = 0;
   let end = rawPath.length;
 
@@ -220,10 +223,8 @@ const hasTabBarPages = (): boolean =>
   (frameworkApi.pages as PageDefinition[]).some((page) => isTabBarDefinition(page));
 
 /** Drop cached tab pages (unloading them unless they are still in the stack). */
-const clearTabPages = (keep?: MockPageInstance): void => {
+const clearTabPages = (): void => {
   for (const [route, page] of frameworkApi.tabPages) {
-    if (page === keep) continue;
-
     if (!currentStack().includes(page)) invokeLifecycle(page, "onUnload");
     frameworkApi.tabPages.delete(route);
   }
@@ -474,6 +475,7 @@ const createNavigator = (type: string): ((option?: NavigationOption) => unknown)
       };
     }
 
+    // istanbul ignore next -- `type` is a closed union whose every member is handled above
     default: {
       throw new TypeError(`[mock] unknown navigation type: ${type}`);
     }

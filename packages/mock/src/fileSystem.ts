@@ -364,7 +364,8 @@ export class FileSystemManager {
     const scheme = /^(?:wxfile|http|https):\/\/([^/]*)(\/.*)?$/u.exec(path);
 
     if (scheme) {
-      const host = scheme[1] ?? "";
+      // `([^/]*)` always participates in the match, so the host (capture group 1) is always a string.
+      const [, host] = scheme;
       const rest = scheme[2] ?? "/";
 
       if (host === "usr") path = rest;
@@ -432,7 +433,8 @@ export class FileSystemManager {
     for (const key of this.files.keys()) {
       if (key === dir || !key.startsWith(prefix)) continue;
 
-      const [name = ""] = key.slice(prefix.length).split("/");
+      // `split` always yields at least one element, so the first segment is always defined.
+      const [name] = key.slice(prefix.length).split("/");
 
       if (name && !names.includes(name)) names.push(name);
     }

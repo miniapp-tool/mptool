@@ -131,6 +131,7 @@ describe("a2 base api mock", () => {
         errMsg: "requestIdleCallback:ok",
         timeRemaining: expect.any(Function),
       });
+      expect(callback.mock.calls[0][0].timeRemaining()).toBe(0);
 
       const cancelled = vi.fn<() => void>();
       const cancelledId = wx.requestIdleCallback(cancelled);
