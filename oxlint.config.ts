@@ -44,16 +44,6 @@ const config: OxlintConfig = defineHopeConfig(
     },
   },
   {
-    files: ["packages/run/src/**/*.ts"],
-    rules: {
-      // complexity: "off",
-      // "max-classes-per-file": "off",
-      // "max-lines": "off",
-      // "max-lines-per-function": "off",
-      // "max-statements": "off",
-    },
-  },
-  {
     files: ["**/encoder/src/implements/*.ts"],
     rules: {
       complexity: "off",
