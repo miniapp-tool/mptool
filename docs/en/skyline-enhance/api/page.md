@@ -96,7 +96,7 @@ The Skyline version has no `onAppLaunch` / `onPreload` / `onNavigate`, so the fr
 
 ### Event dispatch
 
-The event dispatch members are all instance properties or methods of [Emitter](/en/skyline-enhance/api/emitter/):
+The event dispatch members are all instance properties or methods of [Emitter](./emitter.md):
 
 - `$on(type: string, handler: (event?: any) => void | Promise<void>): void`: listen for the `type` event
 

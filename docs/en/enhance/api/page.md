@@ -147,7 +147,7 @@ Writes to `$state` in async callbacks such as `await` / `.then` / `setTimeout` h
 
 ### Event dispatch
 
-The event dispatch members are all instance properties or methods of [$Emitter](/en/enhance/api/emitter/).
+The event dispatch members are all instance properties or methods of [$Emitter](./emitter.md).
 
 - `$on(type:string, handler: (event?:any) => void | Promise<void>): void`: listen for the `type` event
 

@@ -79,7 +79,7 @@ $App({
 
 :::
 
-`$Config`'s `defaultPage` / `pages` / `getPath` / `home` / `extendPage` / `injectPage` / `extendComponent` / `injectComponent` / `hotReloadPattern` are the same as in enhance. See the [$Config API](/en/skyline-enhance/api/config/).
+`$Config`'s `defaultPage` / `pages` / `getPath` / `home` / `extendPage` / `injectPage` / `extendComponent` / `injectComponent` / `hotReloadPattern` are the same as in enhance. See the [$Config API](./api/config.md).
 
 ::: warning Options that only work in enhance
 
@@ -94,7 +94,7 @@ App registrar provided by the framework.
 - Lifecycle extension: `onAwake(time: number)`, called when the mini-program is brought back from the background; `time` is the duration of this sleep, in ms
 - Method extensions: `$on` / `$off` / `$emit` / `$emitAsync`
 
-See the [$App API](/en/skyline-enhance/api/app/).
+See the [$App API](./api/app.md).
 
 ### $Page
 
@@ -114,7 +114,7 @@ Additional lifecycles:
 - `onRegister()`: called when the page is about to register (mini-program native methods are not yet mounted on `this`)
 - `onAwake(time: number)`: called when the mini-program is brought back from the background while the page is alive
 
-Properties and methods available on page instances (see the [$Page API](/en/skyline-enhance/api/page/) for details):
+Properties and methods available on page instances (see the [$Page API](./api/page.md) for details):
 
 - Properties: `$name`, `$state.firstOpen`, `$refs`
 - Navigation: `$go` / `$redirect` / `$switch` / `$reLaunch` / `$back`
@@ -130,7 +130,7 @@ Properties and methods available on page instances (see the [$Page API](/en/skyl
 
 ### $Component
 
-Component registrar provided by the framework, exactly the same as in enhance: typed `props`, parent/child references based on `$refs`, `$call(method, ...args)`, `$id` / `$refID` / `$root` / `$parent`, etc. See the [$Component API](/en/skyline-enhance/api/component/).
+Component registrar provided by the framework, exactly the same as in enhance: typed `props`, parent/child references based on `$refs`, `$call(method, ...args)`, `$id` / `$refID` / `$root` / `$parent`, etc. See the [$Component API](./api/component.md).
 
 ## Navigation
 
@@ -188,7 +188,7 @@ await bus.emitAsync("bar", { data: "content" });
 emitter.on("user-login", () => {});
 ```
 
-See the [Emitter API](/en/skyline-enhance/api/emitter/).
+See the [Emitter API](./api/emitter.md).
 
 ## Page hot reload
 
@@ -208,7 +208,7 @@ import { installGlobal } from "@mptool/run";
 installGlobal();
 ```
 
-Fetch timing, the `onHotReload` hook, server deployment (returning a 200 with an empty body to avoid 404s), and other details are exactly the same as in enhance. See the [Page hot reload section in enhance](/en/enhance/#page-hot-reload).
+Fetch timing, the `onHotReload` hook, server deployment (returning a 200 with an empty body to avoid 404s), and other details are exactly the same as in enhance. See the [Page hot reload section in enhance](../enhance/README.md#page-hot-reload).
 
 ::: tip Concurrent registration, timeouts, and caching
 
@@ -236,8 +236,8 @@ Replace the package name with `@mptool/skyline-enhance`, then adjust according t
 
 ## API
 
-- [Configuration ($Config)](/en/skyline-enhance/api/config/)
-- [App ($App)](/en/skyline-enhance/api/app/)
-- [Page ($Page)](/en/skyline-enhance/api/page/)
-- [Component ($Component)](/en/skyline-enhance/api/component/)
-- [Events (Emitter)](/en/skyline-enhance/api/emitter/)
+- [Configuration ($Config)](./api/config.md)
+- [App ($App)](./api/app.md)
+- [Page ($Page)](./api/page.md)
+- [Component ($Component)](./api/component.md)
+- [Events (Emitter)](./api/emitter.md)

@@ -816,4 +816,4 @@ emitter.on("foo", onFoo); // start listening
 emitter.off("foo", onFoo); // stop listening
 ```
 
-For details, see the [API documentation](/en/enhance/api/emitter/).
+For details, see the [API documentation](./api/emitter.md).

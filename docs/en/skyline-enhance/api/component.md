@@ -119,7 +119,7 @@ Get a component instance by its component ID.
 
 ### Event dispatch
 
-The event dispatch members are all instance properties or methods of [Emitter](/en/skyline-enhance/api/emitter/):
+The event dispatch members are all instance properties or methods of [Emitter](./emitter.md):
 
 - `$on(type: string, handler: (event?: any) => void | Promise<void>): void`: listen for the `type` event
 
@@ -135,7 +135,7 @@ Parent-child component communicator, providing the ability to establish communic
 
 ## Navigation methods
 
-Component instances also have navigation methods (`$go` / `$redirect` / `$switch` / `$reLaunch` / `$back`) and view-layer proxies (`$bindGo` / `$bindRedirect` / `$bindSwitch` / `$bindRelaunch` / `$bindBack`), with the same behavior as [$Page](/en/skyline-enhance/api/page/#navigation-methods).
+Component instances also have navigation methods (`$go` / `$redirect` / `$switch` / `$reLaunch` / `$back`) and view-layer proxies (`$bindGo` / `$bindRedirect` / `$bindSwitch` / `$bindRelaunch` / `$bindBack`), with the same behavior as [$Page](./page.md#navigation-methods).
 
 ::: warning
 
