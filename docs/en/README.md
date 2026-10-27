@@ -179,7 +179,7 @@ mockWx.user({ modal: "cancel" });
 mockWx.network({ networkType: "wifi" });
 ```
 
-`@mptool/mock` is a development dependency: it is used by this repository's tests and is not part of a production mini-program bundle.
+`@mptool/mock` is a development dependency: it is used by this repository's tests and is not part of a production mini-program bundle. See the [English mock guide](/en/mock/) for failure injection, user decisions, supported scope and DevTools differences.
 
 ## Behavior notes
 
