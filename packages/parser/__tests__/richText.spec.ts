@@ -358,6 +358,21 @@ describe(getRichTextNodes, () => {
     expect(src).toContain("gradientUnits=%22");
   });
 
+  it("keeps non-tag svg children when converting", async () => {
+    const nodes = await getRichTextNodes('<svg viewBox="0 0 10 10">hello</svg>');
+
+    expect(nodes).toStrictEqual([
+      {
+        type: "node",
+        name: "img",
+        attrs: {
+          src: expect.stringContaining("viewBox=%220%200%2010%2010%22%3Ehello%3C/svg%3E"),
+          style: "width:10px;height:10px;",
+        },
+      },
+    ]);
+  });
+
   it("parses comma separated viewBox", async () => {
     const nodes = await getRichTextNodes('<svg viewBox="0,0,100,50"></svg>');
 
