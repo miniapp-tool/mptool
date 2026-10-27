@@ -7,6 +7,14 @@ const config: UserConfig = defineUserConfig({
   lang: "zh-CN",
   title: "MP Tool",
   description: "极其轻量的小程序框架",
+  locales: {
+    "/": { lang: "zh-CN", title: "MP Tool", description: "极其轻量的小程序框架" },
+    "/en/": {
+      lang: "en-US",
+      title: "MP Tool",
+      description: "A lightweight framework for WeChat mini-programs",
+    },
+  },
 
   bundler: viteBundler(),
 
@@ -22,29 +30,44 @@ const config: UserConfig = defineUserConfig({
     repo: "miniapp-tool/mptool",
     docsDir: "docs",
 
-    navbar: [
-      {
-        text: "全量包",
-        icon: "box",
-        children: [
-          { text: "@mptool/all", link: "/all/" },
-          { text: "@mptool/skyline", link: "/skyline/" },
+    locales: {
+      "/": {
+        navbar: [
+          {
+            text: "全量包",
+            icon: "box",
+            children: [
+              { text: "@mptool/all", link: "/all/" },
+              { text: "@mptool/skyline", link: "/skyline/" },
+            ],
+          },
+          { text: "enhance", link: "/enhance/" },
+          { text: "skyline-enhance", link: "/skyline-enhance/" },
+          { text: "net", link: "/net/" },
+          { text: "file", link: "/file/" },
+          { text: "api", link: "/api/" },
+          { text: "parser", link: "/parser/" },
+          { text: "run", link: "/run/" },
+          { text: "encoder", link: "/encoder/" },
+          { text: "shared", link: "/shared/" },
+          { text: "mock", link: "/mock/" },
         ],
+        sidebar: "structure",
+        footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
+        displayFooter: true,
       },
-      { text: "enhance", link: "/enhance/" },
-      { text: "skyline-enhance", link: "/skyline-enhance/" },
-      { text: "net", link: "/net/" },
-      { text: "file", link: "/file/" },
-      { text: "api", link: "/api/" },
-      { text: "parser", link: "/parser/" },
-      { text: "run", link: "/run/" },
-      { text: "encoder", link: "/encoder/" },
-      { text: "shared", link: "/shared/" },
-      { text: "mock", link: "/mock/" },
-    ],
-    sidebar: "structure",
-    footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
-    displayFooter: true,
+      "/en/": {
+        navbar: [
+          { text: "Guide", link: "/en/" },
+          { text: "Packages", link: "/en/#packages" },
+          { text: "中文", link: "/" },
+          { text: "GitHub", link: "https://github.com/miniapp-tool/mptool" },
+        ],
+        sidebar: false,
+        footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
+        displayFooter: true,
+      },
+    },
 
     markdown: {
       codeTabs: true,
