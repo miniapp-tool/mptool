@@ -121,6 +121,12 @@ describe(Cookie, () => {
     expect(cookie.createdAt).toBeLessThanOrEqual(Date.now());
   });
 
+  it("should reject an empty name or value", () => {
+    expect(() => new Cookie({ name: "", value: "" })).toThrow(
+      new TypeError("Invalid cookie name or value"),
+    );
+  });
+
   it("should keep the given createdAt", () => {
     const cookie = new Cookie({ name: "a", value: "b", domain: "example.com", createdAt: 1234 });
 

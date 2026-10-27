@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Cookie } from "../src/cookie.js";
 import { CookieStore } from "../src/index.js";
+import type { CookieType } from "../src/typings.js";
 
 const mockedResponse = {
   header: {
@@ -276,6 +277,16 @@ describe("cookie store extras", () => {
     expect(store.get("a", { domain: "example.com", path: "/" })).toBeNull();
     expect(store.get("a", { domain: "other.com", path: "/" })).toBeNull();
   });
+
+  it("should ignore a delete for a domain without cookies", () => {
+    const store = new CookieStore("delete-unknown-domain");
+
+    store.set({ name: "a", value: "1", domain: "example.com", path: "/" });
+
+    store.delete("a", "other.com");
+
+    expect(store.getValue("a", { domain: "example.com" })).toBe("1");
+  });
 });
 
 describe("cookie domain validation", () => {
@@ -484,6 +495,17 @@ describe("cookie path keys", () => {
     expect(store.getAllCookies()).toHaveLength(0);
   });
 
+  it("should drop the cookie name when its last path is deleted", () => {
+    const store = new CookieStore("cookie-path-delete-last");
+
+    store.set({ name: "sid", value: "admin", domain: "example.com", path: "/admin" });
+
+    store.delete("sid", "example.com", "/admin");
+
+    expect(store.getAllCookies()).toStrictEqual([]);
+    expect(store.has("sid", { domain: "example.com" })).toBe(false);
+  });
+
   it("should clear every path of a domain", () => {
     const store = new CookieStore("cookie-path-clear");
 
@@ -598,6 +620,143 @@ describe("cookie storage", () => {
     expect(store.getAllCookies()).toHaveLength(1);
     expect(store.get("big", { domain: "example.com" })).toBeNull();
     expect(store.get("small", { domain: "example.com" })).not.toBeNull();
+  });
+
+  it("should count the UTF-8 byte length of multibyte cookie values", () => {
+    const store = new CookieStore("storage-cookie-utf8-size");
+
+    store.set({ name: "two", value: "é", domain: "example.com" });
+    store.set({ name: "three", value: "中", domain: "example.com" });
+    store.set({ name: "four", value: "😀", domain: "example.com" });
+
+    expect(store.getAllCookies()).toHaveLength(3);
+  });
+
+  it("should skip persisted entries without a valid name", () => {
+    wx.setStorageSync("storage-invalid-entries", [
+      // a legacy entry without a name must be ignored instead of stored as ""
+      { value: "1", domain: "example.com" },
+      { name: "no-value", domain: "example.com" },
+      { name: "bad;name", value: "1", domain: "example.com" },
+      { name: "kept", value: "3", domain: "example.com" },
+    ] as unknown as CookieType[]);
+
+    const store = new CookieStore("storage-invalid-entries");
+
+    expect(
+      store
+        .getAllCookies()
+        .map(({ name }) => name)
+        .sort(),
+    ).toStrictEqual(["kept", "no-value"]);
+  });
+
+  it("should prune a cookie that expires before the batched write", async () => {
+    vi.useFakeTimers({ now: 1_700_000_000_000 });
+
+    try {
+      const key = "storage-expire-before-save";
+      const store = new CookieStore(key);
+
+      // live for one second
+      store.set({ name: "soon", value: "1", domain: "example.com", maxAge: 1 });
+
+      // expire it before the batched write is flushed
+      vi.setSystemTime(Date.now() + 2000);
+
+      await Promise.resolve();
+
+      // the expired cookie is pruned instead of being persisted
+      expect(wx.getStorageSync(key)).toStrictEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should skip a persisted cookie that is already expired", () => {
+    wx.setStorageSync("storage-expired-entry", [
+      {
+        name: "dead",
+        value: "1",
+        domain: "example.com",
+        expires: new Date(Date.now() - 1000),
+      },
+    ] as CookieType[]);
+
+    const store = new CookieStore("storage-expired-entry");
+
+    expect(store.getAllCookies()).toStrictEqual([]);
+  });
+
+  it("should not return a cookie that expired while in the store", () => {
+    vi.useFakeTimers({ now: 1_700_000_000_000 });
+
+    try {
+      const store = new CookieStore("storage-expire-after-set");
+
+      store.set({ name: "soon", value: "1", domain: "example.com", maxAge: 1 });
+      vi.setSystemTime(Date.now() + 2000);
+
+      // reading before the batched write must already filter the expired cookie
+      expect(store.getAllCookies()).toStrictEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should keep the other paths of a cookie name evicted by the domain limit", () => {
+    const store = new CookieStore("storage-domain-limit-paths");
+    const cookies = [
+      new Cookie({ name: "old", value: "1", domain: "example.com", path: "/a", createdAt: 1 }),
+      new Cookie({ name: "old", value: "2", domain: "example.com", path: "/b", createdAt: 2 }),
+    ];
+
+    for (let index = 0; index < 49; index += 1) {
+      cookies.push(
+        new Cookie({
+          name: `c${index}`,
+          value: `${index}`,
+          domain: "example.com",
+          path: "/",
+          createdAt: 3 + index,
+        }),
+      );
+    }
+
+    // the 51st cookie evicts the oldest one, whose name still has another path
+    store.apply(cookies);
+
+    expect(store.getAllCookies()).toHaveLength(50);
+    expect(store.getValue("old", { domain: "example.com", path: "/a" })).toBeUndefined();
+    expect(store.getValue("old", { domain: "example.com", path: "/b" })).toBe("2");
+  });
+
+  it("should keep the other paths of a cookie name evicted by the total limit", () => {
+    const store = new CookieStore("storage-total-limit-paths");
+
+    // 2999 live cookies: 59 domains with 50 cookies plus one with 49
+    for (let domainIndex = 0; domainIndex < 59; domainIndex += 1) {
+      for (let index = 0; index < 50; index += 1) {
+        store.set({
+          name: `c${index}`,
+          value: `${index}`,
+          domain: `d${domainIndex}.example.com`,
+        });
+      }
+    }
+
+    for (let index = 0; index < 49; index += 1)
+      store.set({ name: `c${index}`, value: `${index}`, domain: "d59.example.com" });
+
+    // the first extra cookie fills the store, the second one evicts the oldest
+    store.apply([
+      new Cookie({ name: "old", value: "1", domain: "d60.example.com", path: "/a", createdAt: 1 }),
+      new Cookie({ name: "old", value: "2", domain: "d60.example.com", path: "/b", createdAt: 2 }),
+    ]);
+
+    expect(store.getAllCookies()).toHaveLength(3000);
+    expect(store.getValue("old", { domain: "d60.example.com", path: "/a" })).toBeUndefined();
+    expect(store.getValue("old", { domain: "d60.example.com", path: "/b" })).toBe("2");
   });
 
   it("should evict the oldest cookies when a domain exceeds the limit", () => {

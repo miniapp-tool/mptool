@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Headers } from "../src/headers.js";
+import { Headers, parseCookieHeader } from "../src/headers.js";
 
 describe(Headers, () => {
   describe("constructor()", () => {
@@ -515,5 +515,15 @@ describe(Headers, () => {
       expect(headers.get("accept")).toBe("*/*");
       expect(object.accept).toBe("text/plain");
     });
+  });
+});
+
+describe(parseCookieHeader, () => {
+  it("drops cookies when the response host is empty", () => {
+    expect(parseCookieHeader("a=1; Domain=example.com", "")).toStrictEqual([]);
+  });
+
+  it("drops cookies whose Domain attribute normalizes to an empty value", () => {
+    expect(parseCookieHeader("a=1; Domain=.", "example.com")).toStrictEqual([]);
   });
 });

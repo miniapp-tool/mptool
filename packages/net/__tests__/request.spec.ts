@@ -3,7 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CookieStore } from "../src/cookieStore.js";
 import type { RequestOptions } from "../src/index.js";
-import { Headers, URLSearchParams, createRequest, request } from "../src/index.js";
+import {
+  Headers,
+  URLSearchParams,
+  createRequest,
+  request,
+  requestCookieStore,
+} from "../src/index.js";
 
 interface MockRequestCall {
   method: string;
@@ -137,6 +143,44 @@ describe(request, () => {
     }
   });
 
+  it("should summarize binary and unserializable response bodies", async () => {
+    const wxAny = wx as unknown as {
+      request: (option: {
+        success?: (result: {
+          data: unknown;
+          statusCode: number;
+          header: Record<string, string>;
+        }) => void;
+      }) => void;
+    };
+    const original = wxAny.request;
+    const circular: Record<string, unknown> = {};
+
+    circular.self = circular;
+
+    const bodies: [unknown, string][] = [
+      [new ArrayBuffer(8), "[ArrayBuffer 8 bytes]"],
+      [new Uint8Array(4), "[Uint8Array 4 bytes]"],
+      [circular, "[object]"],
+      [undefined, "Request ends with 200 undefined"],
+    ];
+
+    try {
+      for (const [body, expected] of bodies) {
+        wxAny.request = (option): void => {
+          option.success?.({ data: body, statusCode: 200, header: {} });
+        };
+
+        // oxlint-disable-next-line eslint/no-await-in-loop -- each body needs its own wx.request mock
+        const logs = await captureDebugLogs(() => request("https://example.com/body"));
+
+        expect(logs).toContain(expected);
+      }
+    } finally {
+      wxAny.request = original;
+    }
+  });
+
   it("should uppercase method and set json content-type for plain object body", async () => {
     const calls = mockRequest();
 
@@ -195,6 +239,19 @@ describe(request, () => {
     const [call] = calls;
 
     expect(call.header.cookie).toContain("session=abc");
+  });
+
+  it("should allow an empty cookie scope with a custom cookie store", async () => {
+    const calls = mockRequest();
+    const cookieStore = {
+      getHeader: (): string => "",
+      applyHeader: (): void => void 0,
+    } as unknown as CookieStore;
+
+    const res = await request("https://example.com/api", { cookieScope: "", cookieStore });
+
+    expect(res.status).toBe(200);
+    expect(calls[0].header.cookie).toBeUndefined();
   });
 
   it("should reject with MpError when request fails", async () => {
@@ -287,6 +344,28 @@ describe(createRequest, () => {
     const [call] = calls;
 
     expect(call.url).toBe("https://other.com/api");
+  });
+
+  it("should add the https scheme to a bare host", async () => {
+    const calls = mockRequest();
+    const { request: req } = createRequest();
+
+    const res = await req("example.com/api");
+
+    expect(res.status).toBe(200);
+    expect(calls[0].url).toBe("https://example.com/api");
+  });
+
+  it("should resolve the cookie store from the factory options", () => {
+    const cookieStore = new CookieStore("factory-store-instance");
+    const fromInstance = createRequest({ cookieStore });
+    const fromKey = createRequest({ cookieStore: "factory-store-key" });
+    const fromDefault = createRequest();
+
+    expect(fromInstance.cookieStore).toBe(cookieStore);
+    expect(fromKey.cookieStore).toBeInstanceOf(CookieStore);
+    expect(fromKey.cookieStore).not.toBe(cookieStore);
+    expect(fromDefault.cookieStore).toBe(requestCookieStore);
   });
 
   it("should call errorHandler when request fails with MpError", async () => {
@@ -424,6 +503,130 @@ describe("request cancellation", () => {
 
     fail("request:fail timeout");
     await expect(req).rejects.toMatchObject({ type: "timeout" });
+  });
+
+  it("should abort when the signal dispatches abort and clean up the listener", async () => {
+    const removeEventListener = vi.fn<() => void>();
+    let listener: (() => void) | undefined;
+
+    createTask();
+
+    const req = request("https://example.com/api", {
+      signal: {
+        aborted: false,
+        addEventListener: (_type: "abort", onAbort: () => void): void => {
+          listener = onAbort;
+        },
+        removeEventListener,
+      },
+    });
+
+    expect(listener).toBeTypeOf("function");
+
+    listener?.();
+
+    await expect(req).rejects.toMatchObject({ type: "abort" });
+    expect(removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it("should remove the signal listener after a successful request", async () => {
+    const removeEventListener = vi.fn<() => void>();
+    const { success } = createTask();
+
+    const req = request("https://example.com/api", {
+      signal: {
+        aborted: false,
+        addEventListener: (): void => void 0,
+        removeEventListener,
+      },
+    });
+
+    success();
+    await req;
+
+    expect(removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not start a request when the signal aborts while subscribing", async () => {
+    const requestSpy = vi.fn<() => unknown>(() => undefined);
+
+    (wx as unknown as { request: unknown }).request = requestSpy;
+
+    // A custom signal may notify the listener synchronously when it is aborted between the
+    // initial `aborted` check and the listener registration.
+    const req = request("https://example.com/api", {
+      signal: {
+        aborted: false,
+        addEventListener: (_type: "abort", listener: () => void): void => {
+          listener();
+        },
+      },
+    });
+
+    await expect(req).rejects.toMatchObject({ type: "abort" });
+    expect(requestSpy).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a second abort", async () => {
+    const { task } = createTask();
+    const req = request("https://example.com/api");
+
+    req.abort();
+    req.abort();
+
+    expect(task.abort).toHaveBeenCalledTimes(1);
+    await expect(req).rejects.toMatchObject({ type: "abort" });
+  });
+
+  it("should cancel a scheduled retry when aborted", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const { fail } = createTask();
+      const req = request("https://example.com/api", { retry: { attempts: 3, delay: 1000 } });
+
+      fail("request:fail network");
+      expect(vi.getTimerCount()).toBe(1);
+
+      req.abort();
+
+      expect(vi.getTimerCount()).toBe(0);
+      await expect(req).rejects.toMatchObject({ type: "abort" });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should expose no task once the request has settled", async () => {
+    const { success } = createTask();
+    const req = request("https://example.com/api");
+
+    expect(req.task).toBeDefined();
+
+    success();
+    await req;
+
+    expect(req.task).toBeUndefined();
+  });
+
+  it("should ignore a success that arrives after abort", async () => {
+    const { success } = createTask();
+    const req = request("https://example.com/api");
+
+    req.abort();
+    success();
+
+    await expect(req).rejects.toMatchObject({ type: "abort" });
+  });
+
+  it("should abort when wx.request returns no task", async () => {
+    (wx as unknown as { request: unknown }).request = (): undefined => undefined;
+
+    const req = request("https://example.com/api");
+
+    req.abort();
+
+    await expect(req).rejects.toMatchObject({ type: "abort" });
   });
 });
 
@@ -582,6 +785,216 @@ describe("request retry", () => {
     expect(headers[0].cookie).toBeUndefined();
     expect(headers[1].cookie).toContain("sid=abc");
   });
+
+  it("should apply the retry defaults when the config is empty", async () => {
+    let attempt = 0;
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      attempt += 1;
+      option.success?.({ data: {}, statusCode: 200, header: {} });
+
+      return fakeTask();
+    };
+
+    const res = await request("https://example.com/api", { retry: {} });
+
+    expect(res.status).toBe(200);
+    expect(attempt).toBe(1);
+  });
+
+  it("should pass the failure to onRetry without a response", async () => {
+    let attempt = 0;
+    const onRetry = vi.fn<
+      (info: {
+        attempt: number;
+        delay: number;
+        error?: { type: string };
+        response?: unknown;
+      }) => number
+    >(() => 0);
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      const steps = [
+        (): void => option.fail?.({ errMsg: "request:fail network" }),
+        (): void => option.success?.({ data: {}, statusCode: 200, header: {} }),
+      ];
+
+      steps[attempt]?.();
+      attempt += 1;
+
+      return fakeTask();
+    };
+
+    await request("https://example.com/api", { retry: { attempts: 2, onRetry } });
+
+    expect(onRetry).toHaveBeenCalledTimes(1);
+
+    const [[info]] = onRetry.mock.calls;
+
+    expect(info).toMatchObject({ attempt: 2, delay: 300, error: { type: "network" } });
+    expect(info).not.toHaveProperty("response");
+  });
+
+  it("should pass the response to onRetry without an error", async () => {
+    const onRetry = vi.fn<
+      (info: {
+        attempt: number;
+        delay: number;
+        error?: unknown;
+        response?: { status: number };
+      }) => number
+    >(() => 0);
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      option.success?.({ data: {}, statusCode: 503, header: {} });
+
+      return fakeTask();
+    };
+
+    const res = await request("https://example.com/api", {
+      retry: { attempts: 2, delay: 0, statusCodes: [503], onRetry },
+    });
+
+    expect(res.status).toBe(503);
+
+    const [[info]] = onRetry.mock.calls;
+
+    expect(info).toMatchObject({ attempt: 2, delay: 0, response: { status: 503 } });
+    expect(info).not.toHaveProperty("error");
+  });
+
+  it("should fall back to the default delay when onRetry returns a negative value", async () => {
+    let attempt = 0;
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      const steps = [
+        (): void => option.fail?.({ errMsg: "request:fail network" }),
+        (): void => option.success?.({ data: {}, statusCode: 200, header: {} }),
+      ];
+
+      steps[attempt]?.();
+      attempt += 1;
+
+      return fakeTask();
+    };
+
+    const res = await request("https://example.com/api", {
+      retry: { attempts: 2, delay: 1, onRetry: (): number => -1 },
+    });
+
+    expect(res.status).toBe(200);
+    expect(attempt).toBe(2);
+  });
+
+  it("should not start a retry scheduled after onRetry aborted the request", async () => {
+    let attempt = 0;
+    const holder: { req?: ReturnType<typeof request> } = {};
+    const onRetry = vi.fn<() => number>(() => {
+      // only the retry scheduled after the first attempt has access to the promise
+      holder.req?.abort();
+
+      return 0;
+    });
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+    }): unknown => {
+      attempt += 1;
+      option.fail?.({ errMsg: "request:fail network" });
+
+      return fakeTask();
+    };
+
+    const req = request("https://example.com/api", {
+      retry: { attempts: 3, delay: 0, onRetry },
+    });
+
+    holder.req = req;
+
+    await expect(req).rejects.toMatchObject({ type: "abort" });
+
+    // the timer set up after the abort must not start another attempt
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 0);
+    });
+
+    expect(attempt).toBe(2);
+  });
+});
+
+describe("request failure classification", () => {
+  const defaultWxRequest = (wx as unknown as { request: unknown }).request;
+
+  // oxlint-disable-next-line vitest/no-hooks -- restore wx.request between tests
+  afterEach(() => {
+    (wx as unknown as { request: unknown }).request = defaultWxRequest;
+  });
+
+  it("should classify an abort failure and never retry it", async () => {
+    let attempt = 0;
+
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+    }): unknown => {
+      attempt += 1;
+      option.fail?.({ errMsg: "request:fail abort" });
+
+      return {
+        abort: (): void => void 0,
+        onHeadersReceived: (): void => void 0,
+        offHeadersReceived: (): void => void 0,
+      };
+    };
+
+    await expect(
+      request("https://example.com/api", { retry: { attempts: 3, delay: 0 } }),
+    ).rejects.toMatchObject({ type: "abort" });
+    expect(attempt).toBe(1);
+  });
+
+  it("should fall back to a generic failure message", async () => {
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+    }): unknown => {
+      option.fail?.({ errMsg: "" });
+
+      return {
+        abort: (): void => void 0,
+        onHeadersReceived: (): void => void 0,
+        offHeadersReceived: (): void => void 0,
+      };
+    };
+
+    await expect(request("https://example.com/api")).rejects.toThrow("request:fail");
+  });
 });
 
 describe("request factory cancellation", () => {
@@ -612,6 +1025,10 @@ describe("request factory cancellation", () => {
     const otherRequest = api.request("/b", { cancelKey: "other" });
 
     expect(api.pendingCount()).toBe(2);
+    expect(pageRequest.task).toBe(tasks[0]);
+
+    // an unknown key is a no-op
+    api.abort("missing");
 
     api.abort("page");
     await expect(pageRequest).rejects.toMatchObject({ type: "abort" });
@@ -621,6 +1038,32 @@ describe("request factory cancellation", () => {
     api.abortAll();
     await expect(otherRequest).rejects.toMatchObject({ type: "abort" });
     expect(tasks[1].abort).toHaveBeenCalledTimes(1);
+    expect(api.pendingCount()).toBe(0);
+  });
+
+  it("should group multiple requests under one cancelKey", async () => {
+    (wx as unknown as { request: unknown }).request = (): unknown => {
+      const task = {
+        abort: vi.fn<() => void>(),
+        onHeadersReceived: (): void => void 0,
+        offHeadersReceived: (): void => void 0,
+      };
+
+      tasks.push(task);
+
+      return task;
+    };
+
+    const api = createRequest({ server: "https://example.com" });
+    const first = api.request("/a", { cancelKey: "batch" });
+    const second = api.request("/b", { cancelKey: "batch" });
+
+    expect(api.pendingCount()).toBe(2);
+
+    api.abort("batch");
+
+    await expect(first).rejects.toMatchObject({ type: "abort" });
+    await expect(second).rejects.toMatchObject({ type: "abort" });
     expect(api.pendingCount()).toBe(0);
   });
 });

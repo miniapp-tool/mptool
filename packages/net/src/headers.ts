@@ -279,7 +279,10 @@ export class Headers {
 
   *entries(): IterableIterator<[string, string]> {
     // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
-    const sortedKeys = Object.keys(this.headers).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    // `Object.keys()` returns unique names, so the comparator never sees two equal keys.
+    const sortedKeys = Object.keys(this.headers).sort((a, b) =>
+      a < b ? -1 : a > b ? 1 : /* istanbul ignore next */ 0,
+    );
 
     for (const name of sortedKeys) {
       if (name === "set-cookie") for (const value of this.getSetCookie()) yield [name, value];

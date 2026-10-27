@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { CookieOptions } from "../src/utils.js";
 import { getUrlInfo, getDomain, parseUrl } from "../src/utils.js";
 
 describe(parseUrl, () => {
@@ -135,6 +136,14 @@ describe(getUrlInfo, () => {
   it("should use object options with defaults", () => {
     expect(getUrlInfo({ domain: "example.com" })).toStrictEqual({
       domain: ".example.com",
+      path: "/",
+    });
+  });
+
+  it("should fall back to an empty scope for a non-string, non-object input", () => {
+    // JavaScript callers can omit the argument even though the type requires it
+    expect(getUrlInfo(undefined as unknown as CookieOptions)).toStrictEqual({
+      domain: "",
       path: "/",
     });
   });

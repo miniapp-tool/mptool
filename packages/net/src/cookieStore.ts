@@ -56,6 +56,8 @@ const getUtf8ByteLength = (value: string): number => {
   let length = 0;
 
   for (const char of value) {
+    // A string iterator never yields an empty string, so `codePointAt(0)` is always a number.
+    /* istanbul ignore next */
     const codePoint = char.codePointAt(0) ?? 0;
 
     if (codePoint < 0x80) length += 1;
@@ -117,6 +119,8 @@ const deleteOldestInDomain = (cookieMap: CookieMap): boolean => {
     }
   }
 
+  // Only called once a domain holds more than the per-domain limit, so a cookie always exists.
+  /* istanbul ignore if */
   if (!oldestCookie) return false;
 
   const pathCookies = cookieMap.get(oldestName);
@@ -572,6 +576,8 @@ export class CookieStore {
   #enforceLimits(domain: string): void {
     const cookieMap = this.store.get(domain);
 
+    // Only called right after `#storeCookie` created the map for this domain.
+    /* istanbul ignore else */
     if (cookieMap) {
       let domainCount = countCookies(cookieMap);
 
@@ -604,10 +610,14 @@ export class CookieStore {
       }
     }
 
+    // Only called while the store holds more than `MAX_COOKIES` cookies, so a cookie always exists.
+    /* istanbul ignore if */
     if (!oldestCookie) return false;
 
     const cookieMap = this.store.get(oldestDomain);
 
+    // `oldestDomain` was collected while iterating `this.store`, so its map always exists.
+    /* istanbul ignore if */
     if (!cookieMap) return false;
 
     const pathCookies = cookieMap.get(oldestCookie.name);
