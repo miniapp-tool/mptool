@@ -8,7 +8,11 @@ const config: UserConfig = defineUserConfig({
   title: "MP Tool",
   description: "极其轻量的小程序框架",
   locales: {
-    "/": { lang: "zh-CN", title: "MP Tool", description: "极其轻量的小程序框架" },
+    "/": {
+      lang: "zh-CN",
+      title: "MP Tool",
+      description: "极其轻量的小程序框架",
+    },
     "/en/": {
       lang: "en-US",
       title: "MP Tool",
@@ -61,8 +65,6 @@ const config: UserConfig = defineUserConfig({
           { text: "Guide", link: "/en/" },
           { text: "Packages", link: "/en/#packages" },
           { text: "Mock", link: "/en/mock/" },
-          { text: "中文", link: "/" },
-          { text: "GitHub", link: "https://github.com/miniapp-tool/mptool" },
         ],
         sidebar: false,
         footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
