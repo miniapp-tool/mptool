@@ -100,6 +100,12 @@ const settleHotReload = (name: string): boolean => {
 
   const timer = hotReloadTimeoutTimers.get(name);
 
+  // The timeout timer is armed together with the in-flight marker and the two are only dropped by
+  // this function or `clearHotReloadCache`, so a settled fetch always still has its timer here. The
+  // guard stays because `clearTimeout` is typed to take a timer id, not `undefined`.
+  // 超时定时器与在途标记同时登记，且只会被本函数或 `clearHotReloadCache` 清理，因此此处定时器必定存在。
+  // 保留判断仅因为 `clearTimeout` 的类型不接受 `undefined`，删掉它需要非空断言。
+  /* istanbul ignore else */
   if (timer != null) {
     clearTimeout(timer);
     hotReloadTimeoutTimers.delete(name);
@@ -342,6 +348,14 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       // Release the page instances waiting for this page: a fetch that never settles must not keep
       // them (and the whole page instance) alive forever.
       // 超时后释放等待中的页面实例，避免请求永不返回时页面实例泄漏。
+      //
+      // `settleHotReload` also clears this very timer, so in a single-threaded runtime the callback
+      // can never observe an already settled fetch. The false path stays to guard against a runtime
+      // that fires a cleared timer anyway: such a late timeout must not mark a cached page as
+      // unavailable.
+      // `settleHotReload` 会一并清除本定时器，单线程运行时下该回调不可能遇到已结束的拉取。false 分支
+      // 用于防止运行时仍触发已清除的定时器：这种迟到的超时不得把已缓存的页面标记为不可用。
+      /* istanbul ignore else */
       if (settleHotReload(name)) markHotReloadUnavailable(name);
     }, timeout),
   );

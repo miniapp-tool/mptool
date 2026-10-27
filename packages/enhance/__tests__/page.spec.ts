@@ -388,4 +388,47 @@ describe($Page, () => {
       warnSpy.mockRestore();
     }
   });
+
+  it("should run extendPage, injectPage and onRegister around registration", () => {
+    const calls: string[] = [];
+    let pageOptions: (CapturedPageOptions & { custom?: string }) | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      calls.push("page");
+      pageOptions = options;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      extendPage: (name, options) => {
+        calls.push(`extend:${name}`);
+
+        // 框架扩展之前执行：$name 尚未写入，但可以预置任意选项
+        expect((options as CapturedPageOptions).$name).toBeUndefined();
+        (options as Record<string, unknown>).custom = "extended";
+      },
+      injectPage: (name, options) => {
+        calls.push(`inject:${name}`);
+
+        // 框架扩展之后执行：页面方法已挂载，可以覆盖
+        expect(options.$getPath).toBeTypeOf("function");
+        (options as CapturedPageOptions).$getPath = (target: string): string =>
+          `/injected/${target}`;
+      },
+    });
+
+    $Page("hooks", {
+      onRegister() {
+        calls.push("onRegister");
+      },
+    });
+
+    // 注册钩子顺序：extendPage → 框架扩展 → injectPage → onRegister → Page()
+    expect(calls).toStrictEqual(["extend:hooks", "inject:hooks", "onRegister", "page"]);
+    expect(pageOptions?.custom).toBe("extended");
+
+    const injectedGetPath = pageOptions?.$getPath as ((name: string) => string) | undefined;
+
+    expect(injectedGetPath?.("main")).toBe("/injected/main");
+  });
 });
