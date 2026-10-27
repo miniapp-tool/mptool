@@ -8,11 +8,7 @@ const config: UserConfig = defineUserConfig({
   title: "MP Tool",
   description: "极其轻量的小程序框架",
   locales: {
-    "/": {
-      lang: "zh-CN",
-      title: "MP Tool",
-      description: "极其轻量的小程序框架",
-    },
+    "/": { lang: "zh-CN", title: "MP Tool", description: "极其轻量的小程序框架" },
     "/en/": {
       lang: "en-US",
       title: "MP Tool",
@@ -62,11 +58,27 @@ const config: UserConfig = defineUserConfig({
       },
       "/en/": {
         navbar: [
-          { text: "Guide", link: "/en/" },
-          { text: "Packages", link: "/en/#packages" },
-          { text: "Mock", link: "/en/mock/" },
+          {
+            text: "Bundles",
+            icon: "box",
+            children: [
+              { text: "@mptool/all", link: "/en/all/" },
+              { text: "@mptool/skyline", link: "/en/skyline/" },
+            ],
+          },
+          { text: "enhance", link: "/en/enhance/" },
+          { text: "skyline-enhance", link: "/en/skyline-enhance/" },
+          { text: "net", link: "/en/net/" },
+          { text: "file", link: "/en/file/" },
+          { text: "api", link: "/en/api/" },
+          { text: "parser", link: "/en/parser/" },
+          { text: "run", link: "/en/run/" },
+          { text: "encoder", link: "/en/encoder/" },
+          { text: "shared", link: "/en/shared/" },
+          { text: "mock", link: "/en/mock/" },
+          { text: "中文", link: "/" },
         ],
-        sidebar: false,
+        sidebar: "structure",
         footer: "MIT Licensed | Copyright 2020 - present by Mr.Hope",
         displayFooter: true,
       },
