@@ -193,7 +193,7 @@ Tests import workspace packages by package name (e.g. `import "@mptool/mock"`, `
 ## Testing
 
 - Runner: vitest (`pnpm run test` → `vitest run --coverage`). Config: `vitest.config.ts`; test framework version comes from `package.json`.
-- Coverage: istanbul provider, enabled by default, scope `packages/*/src/**/*.ts`. `vitest.config.ts` enforces conservative `coverage.thresholds` (statements 93 / branches 87 / functions 92 / lines 94) measured against the waterline on `main`; coverage is also uploaded to Codecov from CI (`.github/workflows/test.yml` on `main`), so do not claim specific coverage percentages in docs.
+- Coverage: istanbul provider, enabled by default, scope `packages/*/src/**/*.ts`. `vitest.config.ts` enforces `coverage.thresholds` at 100 for statements / branches / functions / lines (the current `main` waterline); coverage is also uploaded to Codecov from CI (`.github/workflows/test.yml` on `main`), so do not claim specific coverage percentages in docs.
 - Type checking: `pnpm run typecheck` runs `tsc -p tsconfig.json --noEmit` over the whole repo (sources, tests and `*.spec-d.ts` type tests). Like the tests it needs a completed `build`, because workspace packages resolve through their generated `dist/`.
 - Type checking in tests: `test.typecheck.enabled` is on; type tests are the `*.spec-d.ts` files under `packages/shared/__tests__/`, `packages/net/__tests__/`, `packages/enhance/__tests__/` and `packages/skyline-enhance/__tests__/`.
 - Test layout: `packages/<pkg>/__tests__/<name>.spec.ts`. `@mptool/run` has the largest suite (`lexer`, `parser`, `interpreter`, `environment`, `builtins`, `async*`, `edge-cases`, `value`, `index`).
