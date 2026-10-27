@@ -361,10 +361,13 @@ const patternNames = (pattern: AssignmentTarget, out: string[]): void => {
       break;
     }
     case "objectPattern": {
-      for (const prop of pattern.props) if (prop.value != null) patternNames(prop.value, out);
+      for (const prop of pattern.props)
+        /* istanbul ignore else -- the parser never emits an object-pattern property without a value */
+        if (prop.value != null) patternNames(prop.value, out);
       if (pattern.rest != null) patternNames(pattern.rest.argument, out);
       break;
     }
+    /* istanbul ignore next -- AssignmentTarget is exhaustively handled above */
     default: {
       break;
     }
@@ -1183,6 +1186,7 @@ export class Parser {
     let handler: { param: Pattern | null; body: BlockStatement } | null = null;
     let finalizer: BlockStatement | null = null;
 
+    /* istanbul ignore else -- a buffered lookahead already fixed its own regex/division reading */
     if (this.pos >= this.tokens.length) this.lexer.expectRegex();
 
     if (this.match("catch")) {
@@ -2003,7 +2007,8 @@ export class Parser {
 
             arrow = coverArrow;
           }
-        } else if (this.current().type === "identifier") {
+        } else {
+          // the outer guard above only lets `(` or an identifier through
           const paramToken = this.advance();
 
           if (this.match("=>")) {
@@ -2568,13 +2573,10 @@ export class Parser {
 
         throw this.error(`Unexpected token ${describeToken(token)}`, token);
       }
-      case "templateMiddle":
-      case "templateTail": {
-        throw this.error(`Unexpected token ${describeToken(token)}`, token);
-      }
       case "eof": {
         throw this.error("Unexpected end of input", token);
       }
+      /* istanbul ignore next -- template middle/tail tokens are only consumed inside parseTemplate */
       default: {
         throw this.error(`Unexpected token ${describeToken(token)}`, token);
       }
@@ -2934,12 +2936,7 @@ export class Parser {
     for (;;) {
       const token = this.current();
 
-      if (token.type === "templateNoSubstitution") {
-        this.advance();
-        quasis.push({ raw: token.value, cooked: token.cooked });
-        break;
-      }
-
+      /* istanbul ignore else -- parseTemplate is entered on a `templateHead` and only continues on middles */
       if (token.type === "templateHead" || token.type === "templateMiddle") {
         this.advance();
         quasis.push({ raw: token.value, cooked: token.cooked });
@@ -2958,9 +2955,9 @@ export class Parser {
         }
 
         continue;
+      } else {
+        throw this.error("Unexpected token in template literal", token);
       }
-
-      throw this.error("Unexpected token in template literal", token);
     }
 
     return { type: "template", quasis, expressions, start, end: this.lastEnd };
@@ -3072,7 +3069,9 @@ export class Parser {
 
     const expressions: Expression[] = [];
 
-    for (const item of items) if (item.kind === "expr") expressions.push(item.expr);
+    for (const item of items)
+      /* istanbul ignore else -- rest items were rejected above, so every remaining item is an expression */
+      if (item.kind === "expr") expressions.push(item.expr);
 
     if (expressions.length === 1) return { kind: "paren", expr: expressions[0] };
 

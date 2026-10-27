@@ -274,6 +274,7 @@ export const createFunction = (
  * 需要热更新时，请在 `app.js` 中调用（先于任何页面注册）。
  */
 export const installGlobal = (): void => {
+  /* istanbul ignore else -- globalThis always exists on every supported mini-program runtime */
   if (typeof globalThis !== "undefined") {
     Object.defineProperty(globalThis, "createFunction", {
       value: createFunction,

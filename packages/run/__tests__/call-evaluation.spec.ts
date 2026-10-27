@@ -11,4 +11,8 @@ describe("call evaluation order", () => {
       "let calls = 0; const o = { get m() { throw new Error('boom'); } }; const g = () => { calls += 1; }; try { o.m(g()); } catch (e) {} calls",
     );
   });
+
+  it("should evaluate a computed method key when reading the callee", () => {
+    runBoth("const o = { v: 3, m() { return this.v; } }; const k = 'm'; o[k]()");
+  });
 });
