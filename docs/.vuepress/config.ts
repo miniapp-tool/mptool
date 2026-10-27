@@ -60,6 +60,7 @@ const config: UserConfig = defineUserConfig({
         navbar: [
           { text: "Guide", link: "/en/" },
           { text: "Packages", link: "/en/#packages" },
+          { text: "Mock", link: "/en/mock/" },
           { text: "中文", link: "/" },
           { text: "GitHub", link: "https://github.com/miniapp-tool/mptool" },
         ],
