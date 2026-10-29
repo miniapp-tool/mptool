@@ -18,6 +18,14 @@ const config: ViteUserConfigExport = defineConfig({
       enabled: true,
       provider: "istanbul",
       include: ["packages/*/src/**/*.ts"],
+      // `main` is fully covered (100 / 100 / 100 / 100). Any new or changed source line/branch must
+      // come with tests; keep the gate at 100 rather than allowing a slow drift back down.
+      thresholds: {
+        branches: 100,
+        functions: 100,
+        lines: 100,
+        statements: 100,
+      },
     },
 
     ...(isCI
