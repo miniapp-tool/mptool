@@ -9,10 +9,22 @@ import { MpError, logger } from "@mptool/shared";
  */
 export const download = (url: string, mask = false): Promise<string> =>
   new Promise((resolve, reject) => {
+    // `showLoading` only runs from the progress callback, so a download that finishes without any
+    // progress update never showed a loading. Hiding unconditionally would close a loading the
+    // caller opened itself.
+    let loadingShown = false;
+
+    const hideLoading = (): void => {
+      if (!loadingShown) return;
+
+      loadingShown = false;
+      void wx.hideLoading();
+    };
+
     const downloadTask = wx.downloadFile({
       url,
       success: ({ statusCode, tempFilePath }) => {
-        void wx.hideLoading();
+        hideLoading();
         if (statusCode === 200) {
           resolve(tempFilePath);
         } else {
@@ -23,7 +35,7 @@ export const download = (url: string, mask = false): Promise<string> =>
         }
       },
       fail: ({ errMsg }) => {
-        void wx.hideLoading();
+        hideLoading();
 
         reject(new MpError({ message: errMsg }));
         logger.warn(`Download ${url} failed:`, errMsg);
@@ -31,6 +43,7 @@ export const download = (url: string, mask = false): Promise<string> =>
     });
 
     downloadTask.onProgressUpdate(({ progress }) => {
+      loadingShown = true;
       void wx.showLoading({ title: `下载中...${Math.round(progress)}%`, mask });
     });
   });
