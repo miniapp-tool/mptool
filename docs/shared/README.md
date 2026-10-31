@@ -11,18 +11,18 @@ npm i @mptool/shared
 
 ## 内容
 
-| 导出                                                      | 说明                                           |
-| --------------------------------------------------------- | ---------------------------------------------- |
-| `Emitter` / `userEmitter`                                 | 类型安全的事件触发器                           |
-| `logger` (`debug` / `info` / `warn` / `error` / `filter`) | 统一日志，按 `env` 适配小程序与 Node.js        |
-| `query` (`parse` / `stringify` / `join`)                  | query string 解析与拼接                        |
-| `env`                                                     | 当前运行环境：`"wx"` / `"donut"` / `"js"`      |
-| `MpError`                                                 | 带 `errMsg` 的错误类型，网络与文件包统一抛出它 |
-| `type` / `isFunction`                                     | 类型判断工具                                   |
-| `wrapFunction`                                            | 包装函数并保留 `this` / 返回值                 |
-| `lock` / `once`                                           | 防重入锁与只执行一次                           |
-| `Queue` / `funcQueue` / `createQueue`                     | 串行任务队列                                   |
-| `encodeBase64` / `decodeBase64`                           | `ArrayBuffer` 与 base64 互转                   |
+| 导出                                                      | 说明                                                              |
+| --------------------------------------------------------- | ----------------------------------------------------------------- |
+| `Emitter`                                                 | 类型安全的事件触发器                                              |
+| `logger` (`debug` / `info` / `warn` / `error` / `filter`) | 统一日志，按 `env` 适配小程序与 Node.js                           |
+| `query` (`parse` / `stringify` / `join`)                  | query string 解析与拼接                                           |
+| `env`                                                     | 当前运行环境：`"wx"` / `"donut"` / `"js"`                         |
+| `MpError`                                                 | 带错误码（`code`）与 `message` 的错误类型，网络与文件包统一抛出它 |
+| `type` / `isFunction`                                     | 类型判断工具                                                      |
+| `wrapFunction`                                            | 包装函数并保留 `this` / 返回值                                    |
+| `lock` / `once`                                           | 防重入锁与只执行一次                                              |
+| `Queue` / `funcQueue` / `createQueue`                     | 串行任务队列                                                      |
+| `encodeBase64` / `decodeBase64`                           | `ArrayBuffer` 与 base64 互转                                      |
 
 ## 使用
 
@@ -33,8 +33,15 @@ logger.warn("something happened");
 
 const queries = query.parse("a=1&b=2"); // { a: "1", b: "2" }
 
-throw new MpError("request failed", { code: 1001 });
+// 构造函数只接受一个对象参数：{ message?, code? }
+throw new MpError({ message: "request failed", code: 1001 });
 ```
+
+::: tip
+
+`@mptool/shared` 只导出 `Emitter` 工厂；框架内部使用的全局事件总线 `userEmitter` 由 `@mptool/enhance` / `@mptool/skyline-enhance` 以 `emitter` 的名称导出，需要跨页面/组件通信时从这两个包引入。
+
+:::
 
 ::: tip
 
