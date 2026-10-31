@@ -17,11 +17,17 @@ $App({
     this.$on("message to app", (msg: string) => {
       console.log(`Receive message:${msg}`);
     });
-    void request("https://authserver.nenu.edu.cn/authserver/info", {
-      redirect: "manual",
-    }).then((res) => {
-      console.log(res);
-    });
+    void (async (): Promise<void> => {
+      try {
+        console.log(
+          await request("https://authserver.nenu.edu.cn/authserver/info", {
+            redirect: "manual",
+          }),
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   },
   onAwake(time) {
     console.log(`App awake after ${time}ms`, this);

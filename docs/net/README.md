@@ -22,7 +22,7 @@ icon: network-wired
 - `httpDNSServiceId`: ttpDNS 服务商 Id。 HttpDNS 用法详见 [移动解析HttpDNS](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/HTTPDNS.html)
 - `enableQuic`: 开启 quic
 - `forceCellularNetwork`: 强制使用蜂窝网络发送请求
-- `timeout`: 超时时间，单位为毫秒。默认值为 60000
+- `timeout`: 超时时间，单位为毫秒。不传时沿用微信 `networkTimeout` 配置（默认 60000 毫秒）
 - `retry`: 默认重试配置，结构见下方「取消、超时与重试」
 
 默认的 `request` 和 `createRequest` 生成的 `request` 支持两个参数，第一个参数为请求的地址，第二个参数为 `RequestOptions`，支持 `wx.request` 的选项（`url` / `method` / `header` / `data` / `success` / `fail` 除外）。

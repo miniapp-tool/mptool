@@ -28,6 +28,7 @@ import { $App, $Config, installMptoolGlobals } from "@mptool/all";
 
 $Config({
   home: "/pages/index/index",
+  defaultPage: "/pages/$name",
 });
 
 // Call this when hot-reload code needs to access api / file / net / parser through globalThis.mptool

@@ -28,6 +28,7 @@ import { $App, $Config, installMptoolGlobals } from "@mptool/all";
 
 $Config({
   home: "/pages/index/index",
+  defaultPage: "/pages/$name",
 });
 
 // 需要热更新代码通过 globalThis.mptool 访问 api / file / net / parser 时调用

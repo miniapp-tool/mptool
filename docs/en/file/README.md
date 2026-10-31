@@ -181,7 +181,7 @@ Therefore, if you use a large number of temporary keys, you may need to manually
 
   :::
 
-- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<void>`
+- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<WechatMiniprogram.GeneralCallbackResult | void>`
 
   The asynchronous version of `set`; consider using it when setting large amounts of data. Returns a Promise.
 
