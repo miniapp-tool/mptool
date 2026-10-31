@@ -1,9 +1,19 @@
-import "@mptool/mock";
-import { describe, expect, it } from "vitest";
+import { mockWx as mockWxControl } from "@mptool/mock";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { reportNetworkStatus } from "../src/index.js";
 
 describe(reportNetworkStatus, () => {
+  // oxlint-disable-next-line vitest/no-hooks
+  beforeEach(() => {
+    mockWxControl.reset();
+  });
+
+  // oxlint-disable-next-line vitest/no-hooks
+  afterEach(() => {
+    mockWxControl.reset();
+  });
+
   const mockNetworkType = (networkType: string): void => {
     const mockGetNetworkType = wx as unknown as {
       getNetworkType: (option: { success: (result: { networkType: string }) => void }) => void;
@@ -217,5 +227,41 @@ describe(reportNetworkStatus, () => {
     reportNetworkStatus();
 
     expect(titles).toStrictEqual(["网络连接出现问题，请稍后重试"]);
+  });
+
+  it("should not log an error for healthy networks", () => {
+    const titles = mockShowToast();
+    const errorSpy = vi.spyOn(console, "error").mockReturnValue(undefined);
+
+    try {
+      for (const networkType of ["4g", "5g"]) {
+        mockNetworkType(networkType);
+        reportNetworkStatus();
+      }
+
+      mockNetworkType("wifi");
+      mockWifi(1, "ios");
+      reportNetworkStatus();
+
+      expect(titles).toStrictEqual([]);
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  it("should log an error for an unknown network type", () => {
+    const titles = mockShowToast();
+    const errorSpy = vi.spyOn(console, "error").mockReturnValue(undefined);
+
+    try {
+      mockNetworkType("unknown");
+      reportNetworkStatus();
+
+      expect(titles).toStrictEqual(["网络连接出现问题，请稍后重试"]);
+      expect(errorSpy).toHaveBeenCalledWith("Request fail with", "unknown");
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });
