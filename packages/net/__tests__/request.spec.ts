@@ -241,6 +241,31 @@ describe(request, () => {
     expect(call.header.cookie).toContain("session=abc");
   });
 
+  it('should join a caller cookie header and stored cookies with "; "', async () => {
+    const calls = mockRequest();
+    const cookieStore = new CookieStore("request-cookie-merge-test");
+
+    cookieStore.set({ name: "session", value: "abc", domain: "example.com", path: "/" });
+
+    await request("https://example.com/api", {
+      headers: { Cookie: "theme=dark" },
+      cookieStore,
+    });
+
+    expect(calls[0].header.cookie).toBe("theme=dark; session=abc");
+  });
+
+  it("should keep only the stored cookies when no cookie header is provided", async () => {
+    const calls = mockRequest();
+    const cookieStore = new CookieStore("request-cookie-no-header-test");
+
+    cookieStore.set({ name: "session", value: "abc", domain: "example.com", path: "/" });
+
+    await request("https://example.com/api", { cookieStore });
+
+    expect(calls[0].header.cookie).toBe("session=abc");
+  });
+
   it("should allow an empty cookie scope with a custom cookie store", async () => {
     const calls = mockRequest();
     const cookieStore = {

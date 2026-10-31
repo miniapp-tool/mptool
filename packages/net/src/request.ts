@@ -564,7 +564,16 @@ class RequestExecution<T extends RequestData> {
     const cookieHeader = cookieStore.getHeader(cookieScope);
     const requestHeaders = new Headers(headers);
 
-    if (cookieHeader) requestHeaders.append("Cookie", cookieHeader);
+    if (cookieHeader) {
+      const callerCookieHeader = requestHeaders.get("Cookie");
+
+      // RFC 6265 §4.2.1: a `Cookie` header separates pairs with "; ". `Headers.append()` joins
+      // values with ", ", which servers parse as one invalid cookie pair.
+      requestHeaders.set(
+        "Cookie",
+        callerCookieHeader ? `${callerCookieHeader}; ${cookieHeader}` : cookieHeader,
+      );
+    }
 
     // oxlint-disable-next-line no-undefined
     const requestData = body instanceof URLSearchParams ? body.toString() : (body ?? undefined);
