@@ -19,6 +19,17 @@ describe("input limits", () => {
     expect(() => getText(deep, { maxDepth: 10 })).toThrow(/nesting is too deep/u);
   });
 
+  it("should enforce maxDepth inside nested svg elements", async () => {
+    const deepSvg = `<svg viewBox="0 0 10 10">${"<g>".repeat(200)}${"</g>".repeat(200)}</svg>`;
+
+    await expect(getRichTextNodes(deepSvg, { maxDepth: 10 })).rejects.toThrow(
+      /nesting is too deep/u,
+    );
+
+    // A depth within the limit (including the default, unlimited one) still converts normally.
+    await expect(getRichTextNodes(deepSvg)).resolves.toHaveLength(1);
+  });
+
   it("should not overflow the host stack when removing deep scripts", () => {
     const deep = `${"<div>".repeat(3000)}<script>x</script>${"</div>".repeat(3000)}`;
 

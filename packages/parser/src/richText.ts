@@ -33,7 +33,7 @@ const SVG_CAMEL_CASE_ATTRS = [
 ] as const;
 
 /**
- * Restores camel-case attribute names on the svg node and its children
+ * Restores camel-case attribute names on one svg node (children are handled by {@link cloneElement})
  *
  * @param node - The svg node
  */
@@ -47,37 +47,41 @@ const restoreSVGAttrs = (node: Element): void => {
       delete node.attribs[lowerAttr];
     }
   });
-
-  node.children.forEach((child) => {
-    if (child.type === "tag") restoreSVGAttrs(child);
-  });
 };
 
 /**
- * Shallow-clone an SVG element with its attributes, leaving the caller's DOM untouched.
+ * Clone an SVG element with its attributes, leaving the caller's DOM untouched.
  *
- * 浅拷贝 SVG 元素及其属性，不改动调用方 DOM。
+ * The recursion is bounded by `maxDepth`; a deeper SVG throws the same `RangeError` as the regular
+ * node conversion instead of overflowing the host call stack.
+ *
+ * 克隆 SVG 元素及其属性，不改动调用方 DOM。递归受 `maxDepth` 约束，超深 SVG 与普通节点转换一样抛出 `RangeError`，而不是撑爆宿主调用栈。
  *
  * @param node - The svg element / SVG 元素
+ * @param depth - Current nesting depth / 当前嵌套深度
+ * @param maxDepth - Maximum nesting depth / 最大嵌套深度
  * @returns The cloned element / 克隆的元素
  */
-const cloneElement = (node: Element): Element => {
+const cloneElement = (node: Element, depth: number, maxDepth: number): Element => {
+  if (depth > maxDepth)
+    throw new RangeError(`Input nesting is too deep (limit ${maxDepth} levels)`);
+
+  // Restore camel-case attribute names so the svg renders correctly, on a clone: converting
+  // pre-parsed nodes must not mutate the caller's DOM
+  // 在克隆上恢复驼峰属性名以保证 SVG 正常渲染；转换预解析节点不得修改调用方 DOM
   const clone = new Element(node.name, { ...node.attribs }, [], node.type);
 
+  restoreSVGAttrs(clone);
+
   clone.children = node.children.map((child) =>
-    child.type === "tag" ? cloneElement(child) : child,
+    child.type === "tag" ? cloneElement(child, depth + 1, maxDepth) : child,
   );
 
   return clone;
 };
 
-const handleSVG = (node: Element): RichTextNode => {
-  // Restore camel-case attribute names so the svg renders correctly, on a clone: converting
-  // pre-parsed nodes must not mutate the caller's DOM
-  // 在克隆上恢复驼峰属性名以保证 SVG 正常渲染；转换预解析节点不得修改调用方 DOM
-  const svg = cloneElement(node);
-
-  restoreSVGAttrs(svg);
+const handleSVG = (node: Element, depth: number, maxDepth: number): RichTextNode => {
+  const svg = cloneElement(node, depth, maxDepth);
 
   const { width, height, viewBox } = svg.attribs;
 
@@ -208,7 +212,7 @@ const handleNode = async (
     const config = ALLOWED_TAGS.find(([tag]) => node.name === tag);
 
     if (config) {
-      if (node.name === "svg") return handleSVG(node);
+      if (node.name === "svg") return handleSVG(node, depth, context.maxDepth);
 
       const attrs: Record<string, string> = {};
 
