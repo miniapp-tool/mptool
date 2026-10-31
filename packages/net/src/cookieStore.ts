@@ -254,6 +254,9 @@ export class CookieStore {
   /**
    * 获取所有域名和 cookies 结构
    *
+   * Unlike `getCookiesMap(domain)`, this lists every cookie of a domain regardless of its `path`:
+   * listing is a diagnostic view, not a lookup for one request path.
+   *
    * @returns 域名和 cookies 结构对象
    */
   list(): Record<string, Record<string, string>> {
@@ -261,7 +264,24 @@ export class CookieStore {
 
     const dirObj: Record<string, Record<string, string>> = {};
 
-    for (const domain of this.store.keys()) dirObj[domain] = this.getCookiesMap(domain);
+    for (const [domain, cookieMap] of this.store) {
+      const cookies: Cookie[] = [];
+
+      for (const pathCookies of cookieMap.values()) {
+        for (const cookie of pathCookies.values()) {
+          if (cookie.isExpired()) continue;
+
+          cookies.push(cookie);
+        }
+      }
+
+      const map: Record<string, string> = {};
+
+      // Same precedence as `getCookies()`: the most specific path wins for a duplicated name.
+      for (const cookie of cookies.sort(compareCookiePriority)) map[cookie.name] ??= cookie.value;
+
+      dirObj[domain] = map;
+    }
 
     return dirObj;
   }

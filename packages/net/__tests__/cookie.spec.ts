@@ -107,6 +107,47 @@ describe(CookieStore, () => {
     expect(cookieStore.list()[".baidu.com"]).toBeTypeOf("object");
   });
 
+  it("list() should include cookies stored on non-root paths", () => {
+    const cookieStore = new CookieStore("cookie-list-paths");
+
+    cookieStore.set({ name: "root", value: "1", domain: "baidu.com", path: "/" });
+    cookieStore.set({ name: "api", value: "2", domain: "baidu.com", path: "/api" });
+
+    expect(cookieStore.list()[".baidu.com"]).toStrictEqual({ api: "2", root: "1" });
+  });
+
+  it("list() should prefer the more specific path for a duplicated name", () => {
+    const cookieStore = new CookieStore("cookie-list-path-priority");
+
+    cookieStore.set({ name: "sid", value: "root", domain: "baidu.com", path: "/" });
+    cookieStore.set({ name: "sid", value: "api", domain: "baidu.com", path: "/api" });
+
+    expect(cookieStore.list()[".baidu.com"]).toStrictEqual({ sid: "api" });
+  });
+
+  it("list() should handle a cookie without a domain", () => {
+    const cookieStore = new CookieStore("cookie-list-empty-domain");
+
+    cookieStore.set({ name: "local", value: "1", domain: "" });
+
+    expect(cookieStore.list()).toStrictEqual({ "": { local: "1" } });
+  });
+
+  it("list() should omit expired cookies", () => {
+    vi.useFakeTimers();
+
+    try {
+      const cookieStore = new CookieStore("cookie-list-expired");
+
+      cookieStore.set({ name: "short", value: "1", domain: "baidu.com", maxAge: 1 });
+      vi.advanceTimersByTime(2000);
+
+      expect(cookieStore.list()).toStrictEqual({ ".baidu.com": {} });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("clear", () => {
     const cookieStore = new CookieStore("cookie-clear");
 
