@@ -10,7 +10,10 @@ on:
 
 permissions:
   contents: read
-  # used by the Codecov bundler plugin (OIDC bundle analysis upload)
+  # Used by the Codecov bundler plugin, which requests a GitHub OIDC token while `pnpm run build`
+  # runs (`BUNDLE_ANALYSIS=true`). GitHub Actions only supports workflow/job-level permissions, so
+  # this cannot be narrowed to the build step; no step requests a token during install.
+  # 仅构建步骤中的 Codecov 插件会请求 OIDC token；GitHub Actions 不支持步骤级权限，故只能在 job 级声明。
   id-token: write
 
 jobs:
