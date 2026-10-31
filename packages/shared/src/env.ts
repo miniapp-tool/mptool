@@ -2,4 +2,5 @@
 export type Env = "wx" | "donut" | "js";
 
 /** 运行环境 */
-export const env: Env = typeof wx === "object" ? ("miniapp" in wx ? "donut" : "wx") : "js";
+export const env: Env =
+  typeof wx === "object" && wx != null ? ("miniapp" in wx ? "donut" : "wx") : "js";

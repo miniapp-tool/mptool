@@ -183,6 +183,47 @@ describe("downloadFile mock", () => {
 
     expect(task.onProgressUpdate).toBeTypeOf("function");
   });
+
+  it("should call complete after success", async () => {
+    const success = vi.fn<() => void>();
+    const complete = vi.fn<(res: { errMsg: string }) => void>();
+
+    void wx.downloadFile({ complete, success, url: "https://example.com/file" });
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(success).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith(expect.objectContaining({ errMsg: "downloadFile:ok" }));
+  });
+
+  it("should fail instead of succeeding when aborted", async () => {
+    const success = vi.fn<() => void>();
+    const fail = vi.fn<(res: { errMsg: string }) => void>();
+    const complete = vi.fn<(res: { errMsg: string }) => void>();
+    const task = wx.downloadFile({
+      complete,
+      fail,
+      success,
+      url: "https://example.com/file",
+    }) as { abort: () => void };
+
+    task.abort();
+    // aborting twice must not deliver the failure twice
+    task.abort();
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(success).not.toHaveBeenCalled();
+    expect(fail).toHaveBeenCalledTimes(1);
+    expect(fail).toHaveBeenCalledWith({ errMsg: "downloadFile:fail abort" });
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith({ errMsg: "downloadFile:fail abort" });
+  });
 });
 
 describe("uploadFile mock", () => {

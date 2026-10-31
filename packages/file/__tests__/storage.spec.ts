@@ -123,6 +123,24 @@ describe(check, () => {
 
     expect(wx.getStorageSync("_cache_check-rollback-key")).toBeFalsy();
   });
+
+  it("should remove corrupt cache entries", () => {
+    const corruptKeys = [
+      "_cache_check-corrupt-string",
+      "_cache_check-corrupt-number",
+      "_cache_check-corrupt-object",
+      "_cache_check-corrupt-null",
+    ];
+
+    wx.setStorageSync(corruptKeys[0], "garbage");
+    wx.setStorageSync(corruptKeys[1], 123);
+    wx.setStorageSync(corruptKeys[2], {});
+    wx.setStorageSync(corruptKeys[3], null);
+
+    check();
+
+    for (const key of corruptKeys) expect(wx.getStorageSync(key)).toBeFalsy();
+  });
 });
 
 describe(checkAsync, () => {
@@ -144,6 +162,17 @@ describe(checkAsync, () => {
     await checkAsync();
 
     await expect(getAsync("check-async-expired")).resolves.toBeUndefined();
+  });
+
+  it("should remove corrupt cache entries", async () => {
+    const corruptKeys = ["_cache_check-async-corrupt-string", "_cache_check-async-corrupt-object"];
+
+    wx.setStorageSync(corruptKeys[0], "garbage");
+    wx.setStorageSync(corruptKeys[1], {});
+
+    await checkAsync();
+
+    for (const key of corruptKeys) expect(wx.getStorageSync(key)).toBeFalsy();
   });
 });
 
@@ -245,6 +274,13 @@ describe(set, () => {
     expect(get("clock-normal-key")).toBe("valid");
   });
 
+  it("should ignore and remove corrupt values", () => {
+    wx.setStorageSync("_cache_corrupt-get-key", "garbage");
+
+    expect(get("corrupt-get-key")).toBeUndefined();
+    expect(wx.getStorageSync("_cache_corrupt-get-key")).toBeFalsy();
+  });
+
   it("should remove legacy timestamp entries that have already expired", () => {
     wx.setStorageSync("_cache_legacy-expired-key", { data: "stale", expired: Date.now() - 1 });
 
@@ -269,6 +305,33 @@ describe(removeAsync, () => {
     await removeAsync("remove-async-key");
 
     await expect(getAsync("remove-async-key")).resolves.toBeUndefined();
+  });
+
+  it("should reject with MpError when removeStorage fails", async () => {
+    const wxAny = wx as unknown as { removeStorage: (option: { key: string }) => Promise<never> };
+    const original = wxAny.removeStorage;
+
+    put("remove-async-fail-key", "value");
+    wxAny.removeStorage = (): Promise<never> =>
+      Promise.reject(
+        Object.assign(new Error("remove failed"), {
+          errMsg: "removeStorage:fail remove failed",
+        }),
+      );
+
+    try {
+      const error = await removeAsync("remove-async-fail-key").catch((err: unknown) => err);
+
+      expect(error).toBeInstanceOf(MpErrorClass);
+      expect(error as MpError).toMatchObject({
+        message: 'Remove storage "remove-async-fail-key" failed: removeStorage:fail remove failed',
+      });
+      // A failed removal must not drop the in-memory value
+      expect(storage.has("remove-async-fail-key")).toBe(true);
+    } finally {
+      wxAny.removeStorage = original;
+      storage.delete("remove-async-fail-key");
+    }
   });
 });
 

@@ -13,4 +13,4 @@ export const writeClipboard = (data = ""): Promise<void> =>
           },
         });
       })
-    : Promise.reject(new Error("data is empty"));
+    : Promise.reject(new MpError({ message: "data is empty" }));

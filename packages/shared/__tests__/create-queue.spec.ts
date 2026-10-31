@@ -228,6 +228,67 @@ describe(createQueue, () => {
     expect(result).toStrictEqual([1, 2]);
   });
 
+  it("should include tasks pushed to the action list after creation", async () => {
+    const result: number[] = [];
+    const actionList = [
+      (): Promise<void> => {
+        result.push(1);
+
+        return Promise.resolve();
+      },
+    ];
+    const queue = createQueue(actionList);
+
+    actionList.push((): Promise<void> => {
+      result.push(2);
+
+      return Promise.resolve();
+    });
+
+    await expect(queue.run()).resolves.toStrictEqual({ interrupted: false });
+    expect(result).toStrictEqual([1, 2]);
+  });
+
+  it("should run the full action list again on a second run", async () => {
+    const result: number[] = [];
+    const queue = createQueue([
+      (): Promise<void> => {
+        result.push(1);
+
+        return Promise.resolve();
+      },
+      (): Promise<void> => {
+        result.push(2);
+
+        return Promise.resolve();
+      },
+    ]);
+
+    await expect(queue.run()).resolves.toStrictEqual({ interrupted: false });
+    await expect(queue.run()).resolves.toStrictEqual({ interrupted: false });
+
+    expect(result).toStrictEqual([1, 2, 1, 2]);
+  });
+
+  it("should ignore a late stop() after the run has completed", async () => {
+    const result: number[] = [];
+    const queue = createQueue<string>([
+      (): Promise<void> => {
+        result.push(1);
+
+        return Promise.resolve();
+      },
+    ]);
+
+    await expect(queue.run()).resolves.toStrictEqual({ interrupted: false });
+
+    // A late stop has nothing left to cancel; it must not poison the next run.
+    queue.stop("late");
+
+    await expect(queue.run()).resolves.toStrictEqual({ interrupted: false });
+    expect(result).toStrictEqual([1, 1]);
+  });
+
   it("should not be stuck when a task rejects", async () => {
     const result: number[] = [];
     const queue = createQueue([

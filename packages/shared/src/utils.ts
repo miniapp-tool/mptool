@@ -251,16 +251,22 @@ export const createQueue = <StopMessage>(
   actionList: (() => Promise<void>)[],
   capacity = 1,
 ): PromiseQueue<StopMessage> => {
-  /** 回调队列，复制调用方数组，避免 `run()` 原地清空它 */
-  const queue = [...actionList];
-
   let shouldCancel = false;
   let stopMessage: StopMessage | void = void 0;
   let cancelActive: ((msg: StopMessage) => void) | undefined;
+  /** Whether a `run()` has started at least once */
+  let started = false;
 
   return {
     run: (): Promise<{ interrupted: false } | { interrupted: true; msg: StopMessage }> =>
       new Promise((resolve) => {
+        // Snapshot the action list on every run, so tasks pushed to the caller's array after
+        // `createQueue()` (or a task added between two runs) are included.
+        // 每次运行时复制任务列表，使创建后追加的任务也能被执行。
+        const queue = [...actionList];
+
+        started = true;
+
         // A `stop()` called before `run()` applies to this run only; reset the pending markers so
         // the queue can be run again instead of staying cancelled forever.
         // 运行前调用的 `stop()` 只影响本次运行；重置标记，避免队列重跑时永久取消。
@@ -337,10 +343,16 @@ export const createQueue = <StopMessage>(
     stop: (msg: StopMessage): void => {
       if (cancelActive) {
         cancelActive(msg);
-      } else {
+      } else if (!started) {
+        // Before the first `run()`: apply the stop to that upcoming run only.
+        // 首次运行前的 `stop()` 只作用于即将开始的那次运行。
         shouldCancel = true;
         stopMessage = msg;
       }
+
+      // A late `stop()` after a run already completed has nothing to cancel; ignoring it keeps a
+      // subsequent `run()` from being poisoned.
+      // 运行已结束后的迟到 `stop()` 无任务可取消，忽略以免影响下一次运行。
     },
   };
 };
