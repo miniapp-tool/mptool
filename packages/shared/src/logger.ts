@@ -7,6 +7,11 @@ import { env } from "./env.js";
 // oxlint-disable-next-line typescript/strict-boolean-expressions
 const log = env === "js" ? console : wx.getRealtimeLogManager?.() || wx.getLogManager({ level: 1 });
 const isRealtime = env !== "js" && "getRealtimeLogManager" in wx;
+// The realtime manager is not guaranteed to implement `setFilterMsg` (the mock deliberately does
+// not rely on it), so probe the capability instead of assuming it.
+// 实时日志管理器不保证实现 `setFilterMsg`（mock 也不保证），这里探测能力而不是直接调用。
+const canFilter =
+  isRealtime && typeof (log as { setFilterMsg?: unknown }).setFilterMsg === "function";
 
 /**
  * 写入普通日志（仅当 `wx.env.DEBUG` 为真时输出）
@@ -70,7 +75,9 @@ export const error = (...args: any[]): void => {
   // LogManager 无 error 方法，非实时日志用 warn 兜底并加 "error" 前缀标识
   if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).error(...args);
   else log.warn("error", ...args);
-  console.error(...args);
+  // Avoid printing twice when the log manager is `console` itself (the old mock behaviour).
+  // 日志管理器本身就是 `console` 时避免重复输出。
+  if (log !== console) console.error(...args);
 };
 
 /**
@@ -79,5 +86,5 @@ export const error = (...args: any[]): void => {
  * @param filterMsg 过滤信息
  */
 export const filter = (filterMsg: string): void => {
-  if (isRealtime) (log as WechatMiniprogram.RealtimeLogManager).setFilterMsg(filterMsg);
+  if (canFilter) (log as WechatMiniprogram.RealtimeLogManager).setFilterMsg(filterMsg);
 };

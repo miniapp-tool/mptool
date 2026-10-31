@@ -18,6 +18,28 @@ setFrameworkMock();
 /** Default `wx.env.USER_DATA_PATH` used by the mock (PR-8 switches it to `wxfile://usr`). */
 export const DEFAULT_USER_DATA_PATH = "wxfile://usr";
 
+/** Log manager returned by the mock; realtime logs are not persisted, but the API shape exists. */
+type MockRealtimeLogManager = Pick<
+  Console,
+  "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
+> & {
+  setFilterMsg: (filterMsg: string) => void;
+};
+
+const noop = (): void => void 0;
+
+/** Realtime log manager of the mock: accepts logs / filters and deliberately discards them. */
+const realtimeLogManager: MockRealtimeLogManager = {
+  debug: noop,
+  error: noop,
+  group: noop,
+  groupEnd: noop,
+  info: noop,
+  log: noop,
+  setFilterMsg: noop,
+  warn: noop,
+};
+
 interface MockDownloadTask {
   onProgressUpdate: (callback: (result: { progress: number }) => void) => void;
   onHeadersReceived: (callback: () => void) => void;
@@ -49,10 +71,7 @@ const wxMock: {
   env: {
     USER_DATA_PATH: string;
   };
-  getRealtimeLogManager: () => Pick<
-    Console,
-    "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
-  >;
+  getRealtimeLogManager: () => MockRealtimeLogManager;
   getLogManager: (options?: {
     level?: number;
   }) => Pick<Console, "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn">;
@@ -107,11 +126,8 @@ const wxMock: {
   ...managersApi,
   ...miscApi,
 
-  getRealtimeLogManager(): Pick<
-    Console,
-    "debug" | "error" | "group" | "groupEnd" | "info" | "log" | "warn"
-  > {
-    return console;
+  getRealtimeLogManager(): MockRealtimeLogManager {
+    return realtimeLogManager;
   },
 
   getLogManager(_options?: {
