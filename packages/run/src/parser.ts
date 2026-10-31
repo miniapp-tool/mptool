@@ -196,6 +196,24 @@ const isValidAssignmentTarget = (
   node.type === "identifier" || node.type === "member" || node.type === "call";
 
 /**
+ * Find a CoverInitializedName (`{ a = 1 }`) property in an object literal.
+ *
+ * 查找对象字面量中的 CoverInitializedName（`{ a = 1 }`）属性。
+ *
+ * @param node - Object literal / 对象字面量
+ * @returns The offending property range, or `null` / 违规属性的范围，无则 `null`
+ */
+const findCoverInitializedName = (node: ObjectExpr): { start: number; end: number } | null => {
+  for (const prop of node.props) {
+    if (prop.type !== "property" || !prop.shorthand || prop.value.type !== "assignment") continue;
+
+    return { start: prop.start, end: prop.end };
+  }
+
+  return null;
+};
+
+/**
  * Map a token to a binary operator, or null if it is not one.
  *
  * 将 token 映射为二元运算符，非二元运算符时返回 null。
@@ -398,6 +416,16 @@ export class Parser {
   private loopDepth = 0;
   /** Nesting depth of switch statements / switch 嵌套深度 */
   private switchDepth = 0;
+  /**
+   * CoverInitializedName markers collected while a cover grammar may still turn into a pattern.
+   *
+   * `null` outside a cover grammar (a plain object literal is rejected immediately); an array
+   * inside a cover grammar (parenthesized arrow parameters, `for-in`/`for-of` heads), where the
+   * object may still be converted into a destructuring pattern.
+   *
+   * CoverInitializedName 标记：处于 cover 语法（括号箭头参数、`for-in`/`for-of` 头部）时收集，`null` 表示普通表达式上下文（立即报错）。
+   */
+  private pendingCoverInitialized: { start: number; end: number }[] | null = null;
   /** Labels currently in scope / 当前作用域内的标签 */
   private readonly labels: { name: string; token: Token; needsIteration: boolean }[] = [];
   private readonly strict: boolean;
@@ -662,6 +690,61 @@ export class Parser {
    */
   private error(message: string, token: Token = this.current()): ParseError {
     return new ParseError(message, this.source, token.start, token.end);
+  }
+
+  /**
+   * Prepare the current position as the start of an expression.
+   *
+   * A `/` at an expression start always begins a regular expression literal. When the token was
+   * already fetched in a preceding context (e.g. a buffered `else` lookahead after a block), the
+   * lexer may have read it as division; re-lex it from its source offset in expression position.
+   *
+   * 将当前位置标记为表达式起始位置。表达式起始处的 `/` 必为正则字面量；若该 token 已在先前上下文 （如块语句后预读
+   * `else`）被读成除号，则从其源码偏移处以表达式位置重新词法分析。
+   */
+  private expectExpressionStart(): void {
+    if (this.pos < this.tokens.length) {
+      const token = this.tokens[this.pos];
+
+      if (token.type !== "punct" || token.value !== "/") return;
+
+      this.tokens.length = this.pos;
+      this.lexer.restartAt(token.start);
+    }
+
+    this.lexer.expectRegex();
+  }
+
+  /**
+   * Reject a CoverInitializedName that did not become a destructuring pattern.
+   *
+   * In a cover grammar it is buffered until the grammar is resolved (a `for-in`/`for-of` head or
+   * arrow parameters may still turn the object into a pattern); everywhere else it is an early
+   * error, because a plain object literal only allows shorthand properties.
+   *
+   * 拒绝未能转换为解构模式的 CoverInitializedName。cover 语法中先缓存，待语法确定（`for-in`/`for-of`
+   * 头部或箭头参数仍可能转换为模式）后再判断；其余上下文立即报错，因为普通对象字面量只允许简写属性。
+   *
+   * @param node - Object literal / 对象字面量
+   */
+  private rejectCoverInitializedName(node: ObjectExpr): void {
+    const offending = findCoverInitializedName(node);
+
+    /* istanbul ignore if -- only called for object literals that contain one */
+    if (offending == null) return;
+
+    if (this.pendingCoverInitialized != null) {
+      this.pendingCoverInitialized.push(offending);
+
+      return;
+    }
+
+    throw new ParseError(
+      "Invalid shorthand property initializer",
+      this.source,
+      offending.start,
+      offending.end,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -1054,7 +1137,21 @@ export class Parser {
       return { type: "for", init: declaration, test, update, body, start, end: this.lastEnd };
     }
 
-    const init = this.parseExpression(false);
+    // A `for-in`/`for-of` head is an assignment target, so a CoverInitializedName there may still
+    // become a destructuring pattern; buffer it until the head form is known.
+    // `for-in`/`for-of` 头部是赋值目标，其中的 CoverInitializedName 仍可能成为解构模式，
+    // 因此先缓存，待确定头部形式后再判断。
+    const outerCover = this.pendingCoverInitialized;
+    const coverMarkers: { start: number; end: number }[] = [];
+    let init: Expression;
+
+    this.pendingCoverInitialized = coverMarkers;
+
+    try {
+      init = this.parseExpression(false);
+    } finally {
+      this.pendingCoverInitialized = outerCover;
+    }
 
     if (this.match("in")) {
       this.advance();
@@ -1100,6 +1197,20 @@ export class Parser {
       const left: AssignmentTarget | VariableDeclaration = this.toAssignmentTarget(init);
 
       return { type: "forOf", left, right, body, start, end: this.lastEnd };
+    }
+
+    // not a destructuring head: the buffered CoverInitializedName is an early error
+    // 不是解构头部：缓存的 CoverInitializedName 属于早期错误
+    const [coverMarker] = coverMarkers;
+
+    /* istanbul ignore else -- every buffered marker is pushed by rejectCoverInitializedName */
+    if (coverMarker != null) {
+      throw new ParseError(
+        "Invalid shorthand property initializer",
+        this.source,
+        coverMarker.start,
+        coverMarker.end,
+      );
     }
 
     this.expect(";");
@@ -1755,7 +1866,7 @@ export class Parser {
         break;
       }
 
-      const { key, computed } = this.parsePropertyKey();
+      const { key, computed, shorthand: keyCanShorthand } = this.parsePropertyKey();
       let value: Pattern;
       let shorthand = false;
 
@@ -1763,7 +1874,10 @@ export class Parser {
         this.advance();
         value = this.parseBindingTarget();
       } else {
-        if (computed || typeof key !== "string")
+        // only a bare identifier can be a shorthand binding (`{ 'a' }` / `{ 123 }` / `{ if }`
+        // all require an explicit `: target`)
+        // 只有裸标识符才能作为简写绑定（`{ 'a' }` / `{ 123 }` / `{ if }` 都必须显式写 `: target`）
+        if (!keyCanShorthand || typeof key !== "string")
           throw this.error("Invalid shorthand property in destructuring pattern");
 
         value = { type: "identifier", name: key, start: this.lastEnd, end: this.lastEnd };
@@ -2065,6 +2179,10 @@ export class Parser {
       return { type: "assignment", op, target, value: right, start: left.start, end: right.end };
     }
 
+    // a CoverInitializedName only survives as part of a converted destructuring pattern
+    // CoverInitializedName 只有转换为解构模式时才合法
+    if (left.type === "object") this.rejectCoverInitializedName(left);
+
     return left;
   }
 
@@ -2165,6 +2283,11 @@ export class Parser {
   }
 
   private parseUnary(): Expression {
+    // a `/` at an operand position always starts a regex literal; this also repairs tokens
+    // prefetched by a preceding lookahead (e.g. `await /re/`, `for (x of /re/)`)
+    // 操作数位置的 `/` 必为正则字面量；同时修复先前预读（如 `await /re/`、`for (x of /re/)`）得到的 token
+    this.expectExpressionStart();
+
     const token = this.current();
 
     if (
@@ -2808,7 +2931,7 @@ export class Parser {
       };
     }
 
-    const { key, computed } = this.parsePropertyKey();
+    const { key, computed, shorthand: keyCanShorthand } = this.parsePropertyKey();
 
     if (this.match(":")) {
       this.advance();
@@ -2855,7 +2978,7 @@ export class Parser {
     }
 
     // shorthand: `{ a }` or `{ a = 1 }` (default value in cover grammar)
-    if (!computed && typeof key === "string") {
+    if (keyCanShorthand && typeof key === "string") {
       let value: Expression | FunctionExpr | ArrowFunctionExpr = {
         type: "identifier",
         name: key,
@@ -2897,9 +3020,14 @@ export class Parser {
    *
    * 解析属性键（计算 `[...]` 或普通名称）。
    *
-   * @returns The key and whether it is computed / 键与是否计算
+   * @returns The key, whether it is computed, and whether it can be used as a shorthand property (a
+   *   bare `IdentifierReference`) / 键、是否计算、以及能否作为简写属性（裸 `IdentifierReference`）
    */
-  private parsePropertyKey(): { key: Expression | string; computed: boolean } {
+  private parsePropertyKey(): {
+    key: Expression | string;
+    computed: boolean;
+    shorthand: boolean;
+  } {
     const token = this.current();
 
     if (this.match("[")) {
@@ -2909,13 +3037,24 @@ export class Parser {
 
       this.expect("]");
 
-      return { key, computed: true };
+      return { key, computed: true, shorthand: false };
     }
 
     if (isPropertyNameToken(token)) {
       this.advance();
 
-      return { key: tokenValue(token), computed: false };
+      const name = tokenValue(token);
+      // `let`/`static`/`yield` are only reserved in strict mode, so they stay valid shorthands in
+      // sloppy mode. Any other keyword, string, number or BigInt key needs an explicit `:`.
+      // `let`/`static`/`yield` 仅在严格模式下是保留字，sloppy 模式下仍可作为简写属性；
+      // 其余关键字、字符串、数字或 BigInt 键必须显式写 `:`。
+      const contextual = !this.strict && (name === "let" || name === "static" || name === "yield");
+
+      return {
+        key: name,
+        computed: false,
+        shorthand: token.type === "identifier" || contextual,
+      };
     }
 
     throw this.error("Expected a property name", token);
@@ -2976,12 +3115,24 @@ export class Parser {
     // a non-async arrow inherits the enclosing async context, so `await` stays legal
     // 非 async 箭头继承外层 async 上下文，因此 `await` 仍然合法
     const isAsyncContext = this.inAsyncFunction || isAsync;
+    // an arrow body is always an expression (or a block), never a destructuring pattern, so a
+    // CoverInitializedName inside it is an immediate early error even while the parameters are
+    // still being parsed as a cover grammar
+    // 箭头函数体始终是表达式（或块），绝不可能是解构模式；因此即使参数仍按 cover 语法解析，
+    // 函数体内的 CoverInitializedName 也应立即报错
+    const savedCover = this.pendingCoverInitialized;
 
-    return this.parseWithFunctionContext(isAsyncContext, () => {
-      if (this.match("{")) return this.parseBlock();
+    this.pendingCoverInitialized = null;
 
-      return this.parseAssignment(allowIn);
-    });
+    try {
+      return this.parseWithFunctionContext(isAsyncContext, () => {
+        if (this.match("{")) return this.parseBlock();
+
+        return this.parseAssignment(allowIn);
+      });
+    } finally {
+      this.pendingCoverInitialized = savedCover;
+    }
   }
 
   /**
@@ -2996,94 +3147,117 @@ export class Parser {
     isAsync = false,
   ): { kind: "paren"; expr: Expression } | { kind: "arrow"; arrow: ArrowFunctionExpr } {
     const { start } = this.current();
+    const outerCover = this.pendingCoverInitialized;
+    const coverMarkers: { start: number; end: number }[] = [];
 
-    this.expect("(");
+    this.pendingCoverInitialized = coverMarkers;
 
-    const items: ({ kind: "rest"; arg: Pattern } | { kind: "expr"; expr: Expression })[] = [];
-    let sawTrailingComma = false;
+    try {
+      this.expect("(");
 
-    if (this.match(")")) {
-      this.advance();
+      const items: ({ kind: "rest"; arg: Pattern } | { kind: "expr"; expr: Expression })[] = [];
+      let sawTrailingComma = false;
+
+      if (this.match(")")) {
+        this.advance();
+
+        if (this.match("=>")) {
+          this.advance();
+
+          const body = this.parseArrowBody(isAsync, true);
+
+          return {
+            kind: "arrow",
+            arrow: { type: "arrow", params: [], body, isAsync: false, start, end: body.end },
+          };
+        }
+
+        throw this.error("Unexpected token ')'");
+      }
+
+      for (;;) {
+        if (this.match("...")) {
+          this.advance();
+          items.push({ kind: "rest", arg: this.parseBindingTarget() });
+        } else {
+          items.push({ kind: "expr", expr: this.parseAssignment(true) });
+        }
+
+        if (this.match(",")) {
+          this.advance();
+
+          if (this.match(")")) {
+            sawTrailingComma = true;
+            break;
+          }
+
+          continue;
+        }
+
+        break;
+      }
+
+      this.expect(")");
 
       if (this.match("=>")) {
         this.advance();
 
         const body = this.parseArrowBody(isAsync, true);
+        const params: Pattern[] = items.map((item) =>
+          item.kind === "rest"
+            ? { type: "rest", argument: item.arg, start: item.arg.start, end: item.arg.end }
+            : (this.toPattern(item.expr) as Pattern),
+        );
 
         return {
           kind: "arrow",
-          arrow: { type: "arrow", params: [], body, isAsync: false, start, end: body.end },
+          arrow: { type: "arrow", params, body, isAsync: false, start, end: body.end },
         };
       }
 
-      throw this.error("Unexpected token ')'");
-    }
+      if (items.some((item) => item.kind === "rest"))
+        throw this.error("'...' can only be used in arrow function parameters");
 
-    for (;;) {
-      if (this.match("...")) {
-        this.advance();
-        items.push({ kind: "rest", arg: this.parseBindingTarget() });
-      } else {
-        items.push({ kind: "expr", expr: this.parseAssignment(true) });
+      // a trailing comma is only valid in arrow parameter lists, not in a plain
+      // parenthesized expression (e.g. `(a,)` is a SyntaxError)
+      // 尾逗号只允许出现在箭头函数参数列表中，普通括号表达式（如 `(a,)`）是语法错误
+      if (sawTrailingComma) throw this.error("Unexpected token ')'");
+
+      // the cover grammar was not resolved into an arrow parameter list, so any buffered
+      // CoverInitializedName is an early error after all
+      // cover 语法未转换为箭头参数列表，缓存的 CoverInitializedName 属于早期错误
+      const [coverMarker] = coverMarkers;
+
+      /* istanbul ignore else -- every buffered marker is pushed by rejectCoverInitializedName */
+      if (coverMarker != null) {
+        throw new ParseError(
+          "Invalid shorthand property initializer",
+          this.source,
+          coverMarker.start,
+          coverMarker.end,
+        );
       }
 
-      if (this.match(",")) {
-        this.advance();
+      const expressions: Expression[] = [];
 
-        if (this.match(")")) {
-          sawTrailingComma = true;
-          break;
-        }
+      for (const item of items)
+        /* istanbul ignore else -- rest items were rejected above, so every remaining item is an expression */
+        if (item.kind === "expr") expressions.push(item.expr);
 
-        continue;
-      }
-
-      break;
-    }
-
-    this.expect(")");
-
-    if (this.match("=>")) {
-      this.advance();
-
-      const body = this.parseArrowBody(isAsync, true);
-      const params: Pattern[] = items.map((item) =>
-        item.kind === "rest"
-          ? { type: "rest", argument: item.arg, start: item.arg.start, end: item.arg.end }
-          : (this.toPattern(item.expr) as Pattern),
-      );
+      if (expressions.length === 1) return { kind: "paren", expr: expressions[0] };
 
       return {
-        kind: "arrow",
-        arrow: { type: "arrow", params, body, isAsync: false, start, end: body.end },
+        kind: "paren",
+        expr: {
+          type: "sequence",
+          expressions,
+          start: expressions[0].start,
+          end: expressions[expressions.length - 1].end,
+        },
       };
+    } finally {
+      this.pendingCoverInitialized = outerCover;
     }
-
-    if (items.some((item) => item.kind === "rest"))
-      throw this.error("'...' can only be used in arrow function parameters");
-
-    // a trailing comma is only valid in arrow parameter lists, not in a plain
-    // parenthesized expression (e.g. `(a,)` is a SyntaxError)
-    // 尾逗号只允许出现在箭头函数参数列表中，普通括号表达式（如 `(a,)`）是语法错误
-    if (sawTrailingComma) throw this.error("Unexpected token ')'");
-
-    const expressions: Expression[] = [];
-
-    for (const item of items)
-      /* istanbul ignore else -- rest items were rejected above, so every remaining item is an expression */
-      if (item.kind === "expr") expressions.push(item.expr);
-
-    if (expressions.length === 1) return { kind: "paren", expr: expressions[0] };
-
-    return {
-      kind: "paren",
-      expr: {
-        type: "sequence",
-        expressions,
-        start: expressions[0].start,
-        end: expressions[expressions.length - 1].end,
-      },
-    };
   }
 }
 

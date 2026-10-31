@@ -77,4 +77,22 @@ describe("early errors", () => {
     expect(() => parse("return 1;")).toThrow(ParseError);
     expect(() => parse("continue outer;")).toThrow(ParseError);
   });
+
+  it("should reject CoverInitializedName in plain object literals", () => {
+    expectParseError("const o = { a = 1 };");
+    expectParseError("({ a = 1 });");
+    expectParseError("f({ a = 1 });");
+    expectParseError("({ x: { a = 1 } });");
+    expectParseError("(() => ({ a = 1 }))");
+    expectParseError("((x = () => ({ a = 1 })) => 0)");
+    expectParseError("for ({ a = 1 };;) {}");
+  });
+
+  it("should keep CoverInitializedName in destructuring patterns", () => {
+    runBoth("const { a = 5 } = {}; a");
+    runBoth("let a; ({ a = 6 } = {}); a");
+    runBoth("const f = ({ a = 7 }) => a; f({})");
+    runBoth("let n = 0; for ({ a = 8 } of [{}]) n += a; n");
+    runBoth("let n = 0; for ({ a = 9 } in {}) n += a; n");
+  });
 });
