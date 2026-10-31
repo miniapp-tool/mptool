@@ -374,4 +374,202 @@ describe("super property references", () => {
       ),
     ).toThrow(ReferenceError);
   });
+
+  it("should resolve super.x on base classes without extends against Object.prototype and Function.prototype", () => {
+    expect(run("class A { m() { return super.toString(); } } new A().m()")).toBe("[object Object]");
+    expect(run("class A { static s() { return typeof super.call; } } A.s()")).toBe("function");
+  });
+});
+
+describe("async arrow this binding and inline async generator stack limits", () => {
+  it("should preserve undefined lexical this in async arrows in strict mode", async () => {
+    await expect(run("const f = async () => this; f()", { strict: true })).resolves.toBeUndefined();
+    await expect(
+      run("function outer() { const f = async () => this; return f(); } outer.call(null)", {
+        strict: true,
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it("should enforce maxStack for inline arrows containing await", async () => {
+    await expect(
+      run("async function outer() { const rec = () => (await 0, rec()); return rec(); } outer()", {
+        maxStack: 10,
+      }),
+    ).rejects.toThrow(/Maximum call stack size/u);
+  });
+});
+
+describe("multi-labeled loops and iterator closing on destructuring / for-of target errors", () => {
+  it("should handle continue and break targeting any label on a multi-labeled loop", async () => {
+    expect(
+      run(
+        "let n = 0; a: b: for (let i = 0; i < 3; i += 1) { if (i === 1) continue a; n += 10; } n",
+      ),
+    ).toBe(20);
+    expect(run("let n = 0; a: b: while (n < 5) { n += 1; if (n === 2) break a; } n")).toBe(2);
+    expect(run("let n = 0; a: b: { n = 1; break a; n = 2; } n")).toBe(1);
+    expect(run("let n = 0; a: { n = 3; } n")).toBe(3);
+    await expect(
+      run(
+        "async function f() { let n = 0; a: b: for (let i = 0; i < 3; i += 1) { await 0; if (i === 1) continue a; n += 10; } return n; } f()",
+      ),
+    ).resolves.toBe(20);
+    await expect(
+      run(
+        "async function f() { let n = 0; a: b: { await 0; n = 1; break a; n = 2; } return n; } f()",
+      ),
+    ).resolves.toBe(1);
+  });
+
+  it("should close the iterator in array destructuring when incomplete or when assignment throws", async () => {
+    expect(
+      run(
+        [
+          "let closed = 0;",
+          "const iter = {",
+          "  [Symbol.iterator]() {",
+          "    let i = 0;",
+          "    return {",
+          "      next() { return { value: ++i, done: i > 3 }; },",
+          "      return() { closed += 1; return { done: true }; },",
+          "    };",
+          "  },",
+          "};",
+          "const [a] = iter;",
+          "const [, ...rest] = iter;",
+          "[a, rest, closed]",
+        ].join("\n"),
+      ),
+    ).toStrictEqual([1, [2, 3], 1]);
+
+    expect(
+      run(
+        [
+          "let closed = 0;",
+          "const iter = {",
+          "  [Symbol.iterator]() {",
+          "    return {",
+          "      next() { return { value: 1, done: false }; },",
+          "      return() { closed += 1; return { done: true }; },",
+          "    };",
+          "  },",
+          "};",
+          "try { [null.x] = iter; } catch {}",
+          "closed",
+        ].join("\n"),
+      ),
+    ).toBe(1);
+
+    expect(
+      run(
+        [
+          "let closed = 0;",
+          "const emptyIter = {",
+          "  [Symbol.iterator]() {",
+          "    return {",
+          "      next() { return { value: undefined, done: true }; },",
+          "      return() { closed += 1; return { done: true }; },",
+          "    };",
+          "  },",
+          "};",
+          "try { const [a = (() => { throw new Error('boom'); })()] = emptyIter; } catch {}",
+          "closed",
+        ].join("\n"),
+      ),
+    ).toBe(0);
+
+    await expect(
+      run(
+        [
+          "async function f() {",
+          "  let closed = 0;",
+          "  const iter = {",
+          "    [Symbol.iterator]() {",
+          "      let i = 0;",
+          "      return {",
+          "        next() { return { value: ++i, done: i > 3 }; },",
+          "        return() { closed += 1; return { done: true }; },",
+          "      };",
+          "    },",
+          "  };",
+          "  const [a = await 0] = iter;",
+          "  const [, c = await 0, ...rest] = iter;",
+          "  try { [(await null).x] = iter; } catch {}",
+          "  const emptyIter = {",
+          "    [Symbol.iterator]() {",
+          "      return {",
+          "        next() { return { value: undefined, done: true }; },",
+          "        return() { closed += 10; return { done: true }; },",
+          "      };",
+          "    },",
+          "  };",
+          "  try { const [b = await Promise.reject(new Error('boom'))] = emptyIter; } catch {}",
+          "  return [a, c, rest, closed];",
+          "}",
+          "f()",
+        ].join("\n"),
+      ),
+    ).resolves.toStrictEqual([1, 2, [3], 2]);
+  });
+
+  it("should close the iterator in for...of when assigning to the loop target throws", async () => {
+    expect(
+      run(
+        [
+          "let closed = 0;",
+          "const iter = {",
+          "  [Symbol.iterator]() {",
+          "    return {",
+          "      next() { return { value: 1, done: false }; },",
+          "      return() { closed += 1; return { done: true }; },",
+          "    };",
+          "  },",
+          "};",
+          "try { for (null.x of iter) {} } catch {}",
+          "closed",
+        ].join("\n"),
+      ),
+    ).toBe(1);
+
+    await expect(
+      run(
+        [
+          "async function f() {",
+          "  let closed = 0;",
+          "  const iter = {",
+          "    [Symbol.iterator]() {",
+          "      return {",
+          "        next() { return { value: 1, done: false }; },",
+          "        return() { closed += 1; return { done: true }; },",
+          "      };",
+          "    },",
+          "  };",
+          "  try { for ((await null).x of iter) {} } catch {}",
+          "  return closed;",
+          "}",
+          "f()",
+        ].join("\n"),
+      ),
+    ).resolves.toBe(1);
+  });
+});
+
+describe("async function toString and /= regex literals", () => {
+  it("should include async in Function.prototype.toString for async declarations, expressions and arrows", () => {
+    expect(run("async function f() { return 1; } f.toString()")).toBe(
+      "async function f() { return 1; }",
+    );
+    expect(run("const f = async function() { return 1; }; f.toString()")).toBe(
+      "async function() { return 1; }",
+    );
+    expect(run("const f = async (x) => x; f.toString()")).toBe("async (x) => x");
+    expect(run("const f = async x => x; f.toString()")).toBe("async x => x");
+  });
+
+  it("should parse regex literals starting with /= after await", async () => {
+    await expect(
+      run("async function f() { const r = await /=a/; return r.test('=a'); } f()"),
+    ).resolves.toBe(true);
+  });
 });
