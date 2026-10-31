@@ -219,9 +219,17 @@ const parseRouteKey = (
   // `http`, so there is no ambiguity for the usual cases.
   const regexpMatch = /^\/(.*)\/([a-z]*)$/u.exec(target);
 
-  if (regexpMatch)
-    // `(.*)` always participates in the match, so the pattern is always a string.
-    return { method, regexp: new RegExp(regexpMatch[1], regexpMatch[2]), response };
+  if (regexpMatch) {
+    try {
+      // `(.*)` always participates in the match, so the pattern is always a string.
+      return { method, regexp: new RegExp(regexpMatch[1], regexpMatch[2]), response };
+    } catch {
+      // A plain path such as "/api/v1/users" also matches this shape, with the illegal flag
+      // "users". Treat an invalid regular expression as a URL instead of throwing at registration
+      // time.
+      // 形如 "/api/v1/users" 的普通路径也会命中该形式（flag 为非法值 "users"），此时应按普通路径处理。
+    }
+  }
 
   return { method, response, url: target };
 };

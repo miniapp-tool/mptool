@@ -158,6 +158,28 @@ describe("mockWx control plane edge cases", () => {
     });
   });
 
+  it("should reset lastIndex for global route regular expressions", async () => {
+    mockWx.route({ "/^https:\\/\\/api\\.example\\.com\\/global\\//gu": { statusCode: 204 } });
+
+    await expect(callRequest({ url: "https://api.example.com/global/1" })).resolves.toMatchObject({
+      ok: true,
+      res: { statusCode: 204 },
+    });
+    await expect(callRequest({ url: "https://api.example.com/global/1" })).resolves.toMatchObject({
+      ok: true,
+      res: { statusCode: 204 },
+    });
+  });
+
+  it("should treat a regexp-shaped path with invalid flags as a plain URL", async () => {
+    mockWx.route({ "/api/v1/users": { data: { ok: true }, statusCode: 204 } });
+
+    await expect(callRequest({ url: "/api/v1/users" })).resolves.toMatchObject({
+      ok: true,
+      res: { data: { ok: true }, statusCode: 204 },
+    });
+  });
+
   it("should seed files with Uint8Array contents and no parent directory", () => {
     mockWx.file("plain.txt", new Uint8Array([1, 2, 3]));
     mockWx.file("nested/buffer.bin", new Uint8Array([4, 5]));
