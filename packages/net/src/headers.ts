@@ -110,7 +110,10 @@ const isDomainAcceptable = (cookieDomain: string, host: string): boolean => {
  * @returns The accepted cookies
  */
 export const parseCookieHeader = (setCookieHeader: string, domain: string): Cookie[] =>
-  parseSetCookie(setCookieHeader).flatMap((item) => {
+  // `decodeValues: false` keeps the value byte-for-byte: decoding turns `%3B` into `;`, which is
+  // rejected by `isValidCookieValue()` and silently drops the whole cookie. `silent: true` also
+  // suppresses `console.error` for values containing a raw `%` (e.g. `50%`).
+  parseSetCookie(setCookieHeader, { decodeValues: false, silent: true }).flatMap((item) => {
     const { domain: cookieDomain } = item;
 
     // Invalid names / values would make `Headers.append("Cookie", …)` throw and drop the whole
