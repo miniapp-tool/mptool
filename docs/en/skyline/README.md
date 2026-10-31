@@ -28,6 +28,7 @@ import { $App, $Config } from "@mptool/skyline";
 
 $Config({
   home: "/pages/index/index",
+  defaultPage: "/pages/$name",
 });
 
 $App({});

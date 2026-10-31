@@ -181,7 +181,7 @@ icon: folder
 
   :::
 
-- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<void>`
+- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<WechatMiniprogram.GeneralCallbackResult | void>`
 
   `set` 的异步版本，在设置大量数据时可考虑使用，返回一个 Promise。
 
