@@ -36,18 +36,22 @@ installMptoolGlobals();
 $App({});
 ```
 
-Pages and components use the `$Page` / `$Component` exported by the full bundle:
+Pages and components use the `$Page` / `$Component` exported by the full bundle. The first argument of `$Page(name, options)` is the page short name; `$Component` declares component properties with `props` (converted to `properties` on registration, overriding any `properties` passed in):
 
 ```ts
 // pages/index/index.ts
 import { $Page } from "@mptool/all";
 
-$Page({ data: {} });
+$Page("index", { data: {} });
 
 // components/card/card.ts
 import { $Component } from "@mptool/all";
 
-$Component({ properties: {} });
+$Component({
+  props: {
+    // component properties
+  },
+});
 ```
 
 ## Included packages

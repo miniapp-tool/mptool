@@ -676,7 +676,7 @@ $Page("main", {
   ```
 
   ```js
-  $Page({
+  $Page("main", {
     onLoad() {
       this.$refs.get("customComp1"); // instance reference of the custom-component1 child
       this.$refs.get("customComp2"); // instance reference of the custom-component2 child

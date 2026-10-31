@@ -676,7 +676,7 @@ $Page("main", {
   ```
 
   ```js
-  $Page({
+  $Page("main", {
     onLoad() {
       this.$refs.get("customComp1"); // custom-component1 子组件的实例引用
       this.$refs.get("customComp2"); // custom-component2 子组件的实例引用

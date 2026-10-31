@@ -36,18 +36,22 @@ installMptoolGlobals();
 $App({});
 ```
 
-页面与组件分别使用全量包导出的 `$Page` / `$Component`：
+页面与组件分别使用全量包导出的 `$Page` / `$Component`。`$Page(name, options)` 的第一个参数是页面简称；`$Component` 用 `props` 声明组件属性（注册时会转换为 `properties`，并覆盖传入的 `properties`）：
 
 ```ts
 // pages/index/index.ts
 import { $Page } from "@mptool/all";
 
-$Page({ data: {} });
+$Page("index", { data: {} });
 
 // components/card/card.ts
 import { $Component } from "@mptool/all";
 
-$Component({ properties: {} });
+$Component({
+  props: {
+    // 组件属性
+  },
+});
 ```
 
 ## 包含的包

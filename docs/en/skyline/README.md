@@ -37,7 +37,7 @@ $App({});
 // pages/index/index.ts
 import { $Page } from "@mptool/skyline";
 
-$Page({ data: {} });
+$Page("index", { data: {} });
 ```
 
 ## Included packages

@@ -119,7 +119,7 @@ Skyline 版本没有 `onAppLaunch` / `onPreload` / `onNavigate`，实例创建�
 ```
 
 ```js
-$Page({
+$Page("main", {
   onLoad() {
     this.$refs.get("customComp1"); // custom-component1 子组件的实例引用
   },
