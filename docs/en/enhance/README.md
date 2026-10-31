@@ -3,7 +3,7 @@ title: "@mptool/enhance"
 icon: toolbox
 ---
 
-A mini-program enhancement framework, only 8.59kB.
+A mini-program enhancement framework, about 12.2 kB.
 
 Cross-component and cross-page communication, page/component references, lifecycle extensions, and TypeScript support.
 

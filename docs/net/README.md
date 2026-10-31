@@ -3,7 +3,7 @@ title: "@mptool/net"
 icon: network-wired
 ---
 
-小程序网络框架，大小仅 12.02kb。
+小程序网络框架，大小约 26.2 kB。
 
 <!-- more -->
 

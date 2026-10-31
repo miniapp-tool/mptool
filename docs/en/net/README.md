@@ -3,7 +3,7 @@ title: "@mptool/net"
 icon: network-wired
 ---
 
-Networking framework for mini-programs, only 12.02 kB.
+Networking framework for mini-programs, about 26.2 kB.
 
 <!-- more -->
 
