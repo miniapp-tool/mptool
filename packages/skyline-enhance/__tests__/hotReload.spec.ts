@@ -1007,4 +1007,167 @@ describe("page hot reload", () => {
     $Page("hotReloadClear", {});
     expect(requestCount).toBe(2);
   });
+
+  it("should chain hot reload lifecycles after the framework hooks", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    mockRequest(
+      "return {" +
+        "  onLoad() { this.data.hotLoad = true; }," +
+        "  extra() { return this.data.n + 1; }" +
+        "};",
+    );
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+
+    try {
+      $Page("hotLifecycleMerge", {});
+
+      const options = getOptions();
+
+      // 真实小程序中页面实例继承页面定义上的生命周期方法
+      const instance = Object.create(options) as {
+        data: Record<string, unknown>;
+        $state?: unknown;
+        onLoad?: (this: unknown) => void;
+        extra?: () => number;
+      };
+
+      instance.data = { n: 41 };
+      options.onLoad?.call(instance);
+
+      // 框架 onLoad 逻辑照常执行（$state 初始化），onLoad 已被合并包装而不是裸覆盖
+      expect(instance.$state).toBeDefined();
+      expect(instance.onLoad).not.toBe(options.onLoad);
+      expect(instance.onLoad).toBeTypeOf("function");
+      // 非生命周期方法保持覆盖语义
+      expect(instance.extra?.()).toBe(42);
+
+      // 合并后的 onLoad 会先执行框架逻辑，再执行热更新 onLoad
+      const anotherInstance = Object.create(options) as {
+        data: Record<string, unknown>;
+        $state?: unknown;
+      };
+
+      anotherInstance.data = {};
+      instance.onLoad?.call(anotherInstance);
+
+      expect(anotherInstance.$state).toBeDefined();
+      expect(anotherInstance.data.hotLoad).toBe(true);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should keep framework bookkeeping while running hot reload onReady / onUnload", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    mockRequest(
+      "return { onReady() { this.data.hotReady = true; }, onUnload() { this.data.hotUnload = true; } };",
+    );
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+
+    try {
+      $Page("hotLifecycleBookkeeping", {});
+
+      const options = getOptions();
+
+      // 真实小程序中页面实例继承页面定义上的生命周期方法
+      const instance = Object.create(options) as {
+        data: Record<string, unknown>;
+        $refs?: Map<string, unknown>;
+        onReady?: (this: unknown) => void;
+        onUnload?: (this: unknown) => void;
+      };
+
+      instance.data = {};
+      options.onLoad?.call(instance);
+
+      // 生命周期已合并：不再是页面定义上的框架包装函数本身
+      expect(instance.onReady).not.toBe(options.onReady);
+
+      instance.onReady?.();
+
+      // 热更新 onReady 执行，且框架的 ready 簿记未被覆盖
+      expect(instance.data.hotReady).toBe(true);
+
+      instance.$refs?.set("child", {});
+      instance.onUnload?.();
+
+      // 热更新 onUnload 执行，且框架的 onUnload 逻辑（清理 $refs）仍然执行
+      expect(instance.data.hotUnload).toBe(true);
+      expect(instance.$refs?.size).toBe(0);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should keep overwrite semantics for a non-function lifecycle payload", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    mockRequest("return { onLoad: 1, extra() { return 2; } };");
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+
+    try {
+      $Page("hotNonFunctionLifecycle", {});
+
+      const options = getOptions();
+      const instance = Object.create(options) as {
+        onLoad?: unknown;
+        extra?: () => number;
+      };
+
+      options.onLoad?.call(instance);
+
+      // 非法载荷（生命周期不是函数）保持覆盖语义
+      expect(instance.onLoad).toBe(1);
+      expect(instance.extra?.()).toBe(2);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should assign a hot reload lifecycle when the instance has none", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const resolveRequest = captureRequest();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} } as {
+      data: Record<string, unknown>;
+      onReady?: () => void;
+    };
+
+    try {
+      $Page("hotLifecycleMissing", {});
+
+      // 原始对象没有框架包装的生命周期：先登记等待，拉取完成后直接赋值
+      getOptions().onLoad?.call(instance);
+
+      resolveRequest("return { onReady() { this.data.hotReady = true; } };");
+
+      expect(instance.onReady).toBeTypeOf("function");
+
+      instance.onReady?.();
+
+      expect(instance.data.hotReady).toBe(true);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
 });

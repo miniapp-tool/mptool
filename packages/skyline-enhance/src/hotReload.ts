@@ -1,3 +1,5 @@
+import { wrapFunction } from "@mptool/shared";
+
 import { getConfig } from "./config/index.js";
 
 /**
@@ -218,16 +220,52 @@ const callOnHotReload = (instance: object): void => {
 };
 
 /**
+ * Page lifecycles that are wrapped by `$Page` for framework bookkeeping. A hot-reload method with
+ * the same name must be chained after the framework hook instead of replacing it, otherwise the
+ * page-ready / page-unload bookkeeping (navigation lock release, `onAwake` listener cleanup,
+ * pending hot-reload instances) silently stops working.
+ *
+ * 由 `$Page` 包装用于框架簿记的页面生命周期。同名热更新方法必须串在框架钩子之后执行，而不是替换它， 否则页面 ready / unload 的簿记（导航锁释放、`onAwake`
+ * 监听器解绑、等待热更新的实例登记）会失效。
+ */
+const FRAMEWORK_LIFECYCLE_KEYS: ReadonlySet<string> = new Set(["onLoad", "onReady", "onUnload"]);
+
+/**
  * Merge the hot-reload method object onto a page instance, and auto-invoke its `onHotReload` hook:
  * immediately when the instance is already ready, or at `onReady` otherwise.
  *
  * 将热更新方法对象合并到页面实例，并自动触发 `onHotReload` 钩子：实例已 ready 时立即触发，否则在 onReady 时触发。
  *
+ * Framework-wrapped lifecycles are composed (framework logic first, hot-reload method afterwards),
+ * every other property keeps the plain overwrite semantics of `Object.assign`.
+ *
+ * 框架包装的生命周期采用组合语义（先执行框架逻辑，再执行热更新方法），其余属性保持 `Object.assign` 的覆盖语义。
+ *
  * @param instance - Page instance / 页面实例
  * @param func - Hot-reload method object / 热更新方法对象
  */
 const applyToInstance = (instance: object, func: Record<string, unknown>): void => {
-  Object.assign(instance, func);
+  for (const [key, value] of Object.entries(func)) {
+    const current = (instance as Record<string, unknown>)[key];
+
+    if (
+      FRAMEWORK_LIFECYCLE_KEYS.has(key) &&
+      typeof current === "function" &&
+      typeof value === "function"
+    ) {
+      // `wrapFunction(original, pre)` runs `pre` (the framework hook) first, then the hot-reload
+      // method, keeping the same `this` and arguments.
+      // `wrapFunction(original, pre)` 先执行 `pre`（框架钩子），再执行热更新方法，`this` 与参数保持一致。
+      (instance as Record<string, unknown>)[key] = wrapFunction(
+        value as (this: object, ...args: unknown[]) => void,
+        function runFrameworkLifecycle(this: object, ...args: unknown[]): void {
+          (current as (this: object, ...args: unknown[]) => void).apply(this, args);
+        },
+      );
+    } else {
+      (instance as Record<string, unknown>)[key] = value;
+    }
+  }
 
   const onHotReload = func[HOT_RELOAD_ON_READY_KEY];
 
