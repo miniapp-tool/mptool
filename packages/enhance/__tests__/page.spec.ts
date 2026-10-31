@@ -475,6 +475,15 @@ describe($Page, () => {
 
     expect(first.$refs?.size).toBe(0);
     expect(second.$refs?.get("child")).toStrictEqual({ name: "second" });
+
+    // 子组件在 onLoad 之前已经触发 $attached 初始化了 $refs 时，onLoad 不得清空已有的引用
+    const preAttached: PageInstanceLike = {
+      $refs: new Map([["earlyChild", { name: "early" }]]),
+    };
+
+    void options.onLoad?.call(preAttached, {});
+
+    expect(preAttached.$refs?.get("earlyChild")).toStrictEqual({ name: "early" });
   });
 
   it("should invoke onAwake with the page instance as this", () => {

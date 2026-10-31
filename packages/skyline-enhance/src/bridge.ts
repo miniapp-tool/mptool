@@ -167,7 +167,11 @@ export const bind = function (
 
       const refName = ref.$refID;
 
-      if (refName) this.$refs.set(refName, ref);
+      if (refName) {
+        // oxlint-disable-next-line typescript/strict-boolean-expressions -- $refs is undefined on a page instance before onLoad
+        if (!this.$refs) this.$refs = new Map();
+        this.$refs.set(refName, ref);
+      }
 
       ref.$attached(this);
       break;

@@ -47,14 +47,99 @@ const pendingInstances = new Map<string, Set<object>>();
  */
 const unavailableHotReload = new Set<string>();
 
-/** Page names whose hot-reload fetch is currently in flight / 正在拉取热更新的页面名 */
-const inFlightHotReload = new Set<string>();
+/**
+ * Page names whose hot-reload fetch is currently in flight, mapped to their request token /
+ * 正在拉取热更新的页面名及其请求令牌
+ */
+const inFlightHotReload = new Map<string, number>();
+
+/** Monotonically increasing token for in-flight hot-reload requests / 自增的热更新请求令牌 */
+let nextHotReloadToken = 0;
 
 /** Pending fetch timeout timers, keyed by page name / 每个页面热更新拉取的超时定时器 */
 const hotReloadTimeoutTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 /** Default timeout (ms) for a hot-reload fetch / 热更新拉取的默认超时时间（ms） */
 const DEFAULT_HOT_RELOAD_TIMEOUT = 10_000;
+
+/**
+ * Framework lifecycle pre-hooks (`onLoad` / `onReady` / `onUnload`), keyed by page options or page
+ * instance.
+ *
+ * 框架生命周期前置钩子（`onLoad` / `onReady` / `onUnload`），按页面选项或页面实例关联。
+ */
+const frameworkLifecycleHooks = new WeakMap<
+  object,
+  Partial<Record<string, (this: object, ...args: unknown[]) => void>>
+>();
+
+/**
+ * Hot-reloaded `onLoad` handlers applied to page instances during `handleOnLoad`, so the active
+ * `onLoad` call can invoke the hot-reloaded `onLoad` instead of the original `options.onLoad`.
+ *
+ * 在 `handleOnLoad` 期间应用到页面实例上的热更新 `onLoad` 处理函数，使当前 `onLoad` 调用执行热更新版本而非原始 `options.onLoad`。
+ */
+const hotOnLoadHandlers = new WeakMap<
+  object,
+  (this: object, ...args: unknown[]) => void | Promise<void>
+>();
+
+/**
+ * Read the hot-reloaded `onLoad` handler applied to a page instance, if any.
+ *
+ * 读取已应用到页面实例上的热更新 `onLoad` 处理函数（若有）。
+ *
+ * @param instance - Page instance / 页面实例
+ * @returns Hot-reloaded `onLoad` handler or `undefined` / 热更新的 `onLoad` 处理函数或 `undefined`
+ * @internal
+ */
+export const getHotOnLoad = (
+  instance: object,
+): ((this: object, ...args: unknown[]) => void | Promise<void>) | undefined =>
+  hotOnLoadHandlers.get(instance);
+
+/**
+ * Record the framework lifecycle pre-hooks for a page options object so `applyToInstance` can
+ * replace the user's original lifecycle with the hot-reloaded lifecycle while keeping the framework
+ * bookkeeping intact.
+ *
+ * 登记页面选项上的框架生命周期前置钩子，使 `applyToInstance` 在替换用户原始生命周期为热更新生命周期时保留框架簿记逻辑。
+ *
+ * @param target - Page options or instance / 页面选项或实例
+ * @param hooks - Framework lifecycle pre-hooks / 框架生命周期前置钩子
+ * @internal
+ */
+export const setFrameworkLifecycles = (
+  target: object,
+  hooks: Partial<Record<string, (this: object, ...args: unknown[]) => void>>,
+): void => {
+  frameworkLifecycleHooks.set(target, hooks);
+};
+
+/**
+ * Look up a framework lifecycle pre-hook on an instance or its prototype chain (page options).
+ *
+ * 在页面实例或其原型链（页面选项）上查找框架生命周期前置钩子。
+ *
+ * @param instance - Page instance / 页面实例
+ * @param key - Lifecycle name / 生命周期名称
+ * @returns Framework pre-hook if registered / 若已登记则返回框架前置钩子
+ */
+const getFrameworkLifecycle = (
+  instance: object,
+  key: string,
+): ((this: object, ...args: unknown[]) => void) | undefined => {
+  let cursor: object | null = instance;
+
+  while (cursor) {
+    const hook = frameworkLifecycleHooks.get(cursor)?.[key];
+
+    if (hook) return hook;
+    cursor = Object.getPrototypeOf(cursor) as object | null;
+  }
+
+  return void 0;
+};
 
 /**
  * Number of page instances still waiting for a hot reload.
@@ -89,16 +174,19 @@ const markHotReloadUnavailable = (name: string): void => {
 /**
  * Mark a hot-reload fetch as settled: clear its timeout timer and in-flight marker.
  *
- * Returns `false` when the fetch had already settled, so a late response arriving after the timeout
- * is ignored instead of patching pages with stale code.
+ * Returns `false` when the fetch had already settled (or was superseded by a newer fetch after
+ * `clearHotReloadCache`), so a late response is ignored instead of patching pages with stale code.
  *
- * 标记热更新拉取已结束：清理超时定时器与在途标记。已结束（如超时后才到达的响应）时返回 `false`， 避免用过期代码补挂页面。
+ * 标记热更新拉取已结束：清理超时定时器与在途标记。已结束（如超时后才到达的响应，或缓存清理后已被新拉取替代）时返回 `false`，避免用过期代码补挂页面。
  *
  * @param name - Page name / 页面名称
+ * @param token - Request token for the fetch / 本次拉取的请求令牌
  * @returns Whether this call settled the fetch / 本次调用是否真正结束了拉取
  */
-const settleHotReload = (name: string): boolean => {
-  if (!inFlightHotReload.delete(name)) return false;
+const settleHotReload = (name: string, token: number): boolean => {
+  if (inFlightHotReload.get(name) !== token) return false;
+
+  inFlightHotReload.delete(name);
 
   const timer = hotReloadTimeoutTimers.get(name);
 
@@ -212,7 +300,14 @@ const callOnHotReload = (instance: object): void => {
   if (typeof onHotReload !== "function") return;
 
   try {
-    (onHotReload as () => void).call(instance);
+    const result = (onHotReload as () => unknown).call(instance);
+
+    if (result instanceof Promise) {
+      void result.catch(() => {
+        // silent: async hook rejections must not escape as unhandled rejections
+        // 静默：异步钩子拒绝不得产生 unhandled rejection
+      });
+    }
   } catch {
     // silent: hook errors must not break the page lifecycle
     // 静默：钩子异常不得影响页面生命周期
@@ -236,31 +331,35 @@ const FRAMEWORK_LIFECYCLE_KEYS: ReadonlySet<string> = new Set(["onLoad", "onRead
  *
  * 将热更新方法对象合并到页面实例，并自动触发 `onHotReload` 钩子：实例已 ready 时立即触发，否则在 onReady 时触发。
  *
- * Framework-wrapped lifecycles are composed (framework logic first, hot-reload method afterwards),
- * every other property keeps the plain overwrite semantics of `Object.assign`.
+ * Framework-wrapped lifecycles are composed (framework logic first, hot-reload method afterwards,
+ * replacing the user's original lifecycle), every other property keeps the plain overwrite
+ * semantics of `Object.assign`.
  *
- * 框架包装的生命周期采用组合语义（先执行框架逻辑，再执行热更新方法），其余属性保持 `Object.assign` 的覆盖语义。
+ * 框架包装的生命周期采用组合语义（先执行框架逻辑，再执行热更新方法，替换用户原有的同名生命周期），其余属性保持 `Object.assign` 的覆盖语义。
  *
  * @param instance - Page instance / 页面实例
  * @param func - Hot-reload method object / 热更新方法对象
  */
 const applyToInstance = (instance: object, func: Record<string, unknown>): void => {
   for (const [key, value] of Object.entries(func)) {
-    const current = (instance as Record<string, unknown>)[key];
+    const frameworkHook = FRAMEWORK_LIFECYCLE_KEYS.has(key)
+      ? getFrameworkLifecycle(instance, key)
+      : void 0;
 
-    if (
-      FRAMEWORK_LIFECYCLE_KEYS.has(key) &&
-      typeof current === "function" &&
-      typeof value === "function"
-    ) {
+    if (key === "onLoad" && typeof value === "function") {
+      hotOnLoadHandlers.set(
+        instance,
+        value as (this: object, ...args: unknown[]) => void | Promise<void>,
+      );
+    }
+
+    if (frameworkHook && typeof value === "function") {
       // `wrapFunction(original, pre)` runs `pre` (the framework hook) first, then the hot-reload
-      // method, keeping the same `this` and arguments.
-      // `wrapFunction(original, pre)` 先执行 `pre`（框架钩子），再执行热更新方法，`this` 与参数保持一致。
+      // method (replacing the user's original lifecycle), keeping the same `this` and arguments.
+      // `wrapFunction(original, pre)` 先执行 `pre`（框架钩子），再执行热更新方法（替换用户原始生命周期），`this` 与参数保持一致。
       (instance as Record<string, unknown>)[key] = wrapFunction(
         value as (this: object, ...args: unknown[]) => void,
-        function runFrameworkLifecycle(this: object, ...args: unknown[]): void {
-          (current as (this: object, ...args: unknown[]) => void).apply(this, args);
-        },
+        frameworkHook,
       );
     } else {
       (instance as Record<string, unknown>)[key] = value;
@@ -337,6 +436,7 @@ export const dropHotReloadInstance = (instance: object): void => {
 
   readyInstances.delete(instance);
   pendingOnReadyInstances.delete(instance);
+  hotOnLoadHandlers.delete(instance);
 };
 
 /**
@@ -376,7 +476,10 @@ export const fetchHotReload = (name: string, pattern: string): void => {
     return;
   }
 
-  inFlightHotReload.add(name);
+  nextHotReloadToken += 1;
+  const token = nextHotReloadToken;
+
+  inFlightHotReload.set(name, token);
 
   const timeout = getConfig().hotReloadTimeout ?? DEFAULT_HOT_RELOAD_TIMEOUT;
 
@@ -394,7 +497,7 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       // `settleHotReload` 会一并清除本定时器，单线程运行时下该回调不可能遇到已结束的拉取。false 分支
       // 用于防止运行时仍触发已清除的定时器：这种迟到的超时不得把已缓存的页面标记为不可用。
       /* istanbul ignore else */
-      if (settleHotReload(name)) markHotReloadUnavailable(name);
+      if (settleHotReload(name, token)) markHotReloadUnavailable(name);
     }, timeout),
   );
 
@@ -404,7 +507,7 @@ export const fetchHotReload = (name: string, pattern: string): void => {
     success: ({ statusCode, data }) => {
       // Ignore a response that arrives after the timeout already settled this fetch.
       // 忽略超时结束后才到达的响应。
-      if (!settleHotReload(name)) return;
+      if (!settleHotReload(name, token)) return;
 
       // in wx.request, `success` fires for any completed response regardless of the HTTP status
       // code, so the status code must be checked explicitly. When no hot-reload file exists, the
@@ -444,7 +547,7 @@ export const fetchHotReload = (name: string, pattern: string): void => {
       }
     },
     fail: () => {
-      if (!settleHotReload(name)) return;
+      if (!settleHotReload(name, token)) return;
 
       // silent: fetch failed, keep the page as-is, but do not keep page instances waiting
       // 静默：拉取失败，页面保持不变，但不再让页面实例继续等待
