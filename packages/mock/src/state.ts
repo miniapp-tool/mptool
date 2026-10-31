@@ -1,6 +1,7 @@
 import { getFileSystemManager } from "./fileSystem.js";
 import type { FileSystemSnapshot } from "./fileSystem.js";
 import { frameworkApi } from "./framework.js";
+import type { MockPageInstance } from "./framework.js";
 import { resetStorage, restoreStorage, snapshotStorage } from "./storageState.js";
 import type { StorageSnapshot } from "./storageState.js";
 import { resetSystem, restoreSystem, snapshotSystem } from "./systemState.js";
@@ -95,6 +96,8 @@ export interface MockStateSnapshot {
   events: EventListenerSnapshot;
   pages: unknown[];
   tabBarPages: string[];
+  /** Cached tabBar page instances, kept alive across `switchTab()`. */
+  tabPages: Map<string, MockPageInstance>;
   registrations: {
     app: unknown;
     pages: unknown[];
@@ -206,7 +209,15 @@ const findRoute = (routes: readonly RouteEntry[], arg: unknown): RouteEntry | un
 
   return routes.find((route) => {
     if (typeof route.method === "string" && route.method !== method) return false;
-    if (route.regexp) return route.regexp.test(url);
+
+    if (route.regexp) {
+      // `RegExp.test` advances `lastIndex` for global / sticky regexps, so a reused /g pattern
+      // would fail every other call.
+      // 带 /g（或 /y）的正则会推进 `lastIndex`，复用同一 pattern 时会导致隔次匹配失败。
+      route.regexp.lastIndex = 0;
+
+      return route.regexp.test(url);
+    }
 
     return route.url === url;
   });
@@ -258,6 +269,7 @@ export const snapshotState = (): MockStateSnapshot => ({
   fileSystem: getFileSystemManager().snapshot(),
   pages: [...(frameworkApi.currentPages as unknown[])],
   tabBarPages: [...frameworkApi.tabBarPages],
+  tabPages: new Map(frameworkApi.tabPages),
   registrations: {
     app: frameworkApi.app,
     behaviors: [...(frameworkApi.behaviors as unknown[])],
@@ -306,6 +318,13 @@ export const restoreState = (snapshot: MockStateSnapshot): void => {
 
   replaceArray(frameworkApi.currentPages, snapshot.pages);
   replaceArray(frameworkApi.tabBarPages, snapshot.tabBarPages);
+
+  // Drop tab pages opened inside the scope and bring back the ones cached at snapshot time.
+  // 丢弃 scope 内打开的 tab 页面实例，恢复快照时的缓存。
+  frameworkApi.tabPages.clear();
+
+  for (const [route, page] of snapshot.tabPages) frameworkApi.tabPages.set(route, page);
+
   replaceArray(frameworkApi.pages, snapshot.registrations.pages);
   replaceArray(frameworkApi.components, snapshot.registrations.components);
   replaceArray(frameworkApi.behaviors, snapshot.registrations.behaviors);

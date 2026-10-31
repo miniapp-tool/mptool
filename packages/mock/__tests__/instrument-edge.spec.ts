@@ -118,6 +118,45 @@ describe("instrumentation edge cases", () => {
     expect(result.tempFilePath).toBe("mock://tmp/a");
   });
 
+  it("should fail a task when its async responder rejects", async () => {
+    mockWx.respond("downloadFile", () => Promise.reject(new Error("boom")));
+
+    const fail = vi.fn<(result: unknown) => void>();
+    const complete = vi.fn<(result: unknown) => void>();
+
+    void wx.downloadFile({
+      complete,
+      fail,
+      url: "https://example.com/file",
+    });
+
+    await tick(10);
+
+    expect(fail).toHaveBeenCalledWith({ errMsg: "downloadFile:fail" });
+    expect(complete).toHaveBeenCalledWith({ errMsg: "downloadFile:fail" });
+  });
+
+  it("should skip a rejected async task responder after abort", async () => {
+    mockWx.respond("downloadFile", () => Promise.reject(new Error("boom")));
+
+    const fail = vi.fn<(result: unknown) => void>();
+    const complete = vi.fn<(result: unknown) => void>();
+    const task = wx.downloadFile({
+      complete,
+      fail,
+      url: "https://example.com/file",
+    }) as unknown as MockInjectedTask;
+
+    task.abort();
+
+    await tick(10);
+
+    expect(fail).toHaveBeenCalledTimes(1);
+    expect(fail).toHaveBeenCalledWith({ errMsg: "downloadFile:fail abort" });
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(complete).toHaveBeenCalledWith({ errMsg: "downloadFile:fail abort" });
+  });
+
   it("should cancel a delayed task response through abort", async () => {
     mockWx.respond("downloadFile", { delay: 10, tempFilePath: "mock://tmp/a" });
 

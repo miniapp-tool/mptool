@@ -266,8 +266,26 @@ const respondTask = (injection: Injection, responder: WxResponder): unknown => {
     }, delay);
   };
 
-  if (value instanceof Promise) void value.then(deliver);
-  else deliver(value);
+  if (value instanceof Promise) {
+    // A rejected responder must still settle the task (fail + complete); otherwise the rejection is
+    // unhandled and both callbacks never fire.
+    // responder 返回 rejected Promise 时仍要交付失败，否则会产生未捕获拒绝且回调永不触发。
+    void value.then(deliver, () => {
+      const result = createFailureResult(injection.api, {
+        errMsg: `${injection.api}:fail`,
+        type: "fail",
+      });
+
+      later(() => {
+        if (!settle()) return;
+
+        option?.fail?.(result);
+        option?.complete?.(result);
+      }, injection.delay);
+    });
+  } else {
+    deliver(value);
+  }
 
   return task;
 };

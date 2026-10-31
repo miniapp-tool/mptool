@@ -81,6 +81,34 @@ describe("mockWx isolation", () => {
     expect(listener).toHaveBeenCalledTimes(2);
   });
 
+  it("scope() should restore cached tab pages", async () => {
+    mockWx.reset();
+
+    const global = globalThis as unknown as { Page: (options: unknown) => void };
+
+    global.Page({ route: "/pages/home", tabBar: true });
+    global.Page({ route: "/pages/mine", tabBar: true });
+
+    const switchTab = (url: string): Promise<unknown> =>
+      (wx as unknown as { switchTab: (value: { url: string }) => Promise<unknown> }).switchTab({
+        url,
+      });
+
+    await switchTab("/pages/home");
+
+    const home = frameworkApi.tabPages.get("/pages/home");
+
+    const scope = mockWx.scope();
+
+    await switchTab("/pages/mine");
+    expect(frameworkApi.tabPages.has("/pages/mine")).toBe(true);
+
+    scope.restore();
+
+    expect(frameworkApi.tabPages.has("/pages/mine")).toBe(false);
+    expect(frameworkApi.tabPages.get("/pages/home")).toBe(home);
+  });
+
   it("scope() should restore rule counters of older rules", async () => {
     mockWx.fail("getNetworkType", { type: "network" }, { times: 2 });
 
