@@ -132,6 +132,13 @@ export const tsdownConfig = (
     target: "es2018",
     platform,
     treeshake,
+    // The published packages are single-file ESM bundles. Without this, rolldown may hoist shared
+    // runtime helpers into an extra `rolldown-runtime-*.js` chunk and make `dist/index.js` import
+    // it relatively, which breaks the one-file convention (e.g. `@mptool/shared` did).
+    // 各包发布为单文件 ESM 产物；关闭代码分割，避免 rolldown 额外生成相对导入的 runtime chunk。
+    outputOptions: {
+      codeSplitting: false,
+    },
     deps: {
       alwaysBundle,
       neverBundle,
