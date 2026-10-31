@@ -495,4 +495,51 @@ describe($Page, () => {
 
     expect(contexts[0]).toBe(instance);
   });
+
+  it("should register the pre-instance lifecycles after mount / injectPage / onRegister", () => {
+    const calls: string[] = [];
+    let registeredOptions: CapturedPageOptions | undefined;
+    let hasEmitter = false;
+    let hasGo = false;
+
+    (globalThis as any).Page = (options: any): void => {
+      calls.push("page");
+      registeredOptions = options;
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      injectPage: (name, options) => {
+        calls.push(`inject:${name}`);
+
+        // 模拟分包异步注册：注入的 onAppLaunch 在注册后立即同步触发
+        (options as Record<string, unknown>).onAppLaunch = function onAppLaunch(
+          this: Record<string, unknown>,
+        ): void {
+          calls.push("onAppLaunch");
+          hasEmitter = typeof this.$emit === "function";
+          hasGo = typeof this.$go === "function";
+        };
+      },
+    });
+
+    appState.launch = true;
+
+    try {
+      $Page("async", {
+        onRegister() {
+          calls.push("onRegister");
+        },
+      });
+    } finally {
+      appState.launch = false;
+    }
+
+    // injectPage → onRegister → onAppLaunch（同步触发）→ Page 注册
+    expect(calls).toStrictEqual(["inject:async", "onRegister", "onAppLaunch", "page"]);
+    // onAppLaunch 触发时框架方法已挂载
+    expect(hasEmitter).toBe(true);
+    expect(hasGo).toBe(true);
+    expect(registeredOptions?.onAppLaunch).toBeTypeOf("function");
+  });
 });

@@ -201,8 +201,6 @@ export const $Page: PageConstructor = <
     firstOpen: false,
   };
 
-  registerPageLifecycleListeners(name, route, options, callLog);
-
   /* oxlint-disable typescript/no-misused-promises */
   options.onLoad = wrapFunction(
     options.onLoad,
@@ -295,6 +293,13 @@ export const $Page: PageConstructor = <
     callLog("onRegister");
     options.onRegister();
   }
+
+  // Register the page-definition lifecycle listeners only after `mount` / `injectPage` /
+  // `onRegister`: when the app has already launched, `onAppLaunch` fires synchronously right here,
+  // so the framework methods and the injected lifecycles must already be in place.
+  // 仅在 `mount` / `injectPage` / `onRegister` 之后注册页面定义级生命周期监听器：App 已启动时
+  // `onAppLaunch` 会在此处同步触发，因此框架方法与注入的生命周期必须已经就位。
+  registerPageLifecycleListeners(name, route, options, callLog);
 
   // register page
   Page(options as WechatMiniprogram.Page.Options<Data, Custom>);
