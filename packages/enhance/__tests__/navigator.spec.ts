@@ -1,7 +1,7 @@
 import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
-import { $Config } from "../src/config/index.js";
+import { $Config, getConfig } from "../src/config/index.js";
 import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../src/constant.js";
 import { appEmitter, routeEmitter } from "../src/emitter/index.js";
 import { getTrigger } from "../src/navigator/index.js";
@@ -20,6 +20,16 @@ describe("navigator", () => {
   const setup = async (config: Parameters<typeof $Config>[0]): Promise<void> => {
     $Config({ minInterval: 0, ...config });
     await releaseLock();
+  };
+
+  // 重置导航锁：`ON_PAGE_UNLOAD` 不再解锁（旧页会在目标页 ready 前卸载），因此用 `ON_PAGE_READY`
+  // 配合 0 延迟的 `minInterval` 立即释放，随后恢复原配置
+  const resetNavigationLock = (): void => {
+    const config = getConfig();
+
+    $Config({ ...config, minInterval: 0 });
+    appEmitter.emit(ON_PAGE_READY);
+    $Config(config);
   };
 
   it("should navigate and release lock when onNavigate handler throws", async () => {
@@ -169,25 +179,32 @@ describe("navigator", () => {
     expect(navigateTo).toHaveBeenCalledTimes(2);
   });
 
-  it("should release the navigate lock when the page unloads before onReady", async () => {
-    await setup({ defaultPage: "/pages/$name" });
+  it("should not release the navigate lock when the old page unloads before the target is ready", async () => {
+    await setup({ defaultPage: "/pages/$name", minInterval: 0 });
 
-    const navigateTo = vi.fn<() => void>();
+    const redirectTo = vi.fn<() => Promise<{ errMsg: string }>>().mockResolvedValue({
+      errMsg: "redirectTo:ok",
+    });
 
-    wx.navigateTo = navigateTo as unknown as typeof wx.navigateTo;
+    wx.redirectTo = redirectTo as unknown as typeof wx.redirectTo;
 
-    const go = getTrigger("navigateTo");
+    const redirect = getTrigger("redirectTo");
 
-    // 第一次导航：页面在 onLoad 阶段被强制回退，未触发 onReady，仅触发 onUnload
-    await expect(go("main")).resolves.toBeUndefined();
-    expect(navigateTo).toHaveBeenCalledTimes(1);
+    // 第一次跳转：redirectTo 成功后目标页尚未 ready，旧页已 onUnload
+    await expect(redirect("main")).resolves.toStrictEqual({ errMsg: "redirectTo:ok" });
+    expect(redirectTo).toHaveBeenCalledTimes(1);
 
-    // 页面卸载，应释放导航锁，避免死锁
+    // 旧页卸载不得提前解锁：目标页 ready 前仍拦截后续导航
     appEmitter.emit(ON_PAGE_UNLOAD);
 
-    // 锁已释放：第二次导航应正常执行
-    await expect(go("main")).resolves.toBeUndefined();
-    expect(navigateTo).toHaveBeenCalledTimes(2);
+    await expect(redirect("main")).resolves.toBeUndefined();
+    expect(redirectTo).toHaveBeenCalledTimes(1);
+
+    // 目标页 ready（minInterval 为 0）后才解锁
+    appEmitter.emit(ON_PAGE_READY);
+
+    await expect(redirect("main")).resolves.toStrictEqual({ errMsg: "redirectTo:ok" });
+    expect(redirectTo).toHaveBeenCalledTimes(2);
   });
 
   it("should not pass query to wx.switchTab", async () => {
@@ -250,7 +267,7 @@ describe("navigator", () => {
     expect(navigateTo).toHaveBeenCalledTimes(1);
 
     // 清理残留的锁，避免影响后续用例
-    appEmitter.emit(ON_PAGE_UNLOAD);
+    resetNavigationLock();
   });
 
   it("should honor a custom lockTimeout", async () => {
@@ -280,7 +297,7 @@ describe("navigator", () => {
       await expect(go("main")).resolves.toBeUndefined();
       expect(navigateTo).toHaveBeenCalledTimes(2);
     } finally {
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      resetNavigationLock();
       vi.useRealTimers();
     }
   });
@@ -302,7 +319,7 @@ describe("navigator", () => {
       // 只剩导航锁的超时定时器：maxDelay 的竞速定时器已在 Promise.race 结束后清理
       expect(vi.getTimerCount()).toBe(1);
     } finally {
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      resetNavigationLock();
       vi.useRealTimers();
     }
   });
@@ -330,7 +347,7 @@ describe("navigator", () => {
     } finally {
       vi.useRealTimers();
       // 清理可能残留的锁，避免影响后续用例
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      resetNavigationLock();
     }
   });
 
@@ -339,7 +356,7 @@ describe("navigator", () => {
     $Config({ defaultPage: "/pages/$name" });
 
     // 确保用例开始前没有残留的导航锁
-    appEmitter.emit(ON_PAGE_UNLOAD);
+    resetNavigationLock();
 
     const navigateTo = vi
       .fn<() => Promise<{ errMsg: string }>>()
@@ -369,14 +386,14 @@ describe("navigator", () => {
       expect(navigateTo).toHaveBeenCalledTimes(2);
     } finally {
       vi.useRealTimers();
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      resetNavigationLock();
     }
   });
 
   it("should use the default minInterval when switchTab succeeds without config", async () => {
     $Config({ defaultPage: "/pages/$name" });
 
-    appEmitter.emit(ON_PAGE_UNLOAD);
+    resetNavigationLock();
 
     const switchTab = vi
       .fn<() => Promise<{ errMsg: string }>>()
@@ -402,7 +419,7 @@ describe("navigator", () => {
       expect(switchTab).toHaveBeenCalledTimes(2);
     } finally {
       vi.useRealTimers();
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      resetNavigationLock();
     }
   });
 
@@ -433,6 +450,6 @@ describe("navigator", () => {
     expect(navigateTo).toHaveBeenCalledWith({ url: "/pages/main" });
 
     // 清理导航锁，避免影响其它用例
-    appEmitter.emit(ON_PAGE_UNLOAD);
+    resetNavigationLock();
   });
 });

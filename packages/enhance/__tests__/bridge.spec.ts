@@ -2,7 +2,7 @@ import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
 import { $Config } from "../src/config/index.js";
-import { ON_PAGE_PRELOAD, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../src/constant.js";
+import { ON_PAGE_PRELOAD, ON_PAGE_READY } from "../src/constant.js";
 import { appEmitter, routeEmitter } from "../src/emitter/index.js";
 import { $Page } from "../src/page/index.js";
 
@@ -172,8 +172,8 @@ describe("bridge", () => {
       expect(navigateTo).toHaveBeenCalledTimes(1);
       expect(afterNavigate).toHaveBeenCalledTimes(1);
 
-      // 清理导航锁，避免影响其它用例
-      appEmitter.emit(ON_PAGE_UNLOAD);
+      // 清理导航锁，避免影响其它用例（ON_PAGE_UNLOAD 不再解锁，用 ready + 0 延迟释放）
+      appEmitter.emit(ON_PAGE_READY);
     });
 
     it("should log a failed navigation instead of rejecting", async () => {
@@ -466,7 +466,9 @@ describe("bridge", () => {
         expect(reLaunch).not.toHaveBeenCalled();
         expect(afterBack).not.toHaveBeenCalled();
       } finally {
-        appEmitter.emit(ON_PAGE_UNLOAD);
+        // 清理导航锁，避免影响其它用例（ON_PAGE_UNLOAD 不再解锁，用 ready + 0 延迟释放）
+        $Config({ defaultPage: "/pages/$name", minInterval: 0 });
+        appEmitter.emit(ON_PAGE_READY);
       }
     });
   });
