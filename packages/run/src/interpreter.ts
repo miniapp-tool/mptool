@@ -148,6 +148,15 @@ const UNINITIALIZED = Symbol("uninitialized this");
 const EMPTY_BLOCK: BlockStatement = { type: "block", body: [], start: 0, end: 0 };
 
 /**
+ * The BigInt value one, written as a call because the bundle targets ES2018 and the mini-program
+ * runtime (base library 3.8.2) cannot parse ES2020 BigInt literals.
+ *
+ * BigInt 值一，使用函数调用形式：产物目标是 ES2018，且小程序运行时（基础库 3.8.2）无法解析 ES2020 的 BigInt 字面量。
+ */
+// oxlint-disable-next-line unicorn/prefer-bigint-literals -- the ES2018 build target cannot emit BigInt literals
+const BIGINT_ONE = BigInt(1);
+
+/**
  * Generic AST walk: whether any node in the subtree has a `type` matching the predicate.
  *
  * 通用 AST 遍历：子树中是否存在 `type` 匹配谓词的节点。
@@ -3105,7 +3114,8 @@ export class Runtime {
    */
   private evalUpdate(node: UpdateExpr, env: Environment): unknown {
     const delta = (value: unknown): unknown => {
-      if (typeof value === "bigint") return node.op === "++" ? value + 1n : value - 1n;
+      if (typeof value === "bigint")
+        return node.op === "++" ? value + BIGINT_ONE : value - BIGINT_ONE;
 
       const num = toNumber(value);
 
@@ -5068,7 +5078,8 @@ export class Runtime {
       }
       case "update": {
         const delta = (value: unknown): unknown => {
-          if (typeof value === "bigint") return expr.op === "++" ? value + 1n : value - 1n;
+          if (typeof value === "bigint")
+            return expr.op === "++" ? value + BIGINT_ONE : value - BIGINT_ONE;
 
           const num = toNumber(value);
 
