@@ -25,6 +25,26 @@ describe(once, () => {
       }, 10);
     }));
 
+  it("keeps this when called as an object method", () => {
+    const obj = {
+      value: 42,
+      getValue: once(function getValue(this: { value: number }) {
+        return this.value;
+      }),
+    };
+
+    expect(obj.getValue()).toBe(42);
+  });
+
+  it("prefers the explicit context over the call-site this", () => {
+    const ctx = { value: 7 };
+    const fn = once(function fn(this: { value: number }) {
+      return this.value;
+    }, ctx);
+
+    expect(fn.call({ value: 1 })).toBe(7);
+  });
+
   it("run once with multiple args", () =>
     new Promise<void>((resolve) => {
       let count = 0;

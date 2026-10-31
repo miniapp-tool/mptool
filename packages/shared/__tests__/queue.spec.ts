@@ -69,6 +69,52 @@ describe(funcQueue, () => {
       }, 50);
     }));
 
+  it("should release a task only once when next() is called repeatedly", () =>
+    new Promise<void>((resolve) => {
+      const queue = new Queue();
+      const results: number[] = [];
+
+      queue.add((next) => {
+        results.push(1);
+        next();
+        next();
+      });
+      queue.add((next) => {
+        results.push(2);
+        next();
+      });
+
+      setTimeout(() => {
+        expect(results).toStrictEqual([1, 2]);
+        expect(queue.running).toBe(0);
+        resolve();
+      }, 20);
+    }));
+
+  it("should release a task only once when it throws after next()", () =>
+    new Promise<void>((resolve) => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const queue = new Queue();
+      const results: string[] = [];
+
+      queue.add((next) => {
+        results.push("first");
+        next();
+        throw new Error("sync error");
+      });
+      queue.add((next) => {
+        results.push("second");
+        next();
+      });
+
+      setTimeout(() => {
+        expect(results).toStrictEqual(["first", "second"]);
+        expect(queue.running).toBe(0);
+        spy.mockRestore();
+        resolve();
+      }, 20);
+    }));
+
   it("should continue the queue when a task throws synchronously", () =>
     new Promise<void>((resolve) => {
       const spy = vi.spyOn(console, "error").mockImplementation(() => {});
