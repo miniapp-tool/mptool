@@ -109,7 +109,7 @@ export const once = <ThisType, Args extends unknown[], ReturnType>(
     if (called) return undefined;
     called = true;
 
-    return func.apply(ctx ?? null, args);
+    return func.apply(ctx ?? this, args);
   };
 };
 
@@ -142,21 +142,30 @@ export class Queue {
 
     if (task) {
       const { func, ctx, args } = task;
+      let released = false;
+
+      // Idempotent release: a task may call `next()` more than once, or throw after calling it.
+      // Releasing twice would decrease `running` twice and break the concurrency limit.
+      // 幂等释放：任务可能重复调用 `next()`，或在调用后抛错；重复释放会让 running 多减一次，
+      // 破坏并发上限。
+      const release = (): void => {
+        if (released) return;
+
+        released = true;
+        this.running -= 1;
+        this.next();
+      };
 
       const taskFunc = (): void => {
         try {
           func.apply(ctx, [
-            (): void => {
-              this.running -= 1;
-              this.next();
-            },
+            release,
             // oxlint-disable-next-line typescript/no-unsafe-assignment
             ...Array.prototype.slice.call(args, 0),
           ]);
         } catch (err) {
           // continue the queue on a synchronous error so it cannot get stuck
-          this.running -= 1;
-          this.next();
+          release();
           console.error(err);
         }
       };
@@ -242,21 +251,45 @@ export const createQueue = <StopMessage>(
   actionList: (() => Promise<void>)[],
   capacity = 1,
 ): PromiseQueue<StopMessage> => {
+  /** 回调队列，复制调用方数组，避免 `run()` 原地清空它 */
+  const queue = [...actionList];
+
   let shouldCancel = false;
   let stopMessage: StopMessage | void = void 0;
+  let cancelActive: ((msg: StopMessage) => void) | undefined;
 
   return {
     run: (): Promise<{ interrupted: false } | { interrupted: true; msg: StopMessage }> =>
       new Promise((resolve) => {
-        /** 回调队列 */
-        const queue: (() => Promise<void>)[] = actionList;
+        // A `stop()` called before `run()` applies to this run only; reset the pending markers so
+        // the queue can be run again instead of staying cancelled forever.
+        // 运行前调用的 `stop()` 只影响本次运行；重置标记，避免队列重跑时永久取消。
+        const cancelledAtStart = shouldCancel;
+        const queuedMessage = stopMessage;
+
+        shouldCancel = false;
+        stopMessage = void 0;
 
         let running = 0;
+        let stopped = cancelledAtStart;
+        let message = queuedMessage;
+        let done = false;
 
-        /** 执行下一个函数 */
+        const finish = (): void => {
+          if (done) return;
+
+          done = true;
+          cancelActive = void 0;
+
+          if (stopped) resolve({ interrupted: true, msg: message as StopMessage });
+          else resolve({ interrupted: false });
+        };
+
+        /** 执行下一个函数，或在没有在途任务时结束 */
         const next = (): void => {
-          if (shouldCancel) {
-            resolve({ interrupted: true, msg: stopMessage as StopMessage });
+          if (stopped) {
+            // `stop()` 后不再启动新任务，但要等所有在途任务结束再 resolve
+            if (running === 0) finish();
 
             return;
           }
@@ -280,20 +313,34 @@ export const createQueue = <StopMessage>(
               },
             );
           } else if (running === 0) {
-            resolve({ interrupted: false });
+            finish();
           }
         };
 
-        let counter = 0;
+        // `stop()` while this run is active: stop scheduling new tasks but keep waiting for the
+        // in-flight ones before resolving.
+        cancelActive = (msg: StopMessage): void => {
+          stopped = true;
+          message = msg;
 
-        while (counter < capacity) {
-          counter += 1;
-          next();
+          if (running === 0) finish();
+        };
+
+        if (stopped) {
+          finish();
+
+          return;
         }
+
+        for (let counter = 0; counter < capacity; counter += 1) next();
       }),
     stop: (msg: StopMessage): void => {
-      shouldCancel = true;
-      stopMessage = msg;
+      if (cancelActive) {
+        cancelActive(msg);
+      } else {
+        shouldCancel = true;
+        stopMessage = msg;
+      }
     },
   };
 };
