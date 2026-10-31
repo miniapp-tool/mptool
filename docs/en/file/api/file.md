@@ -173,14 +173,17 @@ Writes serializable data to the specified file
 - Type:
 
   ```ts
-  function saveFile(tempFilePath: string, path: string): void;
+  function saveFile(tempFilePath: string, path: string): string;
   ```
 
 - Parameters:
   - `tempFilePath`: the temporary file path
   - `path`: the saved file path
 
-Saves a temporary file to local file storage.
+- Returns:
+  - `string`: the saved file path
+
+Saves a temporary file to local file storage (throws an `MpError` when saving fails).
 
 ## saveOnlineFile
 

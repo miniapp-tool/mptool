@@ -173,14 +173,17 @@
 - 类型:
 
   ```ts
-  function saveFile(tempFilePath: string, path: string): void;
+  function saveFile(tempFilePath: string, path: string): string;
   ```
 
 - 参数:
   - `tempFilePath`: 缓存文件路径
   - `path`: 保存文件路径
 
-将缓存文件保存到本地文件存储。
+- 返回值:
+  - `string`: 保存后的文件路径
+
+将缓存文件保存到本地文件存储（保存失败时抛出 `MpError`）。
 
 ## saveOnlineFile
 
