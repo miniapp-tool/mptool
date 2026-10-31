@@ -3,7 +3,7 @@
   "description": "项目配置文件",
   "miniprogramRoot": "app/",
   "compileType": "miniprogram",
-  "libVersion": "2.21.0",
+  "libVersion": "3.8.2",
   "setting": {
     "urlCheck": true,
     "scopeDataCheck": false,
