@@ -181,9 +181,11 @@ icon: folder
 
   :::
 
-- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 'once'): Promise<void>`
+- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<void>`
 
   `set` 的异步版本，在设置大量数据时可考虑使用，返回一个 Promise。
+
+  `expire` 的取值与 `set` 相同，默认 `0`（永久有效）。
 
   写入失败时返回的 Promise 会以 `MpError` reject（与 `set` 抛错保持一致），调用方应使用 `try/catch` 或 `.catch()` 处理。
 

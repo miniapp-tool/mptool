@@ -181,9 +181,11 @@ Therefore, if you use a large number of temporary keys, you may need to manually
 
   :::
 
-- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 'once'): Promise<void>`
+- `setAsync(key: string, value: any, expire?: number | 'once' | 'keep' = 0): Promise<void>`
 
   The asynchronous version of `set`; consider using it when setting large amounts of data. Returns a Promise.
+
+  `expire` accepts the same values as `set` and defaults to `0` (valid forever).
 
   When the write fails, the returned Promise rejects with an `MpError` (consistent with `set` throwing); callers should use `try/catch` or `.catch()`.
 
