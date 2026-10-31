@@ -50,8 +50,10 @@ export const withScope = (
                   void wx.openSetting();
                   reject(new MpError({ message: "用户拒绝权限" }));
                 },
-                // oxlint-disable-next-line no-undefined -- skip the cancel callback
-                undefined,
+                // 用户点击取消 / 返回键：明确拒绝，避免 Promise 永久挂起
+                () => {
+                  reject(new MpError({ message: "用户取消权限" }));
+                },
                 () => {
                   reject(new MpError({ message: "权限提示框打开失败" }));
                 },

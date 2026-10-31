@@ -198,6 +198,32 @@ describe("withScope with mockWx decisions", () => {
     await expect(withScope("scope.camera", run, "请开启权限")).rejects.toThrow("用户拒绝权限");
     expect(calls.count).toBe(0);
     expect(mockWxControl.ui().modal).toMatchObject({ confirm: true });
+    expect(mockWxControl.calls("openSetting")).toHaveLength(1);
+  });
+
+  it("should reject when the user cancels the denial modal", async () => {
+    mockWxControl.authorize("deny");
+    mockWxControl.user({ modal: "cancel" });
+
+    const { calls, run } = recordRuns();
+
+    await expect(withScope("scope.camera", run, "请开启权限")).rejects.toThrow("用户取消权限");
+    expect(calls.count).toBe(0);
+    expect(mockWxControl.ui().modal).toMatchObject({ confirm: false });
+    expect(mockWxControl.calls("openSetting")).toHaveLength(0);
+  });
+
+  it("should reject when the denial modal fails to open", async () => {
+    mockWxControl.authorize("deny");
+    mockWxControl.failNext("showModal", { type: "fail", errMsg: "showModal:fail injected" });
+
+    const { calls, run } = recordRuns();
+
+    await expect(withScope("scope.camera", run, "请开启权限")).rejects.toThrow(
+      "权限提示框打开失败",
+    );
+    expect(calls.count).toBe(0);
+    expect(mockWxControl.calls("openSetting")).toHaveLength(0);
   });
 
   it("should surface a getSetting failure", async () => {
