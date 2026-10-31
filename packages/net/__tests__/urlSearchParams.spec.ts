@@ -230,6 +230,17 @@ describe(URLSearchParams, () => {
       expect(a.has("notExists")).toBe(false);
       expect(a.has("hasOwnProperty")).toBe(false);
     });
+
+    it("check the key and value pair exists", () => {
+      const a = getKeyRepeatObj();
+
+      expect(a.has("id", "xx")).toBe(true);
+      expect(a.has("id", "yy")).toBe(true);
+      expect(a.has("id", "notExists")).toBe(false);
+      expect(a.has("notExists", "xx")).toBe(false);
+      // @ts-expect-error: non-standard value
+      expect(a.has("test", true)).toBe(true);
+    });
   });
 
   describe("set data", () => {

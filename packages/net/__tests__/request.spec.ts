@@ -968,40 +968,101 @@ describe("request retry", () => {
   });
 
   it("should not start a retry scheduled after onRetry aborted the request", async () => {
-    let attempt = 0;
-    const holder: { req?: ReturnType<typeof request> } = {};
-    const onRetry = vi.fn<() => number>(() => {
-      // only the retry scheduled after the first attempt has access to the promise
-      holder.req?.abort();
+    vi.useFakeTimers();
 
-      return 0;
-    });
+    try {
+      let attempt = 0;
+      const holder: { req?: ReturnType<typeof request> } = {};
+      const onRetry = vi.fn<() => number>(() => {
+        // only the retry scheduled after the first attempt has access to the promise
+        holder.req?.abort();
 
+        return 0;
+      });
+
+      (wx as unknown as { request: unknown }).request = (option: {
+        fail?: (result: { errMsg: string }) => void;
+      }): unknown => {
+        attempt += 1;
+        option.fail?.({ errMsg: "request:fail network" });
+
+        return fakeTask();
+      };
+
+      const req = request("https://example.com/api", {
+        retry: { attempts: 3, delay: 0, onRetry },
+      });
+
+      holder.req = req;
+      vi.advanceTimersByTime(0);
+
+      // aborting inside onRetry must not schedule a dangling retry timer
+      expect(vi.getTimerCount()).toBe(0);
+      await expect(req).rejects.toMatchObject({ type: "abort" });
+      expect(attempt).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should reject the request when onRetry throws", async () => {
     (wx as unknown as { request: unknown }).request = (option: {
       fail?: (result: { errMsg: string }) => void;
     }): unknown => {
-      attempt += 1;
       option.fail?.({ errMsg: "request:fail network" });
 
       return fakeTask();
     };
 
     const req = request("https://example.com/api", {
-      retry: { attempts: 3, delay: 0, onRetry },
+      retry: {
+        attempts: 3,
+        delay: 0,
+        onRetry: (): never => {
+          throw new Error("onRetry boom");
+        },
+      },
     });
 
-    holder.req = req;
+    await expect(req).rejects.toThrow("onRetry boom");
+  });
 
-    await expect(req).rejects.toMatchObject({ type: "abort" });
+  it("should not expose task or call onTask when an attempt synchronously schedules a retry", async () => {
+    let attempt = 0;
+    const onTask = vi.fn<(task: unknown) => void>();
 
-    // the timer set up after the abort must not start another attempt
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 0);
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      const steps = [
+        (): void => option.fail?.({ errMsg: "request:fail network" }),
+        (): void => option.success?.({ data: { ok: true }, statusCode: 200, header: {} }),
+      ];
+
+      steps[attempt]?.();
+      attempt += 1;
+
+      return fakeTask();
+    };
+
+    const req = request("https://example.com/api", {
+      onTask,
+      retry: { attempts: 2, delay: 0 },
     });
 
-    expect(attempt).toBe(2);
+    // First attempt failed synchronously and scheduled a retry; no active task is exposed
+    expect(req.task).toBeUndefined();
+    expect(onTask).not.toHaveBeenCalled();
+
+    const res = await req;
+
+    expect(res.data).toStrictEqual({ ok: true });
+    expect(onTask).not.toHaveBeenCalled();
   });
 });
 

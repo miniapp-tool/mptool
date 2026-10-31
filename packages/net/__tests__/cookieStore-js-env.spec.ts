@@ -34,6 +34,17 @@ describe("cookie store in a JavaScript environment", () => {
     expect(store.getValue("session", { domain: "api.example.com", path: "/" })).toBe("abc");
   });
 
+  it("applies a plain header record and wx response in the js environment", () => {
+    const store = new CookieStore("js-env-plain-header");
+
+    store.applyResponse(
+      { header: { "Set-Cookie": "sid=xyz; Path=/" } },
+      "https://api.example.com/",
+    );
+
+    expect(store.getValue("sid", { domain: "api.example.com", path: "/" })).toBe("xyz");
+  });
+
   it("keeps the default storage key", () => {
     const store = new CookieStore();
 

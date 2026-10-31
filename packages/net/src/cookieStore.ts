@@ -1,6 +1,7 @@
 import { env } from "@mptool/shared";
 
 import { Cookie, isValidCookieName, isValidCookieValue } from "./cookie.js";
+import type { Headers } from "./headers.js";
 import { parseCookieHeader } from "./headers.js";
 import type { CookieType } from "./typings.js";
 import type { CookieOptions } from "./utils.js";
@@ -424,27 +425,21 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyHeader(header: unknown, domainOrURL: string): void {
-    if (env === "js") {
-      this.apply(
-        parseCookieHeader(
-          (header as Headers).getSetCookie().join(","),
-          getRequiredDomain(domainOrURL),
-        ),
-      );
+    const domain = getRequiredDomain(domainOrURL);
+
+    if (typeof (header as Headers).getSetCookie === "function") {
+      this.apply(parseCookieHeader((header as Headers).getSetCookie(), domain));
+
       return;
     }
 
-    const setCookieHeader =
-      // oxlint-disable-next-line typescript/strict-boolean-expressions
-      (header as Record<string, string[] | string>)["Set-Cookie"] ||
-      // oxlint-disable-next-line typescript/strict-boolean-expressions
-      (header as Record<string, string[] | string>)["set-cookie"] ||
-      "";
-    const realHeader = Array.isArray(setCookieHeader)
-      ? setCookieHeader.filter(Boolean).join(",")
-      : setCookieHeader;
+    const headerRecord = header as Record<string, string[] | string>;
+    const setCookieKey = Object.keys(headerRecord).find(
+      (key) => key.toLowerCase() === "set-cookie",
+    );
+    const setCookieHeader = setCookieKey ? headerRecord[setCookieKey] : "";
 
-    this.apply(parseCookieHeader(realHeader, getRequiredDomain(domainOrURL)));
+    this.apply(parseCookieHeader(setCookieHeader, domain));
   }
 
   /**
@@ -454,12 +449,12 @@ export class CookieStore {
    * @param domainOrURL Url 或域名
    */
   applyResponse(response: unknown, domainOrURL: string): void {
-    this.applyHeader(
-      env === "js"
-        ? (response as Response).headers
-        : (response as WechatMiniprogram.RequestSuccessCallbackResult).header,
-      domainOrURL,
-    );
+    const responseRecord = response as {
+      headers?: unknown;
+      header?: unknown;
+    };
+
+    this.applyHeader(responseRecord.headers ?? responseRecord.header, domainOrURL);
   }
 
   /**

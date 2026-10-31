@@ -320,10 +320,14 @@ export class URLSearchParams {
    * is `name`.
    *
    * @param name - The name of the parameter to check
+   * @param value - If provided, only checks pairs with this value
    * @returns `true` if a matching name-value pair exists, `false` otherwise
    */
-  has(name: string): boolean {
-    return this.params.some(([key]) => key === name);
+  has(name: string, value?: string): boolean {
+    return this.params.some(
+      // oxlint-disable-next-line no-undefined, typescript/no-unnecessary-type-conversion
+      ([key, val]) => key === name && (value === undefined || val === String(value)),
+    );
   }
 
   /**
