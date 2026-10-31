@@ -1,6 +1,7 @@
 import { ASYNC_UNSUPPORTED_MESSAGE, Runtime } from "./interpreter.js";
 import type { ParserLimits } from "./parser.js";
 import { parse } from "./parser.js";
+import type { InterpreterFunction } from "./value.js";
 
 /**
  * Interpreter options
@@ -249,18 +250,21 @@ export const createFunction = (
 ): ((...args: unknown[]) => RunResult) => {
   const runtime = new Runtime(options);
 
-  // `(function(a, b) { ... })` — an independent function with its own sandbox
-  // `(function(a, b) { ... })` —— 拥有独立沙箱的函数
+  // `(function(a, b) { ... })` — an independent function with its own sandbox. The body is wrapped
+  // in newlines so a trailing `// comment` cannot swallow the closing braces, and the parameter
+  // list is validated by the parser (invalid names throw a `SyntaxError`).
+  // `(function(a, b) { ... })` —— 拥有独立沙箱的函数。函数体以换行包裹，避免末尾的 `// 注释` 吞掉
+  // 结尾括号；参数列表由解析器校验（非法参数名抛 `SyntaxError`）。
   const fn = runtime.run(
-    parse(`(function(${args.join(", ")}) { ${body} })`, runtime.features, parseLimits(options)),
-  ) as (...callArgs: unknown[]) => unknown;
+    parse(`(function(${args.join(", ")}) {\n${body}\n})`, runtime.features, parseLimits(options)),
+  ) as InterpreterFunction;
 
-  // a plain (non-arrow) function preserves `this` from the call site and forwards it to the
-  // interpreter function, so `.call(page)` exposes the page instance to the body
-  // 使用普通函数（非箭头）保留调用点的 `this` 并转发给解释器函数，`.call(page)` 可将页面实例暴露给函数体
-  return function hotUpdate(this: unknown, ...callArgs: unknown[]): RunResult {
-    return fn.apply(this, callArgs);
-  };
+  // `fn` is already the host-callable wrapper: it forwards the caller's `this` to the interpreter
+  // and keeps `length` / `name` / `prototype` / `interpreterMeta` from the source function — an
+  // extra wrapper would lose all of that
+  // `fn` 本身就是宿主可调用包装：它把调用点的 `this` 转发给解释器，并保留源码函数的
+  // `length` / `name` / `prototype` / `interpreterMeta`——再包一层会丢失这些元信息
+  return fn;
 };
 
 /**
