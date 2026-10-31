@@ -754,6 +754,32 @@ export interface RequestFactory {
   pendingCount: () => number;
 }
 
+/** Absolute URL (`https://…`) / 绝对 URL */
+const ABSOLUTE_URL = /^[a-z][a-z-]*:\/\//iu;
+/** URL scheme (`https:`) / URL 协议 */
+const URL_SCHEME = /^[a-z][a-z-]*:/iu;
+
+/**
+ * Resolve the URL passed to `createRequest()` into an absolute URL.
+ *
+ * Relative paths need a `server`; protocol-relative URLs (`//host/path`) inherit the server
+ * protocol and fall back to HTTPS.
+ *
+ * @param url - URL to resolve / 待解析的 URL
+ * @param domain - Configured server without a trailing slash / 去掉末尾斜杠的 server
+ * @returns Absolute URL / 绝对 URL
+ */
+const resolveRequestURL = (url: string, domain?: string): string => {
+  if (url.startsWith("//")) return `${domain?.match(URL_SCHEME)?.[0] ?? "https:"}${url}`;
+  if (url.startsWith("/")) {
+    if (!domain) throw new Error("No server provided");
+
+    return `${domain}${url}`;
+  }
+
+  return ABSOLUTE_URL.test(url) ? url : `https://${url}`;
+};
+
 /**
  * @param options Request 配置选项
  * @returns 请求工厂，包含请求方法、Cookie 存储与取消能力
@@ -785,13 +811,7 @@ export const createRequest = ({
     url: string,
     requestOptions: RequestOptions<T> = {},
   ): RequestPromise<T> => {
-    if (url.startsWith("/") && !domain) throw new Error("No server provided");
-
-    const link = url.startsWith("/")
-      ? `${domain}${url}`
-      : /^[a-z][a-z-]*:\/\//u.test(url)
-        ? url
-        : `https://${url}`;
+    const link = resolveRequestURL(url, domain);
 
     const mergedOptions: RequestOptions<T> = {
       cookieStore: defaultCookieStore,

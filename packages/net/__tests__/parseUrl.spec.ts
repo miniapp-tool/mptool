@@ -123,6 +123,16 @@ describe(getDomain, () => {
     expect(getDomain("example.com#")).toBe("example.com");
     expect(getDomain("#fragment")).toBe("");
   });
+
+  it("should accept an upper-case scheme", () => {
+    expect(getDomain("HTTPS://Example.COM/api")).toBe("example.com");
+    expect(getDomain("HTTP://Example.COM:8080/api?a=1")).toBe("example.com");
+  });
+
+  it("should accept a protocol-relative url", () => {
+    expect(getDomain("//Example.COM/api")).toBe("example.com");
+    expect(getDomain("//Example.COM:8080/api?b=2")).toBe("example.com");
+  });
 });
 
 describe(getUrlInfo, () => {
