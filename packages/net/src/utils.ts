@@ -20,7 +20,7 @@ const removeHashAndQuery = (url: string): string => {
 export const getDomain = (domainOrURL: string): string =>
   // oxlint-disable-next-line typescript/no-non-null-assertion
   removeHashAndQuery(domainOrURL)
-    .replace(/^https?:\/\/|^\/\//u, "")
+    .replace(/^https?:\/\/|^\/\//iu, "")
     .split("/")
     .shift()!
     .replace(/:\d+$/u, "")

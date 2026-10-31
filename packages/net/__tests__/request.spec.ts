@@ -371,6 +371,36 @@ describe(createRequest, () => {
     expect(call.url).toBe("https://other.com/api");
   });
 
+  it("should keep an absolute url with an upper-case scheme", async () => {
+    const calls = mockRequest();
+    const { request: req } = createRequest({ server: "https://example.com" });
+
+    const res = await req("HTTPS://other.com/api");
+
+    expect(res.status).toBe(200);
+    expect(calls[0].url).toBe("HTTPS://other.com/api");
+  });
+
+  it("should resolve a protocol-relative url with https when no server is set", async () => {
+    const calls = mockRequest();
+    const { request: req } = createRequest();
+
+    const res = await req("//other.com/api");
+
+    expect(res.status).toBe(200);
+    expect(calls[0].url).toBe("https://other.com/api");
+  });
+
+  it("should inherit the server protocol for a protocol-relative url", async () => {
+    const calls = mockRequest();
+    const { request: req } = createRequest({ server: "http://example.com" });
+
+    const res = await req("//other.com/api");
+
+    expect(res.status).toBe(200);
+    expect(calls[0].url).toBe("http://other.com/api");
+  });
+
   it("should add the https scheme to a bare host", async () => {
     const calls = mockRequest();
     const { request: req } = createRequest();
