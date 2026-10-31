@@ -16,9 +16,10 @@ on:
         type: boolean
         description: "Skip running `lerna version` and run publish-only retry (useful to retry failed publish)"
 
-# Keep the workflow token read-only by default; elevated permissions are granted per job so that
-# dependency install scripts and build steps never run with repository write access or an OIDC
-# token.
+# Keep the workflow token read-only by default; elevated permissions are granted per job. GitHub
+# Actions has no step-level permissions, so the single release job necessarily runs install/build
+# with its job permissions (`contents: write` for lerna tagging, `id-token: write` for npm
+# provenance / trusted publishing). The release job is gated by the `npm-publish` environment.
 permissions:
   contents: read
 
