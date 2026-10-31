@@ -28,8 +28,11 @@ jobs:
           # replace it with the path to your config file
           CONFIG_FILE_PATH: ${{ github.workspace }}/docs/scraper.json
         run: |
+          # Pin the image by digest (multi-arch index of `:latest`, last pushed 2023-08-03) so a
+          # compromised/regressed upstream tag cannot change what runs with the API key.
           docker run -t --rm \
             -e MEILISEARCH_HOST_URL=$HOST_URL \
             -e MEILISEARCH_API_KEY=$API_KEY \
             -v $CONFIG_FILE_PATH:/docs-scraper/config.json \
-            getmeili/docs-scraper:latest pipenv run ./docs_scraper config.json
+            getmeili/docs-scraper@sha256:1de9f33272d53ed5ddcb9890bb0454d8ff227de76cd2c87e3d1bb84810e4e516 \
+            pipenv run ./docs_scraper config.json
