@@ -178,6 +178,14 @@ export interface ExtendedComponentMethods extends InstanceEmitterMethods {
    */
   $call: (method: string, ...args: unknown[]) => void;
 
+  /**
+   * 通过组件 ID 获取组件实例引用
+   *
+   * @param id 组件实例 ID（即 `$id`）
+   * @returns 组件实例，未找到时返回 `undefined`
+   */
+  $getRef: (id: number) => TrivialComponentInstance | undefined;
+
   $attached: (parent: TrivialComponentInstance | TrivialPageInstance) => void;
 }
 
