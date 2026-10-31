@@ -1005,6 +1005,30 @@ export class Runtime {
       throw new Error(`Execution aborted: exceeded ${this.maxDuration} ms time limit`);
   }
 
+  /**
+   * Refresh the step/step-deadline budget for a host-initiated call into an interpreter function.
+   *
+   * 为宿主发起的解释器函数调用刷新步数与挂钟预算。
+   *
+   * A function created by `createFunction` is invoked by the host long after its creation run
+   * finished, so it must start with a fresh `stepCount` and deadline; otherwise a configured
+   * `maxDuration` has already expired and repeated calls keep accumulating steps until `maxSteps`
+   * trips permanently. Nested calls (inside a run, inside a host-initiated call, or while an async
+   * chain is suspended) keep sharing the outer budget.
+   *
+   * `createFunction` 创建的函数会在创建时的运行结束后很久才被宿主调用，因此必须以全新的 `stepCount` 与截止时间开始；否则配置的 `maxDuration`
+   * 早已过期，且多次调用会持续累加步数直到 `maxSteps` 永久失效。嵌套调用（一次运行内部、宿主发起的调用内部、或 async 链挂起期间）继续共享外层预算。
+   */
+  private prepareHostCall(): void {
+    if (this.activeRuns > 0 || this.pendingAsync > 0 || this.contextStack.length > 0) return;
+
+    this.stepCount = 0;
+    this.deadline =
+      this.maxDuration === Number.POSITIVE_INFINITY
+        ? Number.POSITIVE_INFINITY
+        : Date.now() + this.maxDuration;
+  }
+
   // -------------------------------------------------------------------------
   // Execution context helpers
   // -------------------------------------------------------------------------
@@ -3400,6 +3424,9 @@ export class Runtime {
     thisArg: unknown,
     isConstruct: boolean,
   ): unknown {
+    // a host-initiated call starts a fresh budget; nested calls share the outer one
+    // 宿主发起的调用使用全新预算；嵌套调用共享外层预算
+    this.prepareHostCall();
     this.step();
 
     // async functions always return a host Promise (driven by the async runner); constructing one
