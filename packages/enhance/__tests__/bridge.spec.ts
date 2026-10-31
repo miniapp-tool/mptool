@@ -21,6 +21,55 @@ describe("bridge", () => {
     await releaseLock();
   };
 
+  describe("$ (bind)", () => {
+    it("should not call a truthy non-function property", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      let pageOptions: { $?: (event: unknown) => void } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      const instance = { data: { n: 1 }, $state: {}, $refs: new Map() };
+
+      // 事件名命中 data / $state / $refs 等真值非函数属性时不得调用，否则 method.apply 会抛 TypeError
+      expect(() =>
+        pageOptions?.$?.call(instance, {
+          detail: { id: 1, event: "data", args: [] },
+        }),
+      ).not.toThrow();
+    });
+
+    it("should dispatch a method bound to the instance", async () => {
+      await setup({ defaultPage: "/pages/$name" });
+
+      let pageOptions: { $?: (event: unknown) => void } | undefined;
+
+      (globalThis as any).Page = (options: any): void => {
+        pageOptions = options;
+      };
+
+      $Page("index", {});
+
+      const contexts: unknown[] = [];
+      const instance = {
+        customMethod(this: unknown, a: number, b: number): void {
+          contexts.push(this);
+          expect([a, b]).toStrictEqual([1, 2]);
+        },
+      };
+
+      pageOptions?.$?.call(instance, {
+        detail: { id: 1, event: "customMethod", args: [1, 2] },
+      });
+
+      expect(contexts[0]).toBe(instance);
+    });
+  });
+
   describe("$back", () => {
     it("should clamp delta to the actual page stack when no home is configured", async () => {
       await setup({ defaultPage: "/pages/$name" });

@@ -4,6 +4,57 @@ import { describe, expect, it, vi } from "vitest";
 import { $Config } from "../src/config/index.js";
 import { $Page } from "../src/page/index.js";
 
+describe("$ (bind)", () => {
+  const capturePageOptions = (): (() => { $?: (event: unknown) => void } | undefined) => {
+    let pageOptions: { $?: (event: unknown) => void } | undefined;
+
+    (globalThis as any).Page = (options: any): void => {
+      pageOptions = options;
+    };
+
+    return () => pageOptions;
+  };
+
+  it("should not call a truthy non-function property", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    const instance = { data: { n: 1 }, $state: {}, $refs: new Map() };
+
+    // 事件名命中 data / $state / $refs 等真值非函数属性时不得调用，否则 method.apply 会抛 TypeError
+    expect(() =>
+      getOptions()?.$?.call(instance, {
+        detail: { id: 1, event: "data", args: [] },
+      }),
+    ).not.toThrow();
+  });
+
+  it("should dispatch a method bound to the instance", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    const contexts: unknown[] = [];
+    const instance = {
+      customMethod(this: unknown, a: number, b: number): void {
+        contexts.push(this);
+        expect([a, b]).toStrictEqual([1, 2]);
+      },
+    };
+
+    getOptions()?.$?.call(instance, {
+      detail: { id: 1, event: "customMethod", args: [1, 2] },
+    });
+
+    expect(contexts[0]).toBe(instance);
+  });
+});
+
 describe("$back", () => {
   it("should clamp delta to the actual page stack when no home is configured", async () => {
     $Config({ defaultPage: "/pages/$name" });
