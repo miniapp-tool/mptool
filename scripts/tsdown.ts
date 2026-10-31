@@ -6,6 +6,20 @@ import type { UserConfig, CopyEntry } from "tsdown";
 import { defineConfig } from "tsdown";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+/**
+ * Polyfill prepended to every JavaScript bundle: `Object.hasOwn` is ES2022 and missing on the
+ * minimum supported runtime (base library 3.8.2 ≈ Chrome 86 / iOS 14), while `dom-serializer`
+ * (bundled into parser / all / skyline) calls it unconditionally.
+ *
+ * 所有 JS 产物顶部注入的 `Object.hasOwn` 兜底（最低支持的基础库环境没有该 ES2022 API）。
+ */
+const hasOwnPolyfill = [
+  'if (typeof Object.hasOwn !== "function")',
+  "  Object.hasOwn = function (target, key) {",
+  "    return Object.prototype.hasOwnProperty.call(target, key);",
+  "  };",
+].join("\n");
 const __dirname = import.meta.dirname;
 
 /**
@@ -139,6 +153,14 @@ export const tsdownConfig = (
     outputOptions: {
       codeSplitting: false,
     },
+    // `Object.hasOwn` is ES2022 (Chrome 93 / iOS 15.4) but the minimum supported base library 3.8.2
+    // maps to Chrome 86 / iOS 14. `dom-serializer` (bundled into `@mptool/parser`, `@mptool/all` and
+    // `@mptool/skyline`) calls it directly, so inject a tiny guard at the top of every JS bundle.
+    // The banner must be limited to `.js` output: tsdown also renders `dist/index.d.ts` through the
+    // same chunk addon hook, and a statement inside a declaration file fails `tsc` for consumers.
+    // `Object.hasOwn` 是 ES2022 API，低于最低基础库对应的 Chrome 86 / iOS 14 没有，故在 JS 产物顶部注入兜底；
+    // 不能注入 `.d.ts`（声明文件里出现语句会导致下游 `tsc` 报错）。
+    banner: ({ fileName }) => (fileName.endsWith(".js") ? hasOwnPolyfill : ""),
     deps: {
       alwaysBundle,
       neverBundle,
