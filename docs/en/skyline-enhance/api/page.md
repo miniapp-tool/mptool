@@ -119,7 +119,7 @@ Map of child component instances that have a `ref`; can be used to access child 
 ```
 
 ```js
-$Page({
+$Page("main", {
   onLoad() {
     this.$refs.get("customComp1"); // instance reference of the custom-component1 child
   },
