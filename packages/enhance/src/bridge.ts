@@ -198,7 +198,11 @@ export const bind = function (
     default: {
       const method = this[event] as ((...args: unknown[]) => unknown) | undefined;
 
-      if (method) method.apply(this, args);
+      // Only dispatch real methods: a truthy non-function property (`data`, `$state`, ...) must not
+      // be called, otherwise `method.apply` throws a `TypeError`.
+      // 只调用真正的方法：命中 `data`、`$state` 等真值非函数属性时不得调用，否则 `method.apply` 会抛
+      // `TypeError`。
+      if (typeof method === "function") method.apply(this, args);
     }
   }
 };
