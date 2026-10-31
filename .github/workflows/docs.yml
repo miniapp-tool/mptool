@@ -22,9 +22,8 @@ jobs:
         uses: pnpm/setup@v3
         with:
           runtime: node@^24.22.1
-
-      - name: Install deps
-        run: pnpm ci
+          # Fail when the lockfile is missing/out of date; installs with --frozen-lockfile.
+          require-lockfile: true
 
       - name: Build docs
         run: pnpm run docs:build
