@@ -117,7 +117,7 @@ order: 2
 
 导航锁的最长持有时间，单位 ms。
 
-正常情况下导航锁会在目标页 `onReady` / `onUnload` 后释放；若目标页始终没有触发这两个生命周期（例如 `switchTab` 回到已加载的 tab 页），锁会在 `lockTimeout` 后强制释放，避免导航永久失效。
+正常情况下导航锁只在目标页 `onReady`（并与 `minInterval` 一起延迟）后释放；`onUnload` 不是释放时机——`redirectTo` / `reLaunch` / 从非 tab 页 `switchTab` 时旧页会在目标页 ready 之前卸载，此时释放会让后续点击在目标页仍在加载时发起新的导航。若目标页始终没有触发 `onReady`（例如 `switchTab` 回到已加载的 tab 页、在 `onLoad` 内被强制返回），锁会在 `lockTimeout` 后强制释放，避免导航永久失效。
 
 ## hotReloadPattern
 

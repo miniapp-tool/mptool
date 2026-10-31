@@ -117,7 +117,7 @@ Minimum interval after a page's initial render before another navigation is allo
 
 Maximum time the navigation lock is held, in ms.
 
-Normally the navigation lock is released after the target page's `onReady` / `onUnload`. If the target page never fires either lifecycle (for example, `switchTab` returns to an already loaded tab page), the lock is force-released after `lockTimeout` so navigation cannot remain permanently blocked.
+Normally the navigation lock is released only after the target page's `onReady` (together with the `minInterval` delay); `onUnload` is not a release trigger, because with `redirectTo` / `reLaunch` / `switchTab` from a non-tab page the old page unloads before the target page is ready, and releasing there would let a later tap start a navigation while the target is still loading. If the target page never fires `onReady` (for example, `switchTab` returns to an already loaded tab page, or the page is forced back inside `onLoad`), the lock is force-released after `lockTimeout` so navigation cannot remain permanently blocked.
 
 ## hotReloadPattern
 

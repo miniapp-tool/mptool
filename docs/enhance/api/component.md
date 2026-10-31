@@ -67,7 +67,7 @@ order: 5
 $Component({
   lifetimes: {
     attached() {
-      this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
+      this.$refs.get("customRef1"); // 根据 ref 属性获取子组件的实例引用
     },
   },
 });

@@ -135,11 +135,11 @@ In addition, you can set the `home` option to choose the main page to redirect t
 
 Because the framework's `onNavigate` lifecycle delays navigation, you can use `maxDelay` to control the maximum duration of the delay, in ms. The default is `200`.
 
-At the same time, to prevent rapid navigation from triggering extra lifecycles and causing potential issues (such as affecting the initial render), by default the next framework navigation can only happen 100 ms after the current page's `onReady` lifecycle fires. Using `onReady` + a delay ensures the initial render is complete and avoids synchronous `onNavigate` work blocking mini-program rendering. If you need a larger or smaller delay, set it with `minInterval`.
+At the same time, to prevent rapid navigation from triggering extra lifecycles and causing potential issues (such as affecting the initial render), by default the next framework navigation can only happen 100 ms after the target page's `onReady` lifecycle fires. Using `onReady` + a delay ensures the initial render is complete and avoids synchronous `onNavigate` work blocking mini-program rendering. The lock is released only by this path (target page `onReady` + `minInterval`); `onUnload` is not a release trigger: with `redirectTo` / `reLaunch` / `switchTab` from a non-tab page the old page unloads before the target page is ready, and releasing there would let a later tap start a navigation while the target is still loading. If you need a larger or smaller delay, set it with `minInterval`.
 
 While the navigation lock is held, calls to `$go` / `$redirect` / `$switch` / `$reLaunch` are ignored: the returned Promise resolves to `undefined` (it does not reject, and no navigation occurs).
 
-The navigation lock is held for at most 5000 ms by default and is then force-released (a fallback for when the target page never fires `onReady` / `onUnload`). You can adjust this duration with `lockTimeout`.
+The navigation lock is held for at most 5000 ms by default and is then force-released (a fallback for when the target page never fires `onReady`, for example `switchTab` back to an already loaded tab page, or being forced back inside `onLoad`). You can adjust this duration with `lockTimeout`.
 
 ### Constructor extensions
 
@@ -342,7 +342,7 @@ Use a data-set to bind navigation configuration:
 ```
 
 ```html
-<button catch:tap="$bindReLaunch" data-url="play" data-before="onClickBefore">
+<button catch:tap="$bindRelaunch" data-url="play" data-before="onClickBefore">
   click reLaunch
 </button>
 ```
@@ -744,7 +744,7 @@ Component registrar provided by the framework.
   $Component({
     lifetimes: {
       attached() {
-        this.$refs.get("customComp"); // get the child component instance by its ref attribute
+        this.$refs.get("customRef1"); // get the child component instance by its ref attribute
       },
     },
   });

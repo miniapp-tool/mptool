@@ -103,7 +103,7 @@ order: 4
 - `$bindGo`
 - `$bindRedirect`
 - `$bindSwitch`
-- `$bindReLaunch`
+- `$bindRelaunch`
 
 :::
 
@@ -170,11 +170,9 @@ order: 4
 ```
 
 ```js
-$Component({
-  lifetimes: {
-    attached() {
-      this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
-    },
+$Page("main", {
+  onLoad() {
+    this.$refs.get("customRef1"); // 根据 ref 属性获取子组件的实例引用
   },
 });
 ```
