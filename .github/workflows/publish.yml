@@ -63,8 +63,18 @@ jobs:
           # Fail when the lockfile is missing/out of date; installs with --frozen-lockfile.
           require-lockfile: true
 
+      # `pnpm run build` copies the shared enhance files into skyline-enhance. Hand edits in
+      # skyline-enhance are silently overwritten there, so fail before building when the committed
+      # copies are already out of sync (same gate as test.yml).
+      - name: Check enhance → skyline-enhance sync
+        run: pnpm run sync:check
+
       - name: Build project
         run: pnpm run build
+
+      # The build must not rewrite tracked files; otherwise the published tree differs from the commit.
+      - name: Ensure build left tracked files untouched
+        run: git diff --exit-code
 
       - name: Linting check
         run: pnpm lint:check
