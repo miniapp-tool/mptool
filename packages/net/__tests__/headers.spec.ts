@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { Headers, parseCookieHeader } from "../src/headers.js";
 
@@ -525,5 +525,27 @@ describe(parseCookieHeader, () => {
 
   it("drops cookies whose Domain attribute normalizes to an empty value", () => {
     expect(parseCookieHeader("a=1; Domain=.", "example.com")).toStrictEqual([]);
+  });
+
+  it("keeps percent-encoded values raw instead of decoding them", () => {
+    // Decoding turns `%3B` into `;`, which `isValidCookieValue()` rejects — the whole cookie
+    // used to be dropped.
+    const [cookie] = parseCookieHeader("token=a%3Bb; Path=/", "example.com");
+
+    expect(cookie.name).toBe("token");
+    expect(cookie.value).toBe("a%3Bb");
+  });
+
+  it("keeps a raw percent sign without logging a decode error", () => {
+    const errorSpy = vi.spyOn(console, "error").mockReturnValue(undefined);
+
+    try {
+      const [cookie] = parseCookieHeader("rate=50%; Path=/", "example.com");
+
+      expect(cookie.value).toBe("50%");
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });
