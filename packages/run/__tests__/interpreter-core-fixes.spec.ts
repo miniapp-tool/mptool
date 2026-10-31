@@ -210,3 +210,120 @@ describe("try/finally with raw null or undefined throws", () => {
     expect(cleaned).toBe(true);
   });
 });
+
+describe("super property references", () => {
+  it("should not recurse when a subclass setter writes through super", () => {
+    expect(
+      run(
+        [
+          "class A {",
+          "  set x(v) { this._x = v; }",
+          "  get x() { return this._x; }",
+          "}",
+          "class B extends A {",
+          "  set x(v) { super.x = v + 1; }",
+          "  get x() { return 100; }",
+          "}",
+          "const b = new B();",
+          "b.x = 1;",
+          "b._x",
+        ].join("\n"),
+      ),
+    ).toBe(2);
+  });
+
+  it("should read super.x from the parent for a postfix update", () => {
+    expect(
+      run(
+        "class A { get x() { return 1; } } class B extends A { get x() { return 2; } m() { return super.x++; } } new B().m()",
+      ),
+    ).toBe(1);
+  });
+
+  it("should read super.x from the parent for a prefix update", () => {
+    expect(
+      run(
+        "class A { get x() { return 1; } } class B extends A { get x() { return 2; } m() { const v = ++super.x; return [v, this.x]; } } new B().m()",
+      ),
+    ).toStrictEqual([2, 2]);
+  });
+
+  it("should read super.x from the parent for a compound assignment", () => {
+    expect(
+      run(
+        "class A { get x() { return 1; } set x(v) { this._x = v; } } class B extends A { get x() { return 2; } m() { super.x += 10; return this._x; } } new B().m()",
+      ),
+    ).toBe(11);
+  });
+
+  it("should run a super getter with the instance as receiver", () => {
+    expect(
+      run(
+        "class A { get m() { return () => this.v; } } class B extends A { constructor() { super(); this.v = 7; } run() { return super.m(); } } new B().run()",
+      ),
+    ).toBe(7);
+  });
+
+  it("should run a super getter with the instance as receiver in async code", async () => {
+    await expect(
+      run(
+        "class A { get m() { return () => this.v; } } class B extends A { constructor() { super(); this.v = 8; } async run() { return super.m(); } } new B().run()",
+      ),
+    ).resolves.toBe(8);
+  });
+
+  it("should silently ignore a failed super write in sloppy mode", () => {
+    expect(
+      run(
+        "class A { get x() { return 1; } } class B extends A { m() { super.x = 2; return this.x; } } new B().m()",
+      ),
+    ).toBe(1);
+  });
+
+  it("should throw for a failed super write in strict mode", () => {
+    expect(() =>
+      run(
+        "class A { get x() { return 1; } } class B extends A { m() { super.x = 2; return this.x; } } new B().m()",
+        { strict: true },
+      ),
+    ).toThrow(TypeError);
+  });
+
+  it("should reject super property reads before super()", () => {
+    expect(() =>
+      run(
+        "class A { get x() { return 1; } } class B extends A { constructor() { super.x; super(); } } new B()",
+      ),
+    ).toThrow(ReferenceError);
+  });
+
+  it("should reject super property writes before super()", () => {
+    expect(() =>
+      run("class A {} class B extends A { constructor() { super.x = 1; super(); } } new B()"),
+    ).toThrow(ReferenceError);
+  });
+
+  it("should reject super property updates before super()", () => {
+    expect(() =>
+      run(
+        "class A { get x() { return 1; } } class B extends A { constructor() { super.x++; super(); } } new B()",
+      ),
+    ).toThrow(ReferenceError);
+  });
+
+  it("should reject super method calls before super() instead of exposing the sentinel", () => {
+    expect(() =>
+      run(
+        "class A { m() { return typeof this; } } class B extends A { constructor() { super.m(); super(); } } new B()",
+      ),
+    ).toThrow(ReferenceError);
+  });
+
+  it("should reject super property reads before super() in an arrow", () => {
+    expect(() =>
+      run(
+        "class A { get x() { return 1; } } class B extends A { constructor() { const f = () => super.x; f(); super(); } } new B()",
+      ),
+    ).toThrow(ReferenceError);
+  });
+});
