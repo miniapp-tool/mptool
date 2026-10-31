@@ -233,7 +233,11 @@ export const $Page: PageConstructor = <
         const onAwakeHandler = (time: number): void => {
           callLog("onAwake");
 
-          void invokeAsyncLifecycle(name, "onAwake", () => onAwake(time));
+          // `onAwake` is typed with the page instance as `this`, so it must be invoked with the
+          // instance (`this` of `handleOnLoad`) instead of as an unbound function.
+          // `onAwake` 的类型声明以页面实例为 `this`，因此必须绑定实例调用（即 `handleOnLoad` 的 `this`），
+          // 不能作为无绑定函数调用。
+          void invokeAsyncLifecycle(name, "onAwake", () => onAwake.call(this, time));
         };
 
         onAwakeHandlers.set(this, onAwakeHandler);

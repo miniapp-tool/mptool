@@ -476,4 +476,23 @@ describe($Page, () => {
     expect(first.$refs?.size).toBe(0);
     expect(second.$refs?.get("child")).toStrictEqual({ name: "second" });
   });
+
+  it("should invoke onAwake with the page instance as this", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+    const contexts: unknown[] = [];
+
+    $Page("index", {
+      onAwake(this: unknown): void {
+        contexts.push(this);
+      },
+    });
+
+    const instance = loadPageInstance(getOptions());
+
+    appEmitter.emit(ON_APP_AWAKE, 1000);
+
+    expect(contexts[0]).toBe(instance);
+  });
 });

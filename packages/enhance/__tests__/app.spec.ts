@@ -38,6 +38,23 @@ describe($App, () => {
     expect(onAwake).toHaveBeenCalledWith(1000);
   });
 
+  it("should invoke onAwake with the app instance as this", () => {
+    const contexts: unknown[] = [];
+
+    const appOptions = {
+      onAwake(this: unknown): void {
+        contexts.push(this);
+      },
+    };
+
+    $App(appOptions);
+
+    appEmitter.emit(ON_APP_AWAKE, 1000);
+
+    // 小程序中 app 选项对象就是 app 实例
+    expect(contexts[0]).toBe(appOptions);
+  });
+
   it("should record hide timestamp on onHide", () => {
     $App({});
 

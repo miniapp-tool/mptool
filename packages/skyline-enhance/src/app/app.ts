@@ -32,15 +32,22 @@ const appHideHandler = (): void => {
  *
  * 触发可选的 `onAwake` 处理函数，并捕获其 Promise 拒绝（记录日志），避免产生 unhandled rejection。
  *
+ * `onAwake` is typed with the app instance as `this`; in a mini-program the app options object is
+ * the app instance, so it is passed explicitly.
+ *
+ * `onAwake` 的类型声明以 App 实例为 `this`；小程序中 app 选项对象就是实例，因此显式传入。
+ *
+ * @param appOptions - App instance (the app options object) / App 实例（即 app 选项对象）
  * @param handler - Awake handler / 唤醒处理函数
  * @param time - Sleep duration in ms / 休眠时间（ms）
  */
 const invokeAsyncAwake = async (
+  appOptions: object,
   handler: (time: number) => void | Promise<void>,
   time: number,
 ): Promise<void> => {
   try {
-    await handler(time);
+    await handler.call(appOptions, time);
   } catch (err) {
     logger.error(`App: onAwake rejected after ${time}ms`, err);
   }
@@ -64,7 +71,7 @@ export const $App: AppConstructor = <Custom extends WechatMiniprogram.IAnyObject
     appEmitter.on(ON_APP_AWAKE, (time) => {
       logger.debug(`App: awake after ${time}ms`);
 
-      void invokeAsyncAwake(onAwake, time);
+      void invokeAsyncAwake(appOptions, onAwake, time);
     });
     logger.debug("App: registered onAwake");
   }
