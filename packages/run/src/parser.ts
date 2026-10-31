@@ -196,24 +196,6 @@ const isValidAssignmentTarget = (
   node.type === "identifier" || node.type === "member" || node.type === "call";
 
 /**
- * Find a CoverInitializedName (`{ a = 1 }`) property in an object literal.
- *
- * 查找对象字面量中的 CoverInitializedName（`{ a = 1 }`）属性。
- *
- * @param node - Object literal / 对象字面量
- * @returns The offending property range, or `null` / 违规属性的范围，无则 `null`
- */
-const findCoverInitializedName = (node: ObjectExpr): { start: number; end: number } | null => {
-  for (const prop of node.props) {
-    if (prop.type !== "property" || !prop.shorthand || prop.value.type !== "assignment") continue;
-
-    return { start: prop.start, end: prop.end };
-  }
-
-  return null;
-};
-
-/**
  * Map a token to a binary operator, or null if it is not one.
  *
  * 将 token 映射为二元运算符，非二元运算符时返回 null。
@@ -417,15 +399,16 @@ export class Parser {
   /** Nesting depth of switch statements / switch 嵌套深度 */
   private switchDepth = 0;
   /**
-   * CoverInitializedName markers collected while a cover grammar may still turn into a pattern.
+   * CoverInitializedName (`{ a = 1 }`) properties parsed inside object literals.
    *
-   * `null` outside a cover grammar (a plain object literal is rejected immediately); an array
-   * inside a cover grammar (parenthesized arrow parameters, `for-in`/`for-of` heads), where the
-   * object may still be converted into a destructuring pattern.
+   * When an object literal is converted to an `ObjectPattern` via `toPattern()`, its properties are
+   * removed from this set; any marker remaining at the end of `parseProgram()` is an unconsumed
+   * shorthand initializer in an expression context and is rejected with a `ParseError`.
    *
-   * CoverInitializedName 标记：处于 cover 语法（括号箭头参数、`for-in`/`for-of` 头部）时收集，`null` 表示普通表达式上下文（立即报错）。
+   * 对象字面量中解析出的 CoverInitializedName（`{ a = 1 }`）属性集合。对象字面量经 `toPattern()` 转为 `ObjectPattern`
+   * 时会从中移除；`parseProgram()` 结束时若仍有残留，说明处于普通表达式上下文，立即报错。
    */
-  private pendingCoverInitialized: { start: number; end: number }[] | null = null;
+  private coverMarkers = new Set<ObjectProperty>();
   /** Labels currently in scope / 当前作用域内的标签 */
   private readonly labels: { name: string; token: Token; needsIteration: boolean }[] = [];
   private readonly strict: boolean;
@@ -527,6 +510,17 @@ export class Parser {
       body.push(this.parseStatement());
     }
 
+    const [coverMarker] = this.coverMarkers;
+
+    if (coverMarker != null) {
+      throw new ParseError(
+        "Invalid shorthand property initializer",
+        this.source,
+        coverMarker.start,
+        coverMarker.end,
+      );
+    }
+
     this.recordFunctionSources(body);
 
     return { type: "program", body, start, end: this.lastEnd };
@@ -618,8 +612,8 @@ export class Parser {
    *
    * @returns The saved snapshot / 保存的快照
    */
-  private save(): { pos: number; lastEnd: number } {
-    return { pos: this.pos, lastEnd: this.lastEnd };
+  private save(): { pos: number; lastEnd: number; coverMarkers: Set<ObjectProperty> } {
+    return { pos: this.pos, lastEnd: this.lastEnd, coverMarkers: new Set(this.coverMarkers) };
   }
 
   /**
@@ -629,9 +623,14 @@ export class Parser {
    *
    * @param snapshot - The saved snapshot / 保存的快照
    */
-  private restore(snapshot: { pos: number; lastEnd: number }): void {
+  private restore(snapshot: {
+    pos: number;
+    lastEnd: number;
+    coverMarkers: Set<ObjectProperty>;
+  }): void {
     this.pos = snapshot.pos;
     this.lastEnd = snapshot.lastEnd;
+    this.coverMarkers = snapshot.coverMarkers;
   }
 
   /**
@@ -706,45 +705,13 @@ export class Parser {
     if (this.pos < this.tokens.length) {
       const token = this.tokens[this.pos];
 
-      if (token.type !== "punct" || token.value !== "/") return;
+      if (token.type !== "punct" || (token.value !== "/" && token.value !== "/=")) return;
 
       this.tokens.length = this.pos;
       this.lexer.restartAt(token.start);
     }
 
     this.lexer.expectRegex();
-  }
-
-  /**
-   * Reject a CoverInitializedName that did not become a destructuring pattern.
-   *
-   * In a cover grammar it is buffered until the grammar is resolved (a `for-in`/`for-of` head or
-   * arrow parameters may still turn the object into a pattern); everywhere else it is an early
-   * error, because a plain object literal only allows shorthand properties.
-   *
-   * 拒绝未能转换为解构模式的 CoverInitializedName。cover 语法中先缓存，待语法确定（`for-in`/`for-of`
-   * 头部或箭头参数仍可能转换为模式）后再判断；其余上下文立即报错，因为普通对象字面量只允许简写属性。
-   *
-   * @param node - Object literal / 对象字面量
-   */
-  private rejectCoverInitializedName(node: ObjectExpr): void {
-    const offending = findCoverInitializedName(node);
-
-    /* istanbul ignore if -- only called for object literals that contain one */
-    if (offending == null) return;
-
-    if (this.pendingCoverInitialized != null) {
-      this.pendingCoverInitialized.push(offending);
-
-      return;
-    }
-
-    throw new ParseError(
-      "Invalid shorthand property initializer",
-      this.source,
-      offending.start,
-      offending.end,
-    );
   }
 
   // ---------------------------------------------------------------------------
@@ -1137,21 +1104,7 @@ export class Parser {
       return { type: "for", init: declaration, test, update, body, start, end: this.lastEnd };
     }
 
-    // A `for-in`/`for-of` head is an assignment target, so a CoverInitializedName there may still
-    // become a destructuring pattern; buffer it until the head form is known.
-    // `for-in`/`for-of` 头部是赋值目标，其中的 CoverInitializedName 仍可能成为解构模式，
-    // 因此先缓存，待确定头部形式后再判断。
-    const outerCover = this.pendingCoverInitialized;
-    const coverMarkers: { start: number; end: number }[] = [];
-    let init: Expression;
-
-    this.pendingCoverInitialized = coverMarkers;
-
-    try {
-      init = this.parseExpression(false);
-    } finally {
-      this.pendingCoverInitialized = outerCover;
-    }
+    const init = this.parseExpression(false);
 
     if (this.match("in")) {
       this.advance();
@@ -1197,20 +1150,6 @@ export class Parser {
       const left: AssignmentTarget | VariableDeclaration = this.toAssignmentTarget(init);
 
       return { type: "forOf", left, right, body, start, end: this.lastEnd };
-    }
-
-    // not a destructuring head: the buffered CoverInitializedName is an early error
-    // 不是解构头部：缓存的 CoverInitializedName 属于早期错误
-    const [coverMarker] = coverMarkers;
-
-    /* istanbul ignore else -- every buffered marker is pushed by rejectCoverInitializedName */
-    if (coverMarker != null) {
-      throw new ParseError(
-        "Invalid shorthand property initializer",
-        this.source,
-        coverMarker.start,
-        coverMarker.end,
-      );
     }
 
     this.expect(";");
@@ -1447,12 +1386,14 @@ export class Parser {
   }
 
   private parseFunctionDeclaration(isAsync: boolean): Statement {
+    const { start } = this.current();
+
     if (isAsync) {
       if (!this.features.async) throw this.error("'async' is not supported");
       this.advance();
     }
 
-    const { start } = this.advance();
+    this.advance();
 
     if (this.match("*")) throw this.error("Generator functions are not supported");
 
@@ -1980,6 +1921,8 @@ export class Parser {
             continue;
           }
 
+          this.coverMarkers.delete(prop);
+
           props.push({
             key: prop.key,
             computed: prop.computed,
@@ -2155,7 +2098,7 @@ export class Parser {
       } else {
         if (!this.features.async) throw this.error("'async' is not supported");
 
-        return { ...arrow, isAsync: true };
+        return { ...arrow, isAsync: true, start: token.start };
       }
     }
 
@@ -2178,10 +2121,6 @@ export class Parser {
 
       return { type: "assignment", op, target, value: right, start: left.start, end: right.end };
     }
-
-    // a CoverInitializedName only survives as part of a converted destructuring pattern
-    // CoverInitializedName 只有转换为解构模式时才合法
-    if (left.type === "object") this.rejectCoverInitializedName(left);
 
     return left;
   }
@@ -2707,12 +2646,12 @@ export class Parser {
   }
 
   private parseFunctionExpression(isAsync: boolean): FunctionExpr {
+    const { start } = this.current();
+
     if (isAsync) {
       if (!this.features.async) throw this.error("'async' is not supported");
       this.advance();
     }
-
-    const { start } = this.current();
 
     this.expect("function");
 
@@ -2985,9 +2924,11 @@ export class Parser {
         start,
         end: this.lastEnd,
       };
+      let isCoverInitialized = false;
 
       if (this.match("=")) {
         this.advance();
+        isCoverInitialized = true;
 
         value = {
           type: "assignment",
@@ -2999,7 +2940,7 @@ export class Parser {
         };
       }
 
-      return {
+      const prop: ObjectProperty = {
         type: "property",
         kind: "init",
         key,
@@ -3010,6 +2951,10 @@ export class Parser {
         start,
         end: this.lastEnd,
       };
+
+      if (isCoverInitialized) this.coverMarkers.add(prop);
+
+      return prop;
     }
 
     throw this.error("Expected ':' or '(' after property key");
@@ -3115,24 +3060,12 @@ export class Parser {
     // a non-async arrow inherits the enclosing async context, so `await` stays legal
     // 非 async 箭头继承外层 async 上下文，因此 `await` 仍然合法
     const isAsyncContext = this.inAsyncFunction || isAsync;
-    // an arrow body is always an expression (or a block), never a destructuring pattern, so a
-    // CoverInitializedName inside it is an immediate early error even while the parameters are
-    // still being parsed as a cover grammar
-    // 箭头函数体始终是表达式（或块），绝不可能是解构模式；因此即使参数仍按 cover 语法解析，
-    // 函数体内的 CoverInitializedName 也应立即报错
-    const savedCover = this.pendingCoverInitialized;
 
-    this.pendingCoverInitialized = null;
+    return this.parseWithFunctionContext(isAsyncContext, () => {
+      if (this.match("{")) return this.parseBlock();
 
-    try {
-      return this.parseWithFunctionContext(isAsyncContext, () => {
-        if (this.match("{")) return this.parseBlock();
-
-        return this.parseAssignment(allowIn);
-      });
-    } finally {
-      this.pendingCoverInitialized = savedCover;
-    }
+      return this.parseAssignment(allowIn);
+    });
   }
 
   /**
@@ -3147,117 +3080,94 @@ export class Parser {
     isAsync = false,
   ): { kind: "paren"; expr: Expression } | { kind: "arrow"; arrow: ArrowFunctionExpr } {
     const { start } = this.current();
-    const outerCover = this.pendingCoverInitialized;
-    const coverMarkers: { start: number; end: number }[] = [];
 
-    this.pendingCoverInitialized = coverMarkers;
+    this.expect("(");
 
-    try {
-      this.expect("(");
+    const items: ({ kind: "rest"; arg: Pattern } | { kind: "expr"; expr: Expression })[] = [];
+    let sawTrailingComma = false;
 
-      const items: ({ kind: "rest"; arg: Pattern } | { kind: "expr"; expr: Expression })[] = [];
-      let sawTrailingComma = false;
-
-      if (this.match(")")) {
-        this.advance();
-
-        if (this.match("=>")) {
-          this.advance();
-
-          const body = this.parseArrowBody(isAsync, true);
-
-          return {
-            kind: "arrow",
-            arrow: { type: "arrow", params: [], body, isAsync: false, start, end: body.end },
-          };
-        }
-
-        throw this.error("Unexpected token ')'");
-      }
-
-      for (;;) {
-        if (this.match("...")) {
-          this.advance();
-          items.push({ kind: "rest", arg: this.parseBindingTarget() });
-        } else {
-          items.push({ kind: "expr", expr: this.parseAssignment(true) });
-        }
-
-        if (this.match(",")) {
-          this.advance();
-
-          if (this.match(")")) {
-            sawTrailingComma = true;
-            break;
-          }
-
-          continue;
-        }
-
-        break;
-      }
-
-      this.expect(")");
+    if (this.match(")")) {
+      this.advance();
 
       if (this.match("=>")) {
         this.advance();
 
         const body = this.parseArrowBody(isAsync, true);
-        const params: Pattern[] = items.map((item) =>
-          item.kind === "rest"
-            ? { type: "rest", argument: item.arg, start: item.arg.start, end: item.arg.end }
-            : (this.toPattern(item.expr) as Pattern),
-        );
 
         return {
           kind: "arrow",
-          arrow: { type: "arrow", params, body, isAsync: false, start, end: body.end },
+          arrow: { type: "arrow", params: [], body, isAsync: false, start, end: body.end },
         };
       }
 
-      if (items.some((item) => item.kind === "rest"))
-        throw this.error("'...' can only be used in arrow function parameters");
+      throw this.error("Unexpected token ')'");
+    }
 
-      // a trailing comma is only valid in arrow parameter lists, not in a plain
-      // parenthesized expression (e.g. `(a,)` is a SyntaxError)
-      // 尾逗号只允许出现在箭头函数参数列表中，普通括号表达式（如 `(a,)`）是语法错误
-      if (sawTrailingComma) throw this.error("Unexpected token ')'");
-
-      // the cover grammar was not resolved into an arrow parameter list, so any buffered
-      // CoverInitializedName is an early error after all
-      // cover 语法未转换为箭头参数列表，缓存的 CoverInitializedName 属于早期错误
-      const [coverMarker] = coverMarkers;
-
-      /* istanbul ignore else -- every buffered marker is pushed by rejectCoverInitializedName */
-      if (coverMarker != null) {
-        throw new ParseError(
-          "Invalid shorthand property initializer",
-          this.source,
-          coverMarker.start,
-          coverMarker.end,
-        );
+    for (;;) {
+      if (this.match("...")) {
+        this.advance();
+        items.push({ kind: "rest", arg: this.parseBindingTarget() });
+      } else {
+        items.push({ kind: "expr", expr: this.parseAssignment(true) });
       }
 
-      const expressions: Expression[] = [];
+      if (this.match(",")) {
+        this.advance();
 
-      for (const item of items)
-        /* istanbul ignore else -- rest items were rejected above, so every remaining item is an expression */
-        if (item.kind === "expr") expressions.push(item.expr);
+        if (this.match(")")) {
+          sawTrailingComma = true;
+          break;
+        }
 
-      if (expressions.length === 1) return { kind: "paren", expr: expressions[0] };
+        continue;
+      }
+
+      break;
+    }
+
+    this.expect(")");
+
+    if (this.match("=>")) {
+      this.advance();
+
+      const body = this.parseArrowBody(isAsync, true);
+      const params: Pattern[] = items.map((item) =>
+        item.kind === "rest"
+          ? { type: "rest", argument: item.arg, start: item.arg.start, end: item.arg.end }
+          : (this.toPattern(item.expr) as Pattern),
+      );
 
       return {
-        kind: "paren",
-        expr: {
-          type: "sequence",
-          expressions,
-          start: expressions[0].start,
-          end: expressions[expressions.length - 1].end,
-        },
+        kind: "arrow",
+        arrow: { type: "arrow", params, body, isAsync: false, start, end: body.end },
       };
-    } finally {
-      this.pendingCoverInitialized = outerCover;
     }
+
+    if (items.some((item) => item.kind === "rest"))
+      throw this.error("'...' can only be used in arrow function parameters");
+
+    // a trailing comma is only valid in arrow parameter lists, not in a plain
+    // parenthesized expression (e.g. `(a,)` is a SyntaxError)
+    // 尾逗号只允许出现在箭头函数参数列表中，普通括号表达式（如 `(a,)`）是语法错误
+    if (sawTrailingComma) throw this.error("Unexpected token ')'");
+
+    const expressions: Expression[] = [];
+
+    for (const item of items)
+      /* istanbul ignore else -- rest items were rejected above, so every remaining item is an expression */
+      if (item.kind === "expr") expressions.push(item.expr);
+
+    if (expressions.length === 1) return { kind: "paren", expr: expressions[0] };
+
+    return {
+      kind: "paren",
+      expr: {
+        type: "sequence",
+        expressions,
+        start: expressions[0].start,
+        end: expressions[expressions.length - 1].end,
+      },
+    };
   }
 }
 

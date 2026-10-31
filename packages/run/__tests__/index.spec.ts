@@ -151,8 +151,18 @@ describe(createFunction, () => {
 
       expect(fn).toBe(createFunction);
       expect(fn([], "return 1 + 1;")()).toBe(2);
+      expect(() => run("createFunction", { global: true })).toThrow(ReferenceError);
     } finally {
       delete (globalThis as Record<string, unknown>).createFunction;
     }
+  });
+
+  it("should allow line comments in parameter names and reject parameter/body breakouts", () => {
+    const fn = createFunction(["a // trailing comment"], "return a + 1;");
+
+    expect(fn(4)).toBe(5);
+    expect(() => createFunction([], "}); 1; (function() {")).toThrow(SyntaxError);
+    expect(() => createFunction([], "}) + (function() {")).toThrow(SyntaxError);
+    expect(() => createFunction(["a) { /*"], "*/")).toThrow(SyntaxError);
   });
 });

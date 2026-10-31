@@ -1,3 +1,4 @@
+import type { ExpressionStatement } from "./ast.js";
 import { ASYNC_UNSUPPORTED_MESSAGE, Runtime } from "./interpreter.js";
 import type { ParserLimits } from "./parser.js";
 import { parse } from "./parser.js";
@@ -250,14 +251,24 @@ export const createFunction = (
 ): ((...args: unknown[]) => RunResult) => {
   const runtime = new Runtime(options);
 
-  // `(function(a, b) { ... })` — an independent function with its own sandbox. The body is wrapped
-  // in newlines so a trailing `// comment` cannot swallow the closing braces, and the parameter
-  // list is validated by the parser (invalid names throw a `SyntaxError`).
-  // `(function(a, b) { ... })` —— 拥有独立沙箱的函数。函数体以换行包裹，避免末尾的 `// 注释` 吞掉
-  // 结尾括号；参数列表由解析器校验（非法参数名抛 `SyntaxError`）。
-  const fn = runtime.run(
-    parse(`(function(${args.join(", ")}) {\n${body}\n})`, runtime.features, parseLimits(options)),
-  ) as InterpreterFunction;
+  // `(function(a, b\n) { ... })` — an independent function with its own sandbox. Both the parameter
+  // list and body are terminated by a newline so a trailing `// comment` cannot swallow the closing
+  // delimiter, and the parsed AST is verified to be a single function expression whose body starts
+  // right after the parameter prefix so parameter/body breakout cannot execute extra statements.
+  // `(function(a, b\n) { ... })` —— 拥有独立沙箱的函数。参数列表与函数体均以换行结尾，避免末尾的 `// 注释`
+  // 吞掉闭合分隔符；同时校验 AST 为单一函数表达式且函数体紧接参数前缀之后，防止通过参数或函数体拼接逃逸执行额外语句。
+  const prefix = `(function(${args.join(", ")}\n) `;
+  const program = parse(`${prefix}{\n${body}\n})`, runtime.features, parseLimits(options));
+  const stmt = program.body[0] as ExpressionStatement;
+
+  if (
+    program.body.length !== 1 ||
+    stmt.expression.type !== "functionExpr" ||
+    stmt.expression.body.start !== prefix.length
+  )
+    throw new SyntaxError("Invalid function definition in createFunction");
+
+  const fn = runtime.run(program) as InterpreterFunction;
 
   // `fn` is already the host-callable wrapper: it forwards the caller's `this` to the interpreter
   // and keeps `length` / `name` / `prototype` / `interpreterMeta` from the source function — an

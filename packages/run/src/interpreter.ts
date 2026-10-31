@@ -485,6 +485,45 @@ const analyzeParams = (params: readonly Pattern[]): (string | null)[] =>
   params.map((param) => (param.type === "identifier" ? param.name : null));
 
 /**
+ * Drain the remaining elements of an iterator into an array (for `...rest` destructuring).
+ *
+ * 将迭代器的剩余元素收集为数组（供 `...rest` 解构使用）。
+ *
+ * @param iterator - The iterator to drain / 待耗尽的迭代器
+ * @returns The remaining values / 剩余值数组
+ */
+const drainIterator = (iterator: Iterator<unknown>): unknown[] => {
+  const rest: unknown[] = [];
+
+  for (;;) {
+    const step = iterator.next();
+
+    if (step.done) return rest;
+    rest.push(step.value);
+  }
+};
+
+/**
+ * Unwrap directly nested `labeled` statements into a flat label list and the inner statement.
+ *
+ * 将直接嵌套的 `labeled` 语句展开为扁平标签列表与内部语句。
+ *
+ * @param stmt - The outer labeled statement / 外层标签语句
+ * @returns The collected labels and the inner statement / 收集到的标签列表与内部语句
+ */
+const unwrapLabeled = (stmt: LabeledStatement): { labels: (string | null)[]; body: Statement } => {
+  const labels: (string | null)[] = [stmt.label];
+  let { body } = stmt;
+
+  while (body.type === "labeled") {
+    labels.push(body.label);
+    ({ body } = body);
+  }
+
+  return { labels, body };
+};
+
+/**
  * Create a fresh per-iteration environment copying bindings from `previous` (or `base` for the
  * first iteration), so `let` bindings in a loop body get fresh closures each iteration.
  *
@@ -741,9 +780,9 @@ interface RuntimeContext {
 /**
  * Host globals that must never be injected by `global: true`.
  *
- * `global: true` 绝不注入的宿主全局（`eval` / `Function`）。
+ * `global: true` 绝不注入的宿主全局（`eval` / `Function` / `createFunction`）。
  */
-const HOST_GLOBAL_BLOCKLIST: ReadonlySet<string> = new Set(["eval", "Function"]);
+const HOST_GLOBAL_BLOCKLIST: ReadonlySet<string> = new Set(["eval", "Function", "createFunction"]);
 
 export class Runtime {
   /** Feature toggles / 特性开关 */
@@ -904,7 +943,6 @@ export class Runtime {
     });
 
     try {
-      this.hoistProgram(program.body, this.globalEnv);
       this.predeclareLexical(program.body, this.globalEnv);
 
       try {
@@ -1362,16 +1400,21 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
+   * @param labels - Enclosing labels, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
    */
-  private evalWhile(stmt: WhileStatement, env: Environment, label: string | null = null): void {
+  private evalWhile(
+    stmt: WhileStatement,
+    env: Environment,
+    labels: readonly (string | null)[] = [],
+  ): void {
     while (toBoolean(this.evalExpression(stmt.test, env))) {
       try {
         this.evalStatement(stmt.body, env);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -1384,17 +1427,27 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
+   * @param labels - Enclosing labels, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
    */
-  private evalDoWhile(stmt: DoWhileStatement, env: Environment, label: string | null = null): void {
+  private evalDoWhile(
+    stmt: DoWhileStatement,
+    env: Environment,
+    labels: readonly (string | null)[] = [],
+  ): void {
     for (;;) {
       try {
         this.evalStatement(stmt.body, env);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+        if (
+          err instanceof ContinueSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           // continue: re-check the test below
           // continue：重新检查下方的 test
-        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+        } else if (
+          err instanceof BreakSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           return;
         } else {
           throw err;
@@ -1412,9 +1465,13 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
+   * @param labels - Enclosing labels, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
    */
-  private evalFor(stmt: ForStatement, env: Environment, label: string | null = null): void {
+  private evalFor(
+    stmt: ForStatement,
+    env: Environment,
+    labels: readonly (string | null)[] = [],
+  ): void {
     let baseEnv = env;
     let hasBinding = false;
 
@@ -1442,10 +1499,16 @@ export class Runtime {
       try {
         this.evalStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+        if (
+          err instanceof ContinueSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           // continue: run the update below
           // continue：执行下方的 update
-        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+        } else if (
+          err instanceof BreakSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           return;
         } else {
           throw err;
@@ -1498,9 +1561,13 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
+   * @param labels - Enclosing labels, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
    */
-  private evalForIn(stmt: ForInStatement, env: Environment, label: string | null = null): void {
+  private evalForIn(
+    stmt: ForInStatement,
+    env: Environment,
+    labels: readonly (string | null)[] = [],
+  ): void {
     const right = this.evalExpression(stmt.right, env);
 
     // `for...in` over `null`/`undefined` iterates zero times (spec)
@@ -1540,9 +1607,10 @@ export class Runtime {
       try {
         this.evalStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -1555,9 +1623,13 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
+   * @param labels - Enclosing labels, when this loop is a labeled statement / 外层标签（本循环是标签语句时）
    */
-  private evalForOf(stmt: ForOfStatement, env: Environment, label: string | null = null): void {
+  private evalForOf(
+    stmt: ForOfStatement,
+    env: Environment,
+    labels: readonly (string | null)[] = [],
+  ): void {
     const iterator = iterate(this.evalExpression(stmt.right, env));
 
     let baseEnv = env;
@@ -1579,25 +1651,26 @@ export class Runtime {
       const iterEnv: Environment = hasBinding ? freshIterationEnv(baseEnv, previous) : env;
       previous = hasBinding ? iterEnv : null;
 
-      if (stmt.left.type === "variable") {
-        if (stmt.left.kind === "var")
-          this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv);
-        else this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv, true);
-      } else {
-        this.assignTo(stmt.left, step.value, iterEnv);
-      }
-
       try {
+        if (stmt.left.type === "variable") {
+          if (stmt.left.kind === "var")
+            this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv);
+          else this.assignTo(stmt.left.declarations[0].id, step.value, iterEnv, true);
+        } else {
+          this.assignTo(stmt.left, step.value, iterEnv);
+        }
+
         this.evalStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
 
         // abrupt exits (break / return / throw) close the iterator
         // 异常退出（break / return / 抛出）关闭迭代器
         closeIterator(iterator);
 
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -1721,44 +1794,50 @@ export class Runtime {
    * @param env - Current environment / 当前环境
    */
   private evalLabeled(stmt: LabeledStatement, env: Environment): void {
+    const { labels, body } = unwrapLabeled(stmt);
+
     try {
-      this.evalStatementWithLabel(stmt.body, env, stmt.label);
+      this.evalStatementWithLabel(body, env, labels);
     } catch (err) {
-      if (err instanceof BreakSignalError && err.label === stmt.label) return;
+      if (err instanceof BreakSignalError && labels.includes(err.label)) return;
       throw err;
     }
   }
 
   /**
-   * Evaluate a statement that is directly labeled, forwarding the label to loops so that `continue
+   * Evaluate a statement that is directly labeled, forwarding the labels to loops so that `continue
    * label` / `break label` are resolved by the loop itself.
    *
    * 求值被直接标签化的语句，将标签转发给循环，使 `continue label` / `break label` 由循环自身解析。
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - The enclosing label / 外层标签
+   * @param labels - The enclosing labels / 外层标签
    */
-  private evalStatementWithLabel(stmt: Statement, env: Environment, label: string): void {
+  private evalStatementWithLabel(
+    stmt: Statement,
+    env: Environment,
+    labels: readonly (string | null)[],
+  ): void {
     switch (stmt.type) {
       case "while": {
-        this.evalWhile(stmt, env, label);
+        this.evalWhile(stmt, env, labels);
         break;
       }
       case "doWhile": {
-        this.evalDoWhile(stmt, env, label);
+        this.evalDoWhile(stmt, env, labels);
         break;
       }
       case "for": {
-        this.evalFor(stmt, env, label);
+        this.evalFor(stmt, env, labels);
         break;
       }
       case "forIn": {
-        this.evalForIn(stmt, env, label);
+        this.evalForIn(stmt, env, labels);
         break;
       }
       case "forOf": {
-        this.evalForOf(stmt, env, label);
+        this.evalForOf(stmt, env, labels);
         break;
       }
       default: {
@@ -2285,31 +2364,34 @@ export class Runtime {
     }
 
     const iterator = iterate(value);
+    let done = false;
 
-    for (const element of target.elements) {
-      if (element == null) {
-        iterator.next();
-        continue;
-      }
-
-      if (element.type === "rest") {
-        const rest: unknown[] = [];
-
-        for (;;) {
-          const step = iterator.next();
-
-          if (step.done) break;
-          rest.push(step.value);
+    try {
+      for (const element of target.elements) {
+        if (element == null) {
+          done = true;
+          done = Boolean(iterator.next().done);
+          continue;
         }
 
-        this.assignTo(element.argument, rest, env, initialize);
-        break;
+        if (element.type === "rest") {
+          done = true;
+          this.assignTo(element.argument, drainIterator(iterator), env, initialize);
+          break;
+        }
+
+        done = true;
+        const step = iterator.next();
+
+        done = Boolean(step.done);
+        this.assignTo(element, step.done ? void 0 : step.value, env, initialize);
       }
-
-      const step = iterator.next();
-
-      this.assignTo(element, step.done ? void 0 : step.value, env, initialize);
+    } catch (err) {
+      if (!done) closeIterator(iterator);
+      throw err;
     }
+
+    if (!done) closeIterator(iterator);
   }
 
   /**
@@ -3862,8 +3944,8 @@ export class Runtime {
     // A class is "derived" whenever it has a heritage clause, including `extends null`.
     // 只要存在 heritage 子句（含 `extends null`），类就是派生类。
     const hasExtends = superClassExpr != null;
-    let parentCtor: unknown = null;
-    let parentProto: object | null = null;
+    let parentCtor: unknown = hasExtends ? null : Function.prototype;
+    let parentProto: object | null = hasExtends ? null : Object.prototype;
 
     if (hasExtends) {
       parentCtor = this.evalExpression(superClassExpr, env);
@@ -4145,16 +4227,6 @@ export class Runtime {
     thisArg: unknown,
   ): Promise<unknown> {
     this.pendingAsync += 1;
-    this.stackDepth += 1;
-
-    if (this.stackDepth > this.maxStack) {
-      // undo the increments before throwing, so the guards do not leak state
-      // 抛出前先撤销递增，避免守卫泄漏状态
-      this.stackDepth -= 1;
-      this.pendingAsync -= 1;
-
-      throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
-    }
 
     // the frames owned by this async call are always appended at the current stack top, so the
     // base must be re-derived on every resumption: `runWithStatus` clears the stack once its
@@ -4166,7 +4238,6 @@ export class Runtime {
 
     return new Promise<unknown>((resolve, reject) => {
       const settle = (): void => {
-        this.stackDepth -= 1;
         this.pendingAsync -= 1;
       };
 
@@ -4178,7 +4249,7 @@ export class Runtime {
 
         if (savedFrames.length > 0) {
           this.contextStack.push(...savedFrames);
-          this.stackDepth += 1;
+          this.stackDepth += savedFrames.length;
           savedFrames = [];
         }
 
@@ -4209,7 +4280,7 @@ export class Runtime {
         // toward maxStack (they occupy no host stack while waiting)
         // 挂起：移除 async 帧与深度，使挂起任务不计入 maxStack（等待期间不占宿主栈）
         savedFrames = this.contextStack.splice(frameBase);
-        this.stackDepth -= 1;
+        this.stackDepth -= savedFrames.length;
 
         /* oxlint-disable promise/catch-or-return, promise/prefer-catch, promise/prefer-await-to-callbacks -- recursive promise driver */
         Promise.resolve(result.value).then(
@@ -4244,14 +4315,36 @@ export class Runtime {
     args: unknown[],
     thisArg: unknown,
   ): Generator<unknown, unknown, unknown> {
-    let thisValue: unknown = thisArg;
+    this.stackDepth += 1;
 
-    if (meta.thisMode === "sloppy") {
-      // sloppy `this` is boxed: nullish -> global object, primitives -> wrapper objects
-      // sloppy `this` 会装箱：null/undefined → 全局对象，原始值 → 包装对象
-      if (thisValue == null) thisValue = this.globalObject;
-      else if (typeof thisValue !== "object" && typeof thisValue !== "function")
-        thisValue = new Object(thisValue);
+    if (this.stackDepth > this.maxStack) {
+      this.stackDepth -= 1;
+
+      throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
+    }
+
+    let thisRef: { value: unknown };
+    let superBase: object | null = meta.superBase;
+    let superClass: unknown = meta.superClass;
+
+    if (meta.thisMode === "arrow") {
+      thisRef = meta.lexicalThis ??
+        /* istanbul ignore next -- async arrow metadata always carries its lexical `this` */
+        { value: this.globalObject };
+      superBase = meta.lexicalSuperBase;
+      superClass = meta.lexicalSuperClass;
+    } else {
+      let thisValue: unknown = thisArg;
+
+      if (meta.thisMode === "sloppy") {
+        // sloppy `this` is boxed: nullish -> global object, primitives -> wrapper objects
+        // sloppy `this` 会装箱：null/undefined → 全局对象，原始值 → 包装对象
+        if (thisValue == null) thisValue = this.globalObject;
+        else if (typeof thisValue !== "object" && typeof thisValue !== "function")
+          thisValue = new Object(thisValue);
+      }
+
+      thisRef = { value: thisValue };
     }
 
     const env = new Environment(meta.closure, true);
@@ -4259,19 +4352,6 @@ export class Runtime {
     this.bindParams(meta.params, args, env);
     this.hoistFunctionBody(meta.body, env);
     if (meta.hasArguments) bindArguments(meta, args, env);
-
-    const thisRef: { value: unknown } = { value: thisValue };
-    let superBase: object | null = meta.superBase;
-    let superClass: unknown = meta.superClass;
-
-    if (meta.thisMode === "arrow") {
-      thisRef.value =
-        meta.lexicalThis?.value ??
-        /* istanbul ignore next -- async arrow metadata always carries its lexical `this` */
-        this.globalObject;
-      superBase = meta.lexicalSuperBase;
-      superClass = meta.lexicalSuperClass;
-    }
 
     this.contextStack.push({
       thisRef,
@@ -4299,6 +4379,7 @@ export class Runtime {
       throw err;
     } finally {
       this.contextStack.pop();
+      this.stackDepth -= 1;
     }
   }
 
@@ -4334,7 +4415,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label for loops / 循环的外层标签
+   * @param labels - Enclosing labels for loops / 循环的外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4342,7 +4423,7 @@ export class Runtime {
   private *evalAsyncStatement(
     stmt: Statement,
     env: Environment,
-    label: string | null = null,
+    labels: readonly (string | null)[] = [],
   ): Generator<unknown, unknown, unknown> {
     if (isSafeSyncStatement(stmt)) return this.evalStatement(stmt, env);
 
@@ -4375,27 +4456,27 @@ export class Runtime {
         return void 0;
       }
       case "while": {
-        yield* this.evalAsyncWhile(stmt, env, label);
+        yield* this.evalAsyncWhile(stmt, env, labels);
 
         return void 0;
       }
       case "doWhile": {
-        yield* this.evalAsyncDoWhile(stmt, env, label);
+        yield* this.evalAsyncDoWhile(stmt, env, labels);
 
         return void 0;
       }
       case "for": {
-        yield* this.evalAsyncFor(stmt, env, label);
+        yield* this.evalAsyncFor(stmt, env, labels);
 
         return void 0;
       }
       case "forIn": {
-        yield* this.evalAsyncForIn(stmt, env, label);
+        yield* this.evalAsyncForIn(stmt, env, labels);
 
         return void 0;
       }
       case "forOf": {
-        yield* this.evalAsyncForOf(stmt, env, label);
+        yield* this.evalAsyncForOf(stmt, env, labels);
 
         return void 0;
       }
@@ -4426,10 +4507,12 @@ export class Runtime {
         throw yield* this.evalAsyncExpr(stmt.argument, env);
       }
       case "labeled": {
+        const { labels: nextLabels, body } = unwrapLabeled(stmt);
+
         try {
-          yield* this.evalAsyncStatement(stmt.body, env, stmt.label);
+          yield* this.evalAsyncStatement(body, env, nextLabels);
         } catch (err) {
-          if (err instanceof BreakSignalError && err.label === stmt.label) return void 0;
+          if (err instanceof BreakSignalError && nextLabels.includes(err.label)) return void 0;
 
           throw err;
         }
@@ -4449,7 +4532,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label / 外层标签
+   * @param labels - Enclosing labels / 外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4457,15 +4540,16 @@ export class Runtime {
   private *evalAsyncWhile(
     stmt: WhileStatement,
     env: Environment,
-    label: string | null,
+    labels: readonly (string | null)[],
   ): Generator<unknown, void, unknown> {
     while (toBoolean(yield* this.evalAsyncExpr(stmt.test, env))) {
       try {
         yield* this.evalAsyncStatement(stmt.body, env);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -4478,7 +4562,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label / 外层标签
+   * @param labels - Enclosing labels / 外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4486,16 +4570,22 @@ export class Runtime {
   private *evalAsyncDoWhile(
     stmt: DoWhileStatement,
     env: Environment,
-    label: string | null,
+    labels: readonly (string | null)[],
   ): Generator<unknown, void, unknown> {
     for (;;) {
       try {
         yield* this.evalAsyncStatement(stmt.body, env);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+        if (
+          err instanceof ContinueSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           // continue: re-check the test below
           // continue：重新检查下方的 test
-        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+        } else if (
+          err instanceof BreakSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           return;
         } else {
           throw err;
@@ -4591,7 +4681,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label / 外层标签
+   * @param labels - Enclosing labels / 外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4599,7 +4689,7 @@ export class Runtime {
   private *evalAsyncFor(
     stmt: ForStatement,
     env: Environment,
-    label: string | null,
+    labels: readonly (string | null)[],
   ): Generator<unknown, void, unknown> {
     let baseEnv = env;
     let hasBinding = false;
@@ -4628,10 +4718,16 @@ export class Runtime {
       try {
         yield* this.evalAsyncStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label)) {
+        if (
+          err instanceof ContinueSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           // continue: run the update below
           // continue：执行下方的 update
-        } else if (err instanceof BreakSignalError && (err.label == null || err.label === label)) {
+        } else if (
+          err instanceof BreakSignalError &&
+          (err.label == null || labels.includes(err.label))
+        ) {
           return;
         } else {
           throw err;
@@ -4658,7 +4754,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label / 外层标签
+   * @param labels - Enclosing labels / 外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4666,7 +4762,7 @@ export class Runtime {
   private *evalAsyncForIn(
     stmt: ForInStatement,
     env: Environment,
-    label: string | null,
+    labels: readonly (string | null)[],
   ): Generator<unknown, void, unknown> {
     const right = yield* this.evalAsyncExpr(stmt.right, env);
 
@@ -4711,9 +4807,10 @@ export class Runtime {
       try {
         yield* this.evalAsyncStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -4726,7 +4823,7 @@ export class Runtime {
    *
    * @param stmt - The statement / 语句
    * @param env - Current environment / 当前环境
-   * @param label - Enclosing label / 外层标签
+   * @param labels - Enclosing labels / 外层标签
    * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
    *   promise
    * @returns The generator / 生成器
@@ -4734,7 +4831,7 @@ export class Runtime {
   private *evalAsyncForOf(
     stmt: ForOfStatement,
     env: Environment,
-    label: string | null,
+    labels: readonly (string | null)[],
   ): Generator<unknown, void, unknown> {
     const iterator = iterate(yield* this.evalAsyncExpr(stmt.right, env));
 
@@ -4757,28 +4854,29 @@ export class Runtime {
       const iterEnv: Environment = hasBinding ? freshIterationEnv(baseEnv, previous) : env;
       previous = hasBinding ? iterEnv : null;
 
-      if (stmt.left.type === "variable") {
-        yield* this.evalAsyncAssignTo(
-          stmt.left.declarations[0].id,
-          step.value,
-          iterEnv,
-          stmt.left.kind !== "var",
-        );
-      } else {
-        yield* this.evalAsyncAssignTo(stmt.left, step.value, iterEnv);
-      }
-
       try {
+        if (stmt.left.type === "variable") {
+          yield* this.evalAsyncAssignTo(
+            stmt.left.declarations[0].id,
+            step.value,
+            iterEnv,
+            stmt.left.kind !== "var",
+          );
+        } else {
+          yield* this.evalAsyncAssignTo(stmt.left, step.value, iterEnv);
+        }
+
         yield* this.evalAsyncStatement(stmt.body, iterEnv);
       } catch (err) {
-        if (err instanceof ContinueSignalError && (err.label == null || err.label === label))
+        if (err instanceof ContinueSignalError && (err.label == null || labels.includes(err.label)))
           continue;
 
         // abrupt exits (break / return / throw) close the iterator
         // 异常退出（break / return / 抛出）关闭迭代器
         closeIterator(iterator);
 
-        if (err instanceof BreakSignalError && (err.label == null || err.label === label)) break;
+        if (err instanceof BreakSignalError && (err.label == null || labels.includes(err.label)))
+          break;
         throw err;
       }
     }
@@ -5550,31 +5648,34 @@ export class Runtime {
     }
 
     const iterator = iterate(value);
+    let done = false;
 
-    for (const element of target.elements) {
-      if (element == null) {
-        iterator.next();
-        continue;
-      }
-
-      if (element.type === "rest") {
-        const rest: unknown[] = [];
-
-        for (;;) {
-          const step = iterator.next();
-
-          if (step.done) break;
-          rest.push(step.value);
+    try {
+      for (const element of target.elements) {
+        if (element == null) {
+          done = true;
+          done = Boolean(iterator.next().done);
+          continue;
         }
 
-        yield* this.evalAsyncAssignTo(element.argument, rest, env, initialize);
-        break;
+        if (element.type === "rest") {
+          done = true;
+          yield* this.evalAsyncAssignTo(element.argument, drainIterator(iterator), env, initialize);
+          break;
+        }
+
+        done = true;
+        const step = iterator.next();
+
+        done = Boolean(step.done);
+        yield* this.evalAsyncAssignTo(element, step.done ? void 0 : step.value, env, initialize);
       }
-
-      const step = iterator.next();
-
-      yield* this.evalAsyncAssignTo(element, step.done ? void 0 : step.value, env, initialize);
+    } catch (err) {
+      if (!done) closeIterator(iterator);
+      throw err;
     }
+
+    if (!done) closeIterator(iterator);
   }
 
   /**
