@@ -382,7 +382,7 @@ class RequestExecution<T extends RequestData> {
   private settled = false;
   private aborted = false;
   private resolvePromise!: (response: RequestResponse<T>) => void;
-  private rejectPromise!: (error: RequestError) => void;
+  private rejectPromise!: (error: unknown) => void;
   private onAbortListener: (() => void) | null = null;
 
   constructor(private readonly config: RequestExecutionConfig<T>) {
@@ -462,7 +462,7 @@ class RequestExecution<T extends RequestData> {
     this.resolvePromise(response);
   }
 
-  private finishReject(error: RequestError): void {
+  private finishReject(error: unknown): void {
     // Re-entrancy guard only: every caller already bails out when the request is settled.
     /* istanbul ignore if */
     if (this.settled) return;
@@ -482,20 +482,30 @@ class RequestExecution<T extends RequestData> {
     const { onRetry, delay: baseDelay, maxDelay } = this.config.retryOptions;
     const nextAttempt = this.attempt + 1;
     const defaultDelay = Math.min(baseDelay * 2 ** (this.attempt - 1), maxDelay);
-    const overriddenDelay = onRetry?.({
-      url: this.config.url,
-      attempt: nextAttempt,
-      delay: defaultDelay,
-      ...(error ? { error } : {}),
-      ...(response ? { response } : {}),
-    });
+    let overriddenDelay: number | void;
+
+    try {
+      overriddenDelay = onRetry?.({
+        url: this.config.url,
+        attempt: nextAttempt,
+        delay: defaultDelay,
+        ...(error ? { error } : {}),
+        ...(response ? { response } : {}),
+      });
+    } catch (err) {
+      this.finishReject(err);
+
+      return;
+    }
+
+    if (this.settled || this.aborted) return;
+
     const delay =
       typeof overriddenDelay === "number" && overriddenDelay >= 0 ? overriddenDelay : defaultDelay;
 
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
-
-      if (!this.settled && !this.aborted) this.performAttempt();
+      this.performAttempt();
     }, delay);
   }
 
@@ -629,7 +639,7 @@ Headers:`,
       },
     });
 
-    if (!this.settled) {
+    if (!this.settled && !this.aborted && this.retryTimer == null) {
       this.currentTask = task;
       onTask?.(task);
     }

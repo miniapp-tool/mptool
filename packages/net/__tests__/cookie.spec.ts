@@ -2,7 +2,7 @@ import "@mptool/mock";
 import { describe, expect, it, vi } from "vitest";
 
 import { Cookie } from "../src/cookie.js";
-import { CookieStore } from "../src/index.js";
+import { CookieStore, Headers } from "../src/index.js";
 import type { CookieType } from "../src/typings.js";
 
 const mockedResponse = {
@@ -222,9 +222,29 @@ describe("cookie store extras", () => {
   it("applyHeader should parse array Set-Cookie", () => {
     const store = new CookieStore("apply-header-array-test");
 
-    store.applyHeader({ "Set-Cookie": ["a=1; Path=/", "b=2; Path=/"] }, "example.com");
+    store.applyHeader(
+      {
+        "Set-Cookie": [
+          "a=1; Expires=Wed, 21 Oct 2099 07:28:00 GMT; Path=/",
+          "b=2; Expires=Wed, 21 Oct 2099 07:28:00 GMT; Path=/",
+        ],
+      },
+      "example.com",
+    );
 
     expect(store.getHeader("example.com")).toBe("a=1; b=2");
+  });
+
+  it("applyHeader and applyResponse should accept Headers and RequestResponse in wx env", () => {
+    const store = new CookieStore("apply-headers-instance-wx-test");
+    const headers = new Headers();
+
+    headers.append("Set-Cookie", "a=1; Expires=Wed, 21 Oct 2099 07:28:00 GMT; Path=/");
+    headers.append("Set-Cookie", "b=2; Expires=Wed, 21 Oct 2099 07:28:00 GMT; Path=/");
+
+    store.applyResponse({ headers, status: 200, data: {} }, "https://example.com/");
+
+    expect(store.getHeader("https://example.com/")).toBe("a=1; b=2");
   });
 
   it("applyHeader should parse lowercase set-cookie", () => {
