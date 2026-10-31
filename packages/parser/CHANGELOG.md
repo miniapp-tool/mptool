@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **parser:** add opt-in input length and nesting limits ([#1585](https://github.com/miniapp-tool/mptool/issues/1585)) ([b27fe1b](https://github.com/miniapp-tool/mptool/commit/b27fe1bce4b12d00f0c94f09a45ce6d8bfe5735d))
+
+### 🐛 Bug Fixes
+
+- **deps:** move build-time-inlined dependencies to devDependencies ([#1487](https://github.com/miniapp-tool/mptool/issues/1487)) ([2beef8c](https://github.com/miniapp-tool/mptool/commit/2beef8c115e2e35bdd20b3d245e9a942071fbf18))
+- **metadata:** correct skyline package links and add missing miniprogram fields ([#1486](https://github.com/miniapp-tool/mptool/issues/1486)) ([8bab130](https://github.com/miniapp-tool/mptool/commit/8bab13013781f8f1ba1d285e6d6e6058c2131280))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+- **parser:** bound svg recursion by maxDepth ([#1641](https://github.com/miniapp-tool/mptool/issues/1641)) ([72cf87f](https://github.com/miniapp-tool/mptool/commit/72cf87f587885471989a97e76e8c6a030fb8f421))
+- **parser:** encode only URI-significant characters in SVG data URIs ([#1541](https://github.com/miniapp-tool/mptool/issues/1541)) ([c41bbd9](https://github.com/miniapp-tool/mptool/commit/c41bbd9c04c18e9611a04ce8a8ddb671abf26cc5))
+- **parser:** keep inline whitespace in rich text conversion ([#1511](https://github.com/miniapp-tool/mptool/issues/1511)) ([5c67497](https://github.com/miniapp-tool/mptool/commit/5c674974b6c54afcb5616e14dd295eea8f264387))
+- **parser:** normalize CRLF and CR in rich text nodes to LF ([#1504](https://github.com/miniapp-tool/mptool/issues/1504)) ([7cf24a6](https://github.com/miniapp-tool/mptool/commit/7cf24a6c435e8d0091cf7f48dc9eee715e94e6e7))
+- **parser:** preserve text of unknown containers and drop invisible elements ([#1531](https://github.com/miniapp-tool/mptool/issues/1531)) ([d56fb33](https://github.com/miniapp-tool/mptool/commit/d56fb3300d140e015ddea62e144d24ad1a2786e5))
+- **parser:** stop mutating caller-provided DOM when converting SVG ([#1584](https://github.com/miniapp-tool/mptool/issues/1584)) ([7d6bbe7](https://github.com/miniapp-tool/mptool/commit/7d6bbe727d290e577f6e350deca99dcc8aa6aa94))
+- **parser:** use the converted tag name for html/body class names ([#1540](https://github.com/miniapp-tool/mptool/issues/1540)) ([27e46fd](https://github.com/miniapp-tool/mptool/commit/27e46fd73c64ba10e501adff50eaf6cc2241bcc6))
+
+### Documentation
+
+- sync run/parser package READMEs and known limitations ([#1597](https://github.com/miniapp-tool/mptool/issues/1597)) ([a0c6d30](https://github.com/miniapp-tool/mptool/commit/a0c6d30d858d93935a9bfe7a513fdf71d8590f46))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **parser:** reach 100% coverage ([#1617](https://github.com/miniapp-tool/mptool/issues/1617)) ([b372a25](https://github.com/miniapp-tool/mptool/commit/b372a25376fa50c0b86585354c19add4f64e7dac))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/parser

@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **mock:** add a user-decision model for UI and permissions ([#1587](https://github.com/miniapp-tool/mptool/issues/1587)) ([faa81af](https://github.com/miniapp-tool/mptool/commit/faa81af8eb30b059cd737cca50d91a5f2d67e415))
+
+### 🐛 Bug Fixes
+
+- **api:** avoid duplicate download failure toasts ([#1552](https://github.com/miniapp-tool/mptool/issues/1552)) ([0720308](https://github.com/miniapp-tool/mptool/commit/0720308d1af215ef9c1300be355bfc82d925697a))
+- **api:** only hide the loading that download() showed itself ([#1659](https://github.com/miniapp-tool/mptool/issues/1659)) ([6d85e14](https://github.com/miniapp-tool/mptool/commit/6d85e1420e7b70058a1a2be0e19c7ee7405bfe91))
+- **api:** only log an error for abnormal network types ([#1658](https://github.com/miniapp-tool/mptool/issues/1658)) ([2fd2fd3](https://github.com/miniapp-tool/mptool/commit/2fd2fd3d67a79a57e7ff51a5ea876325f4d4c53c))
+- **api:** reject withScope when the permission modal is cancelled or cannot open ([#1657](https://github.com/miniapp-tool/mptool/issues/1657)) ([321327b](https://github.com/miniapp-tool/mptool/commit/321327b1ec659d066720f7336a427c0a021093d2))
+- **api:** settle withScope on modal failure, validate versions, warn on unsupported saveDocument ([#1534](https://github.com/miniapp-tool/mptool/issues/1534)) ([da46a3d](https://github.com/miniapp-tool/mptool/commit/da46a3d1ebf386581639300bfc41e606b09583e5))
+- **api:** strip document url query and hash without a regex ([#1501](https://github.com/miniapp-tool/mptool/issues/1501)) ([24485fd](https://github.com/miniapp-tool/mptool/commit/24485fd9c25872a77a6aff396708b079ac53b352)), references [#16](https://github.com/miniapp-tool/mptool/issues/16)
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **api:** raise coverage to 100% ([#1609](https://github.com/miniapp-tool/mptool/issues/1609)) ([1b997c1](https://github.com/miniapp-tool/mptool/commit/1b997c1027338e9ebc7123b2c183609b2e3009d6))
+
+### Build System
+
+- bump deps ([636a113](https://github.com/miniapp-tool/mptool/commit/636a113b6abb011973e599b694d3fc0dc6e50d6c))
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 ### ✨ Features

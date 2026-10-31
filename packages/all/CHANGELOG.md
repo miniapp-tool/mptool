@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### 🐛 Bug Fixes
+
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+
+### Code Refactoring
+
+- **all:** correct description ([706eba2](https://github.com/miniapp-tool/mptool/commit/706eba27427caed8472587f5044e0efd233e58ab))
+
+### Tests
+
+- **all:** assert aggregated globals have no duplicate exports ([#1567](https://github.com/miniapp-tool/mptool/issues/1567)) ([ec243c9](https://github.com/miniapp-tool/mptool/commit/ec243c95cae36ad6f99bc62fedfb61a94fae0f2a))
+- **all:** assert the bundle export surface matches the bundled packages ([#1573](https://github.com/miniapp-tool/mptool/issues/1573)) ([a9fbb8b](https://github.com/miniapp-tool/mptool/commit/a9fbb8be2acf295dd93ef8592acc176de2c88773))
+- **all:** cover the bundle re-export surfaces ([#1622](https://github.com/miniapp-tool/mptool/issues/1622)) ([6e777e3](https://github.com/miniapp-tool/mptool/commit/6e777e383e91b1cb5c5d38984b9956c560fb4d9e))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/all

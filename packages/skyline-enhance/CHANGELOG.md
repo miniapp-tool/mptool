@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- **skyline-enhance:** @mptool/skyline-enhance's $Config no longer accepts the maxDelay and
+  minInterval options. Skyline has no onNavigate lifecycle and no navigation lock, so those
+  options never had any effect; they were only accepted for config compatibility with
+  @mptool/enhance. Remove them from the configuration — passing either option is now a type
+  error.
+- **enhance:** `injectComponent` now runs once per component registration and before `Component()`, instead of once per component instance inside `created`. Hooks that relied on the per-instance timing, or on mutating the instance, must move that logic to an instance lifecycle.
+
+### 🐛 Bug Fixes
+
+- **enhance:** bind onAwake to the page and app instance ([#1661](https://github.com/miniapp-tool/mptool/issues/1661)) ([d488ce3](https://github.com/miniapp-tool/mptool/commit/d488ce3f137595ce0ef6652b021233d50275e884))
+- **enhance:** bound the execution of remote hot-reload code ([#1598](https://github.com/miniapp-tool/mptool/issues/1598)) ([b1a9849](https://github.com/miniapp-tool/mptool/commit/b1a9849b3c52dff1d913b3c0dc0949c52cadee08))
+- **enhance:** catch rejected lifecycles and harden navigation ([#1592](https://github.com/miniapp-tool/mptool/issues/1592)) ([b482dfb](https://github.com/miniapp-tool/mptool/commit/b482dfbdcc88410de94d74c527e6d791708075b1))
+- **enhance:** declare $getRef in component instance types ([#1669](https://github.com/miniapp-tool/mptool/issues/1669)) ([be10608](https://github.com/miniapp-tool/mptool/commit/be10608d6f8bfcfe9f8d686fda31fcccc40525af))
+- **enhance:** drop unloaded pages from the hot-reload pending set ([#1508](https://github.com/miniapp-tool/mptool/issues/1508)) ([d6336b3](https://github.com/miniapp-tool/mptool/commit/d6336b3a741434f45d5e1b5bcb567bb0b87a220e))
+- **enhance:** give every page instance its own $refs ([#1656](https://github.com/miniapp-tool/mptool/issues/1656)) ([d44d581](https://github.com/miniapp-tool/mptool/commit/d44d5819fc71b3a086ee945bc91ebd782cc31904))
+- **enhance:** give every page instance its own page state ([#1546](https://github.com/miniapp-tool/mptool/issues/1546)) ([47339bc](https://github.com/miniapp-tool/mptool/commit/47339bc146d816d7b17f9534809270f40f9551d9))
+- **enhance:** harden hot reload fetches and page lifecycle listeners ([#1608](https://github.com/miniapp-tool/mptool/issues/1608)) ([b73f642](https://github.com/miniapp-tool/mptool/commit/b73f6424ae359a152a340cb8a39aab77206f8eb9))
+- **enhance:** merge hot-reload lifecycles with framework hooks ([#1667](https://github.com/miniapp-tool/mptool/issues/1667)) ([70c30d5](https://github.com/miniapp-tool/mptool/commit/70c30d52734bfd43b1d4008ec31b56b15708321b))
+- **enhance:** normalize $getPath output and harden navigation helpers ([#1605](https://github.com/miniapp-tool/mptool/issues/1605)) ([9b3a6f3](https://github.com/miniapp-tool/mptool/commit/9b3a6f32f62ebbfdfffb3742cc328284106b5a05))
+- **enhance:** only dispatch function methods in bind ([#1665](https://github.com/miniapp-tool/mptool/issues/1665)) ([c71c9ec](https://github.com/miniapp-tool/mptool/commit/c71c9ec8550b161c6f5d4ae1c13292ac41eb7318))
+- **enhance:** run injectComponent before component registration ([#1502](https://github.com/miniapp-tool/mptool/issues/1502)) ([c68db94](https://github.com/miniapp-tool/mptool/commit/c68db946a5464097a399e91bba24b72d86b57f12))
+- **enhance:** stop leaking page instances when hot reload is unavailable ([#1492](https://github.com/miniapp-tool/mptool/issues/1492)) ([dbe1cab](https://github.com/miniapp-tool/mptool/commit/dbe1cab4d0962dc130677f2c366a4343ad0fe7f2))
+- **enhance:** surface the navigation lock in the trigger result type ([#1548](https://github.com/miniapp-tool/mptool/issues/1548)) ([c1cbf09](https://github.com/miniapp-tool/mptool/commit/c1cbf09acec404a16b296c90849c493d7dd2fc2b))
+- **enhance:** throw MpError when $Config is missing ([#1550](https://github.com/miniapp-tool/mptool/issues/1550)) ([d53662b](https://github.com/miniapp-tool/mptool/commit/d53662bd25604c05d3f3f5bae9f1ff86997bfd04))
+- **metadata:** correct skyline package links and add missing miniprogram fields ([#1486](https://github.com/miniapp-tool/mptool/issues/1486)) ([8bab130](https://github.com/miniapp-tool/mptool/commit/8bab13013781f8f1ba1d285e6d6e6058c2131280))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+- **skyline-enhance:** drop enhance-only instance types from the slim package ([#1491](https://github.com/miniapp-tool/mptool/issues/1491)) ([5c73abf](https://github.com/miniapp-tool/mptool/commit/5c73abfaddf784287fcd03cd1276b0319c64bf96))
+- **skyline-enhance:** normalize page paths like enhance ([#1494](https://github.com/miniapp-tool/mptool/issues/1494)) ([e8bc22e](https://github.com/miniapp-tool/mptool/commit/e8bc22e26b94b2a94c4e6e5dfb3dd97ab1ce4d13))
+
+### Styles
+
+- fix linter ([ffee079](https://github.com/miniapp-tool/mptool/commit/ffee0793fe429a14bf756c794ac770209f086b1a))
+
+### Miscellaneous Chores
+
+- **enhance:** align skyline-enhance drift and cover slim behaviours ([#1516](https://github.com/miniapp-tool/mptool/issues/1516)) ([ca12980](https://github.com/miniapp-tool/mptool/commit/ca129802b76dc9c0d2c86e093b2608c1e179162b))
+
+### Code Refactoring
+
+- **skyline-enhance:** remove enhance-only config options and dead app state ([#1557](https://github.com/miniapp-tool/mptool/issues/1557)) ([49b833e](https://github.com/miniapp-tool/mptool/commit/49b833e0face5b49b36b101ba080edd1b53e032b))
+
+### Tests
+
+- **enhance:** raise coverage to 100% on statements, branches, functions and lines ([#1619](https://github.com/miniapp-tool/mptool/issues/1619)) ([2f8faa5](https://github.com/miniapp-tool/mptool/commit/2f8faa5a0318cfdc2037f9bd4602e44091350ad1))
+- **skyline-enhance:** raise coverage to 100% statements / 99.35% branches ([#1626](https://github.com/miniapp-tool/mptool/issues/1626)) ([7d41f9b](https://github.com/miniapp-tool/mptool/commit/7d41f9bcb66b51d61c59be2ca823620dda0a60b1))
+
+### Build System
+
+- bump deps ([636a113](https://github.com/miniapp-tool/mptool/commit/636a113b6abb011973e599b694d3fc0dc6e50d6c))
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 ### Styles

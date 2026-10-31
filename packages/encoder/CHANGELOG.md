@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **encoder:** support non-standard encoding labels in TextEncoder ([#1488](https://github.com/miniapp-tool/mptool/issues/1488)) ([9b134a8](https://github.com/miniapp-tool/mptool/commit/9b134a812fe0b2fb45fcb61c0a19bf3b7f76eb5c))
+
+### 🚀 Performance Improvements
+
+- **encoder:** build a reverse GB18030 index instead of scanning ([#1547](https://github.com/miniapp-tool/mptool/issues/1547)) ([dbfb0cf](https://github.com/miniapp-tool/mptool/commit/dbfb0cf1d25bb298b84c2ee9cec392b2a09a41a6))
+- **encoder:** decode the gb18030 index lazily and padding-aware ([#1564](https://github.com/miniapp-tool/mptool/issues/1564)) ([4e4fb26](https://github.com/miniapp-tool/mptool/commit/4e4fb2645a92eeee8b025ce864a1bcf609bdfa7d))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+- **encoder:** drop unreachable branches and document spec guards ([#1615](https://github.com/miniapp-tool/mptool/issues/1615)) ([1788a79](https://github.com/miniapp-tool/mptool/commit/1788a791e8a93cb0436b646774a094a4c459db74))
+- **encoder:** freeze the codec registries and drop a dead constructor check ([#1565](https://github.com/miniapp-tool/mptool/issues/1565)) ([85009f1](https://github.com/miniapp-tool/mptool/commit/85009f1423d34aa63e29eab39e36aaf278a92986))
+
+### Tests
+
+- **encoder:** raise coverage to 97.36% statements and 93.65% branches ([#1611](https://github.com/miniapp-tool/mptool/issues/1611)) ([135f8a5](https://github.com/miniapp-tool/mptool/commit/135f8a546d1b17e59d5ec2e05d1a670315050728))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+- keep encoder codecs when bundling on Windows ([#1477](https://github.com/miniapp-tool/mptool/issues/1477)) ([70e4fa6](https://github.com/miniapp-tool/mptool/commit/70e4fa6cda14676993e6a6a0ff9986263d7fda82))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/encoder

@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### 🐛 Bug Fixes
+
+- **metadata:** correct skyline package links and add missing miniprogram fields ([#1486](https://github.com/miniapp-tool/mptool/issues/1486)) ([8bab130](https://github.com/miniapp-tool/mptool/commit/8bab13013781f8f1ba1d285e6d6e6058c2131280))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+- **skyline:** align the bundle export surface with @mptool/all ([#1551](https://github.com/miniapp-tool/mptool/issues/1551)) ([952acfe](https://github.com/miniapp-tool/mptool/commit/952acfe96a67cff776f49040e7d584acff839687))
+
+### Documentation
+
+- add sections for all, skyline, encoder and shared plus install steps ([#1566](https://github.com/miniapp-tool/mptool/issues/1566)) ([874308b](https://github.com/miniapp-tool/mptool/commit/874308b69fcb0a50c6cb5c8da68950389ddf34db))
+
+### Tests
+
+- **all:** cover the bundle re-export surfaces ([#1622](https://github.com/miniapp-tool/mptool/issues/1622)) ([6e777e3](https://github.com/miniapp-tool/mptool/commit/6e777e383e91b1cb5c5d38984b9956c560fb4d9e))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/skyline

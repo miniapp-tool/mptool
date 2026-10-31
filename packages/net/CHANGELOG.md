@@ -2,6 +2,63 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **net:** add request cancellation, timeout and retry ([#1513](https://github.com/miniapp-tool/mptool/issues/1513)) ([f7bd9e1](https://github.com/miniapp-tool/mptool/commit/f7bd9e1d1ddb48da32e245749042bf50ae0f7932))
+
+### 🐛 Bug Fixes
+
+- **deps:** move build-time-inlined dependencies to devDependencies ([#1487](https://github.com/miniapp-tool/mptool/issues/1487)) ([2beef8c](https://github.com/miniapp-tool/mptool/commit/2beef8c115e2e35bdd20b3d245e9a942071fbf18))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+- **net:** accept upper-case schemes and protocol-relative URLs ([#1654](https://github.com/miniapp-tool/mptool/issues/1654)) ([2d017ca](https://github.com/miniapp-tool/mptool/commit/2d017ca14d53dfa20591a009bdac941d33a036b6))
+- **net:** batch cookie storage writes and cap the cookie jar ([#1500](https://github.com/miniapp-tool/mptool/issues/1500)) ([c7abeb3](https://github.com/miniapp-tool/mptool/commit/c7abeb3cb0954d48e4154c90ee15488cf7f522e1))
+- **net:** enforce the Headers contract and normalize cookie domains ([#1514](https://github.com/miniapp-tool/mptool/issues/1514)) ([4b8524c](https://github.com/miniapp-tool/mptool/commit/4b8524c691352f9db708eb8be5bc76c07dc94978))
+- **net:** join custom Cookie header and cookieStore with "; " ([#1644](https://github.com/miniapp-tool/mptool/issues/1644)) ([868c711](https://github.com/miniapp-tool/mptool/commit/868c7110d63f4c5f3d486ca057d93842e976663f))
+- **net:** keep percent-encoded cookie values raw when parsing Set-Cookie ([#1652](https://github.com/miniapp-tool/mptool/issues/1652)) ([823ce2a](https://github.com/miniapp-tool/mptool/commit/823ce2a9d5212f7d6d6006a6263774f329e8c7f5))
+- **net:** key cookies by name, domain and path ([#1496](https://github.com/miniapp-tool/mptool/issues/1496)) ([68b3173](https://github.com/miniapp-tool/mptool/commit/68b3173d3abdcd1e9d2ecfc517219943508c942a)), references [#1497](https://github.com/miniapp-tool/mptool/issues/1497)
+- **net:** list cookies from every path in CookieStore.list ([#1645](https://github.com/miniapp-tool/mptool/issues/1645)) ([aa400b3](https://github.com/miniapp-tool/mptool/commit/aa400b37fef31e39a0ee6d82d4daafaccac5604c))
+- **net:** persist Secure and SameSite cookie attributes ([#1509](https://github.com/miniapp-tool/mptool/issues/1509)) ([bffa5e2](https://github.com/miniapp-tool/mptool/commit/bffa5e26abf27e3f16869766b8e69ad193b7f8ba))
+- **net:** redact credentials and cap bodies in debug logs ([#1570](https://github.com/miniapp-tool/mptool/issues/1570)) ([fbe08de](https://github.com/miniapp-tool/mptool/commit/fbe08defb5da4d6bc86865eba6029d9b40b106f4))
+- **net:** reject request urls and cookie scopes without a domain ([#1517](https://github.com/miniapp-tool/mptool/issues/1517)) ([3568a31](https://github.com/miniapp-tool/mptool/commit/3568a3173ca51064173b616e3d5713b19e7f07d9))
+- **net:** send cookies in RFC 6265 priority order ([#1497](https://github.com/miniapp-tool/mptool/issues/1497)) ([9e96037](https://github.com/miniapp-tool/mptool/commit/9e96037eaad01cc6fc8fbb1bbf74e6fe33734536))
+- **net:** stop callers from overriding request callbacks ([#1499](https://github.com/miniapp-tool/mptool/issues/1499)) ([c678d84](https://github.com/miniapp-tool/mptool/commit/c678d84c0fd0c80a12381fe17e9066dbd8b946bd))
+- **net:** validate cookie Domain and keep host-only cookies host-only ([#1481](https://github.com/miniapp-tool/mptool/issues/1481)) ([1fea35c](https://github.com/miniapp-tool/mptool/commit/1fea35cc1caf01b9926cb3e521731ff1487434ec))
+
+### Documentation
+
+- **net:** clarify which URLSearchParams class the body accepts ([#1571](https://github.com/miniapp-tool/mptool/issues/1571)) ([aa4569f](https://github.com/miniapp-tool/mptool/commit/aa4569fbb195f5d14f514baa82d07ef20af79fec))
+
+### Styles
+
+- fix linter ([ffee079](https://github.com/miniapp-tool/mptool/commit/ffee0793fe429a14bf756c794ac770209f086b1a))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency set-cookie-parser to v3.1.3 ([#1462](https://github.com/miniapp-tool/mptool/issues/1462)) ([e2ad378](https://github.com/miniapp-tool/mptool/commit/e2ad378c4b6f08e38b29d06dfe844ae6eb406327))
+- **deps:** update dependency set-cookie-parser to v3.1.4 ([#1473](https://github.com/miniapp-tool/mptool/issues/1473)) ([49d9835](https://github.com/miniapp-tool/mptool/commit/49d98359e55c987d11aa1bbfa81a8b5be8b7d4b5))
+- **deps:** upgrade dependencies and pnpm to v12.15.0 ([7e04438](https://github.com/miniapp-tool/mptool/commit/7e04438aa85d3998cdeabb47a7d32a53266d2f6b))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **net:** raise @mptool/net coverage to 100% ([#1614](https://github.com/miniapp-tool/mptool/issues/1614)) ([473abfa](https://github.com/miniapp-tool/mptool/commit/473abfa5c09a7d1d146532726444c4a0986f6328))
+
+### Build System
+
+- bump deps ([636a113](https://github.com/miniapp-tool/mptool/commit/636a113b6abb011973e599b694d3fc0dc6e50d6c))
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/net

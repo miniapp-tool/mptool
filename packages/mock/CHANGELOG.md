@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **mock:** add a user-decision model for UI and permissions ([#1587](https://github.com/miniapp-tool/mptool/issues/1587)) ([faa81af](https://github.com/miniapp-tool/mptool/commit/faa81af8eb30b059cd737cca50d91a5f2d67e415))
+- **mock:** add base64, system-config, performance and page APIs ([#1603](https://github.com/miniapp-tool/mptool/issues/1603)) ([1bacf28](https://github.com/miniapp-tool/mptool/commit/1bacf28b56de841075a63931401edbf292dde95b))
+- **mock:** add manager stubs, non-target allowlist and coverage guard ([#1606](https://github.com/miniapp-tool/mptool/issues/1606)) ([06beac7](https://github.com/miniapp-tool/mptool/commit/06beac7691097ae2cceaf32764f09c2280b66819))
+- **mock:** add media, share and audio APIs ([#1604](https://github.com/miniapp-tool/mptool/issues/1604)) ([98a1dfd](https://github.com/miniapp-tool/mptool/commit/98a1dfd48974c4adc06f7281e3b621fc4cce7d07)), references [#1603](https://github.com/miniapp-tool/mptool/issues/1603)
+- **mock:** add the mockWx control plane ([#1525](https://github.com/miniapp-tool/mptool/issues/1525)) ([147b1f9](https://github.com/miniapp-tool/mptool/commit/147b1f9d9416aebe44079b74d446e5f95d40ba80))
+- **mock:** add WXML node fixtures for selector queries ([#1591](https://github.com/miniapp-tool/mptool/issues/1591)) ([69d9e0c](https://github.com/miniapp-tool/mptool/commit/69d9e0c197982d165c8e7fa560ef0feca7654fc1))
+- **mock:** align storage semantics with the real runtime ([#1542](https://github.com/miniapp-tool/mptool/issues/1542)) ([802b3fd](https://github.com/miniapp-tool/mptool/commit/802b3fd31d3f8fb492ae013af3abf4a577c48af3))
+- **mock:** implement every on/off event pair ([#1601](https://github.com/miniapp-tool/mptool/issues/1601)) ([1b35fc1](https://github.com/miniapp-tool/mptool/commit/1b35fc181475be7d92afa8dc9e0c8c26abcf77f0))
+- **mock:** normalise the FileSystemManager and complete its API ([#1586](https://github.com/miniapp-tool/mptool/issues/1586)) ([d9bfc5e](https://github.com/miniapp-tool/mptool/commit/d9bfc5e4f6495de78315e6dba3e27bea98bf95cc))
+- **mock:** simulate the page stack and page lifecycles ([#1588](https://github.com/miniapp-tool/mptool/issues/1588)) ([751964c](https://github.com/miniapp-tool/mptool/commit/751964c3ef149eda9b1d44cb3604da42ee096948))
+- **mock:** trigger events from real mock behaviour ([#1602](https://github.com/miniapp-tool/mptool/issues/1602)) ([f93f2d9](https://github.com/miniapp-tool/mptool/commit/f93f2d9ea1af4d71d20f12737f5bb7ebab734763))
+- **mock:** unify system information, network and env ([#1593](https://github.com/miniapp-tool/mptool/issues/1593)) ([a1cf8d8](https://github.com/miniapp-tool/mptool/commit/a1cf8d897be1582e619a6160aad4ee1a73e9af46))
+
+### 🐛 Bug Fixes
+
+- **mock:** align injection edge cases with the documented contract ([#1533](https://github.com/miniapp-tool/mptool/issues/1533)) ([31a8cf4](https://github.com/miniapp-tool/mptool/commit/31a8cf481bb4968014927dfaf5f0e7bbae2719b7)), references [#1525](https://github.com/miniapp-tool/mptool/issues/1525)
+- **mock:** return a real RequestTask from wx.request ([#1518](https://github.com/miniapp-tool/mptool/issues/1518)) ([3550935](https://github.com/miniapp-tool/mptool/commit/3550935d0c39664bcc787d5a5ded15668365a3b9)), references [#1513](https://github.com/miniapp-tool/mptool/issues/1513)
+- **mock:** settle rejected async responders, reset route regexps, restore tab pages ([#1642](https://github.com/miniapp-tool/mptool/issues/1642)) ([4037866](https://github.com/miniapp-tool/mptool/commit/4037866b58760c8f45deb9b598b15acea7e537e9))
+- **shared,mock:** probe realtime log filter and avoid duplicate error output ([#1640](https://github.com/miniapp-tool/mptool/issues/1640)) ([07314ec](https://github.com/miniapp-tool/mptool/commit/07314ecbf2a6eccdaca1e91d6b5dd22914bf7a91))
+
+### Documentation
+
+- **mock:** close out the mock documentation ([#1625](https://github.com/miniapp-tool/mptool/issues/1625)) ([3d59edd](https://github.com/miniapp-tool/mptool/commit/3d59edd8491940dbb84a9857f76cb26f67ae4df7))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **mock:** reach 100% coverage ([#1621](https://github.com/miniapp-tool/mptool/issues/1621)) ([4125224](https://github.com/miniapp-tool/mptool/commit/41252249e2db04aba4c2548ad233f343c5260b92))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/mock

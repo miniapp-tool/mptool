@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- **file:** `saveFile()` now throws `MpError` instead of returning `undefined`
+  on failure; `saveOnlineFile()` no longer accepts the `onTask` option — use the
+  `task` property on the returned promise instead.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### ✨ Features
+
+- **mock:** align storage semantics with the real runtime ([#1542](https://github.com/miniapp-tool/mptool/issues/1542)) ([802b3fd](https://github.com/miniapp-tool/mptool/commit/802b3fd31d3f8fb492ae013af3abf4a577c48af3))
+- **mock:** normalise the FileSystemManager and complete its API ([#1586](https://github.com/miniapp-tool/mptool/issues/1586)) ([d9bfc5e](https://github.com/miniapp-tool/mptool/commit/d9bfc5e4f6495de78315e6dba3e27bea98bf95cc))
+- **mock:** unify system information, network and env ([#1593](https://github.com/miniapp-tool/mptool/issues/1593)) ([a1cf8d8](https://github.com/miniapp-tool/mptool/commit/a1cf8d897be1582e619a6160aad4ee1a73e9af46))
+
+### 🐛 Bug Fixes
+
+- **file:** clear the in-memory store when persisted keys are removed ([#1563](https://github.com/miniapp-tool/mptool/issues/1563)) ([1a3302a](https://github.com/miniapp-tool/mptool/commit/1a3302a0ac1c6adb04657b1bddf62593e390f5ca))
+- **file:** make storage errors observable and expire once values by session ([#1544](https://github.com/miniapp-tool/mptool/issues/1544)) ([2388c24](https://github.com/miniapp-tool/mptool/commit/2388c24ccb3518dfc18cb0feb2a1dc4c17ad8c6f))
+- **file:** reject paths that escape the user data directory ([#1489](https://github.com/miniapp-tool/mptool/issues/1489)) ([23ee3a6](https://github.com/miniapp-tool/mptool/commit/23ee3a65bf544931ccff5e88640ff7e74b28d15f))
+- **file:** reject values writeJSON cannot serialize ([#1561](https://github.com/miniapp-tool/mptool/issues/1561)) ([ebc88a6](https://github.com/miniapp-tool/mptool/commit/ebc88a6dd72f138d3dce45214fc635c54f836faf))
+- **file:** return save results and expose the download task ([#1545](https://github.com/miniapp-tool/mptool/issues/1545)) ([d37295a](https://github.com/miniapp-tool/mptool/commit/d37295acca344de59c6ff1c2d7f83d0ba56add80))
+- **file:** surface read errors instead of reporting missing data ([#1560](https://github.com/miniapp-tool/mptool/issues/1560)) ([7aab403](https://github.com/miniapp-tool/mptool/commit/7aab403fc2ac9e87dcd27ab20cd8ee1a23e193c0))
+- **file:** write strings and binary data as-is instead of JSON ([#1482](https://github.com/miniapp-tool/mptool/issues/1482)) ([7c1d420](https://github.com/miniapp-tool/mptool/commit/7c1d4204ae9b7faac44e8daf4c46412593d42aad))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **file:** raise coverage to 100% ([#1612](https://github.com/miniapp-tool/mptool/issues/1612)) ([1b39745](https://github.com/miniapp-tool/mptool/commit/1b3974517cbb740efd0d905b8f72709034a973f5))
+- **file:** widen the storage expiry margins against slow CI ([#1555](https://github.com/miniapp-tool/mptool/issues/1555)) ([ef1cc95](https://github.com/miniapp-tool/mptool/commit/ef1cc953c60365fab0585c72e2ae36ae31f540a7))
+
+### Build System
+
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 **Note:** Version bump only for package @mptool/file

@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
+
+### ⚠ BREAKING CHANGES
+
+- `Env` no longer includes `"qq"` and `env` never evaluates to `"qq"`: a QQ runtime now falls back to `"wx"` or `"js"`, so code branching on the QQ environment has to be removed.
+- the QQ-only `Set-Cookie` rewriting in `CookieStore.applyHeader()` is gone; such headers are parsed as-is by `set-cookie-parser`.
+- the QQ-only `theme` option is no longer passed to `wx.showModal()` by `showModal()` / `retry()`.
+
+### 🐛 Bug Fixes
+
+- **metadata:** correct skyline package links and add missing miniprogram fields ([#1486](https://github.com/miniapp-tool/mptool/issues/1486)) ([8bab130](https://github.com/miniapp-tool/mptool/commit/8bab13013781f8f1ba1d285e6d6e6058c2131280))
+- **metadata:** mark miniprogram-api-typings as an optional peer dependency ([#1512](https://github.com/miniapp-tool/mptool/issues/1512)) ([b242b45](https://github.com/miniapp-tool/mptool/commit/b242b45dbd484ccc239eabbafc29c215c50692de))
+- **shared,mock:** probe realtime log filter and avoid duplicate error output ([#1640](https://github.com/miniapp-tool/mptool/issues/1640)) ([07314ec](https://github.com/miniapp-tool/mptool/commit/07314ecbf2a6eccdaca1e91d6b5dd22914bf7a91))
+- **shared:** make queue lifecycle safe and preserve this in once ([#1639](https://github.com/miniapp-tool/mptool/issues/1639)) ([a5c2c58](https://github.com/miniapp-tool/mptool/commit/a5c2c58de399b8f12796dc334e7669393701d58f))
+
+### Documentation
+
+- add sections for all, skyline, encoder and shared plus install steps ([#1566](https://github.com/miniapp-tool/mptool/issues/1566)) ([874308b](https://github.com/miniapp-tool/mptool/commit/874308b69fcb0a50c6cb5c8da68950389ddf34db))
+- **shared:** document the logger output policy ([#1554](https://github.com/miniapp-tool/mptool/issues/1554)) ([81d229d](https://github.com/miniapp-tool/mptool/commit/81d229d5b0ca6a4f40f42a59a38be29e9acd2ca7))
+
+### Code Refactoring
+
+- drop QQ mini-program support ([#1498](https://github.com/miniapp-tool/mptool/issues/1498)) ([f6e43c1](https://github.com/miniapp-tool/mptool/commit/f6e43c155ed6f1fe7b843d460ba458eef2429981))
+
+### Tests
+
+- **shared:** raise coverage to 100% ([#1618](https://github.com/miniapp-tool/mptool/issues/1618)) ([af26977](https://github.com/miniapp-tool/mptool/commit/af269776ba2b84ff171bcf4c28cc2cc63e8431e2))
+
+### Build System
+
+- bump deps ([636a113](https://github.com/miniapp-tool/mptool/commit/636a113b6abb011973e599b694d3fc0dc6e50d6c))
+- emit single-file ESM bundles for every package ([#1636](https://github.com/miniapp-tool/mptool/issues/1636)) ([a71a78b](https://github.com/miniapp-tool/mptool/commit/a71a78b16a5ac03d03a6d88522d389675ef5a1a8))
+- enable isolatedDeclarations ([a763fc6](https://github.com/miniapp-tool/mptool/commit/a763fc66e994f565fe6b3bdeac0333d025a29ee9))
+
 ## [0.19.0](https://github.com/miniapp-tool/mptool/compare/v0.18.1...v0.19.0) (2026-08-17)
 
 ### 🐛 Bug Fixes
