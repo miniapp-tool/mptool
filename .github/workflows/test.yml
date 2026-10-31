@@ -33,7 +33,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/setup@v3
         with:
-          runtime: node@^24.22.1
+          runtime: node@^26.0.0
           # Fail when the lockfile is missing/out of date; installs with --frozen-lockfile.
           require-lockfile: true
 
