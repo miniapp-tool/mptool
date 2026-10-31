@@ -172,6 +172,19 @@ export class Lexer {
   }
 
   /**
+   * Move the lexer back to a previously scanned offset so a token can be re-read in a different
+   * lexical goal (e.g. a `/` that was read as division but must be a regular expression).
+   *
+   * 将词法分析器回退到已扫描过的偏移，以便用不同的词法目标重新读取 token （例如把已读作除号的 `/` 重新读作正则字面量）。
+   *
+   * @param pos - Source offset to resume from / 恢复扫描的源码偏移
+   */
+  restartAt(pos: number): void {
+    this.pos = pos;
+    this.lastToken = null;
+  }
+
+  /**
    * Whether the next `/` should start a regular expression literal.
    *
    * 下一个 `/` 是否应作为正则字面量的开始。
