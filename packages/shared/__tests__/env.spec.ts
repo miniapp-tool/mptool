@@ -40,6 +40,22 @@ describe(env, () => {
     }
   });
 
+  it("should be js when wx is null", async () => {
+    const globalRecord = globalThis as { wx?: unknown };
+    const originalWx = globalRecord.wx;
+
+    globalRecord.wx = null;
+
+    try {
+      // @ts-expect-error: query suffix for fresh module evaluation
+      const { env: nullEnv } = (await import("../src/env.js?null-wx")) as { env: Env };
+
+      expect(nullEnv).toBe("js");
+    } finally {
+      globalRecord.wx = originalWx;
+    }
+  });
+
   it("should ignore the qq global", async () => {
     const globalRecord = globalThis as { qq?: unknown; wx?: unknown };
     const originalQq = globalRecord.qq;

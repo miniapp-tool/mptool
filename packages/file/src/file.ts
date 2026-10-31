@@ -406,7 +406,12 @@ export const saveOnlineFile = (onlinePath: string, localPath: string): SaveOnlin
 
         logger.error(`Download ${onlinePath} failed with statusCode ${statusCode}`);
 
-        reject(new MpError({ code: statusCode }));
+        reject(
+          new MpError({
+            code: statusCode,
+            message: `Download failed with status code ${statusCode}`,
+          }),
+        );
       },
       fail: ({ errMsg }) => {
         logger.error(`Download ${onlinePath} failed:`, errMsg);

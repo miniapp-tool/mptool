@@ -176,10 +176,29 @@ describe(download, () => {
     const task = mockDownloadTask();
     const promise = download("https://example.com/file.png");
 
-    task.progress?.({ progress: 100 });
+    task.progress?.({ progress: 50 });
     task.success?.({ statusCode: 200, tempFilePath: "mock://temp/file.png" });
 
     await expect(promise).resolves.toBe("mock://temp/file.png");
+
+    expect(calls).toStrictEqual(["show", "hide"]);
+  });
+
+  it("should only show a loading for in-flight progress values", async () => {
+    const calls = mockLoading();
+    const task = mockDownloadTask();
+    const promise = download("https://example.com/file.png");
+
+    // The first and last percent are not worth a loading, and a late progress callback after the
+    // request settled must not open a loading that nobody hides anymore.
+    task.progress?.({ progress: 1 });
+    task.progress?.({ progress: 100 });
+    task.progress?.({ progress: 50 });
+    task.success?.({ statusCode: 200, tempFilePath: "mock://temp/file.png" });
+
+    await expect(promise).resolves.toBe("mock://temp/file.png");
+
+    task.progress?.({ progress: 60 });
 
     expect(calls).toStrictEqual(["show", "hide"]);
   });

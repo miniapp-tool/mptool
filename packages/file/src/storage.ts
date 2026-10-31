@@ -62,16 +62,37 @@ export const take = <T = unknown>(key: string): T | undefined => {
 };
 
 /**
+ * Whether a stored value has the expected {@link StorageData} shape.
+ *
+ * A truthy but malformed value (`"garbage"`, `123`, `{}`, ...) must be treated as corrupt instead
+ * of being read as data: `expired` is required to build the expiry decision, and a non-number would
+ * make every comparison silently false.
+ *
+ * 判断存储值是否符合 {@link StorageData} 结构；损坏的值（如字符串、数字、缺少 `expired` 的对象）应视为失效。
+ *
+ * @param value 已存储的值
+ * @returns 是否符合存储结构
+ */
+const isValidStorageData = (value: unknown): value is StorageData<unknown> =>
+  typeof value === "object" &&
+  value != null &&
+  typeof (value as { expired?: unknown }).expired === "number";
+
+/**
  * Whether a stored value has expired
  *
- * `'once'` values are valid only within the session that wrote them.
+ * `'once'` values are valid only within the session that wrote them. Corrupt values are always
+ * treated as expired.
  *
- * 判断已存储的值是否已过期。`'once'` 值仅在写入它的本次启动内有效。
+ * 判断已存储的值是否已过期。`'once'` 值仅在写入它的本次启动内有效；损坏的值一律视为已过期。
  *
  * @param value 已存储的值
  * @returns 是否已过期
  */
-const isExpired = (value: StorageData<unknown>): boolean => {
+const isExpired = (value: unknown): boolean => {
+  // Corrupt payloads must not be served; dropping them is the only way to recover the key.
+  if (!isValidStorageData(value)) return true;
+
   if (value.once) return value.expired !== sessionId;
 
   // `expired === 0` marks a permanent value
@@ -319,18 +340,25 @@ export const remove = (key: string): void => {
  * @param key Key
  * @param option 回调函数
  * @returns 异步回调结果
+ * @throws {MpError} 返回的 Promise 在移除失败时以 `MpError` reject，`message` 中包含微信返回的 `errMsg`
  */
 export const removeAsync = async (
   key: string,
 ): Promise<WechatMiniprogram.GeneralCallbackResult> => {
-  const result = await wx.removeStorage({
-    key: `${CACHE_PREFIX}${key}`,
-  });
+  try {
+    const result = await wx.removeStorage({
+      key: `${CACHE_PREFIX}${key}`,
+    });
 
-  // Keep the two stores consistent: a removed key must not be readable through `take()` either
-  storage.delete(key);
+    // Keep the two stores consistent: a removed key must not be readable through `take()` either
+    storage.delete(key);
 
-  return result;
+    return result;
+  } catch (err) {
+    logger.error(`remove "${key}" fail`, err);
+
+    throw createStorageError(key, err, "Remove");
+  }
 };
 
 /**
@@ -345,7 +373,7 @@ export const check = (): void => {
     const value: StorageData<unknown> | undefined = wx.getStorageSync(key);
 
     // Drop corrupt values and expired ones / 清除损坏与已过期的值
-    if (!value || isExpired(value)) {
+    if (isExpired(value)) {
       wx.removeStorageSync(key);
       storage.delete(key.slice(CACHE_PREFIX.length));
     }
@@ -369,7 +397,7 @@ export const checkAsync = async (): Promise<void> => {
           const { data } = await wx.getStorage<StorageData<unknown> | undefined>({ key });
 
           // Drop corrupt values and expired ones / 清除损坏与已过期的值
-          if (!data || isExpired(data)) {
+          if (isExpired(data)) {
             await wx.removeStorage({ key });
             storage.delete(key.slice(CACHE_PREFIX.length));
           }

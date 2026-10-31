@@ -282,7 +282,10 @@ describe("file edge cases", () => {
     try {
       await expect(
         saveOnlineFile("https://example.com/file", "tmp/fail-status.txt"),
-      ).rejects.toMatchObject({ code: 404 });
+      ).rejects.toMatchObject({
+        code: 404,
+        message: "Download failed with status code 404",
+      });
     } finally {
       wxAny.downloadFile = original;
     }

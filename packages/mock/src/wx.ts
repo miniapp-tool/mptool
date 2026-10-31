@@ -48,12 +48,12 @@ interface MockDownloadTask {
   abort: () => void;
 }
 
-const downloadTask = (): MockDownloadTask => ({
+/** Task methods shared by every mock download task; `abort` is bound per call. */
+const downloadTask = (): Omit<MockDownloadTask, "abort"> => ({
   onProgressUpdate: (): void => void 0,
   onHeadersReceived: (): void => void 0,
   offProgressUpdate: (): void => void 0,
   offHeadersReceived: (): void => void 0,
-  abort: (): void => void 0,
 });
 
 /** APIs intentionally not implemented by the mock (`canIUse` returns false). */
@@ -168,11 +168,31 @@ const wxMock: {
       });
     }
 
+    let aborted = false;
+
     setTimeout(() => {
-      if (option.success) option.success(getResult());
+      // `abort()` already delivered `fail` + `complete`; the pending success must not fire.
+      if (aborted) return;
+
+      const res = getResult();
+
+      option.success?.(res);
+      option.complete?.({ errMsg: "downloadFile:ok", ...res });
     }, 0);
 
-    return downloadTask();
+    return {
+      ...downloadTask(),
+      abort(): void {
+        if (aborted) return;
+
+        aborted = true;
+
+        const res = { errMsg: "downloadFile:fail abort" };
+
+        option.fail?.(res);
+        option.complete?.(res);
+      },
+    };
   },
 };
 

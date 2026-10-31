@@ -13,6 +13,10 @@ export const download = (url: string, mask = false): Promise<string> =>
     // progress update never showed a loading. Hiding unconditionally would close a loading the
     // caller opened itself.
     let loadingShown = false;
+    // Set as soon as the request settles, so a late `onProgressUpdate` cannot show a loading that
+    // nobody will hide anymore.
+    // 请求结束后忽略迟到的进度回调，避免弹出无人关闭的 loading。
+    let settled = false;
 
     const hideLoading = (): void => {
       if (!loadingShown) return;
@@ -24,6 +28,7 @@ export const download = (url: string, mask = false): Promise<string> =>
     const downloadTask = wx.downloadFile({
       url,
       success: ({ statusCode, tempFilePath }) => {
+        settled = true;
         hideLoading();
         if (statusCode === 200) {
           resolve(tempFilePath);
@@ -35,6 +40,7 @@ export const download = (url: string, mask = false): Promise<string> =>
         }
       },
       fail: ({ errMsg }) => {
+        settled = true;
         hideLoading();
 
         reject(new MpError({ message: errMsg }));
@@ -43,7 +49,9 @@ export const download = (url: string, mask = false): Promise<string> =>
     });
 
     downloadTask.onProgressUpdate(({ progress }) => {
-      loadingShown = true;
-      void wx.showLoading({ title: `下载中...${Math.round(progress)}%`, mask });
+      if (!settled && progress > 1 && progress < 100) {
+        loadingShown = true;
+        void wx.showLoading({ title: `下载中...${Math.round(progress)}%`, mask });
+      }
     });
   });
