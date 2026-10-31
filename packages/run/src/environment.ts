@@ -15,10 +15,23 @@
 /** TDZ sentinel: the binding is declared but not yet initialized / TDZ 哨兵：绑定已声明但未初始化 */
 const TDZ = Symbol("TDZ sentinel");
 
-/** A single binding: its value and whether it is reassignable / 单个绑定：值与其是否可重赋值 */
+/**
+ * A single binding: its value, whether it is reassignable, and whether writes mirror onto the
+ * sandbox global object / 单个绑定：值、是否可重赋值、写入是否镜像到沙箱全局对象
+ */
 interface Binding {
   value: unknown;
   mutable: boolean;
+  /**
+   * Whether writes to this binding are mirrored onto the sandbox global object. Only `var`-like
+   * bindings (var declarations, function declarations, builtins, host-injected globals) are
+   * properties of the global object; top-level `let`/`const`/`class` bindings must not overwrite
+   * same-named host globals.
+   *
+   * 写入是否镜像到沙箱全局对象。只有 `var` 类绑定（var 声明、函数声明、内建、宿主注入的全局）是全局对象 的属性；顶层 `let`/`const`/`class`
+   * 绑定不得覆盖同名的宿主全局。
+   */
+  mirror: boolean;
 }
 
 /**
@@ -91,7 +104,10 @@ export class Environment {
   hasOwn(name: string): boolean {
     return (
       this.records.has(name) ||
-      (this.globalObject != null && Object.hasOwn(this.globalObject, name))
+      // `Object.hasOwn` is ES2022 and missing on the minimum runtime (base library 3.8.2)
+      // `Object.hasOwn` 属于 ES2022，声明的最低运行环境（基础库 3.8.2）不支持
+      // oxlint-disable-next-line eslint/prefer-object-has-own -- ES2022 API unavailable on the supported runtime
+      (this.globalObject != null && Object.prototype.hasOwnProperty.call(this.globalObject, name))
     );
   }
 
@@ -148,7 +164,9 @@ export class Environment {
 
       binding.value = value;
 
-      if (this.globalObject != null) this.globalObject[name] = value;
+      // only `var`-like bindings live on the sandbox global object
+      // 只有 var 类绑定会写回沙箱全局对象
+      if (binding.mirror && this.globalObject != null) this.globalObject[name] = value;
 
       return true;
     }
@@ -173,7 +191,7 @@ export class Environment {
    * @param value - New value / 新值
    */
   setOwn(name: string, value: unknown): void {
-    this.records.set(name, { value, mutable: true });
+    this.records.set(name, { value, mutable: true, mirror: true });
 
     if (this.globalObject != null) this.globalObject[name] = value;
   }
@@ -189,7 +207,7 @@ export class Environment {
     const env = this.functionScope;
 
     if (!env.records.has(name)) {
-      env.records.set(name, { value: void 0, mutable: true });
+      env.records.set(name, { value: void 0, mutable: true, mirror: true });
       if (env.globalObject != null) env.globalObject[name] = void 0;
     }
   }
@@ -202,7 +220,7 @@ export class Environment {
    * @param name - Binding name / 绑定名称
    */
   declareLet(name: string): void {
-    this.records.set(name, { value: TDZ, mutable: true });
+    this.records.set(name, { value: TDZ, mutable: true, mirror: false });
   }
 
   /**
@@ -213,7 +231,7 @@ export class Environment {
    * @param name - Binding name / 绑定名称
    */
   declareConst(name: string): void {
-    this.records.set(name, { value: TDZ, mutable: false });
+    this.records.set(name, { value: TDZ, mutable: false, mirror: false });
   }
 
   /**
@@ -232,13 +250,15 @@ export class Environment {
    */
   define(name: string, value: unknown, mutable = true): void {
     const existing = this.records.get(name);
+    const mirror = existing?.mirror ?? true;
 
     this.records.set(name, {
       value,
       mutable: existing == null ? mutable : existing.mutable,
+      mirror,
     });
 
-    if (this.globalObject != null) this.globalObject[name] = value;
+    if (mirror && this.globalObject != null) this.globalObject[name] = value;
   }
 
   /**
@@ -283,7 +303,13 @@ export class Environment {
       return true;
     }
 
-    if (this.globalObject != null && Object.hasOwn(this.globalObject, name)) {
+    if (
+      this.globalObject != null &&
+      // `Object.hasOwn` is ES2022 and missing on the minimum runtime (base library 3.8.2)
+      // `Object.hasOwn` 属于 ES2022，声明的最低运行环境（基础库 3.8.2）不支持
+      // oxlint-disable-next-line eslint/prefer-object-has-own -- ES2022 API unavailable on the supported runtime
+      Object.prototype.hasOwnProperty.call(this.globalObject, name)
+    ) {
       // oxlint-disable-next-line typescript/no-dynamic-delete -- the key is a binding name
       delete this.globalObject[name];
 

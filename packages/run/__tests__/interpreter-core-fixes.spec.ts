@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { Environment } from "../src/environment.js";
 import type { RunOptions } from "../src/index.js";
 import { Runtime } from "../src/interpreter.js";
 import { parse } from "../src/parser.js";
@@ -208,6 +209,53 @@ describe("try/finally with raw null or undefined throws", () => {
 
     expect(thrown).toBe(true);
     expect(cleaned).toBe(true);
+  });
+});
+
+describe("global object mirroring", () => {
+  it("should not mirror top-level let reassignments onto the sandbox global", () => {
+    const runtime = new Runtime();
+
+    expect(runtime.run(parse("let Object = 1; Object = 2; Object"))).toBe(2);
+    expect(runtime.globalObject.Object).toBe(Object);
+  });
+
+  it("should not mirror top-level class reassignments onto the sandbox global", () => {
+    const runtime = new Runtime();
+
+    runtime.run(parse("class Array {} Array = 5;"));
+    expect(runtime.globalObject.Array).toBe(Array);
+  });
+
+  it("should keep mirroring var and function bindings", () => {
+    const runtime = new Runtime();
+
+    runtime.run(
+      parse("var mirrored = 1; mirrored = 2; function mirroredFn() { return mirrored; }"),
+    );
+
+    expect(runtime.globalObject.mirrored).toBe(2);
+    expect(runtime.globalObject.mirroredFn).toBeTypeOf("function");
+  });
+
+  it("should only mirror var-like bindings at the Environment level", () => {
+    const globalObject = { builtin: 1 } as Record<PropertyKey, unknown>;
+    const global = new Environment(null, true, globalObject);
+
+    global.declareLet("lexical");
+    global.initialize("lexical", 1);
+    expect(global.set("lexical", 2)).toBe(true);
+    expect(globalObject.lexical).toBeUndefined();
+
+    global.declareVar("hoisted");
+    expect(globalObject.hoisted).toBeUndefined();
+    expect(global.set("hoisted", 3)).toBe(true);
+    expect(globalObject.hoisted).toBe(3);
+
+    global.declareConst("constant");
+    global.initialize("constant", 1);
+    expect(() => global.set("constant", 2)).toThrow(TypeError);
+    expect(globalObject.constant).toBeUndefined();
   });
 });
 
