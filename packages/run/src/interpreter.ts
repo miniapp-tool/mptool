@@ -1024,6 +1024,57 @@ export class Runtime {
     );
   }
 
+  /**
+   * Resolve the `super` base and the `this` receiver of a `super.x` reference.
+   *
+   * 解析 `super.x` 引用的 `super` 基准与 `this` 接收者。
+   *
+   * A `super` property reference reads and writes through the parent prototype with the current
+   * instance as receiver (so accessors run with the subclass instance as `this`). Accessing `super`
+   * before `super()` initializes `this` in a derived constructor is a `ReferenceError`.
+   *
+   * `super` 属性引用经由父原型、以当前实例为接收者读写（因此 accessor 以子类实例作为 `this` 运行）。 派生构造器在 `super()` 初始化 `this` 之前访问
+   * `super` 属于 `ReferenceError`。
+   *
+   * @returns The `super` base and the `this` reference / `super` 基准与 `this` 引用
+   */
+  private superReference(): { superBase: object; thisRef: { value: unknown } } {
+    const ctx = this.currentContext();
+
+    if (ctx == null || ctx.superBase == null)
+      throw new ReferenceError("'super' keyword unexpected here");
+
+    if (ctx.thisRef.value === UNINITIALIZED)
+      throw new ReferenceError("Cannot access 'super' before calling super()");
+
+    return { superBase: ctx.superBase, thisRef: ctx.thisRef };
+  }
+
+  /**
+   * Write a property of the `super` base with the current instance as receiver.
+   *
+   * 以当前实例为接收者写入 `super` 基准的属性。
+   *
+   * Unlike an ordinary property write this must go through the base object (`Reflect.set` with
+   * `receiver = this`), otherwise a subclass setter calling `super.x = v` recurses into itself.
+   *
+   * 与普通属性写入不同，这里必须经由基准对象（`Reflect.set` 且 `receiver = this`），否则子类 setter 中的 `super.x = v` 会无限递归。
+   *
+   * @param superBase - The `super` base object / `super` 基准对象
+   * @param key - The property key / 属性键
+   * @param value - New value / 新值
+   * @param receiver - The `this` receiver / `this` 接收者
+   */
+  private writeSuperProperty(
+    superBase: object,
+    key: PropertyKey,
+    value: unknown,
+    receiver: unknown,
+  ): void {
+    if (!Reflect.set(superBase, key, value, receiver) && this.strict)
+      throw new TypeError(`Cannot assign to read only property '${String(key)}'`);
+  }
+
   // -------------------------------------------------------------------------
   // Builtins
   // -------------------------------------------------------------------------
@@ -2138,9 +2189,7 @@ export class Runtime {
         break;
       }
       case "member": {
-        const { object, key } = this.evalMemberRef(target, env);
-
-        this.writeProperty(object, key, value);
+        this.evalTargetReference(target, env).set(value);
         break;
       }
       case "call": {
@@ -2317,22 +2366,17 @@ export class Runtime {
 
     if (target.type === "member") {
       if (target.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
-
-        const { superBase, thisRef } = ctx;
+        const { superBase, thisRef } = this.superReference();
         const key = target.computed
           ? toPropertyKey(this.evalExpression(target.property as Expression, env))
           : (target.property as string);
 
         return {
-          // accessors run with the instance as receiver
-          // accessor 以实例作为接收者运行
+          // reads and accessors run with the instance as receiver
+          // 读取与 accessor 以实例作为接收者运行
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
           set: (value) => {
-            this.writeProperty(thisRef.value, key, value);
+            this.writeSuperProperty(superBase, key, value, thisRef.value);
           },
         };
       }
@@ -2351,41 +2395,6 @@ export class Runtime {
     }
 
     throw new TypeError("Invalid assignment target");
-  }
-
-  /**
-   * Evaluate the `object`/`key` of a member target for writing.
-   *
-   * 求值写入目标的 `object`/`key`。
-   *
-   * For `super.x = v`, the receiver (current `this`) is the write target.
-   *
-   * 对 `super.x = v`，接收者（当前 `this`）为写入目标。
-   *
-   * @param node - The member expression / 成员表达式
-   * @param env - Current environment / 当前环境
-   * @returns The object and key / 对象与键
-   */
-  private evalMemberRef(node: MemberExpr, env: Environment): { object: unknown; key: PropertyKey } {
-    if (node.object.type === "super") {
-      const ctx = this.currentContext();
-
-      if (ctx == null || ctx.superBase == null)
-        throw new ReferenceError("'super' keyword unexpected here");
-
-      const key = node.computed
-        ? toPropertyKey(this.evalExpression(node.property as Expression, env))
-        : (node.property as string);
-
-      return { object: ctx.thisRef.value, key };
-    }
-
-    const object = this.evalExpression(node.object, env);
-    const key = node.computed
-      ? toPropertyKey(this.evalExpression(node.property as Expression, env))
-      : (node.property as string);
-
-    return { object, key };
   }
 
   /**
@@ -2691,10 +2700,7 @@ export class Runtime {
    */
   private evalMember(node: MemberExpr, env: Environment): unknown {
     if (node.object.type === "super") {
-      const ctx = this.currentContext();
-
-      if (ctx == null || ctx.superBase == null)
-        throw new ReferenceError("'super' keyword unexpected here");
+      const { superBase, thisRef } = this.superReference();
 
       const key = node.computed
         ? toPropertyKey(this.evalExpression(node.property as Expression, env))
@@ -2702,7 +2708,7 @@ export class Runtime {
 
       // accessors run with the instance as receiver
       // accessor 以实例作为接收者运行
-      return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+      return Reflect.get(superBase, key, thisRef.value) as unknown;
     }
 
     const object = this.evalExpression(node.object, env);
@@ -2751,16 +2757,13 @@ export class Runtime {
   private evalChainLink(node: MemberExpr | CallExpr, env: Environment): unknown {
     if (node.type === "member") {
       if (node.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = node.computed
           ? toPropertyKey(this.evalExpression(node.property as Expression, env))
           : (node.property as string);
 
-        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+        return Reflect.get(superBase, key, thisRef.value) as unknown;
       }
 
       const object = this.evalChainOperand(node.object, env);
@@ -2816,16 +2819,18 @@ export class Runtime {
   ): { callee: unknown; thisArg: unknown } {
     if (callee.type === "member") {
       if (callee.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = callee.computed
           ? toPropertyKey(this.evalExpression(callee.property as Expression, env))
           : (callee.property as string);
 
-        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+        return {
+          // accessors in the callee position still run with the instance as receiver
+          // callee 位置的 accessor 同样以实例作为接收者运行
+          callee: Reflect.get(superBase, key, thisRef.value) as unknown,
+          thisArg: thisRef.value,
+        };
       }
 
       const object = this.evalChainOperand(callee.object, env);
@@ -2855,16 +2860,16 @@ export class Runtime {
   private evalCallee(callee: Expression, env: Environment): { callee: unknown; thisArg: unknown } {
     if (callee.type === "member") {
       if (callee.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = callee.computed
           ? toPropertyKey(this.evalExpression(callee.property as Expression, env))
           : (callee.property as string);
 
-        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+        return {
+          callee: Reflect.get(superBase, key, thisRef.value) as unknown,
+          thisArg: thisRef.value,
+        };
       }
 
       const object = this.evalExpression(callee.object, env);
@@ -3094,11 +3099,11 @@ export class Runtime {
     }
 
     if (target.type === "member") {
-      const { object, key } = this.evalMemberRef(target, env);
-      const old = getProperty(object, key);
+      const reference = this.evalTargetReference(target, env);
+      const old = reference.get();
       const value = delta(old);
 
-      this.writeProperty(object, key, value);
+      reference.set(value);
 
       return node.prefix ? value : old;
     }
@@ -4916,10 +4921,7 @@ export class Runtime {
         }
 
         if (expr.object.type === "super") {
-          const ctx = this.currentContext();
-
-          if (ctx == null || ctx.superBase == null)
-            throw new ReferenceError("'super' keyword unexpected here");
+          const { superBase, thisRef } = this.superReference();
 
           /* istanbul ignore next -- a non-computed super read has no await/call and stays on the sync evaluator */
           const key = expr.computed
@@ -4928,7 +4930,7 @@ export class Runtime {
 
           // accessors run with the instance as receiver
           // accessor 以实例作为接收者运行
-          return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+          return Reflect.get(superBase, key, thisRef.value) as unknown;
         }
 
         const object = yield* this.evalAsyncExpr(expr.object, env);
@@ -5050,11 +5052,11 @@ export class Runtime {
         // identifier updates are await/call-free, so they never reach the async evaluator
         /* istanbul ignore else -- only member targets can contain `await` here */
         if (target.type === "member") {
-          const { object, key } = yield* this.evalAsyncMemberRef(target, env);
-          const old = getProperty(object, key);
+          const reference = yield* this.evalAsyncTargetReference(target, env);
+          const old = reference.get();
           const value = delta(old);
 
-          this.writeProperty(object, key, value);
+          reference.set(value);
 
           return expr.prefix ? value : old;
         }
@@ -5237,12 +5239,7 @@ export class Runtime {
 
     if (target.type === "member") {
       if (target.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
-
-        const { superBase, thisRef } = ctx;
+        const { superBase, thisRef } = this.superReference();
         const key = target.computed
           ? toPropertyKey(yield* this.evalAsyncExpr(target.property as Expression, env))
           : (target.property as string);
@@ -5250,7 +5247,7 @@ export class Runtime {
         return {
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
           set: (value) => {
-            this.writeProperty(thisRef.value, key, value);
+            this.writeSuperProperty(superBase, key, value, thisRef.value);
           },
         };
       }
@@ -5303,9 +5300,9 @@ export class Runtime {
 
     switch (target.type) {
       case "member": {
-        const { object, key } = yield* this.evalAsyncMemberRef(target, env);
+        const reference = yield* this.evalAsyncTargetReference(target, env);
 
-        this.writeProperty(object, key, value);
+        reference.set(value);
         break;
       }
       case "objectPattern": {
@@ -5340,43 +5337,6 @@ export class Runtime {
         throw new Error("Unreachable pattern");
       }
     }
-  }
-
-  /**
-   * Resolve a member reference with async-aware object/key evaluation.
-   *
-   * 解析成员引用（object/key 支持 async 求值）。
-   *
-   * @param node - The member expression / 成员表达式
-   * @param env - Current environment / 当前环境
-   * @yields {unknown} The pending promise when suspending at `await` / 在 `await` 处挂起时的 pending
-   *   promise
-   * @returns The generator, completing with the object and key / 生成器，完成值为对象与键
-   */
-  private *evalAsyncMemberRef(
-    node: MemberExpr,
-    env: Environment,
-  ): Generator<unknown, { object: unknown; key: PropertyKey }, unknown> {
-    if (node.object.type === "super") {
-      const ctx = this.currentContext();
-
-      if (ctx == null || ctx.superBase == null)
-        throw new ReferenceError("'super' keyword unexpected here");
-
-      /* istanbul ignore next -- a super target only reaches the async assigner through a computed key */
-      const key = node.computed
-        ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
-        : (node.property as string);
-
-      return { object: ctx.thisRef.value, key };
-    }
-
-    const object = yield* this.evalAsyncExpr(node.object, env);
-    const key = node.computed
-      ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
-      : (node.property as string);
-
-    return { object, key };
   }
 
   /**
@@ -5672,16 +5632,16 @@ export class Runtime {
   ): Generator<unknown, { callee: unknown; thisArg: unknown }, unknown> {
     if (callee.type === "member") {
       if (callee.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = callee.computed
           ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
           : (callee.property as string);
 
-        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+        return {
+          callee: Reflect.get(superBase, key, thisRef.value) as unknown,
+          thisArg: thisRef.value,
+        };
       }
 
       const object = yield* this.evalAsyncExpr(callee.object, env);
@@ -5713,16 +5673,13 @@ export class Runtime {
   ): Generator<unknown, unknown, unknown> {
     if (node.type === "member") {
       if (node.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = node.computed
           ? toPropertyKey(yield* this.evalAsyncExpr(node.property as Expression, env))
           : (node.property as string);
 
-        return Reflect.get(ctx.superBase, key, ctx.thisRef.value) as unknown;
+        return Reflect.get(superBase, key, thisRef.value) as unknown;
       }
 
       const object = yield* this.evalAsyncChainOperand(node.object, env);
@@ -5792,16 +5749,16 @@ export class Runtime {
   ): Generator<unknown, { callee: unknown; thisArg: unknown }, unknown> {
     if (callee.type === "member") {
       if (callee.object.type === "super") {
-        const ctx = this.currentContext();
-
-        if (ctx == null || ctx.superBase == null)
-          throw new ReferenceError("'super' keyword unexpected here");
+        const { superBase, thisRef } = this.superReference();
 
         const key = callee.computed
           ? toPropertyKey(yield* this.evalAsyncExpr(callee.property as Expression, env))
           : (callee.property as string);
 
-        return { callee: getProperty(ctx.superBase, key), thisArg: ctx.thisRef.value };
+        return {
+          callee: Reflect.get(superBase, key, thisRef.value) as unknown,
+          thisArg: thisRef.value,
+        };
       }
 
       const object = yield* this.evalAsyncChainOperand(callee.object, env);
