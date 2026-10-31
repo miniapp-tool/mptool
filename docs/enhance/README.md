@@ -135,11 +135,11 @@ $App({
 
 由于框架的 `onNavigate` 生命周期会造成跳转延时，你可以通过 `maxDelay` 控制框架延迟跳转的最大时长，单位为 ms，默认为 `200`。
 
-同时为了防止快速跳转触发额外生命周期导致的一些潜在问题 (诸如影响首屏渲染)，默认情况下，你只能在当前页面 `onReady` 生命周期触发之后再经过 100ms，才能通过框架进行下一次跳转。使用 `onReady` + `延时` 是为了保证首屏渲染完成，避免同步的 onNavigate 周期阻塞小程序渲染。如果你需要一个更大或者更小的延迟值，请通过 `minInterval` 设置。
+同时为了防止快速跳转触发额外生命周期导致的一些潜在问题 (诸如影响首屏渲染)，默认情况下，目标页的 `onReady` 生命周期触发之后再经过 100ms，才能通过框架进行下一次跳转。使用 `onReady` + `延时` 是为了保证首屏渲染完成，避免同步的 onNavigate 周期阻塞小程序渲染。导航锁只由这条路径（目标页 `onReady` + `minInterval`）释放，`onUnload` 不是释放时机：`redirectTo` / `reLaunch` / 从非 tab 页 `switchTab` 时旧页会在目标页 ready 之前卸载，此时释放会让后续点击在目标页仍在加载时发起新的导航。如果你需要一个更大或者更小的延迟值，请通过 `minInterval` 设置。
 
 在导航锁未释放期间调用 `$go` / `$redirect` / `$switch` / `$reLaunch` 会被忽略：返回的 Promise 解析为 `undefined`（不会 reject，也不会执行跳转）。
 
-导航锁默认最多持有 5000ms，超时后会强制释放（目标页始终没有触发 `onReady` / `onUnload` 时的兜底）。你可以通过 `lockTimeout` 调整这个时长。
+导航锁默认最多持有 5000ms，超时后会强制释放（目标页始终没有触发 `onReady` 时的兜底，例如 `switchTab` 回到已加载的 tab 页，或在 `onLoad` 内被强制返回）。你可以通过 `lockTimeout` 调整这个时长。
 
 ### 构造器扩展
 
@@ -342,7 +342,7 @@ go("play?vid=xxx");
 ```
 
 ```html
-<button catch:tap="$bindReLaunch" data-url="play" data-before="onClickBefore">
+<button catch:tap="$bindRelaunch" data-url="play" data-before="onClickBefore">
   click reLaunch
 </button>
 ```
@@ -744,7 +744,7 @@ $Page("main", {
   $Component({
     lifetimes: {
       attached() {
-        this.$refs.get("customComp"); // 根据 ref 属性获取子组件的实例引用
+        this.$refs.get("customRef1"); // 根据 ref 属性获取子组件的实例引用
       },
     },
   });

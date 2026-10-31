@@ -67,7 +67,7 @@ Map of child component instances that have a `ref`; can be used to access child 
 $Component({
   lifetimes: {
     attached() {
-      this.$refs.get("customComp"); // get the child component instance by its ref attribute
+      this.$refs.get("customRef1"); // get the child component instance by its ref attribute
     },
   },
 });
