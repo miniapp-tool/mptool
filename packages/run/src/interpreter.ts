@@ -1585,7 +1585,8 @@ export class Runtime {
    * @param env - Current environment / 当前环境
    */
   private evalTry(stmt: TryStatement, env: Environment): void {
-    let pending: unknown = null;
+    let pending: unknown;
+    let hasPending = false;
 
     try {
       try {
@@ -1615,11 +1616,16 @@ export class Runtime {
       }
     } catch (err) {
       pending = err;
+      hasPending = true;
     }
 
     if (stmt.finalizer != null) this.evalBlock(stmt.finalizer, env);
 
-    if (pending != null) throw pending as Error;
+    // rethrow the pending exception; a `throw null` / `throw undefined` from a nested function
+    // arrives unwrapped at this boundary, so a value check would silently swallow it
+    // 重抛未决异常；嵌套函数抛出的 `throw null` / `throw undefined` 在此边界已是未包装值，
+    // 用值判断会静默吞掉它
+    if (hasPending) throw pending;
   }
 
   /**
@@ -4108,7 +4114,11 @@ export class Runtime {
       throw new Error(`Maximum call stack size exceeded (limit ${this.maxStack})`);
     }
 
-    const baseDepth = this.contextStack.length;
+    // the frames owned by this async call are always appended at the current stack top, so the
+    // base must be re-derived on every resumption: `runWithStatus` clears the stack once its
+    // synchronous phase returns, and an entry-time depth would then point past the stack end
+    // 本 async 调用持有的帧总是追加到当前栈顶，因此基准必须在每次恢复时重新推导：
+    // `runWithStatus` 会在同步阶段返回后清空栈，入口时缓存的下标会越过栈顶
     const gen = this.asyncBodyGenerator(meta, args, thisArg);
     let savedFrames: RuntimeContext[] = [];
 
@@ -4119,8 +4129,11 @@ export class Runtime {
       };
 
       const step = (method: "next" | "throw", arg: unknown): void => {
-        // restore the async frames and depth before resuming the generator
-        // 恢复生成器前还原 async 帧与深度
+        // frames restored below are appended at the current stack top, so that is the base for
+        // the next suspension
+        // 下方还原的帧追加到当前栈顶，因此它就是下次挂起的基准
+        const frameBase = this.contextStack.length;
+
         if (savedFrames.length > 0) {
           this.contextStack.push(...savedFrames);
           this.stackDepth += 1;
@@ -4153,7 +4166,7 @@ export class Runtime {
         // suspended: remove the async frames and depth, so suspended tasks do not count
         // toward maxStack (they occupy no host stack while waiting)
         // 挂起：移除 async 帧与深度，使挂起任务不计入 maxStack（等待期间不占宿主栈）
-        savedFrames = this.contextStack.splice(baseDepth);
+        savedFrames = this.contextStack.splice(frameBase);
         this.stackDepth -= 1;
 
         /* oxlint-disable promise/catch-or-return, promise/prefer-catch, promise/prefer-await-to-callbacks -- recursive promise driver */
@@ -4805,9 +4818,10 @@ export class Runtime {
 
     try {
       try {
-        const blockEnv = new Environment(env, false);
-
-        yield* this.evalAsyncBody(stmt.block.body, blockEnv);
+        // a fresh block environment with hoisted block functions and TDZ lexical declarations,
+        // same as the synchronous `evalTry`
+        // 与同步 `evalTry` 一致：全新的块环境、块级函数提升与 TDZ 词法声明
+        yield* this.evalAsyncStatement(stmt.block, env);
       } catch (err) {
         if (
           err instanceof ReturnSignalError ||
@@ -4828,7 +4842,7 @@ export class Runtime {
             yield* this.evalAsyncAssignTo(stmt.handler.param, err, catchEnv, true);
           }
 
-          yield* this.evalAsyncBody(stmt.handler.body.body, catchEnv);
+          yield* this.evalAsyncStatement(stmt.handler.body, catchEnv);
         }
       }
     } catch (err) {
@@ -4836,11 +4850,7 @@ export class Runtime {
       hasPending = true;
     }
 
-    if (stmt.finalizer != null) {
-      const finEnv = new Environment(env, false);
-
-      yield* this.evalAsyncBody(stmt.finalizer.body, finEnv);
-    }
+    if (stmt.finalizer != null) yield* this.evalAsyncStatement(stmt.finalizer, env);
 
     // rethrow the pending exception (which may be `null`/`undefined` from a raw throw)
     // 重抛未决异常（原始 throw 可能为 `null`/`undefined`）
