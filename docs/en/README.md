@@ -22,7 +22,7 @@ highlights:
 
       - title: Lightweight
         icon: bolt
-        details: Less than 10 kb
+        details: About 12.2 kB
 
       - title: References
         icon: route
@@ -84,7 +84,7 @@ highlights:
 
       - title: Lightweight
         icon: bolt
-        details: Only about 202 kb in size
+        details: About 108.7 kB in size
 
 footer: Using the <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> theme
 ---

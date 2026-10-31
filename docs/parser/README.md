@@ -3,7 +3,7 @@ title: "@mptool/parser"
 icon: network-wired
 ---
 
-小程序 HTML 解析器，大小仅 3.5kb。
+小程序 HTML 解析器，大小约 69.6 kB。
 
 <!-- more -->
 

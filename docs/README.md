@@ -22,7 +22,7 @@ highlights:
 
       - title: 轻量
         icon: bolt
-        details: < 10 kb 的大小
+        details: 约 12.2 kB 的大小
 
       - title: 引用
         icon: route
@@ -84,7 +84,7 @@ highlights:
 
       - title: 轻量
         icon: bolt
-        details: 大小仅约 202 kb
+        details: 大小约 108.7 kB
 
 footer: 使用 <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> 主题
 ---

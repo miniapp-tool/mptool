@@ -3,7 +3,7 @@ title: "@mptool/enhance"
 icon: toolbox
 ---
 
-小程序增强框架，大小仅 8.59kB。
+小程序增强框架，大小约 12.2 kB。
 
 跨组件、页面通信，页面组件间引用，生命周期扩展和 TypeScript 支持。
 
