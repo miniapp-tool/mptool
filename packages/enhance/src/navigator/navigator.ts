@@ -1,7 +1,7 @@
 import { logger, query } from "@mptool/shared";
 
 import { getConfig } from "../config/index.js";
-import { ON_PAGE_NAVIGATE, ON_PAGE_READY, ON_PAGE_UNLOAD } from "../constant.js";
+import { ON_PAGE_NAVIGATE, ON_PAGE_READY } from "../constant.js";
 import { appEmitter, routeEmitter } from "../emitter/index.js";
 import type { PageQuery } from "../page/index.js";
 
@@ -15,13 +15,13 @@ export interface NavigatorTriggerOptions {
 /**
  * Default time (ms) a navigation may hold the lock before it is force released.
  *
- * The lock is normally released by `ON_PAGE_READY` / `ON_PAGE_UNLOAD`, but neither event is
+ * The lock is normally released by `ON_PAGE_READY` (plus `minInterval`), but the event is not
  * guaranteed: `wx.switchTab` back to an already loaded tab page never fires `onReady` again, and a
- * page can be closed while it is still loading. This timeout is a safety net so a missed event can
- * never block navigation forever. Override it with `$Config({ lockTimeout })`.
+ * page can be closed while it is still loading (e.g. forced back inside `onLoad`). This timeout is
+ * a safety net so a missed event can never block navigation forever. Override it with `$Config({
+ * lockTimeout })`.
  *
- * 导航锁的默认最长持有时间（ms）。目标页未能触发 `onReady` / `onUnload` 时，锁会在该时间后强制释放， 避免导航永久失效。可通过 `$Config({
- * lockTimeout })` 覆盖。
+ * 导航锁的默认最长持有时间（ms）。目标页未触发 `onReady` 时，锁会在该时间后强制释放，避免导航永久失效。 可通过 `$Config({ lockTimeout })` 覆盖。
  */
 const DEFAULT_NAVIGATION_LOCK_TIMEOUT = 5000;
 
@@ -178,13 +178,16 @@ export function getTrigger(type: NavigatorType): (pageNameWithArg: string) => an
   };
 }
 
-// release navigate lock with $minInterval ms delay after pageReady triggers
+// Release the navigate lock only after the target page is ready (+ `minInterval`). `ON_PAGE_UNLOAD`
+// is deliberately not a release trigger: when navigating with `redirectTo` / `reLaunch` / from a
+// non-tab page with `switchTab`, the *old* page unloads before the target page becomes ready, and
+// releasing there would let a second tap start a navigation while the target is still loading.
+// A target page that never becomes ready (e.g. it is forced to go back inside `onLoad`) is handled
+// by the dead-lock safety net armed in `acquireNavigationLock`.
+// 仅在目标页 ready（并按 `minInterval` 延迟）后释放导航锁。`ON_PAGE_UNLOAD` 故意不作为释放时机：
+// `redirectTo` / `reLaunch` / 从非 tab 页 `switchTab` 时旧页会在目标页 ready 之前卸载，此时释放会让后续
+// 点击在目标页仍在加载时发起新的导航。目标页永不 ready（如 onLoad 内被强制返回）由
+// `acquireNavigationLock` 中设置的超时兜底处理。
 appEmitter.on(ON_PAGE_READY, () => {
   releaseNavigationLock(getConfig().minInterval ?? 100);
-});
-
-// release navigate lock on page unload, in case the target page never fires
-// onReady (e.g. it is forced to go back during onLoad) to avoid a dead lock
-appEmitter.on(ON_PAGE_UNLOAD, () => {
-  releaseNavigationLock();
 });

@@ -24,7 +24,7 @@ export interface AppConfigCommonOptions {
   /**
    * 导航锁的最长持有时间，单位 ms
    *
-   * 目标页未能触发 `onReady` / `onUnload` 时，锁会在该时间后强制释放，避免导航永久失效。
+   * 目标页未能触发 `onReady` 时，锁会在该时间后强制释放，避免导航永久失效。
    *
    * @default 5000
    */
