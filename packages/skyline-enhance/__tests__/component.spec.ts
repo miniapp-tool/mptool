@@ -410,7 +410,7 @@ describe("$ (bind)", () => {
     ).not.toThrow();
   });
 
-  it("should attach ref on $attached event", () => {
+  it("should attach ref on $attached event and lazily initialize $refs when missing", () => {
     $Config({ defaultPage: "/pages/$name" });
 
     let componentOptions: TrivialComponentOptions | undefined;
@@ -440,6 +440,16 @@ describe("$ (bind)", () => {
 
     expect(parent.$refs.get("childRef")).toBe(childInstance);
     expect(childInstance.$attached).toHaveBeenCalledWith(parent);
+
+    // 页面实例在 onLoad 之前触发子组件 attached 时，$refs 尚未初始化，应按需创建
+    const uninitializedPage: { $refs?: Map<string, unknown> } = {};
+
+    getBind(componentOptions)?.call(uninitializedPage, {
+      detail: { id: childInstance.$id, event: "$attached", args: [] },
+    });
+
+    expect(uninitializedPage.$refs).toBeInstanceOf(Map);
+    expect(uninitializedPage.$refs?.get("childRef")).toBe(childInstance);
   });
 
   it("should attach ref without registering an unnamed ref", () => {

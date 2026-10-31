@@ -399,7 +399,7 @@ describe("page hot reload", () => {
     }
   });
 
-  it("should not break the page lifecycle when onHotReload throws", () => {
+  it("should not break the page lifecycle when onHotReload throws or rejects", () => {
     (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
     mockRequest('return { onHotReload() { throw new Error("boom"); } } };');
     $Config({
@@ -423,6 +423,15 @@ describe("page hot reload", () => {
       // onHotReload 抛异常不应阻断用户 onReady
       expect(() => getOptions().onReady?.call(instance)).not.toThrow();
       expect(userOnReadyCalled).toBe(true);
+
+      // 异步 onHotReload 返回被拒绝的 Promise 时同样被吞掉，不产生 unhandled rejection
+      mockRequest('return { async onHotReload() { throw new Error("async boom"); } };');
+      $Page("hotHookAsyncRejects", {});
+
+      const asyncInstance = { data: {} };
+
+      getOptions().onLoad?.call(asyncInstance);
+      expect(() => getOptions().onReady?.call(asyncInstance)).not.toThrow();
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
@@ -1008,7 +1017,93 @@ describe("page hot reload", () => {
     expect(requestCount).toBe(2);
   });
 
-  it("should chain hot reload lifecycles after the framework hooks", () => {
+  it("should ignore stale in-flight completion when cache is cleared and refetched", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const callbacks: ((result: { statusCode: number; data: string }) => void)[] = [];
+
+    (globalThis as unknown as { wx: Record<string, unknown> }).wx.request = (option: {
+      success: (result: { statusCode: number; data: string }) => void;
+    }): void => {
+      callbacks.push(option.success);
+    };
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+
+    try {
+      // 第一次注册启动 Fetch #1
+      $Page("hotReloadABA", {});
+      expect(callbacks).toHaveLength(1);
+
+      // Fetch #1 仍在途时清除缓存并重新注册，启动 Fetch #2
+      clearHotReloadCache("hotReloadABA");
+      $Page("hotReloadABA", {});
+      expect(callbacks).toHaveLength(2);
+
+      const instance = { data: {} } as { data: Record<string, unknown>; ver?: () => number };
+
+      getOptions().onLoad?.call(instance);
+      expect(getPendingHotReloadCount()).toBe(1);
+
+      // Fetch #1 的过期响应先返回：必须被忽略，不能结束或覆盖 Fetch #2
+      callbacks[0]({ statusCode: 200, data: "return { ver() { return 1; } };" });
+      expect(getPendingHotReloadCount()).toBe(1);
+      expect(instance.ver).toBeUndefined();
+
+      // Fetch #2 的响应返回：正常生效
+      callbacks[1]({ statusCode: 200, data: "return { ver() { return 2; } };" });
+      expect(getPendingHotReloadCount()).toBe(0);
+      expect(instance.ver?.()).toBe(2);
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should skip a hot reload hook that is not a function", () => {
+    (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
+    const resolveRequest = captureRequest();
+
+    $Config({
+      defaultPage: "/pages/$name",
+      hotReloadPattern: "https://example.com/hotReloadCode/$name",
+    });
+
+    const getOptions = capturePageOptions();
+    const instance = { data: {} };
+
+    try {
+      $Page("hotReloadAccessor", {});
+
+      getOptions().onLoad?.call(instance);
+      getOptions().onReady?.call(instance);
+
+      // 远程载荷用 getter 暴露 onHotReload：Object.assign 读到的是 undefined，
+      // 而钩子判断读到的是函数。补挂后钩子不是函数时必须跳过而不是抛错。
+      resolveRequest(
+        "var reads = 0;" +
+          "return {" +
+          "  ping() { return 1; }," +
+          "  get onHotReload() {" +
+          "    reads += 1;" +
+          "    return reads === 1 ? undefined : function () { this.data.applied = true; };" +
+          "  }" +
+          "};",
+      );
+
+      // 载荷已执行：其它方法正常补挂
+      expect((instance as { ping?: () => number }).ping?.()).toBe(1);
+      // 钩子不是函数：跳过，不抛错、不执行
+      expect((instance.data as { applied?: boolean }).applied).toBeUndefined();
+    } finally {
+      delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
+    }
+  });
+
+  it("should chain hot reload lifecycles after the framework hooks and replace user lifecycles", () => {
     (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY] = createFunction;
     mockRequest(
       "return {" +
@@ -1022,9 +1117,12 @@ describe("page hot reload", () => {
     });
 
     const getOptions = capturePageOptions();
+    const userOnLoad = vi.fn<() => void>();
 
     try {
-      $Page("hotLifecycleMerge", {});
+      $Page("hotLifecycleMerge", {
+        onLoad: userOnLoad,
+      });
 
       const options = getOptions();
 
@@ -1039,10 +1137,11 @@ describe("page hot reload", () => {
       instance.data = { n: 41 };
       options.onLoad?.call(instance);
 
-      // 框架 onLoad 逻辑照常执行（$state 初始化），onLoad 已被合并包装而不是裸覆盖
+      // 框架 onLoad 逻辑照常执行（$state 初始化），且当前首次 onLoad 即执行热更新版本并替换原始 userOnLoad
       expect(instance.$state).toBeDefined();
+      expect(instance.data.hotLoad).toBe(true);
+      expect(userOnLoad).not.toHaveBeenCalled();
       expect(instance.onLoad).not.toBe(options.onLoad);
-      expect(instance.onLoad).toBeTypeOf("function");
       // 非生命周期方法保持覆盖语义
       expect(instance.extra?.()).toBe(42);
 
@@ -1057,6 +1156,7 @@ describe("page hot reload", () => {
 
       expect(anotherInstance.$state).toBeDefined();
       expect(anotherInstance.data.hotLoad).toBe(true);
+      expect(userOnLoad).not.toHaveBeenCalled();
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
@@ -1073,9 +1173,14 @@ describe("page hot reload", () => {
     });
 
     const getOptions = capturePageOptions();
+    const userOnReady = vi.fn<() => void>();
+    const userOnUnload = vi.fn<() => void>();
 
     try {
-      $Page("hotLifecycleBookkeeping", {});
+      $Page("hotLifecycleBookkeeping", {
+        onReady: userOnReady,
+        onUnload: userOnUnload,
+      });
 
       const options = getOptions();
 
@@ -1095,15 +1200,17 @@ describe("page hot reload", () => {
 
       instance.onReady?.();
 
-      // 热更新 onReady 执行，且框架的 ready 簿记未被覆盖
+      // 热更新 onReady 执行，框架的 ready 簿记未被覆盖，且原始 userOnReady 被替换不执行
       expect(instance.data.hotReady).toBe(true);
+      expect(userOnReady).not.toHaveBeenCalled();
 
       instance.$refs?.set("child", {});
       instance.onUnload?.();
 
-      // 热更新 onUnload 执行，且框架的 onUnload 逻辑（清理 $refs）仍然执行
+      // 热更新 onUnload 执行，框架的 onUnload 逻辑（清理 $refs）仍然执行，且原始 userOnUnload 被替换不执行
       expect(instance.data.hotUnload).toBe(true);
       expect(instance.$refs?.size).toBe(0);
+      expect(userOnUnload).not.toHaveBeenCalled();
     } finally {
       delete (globalThis as Record<PropertyKey, unknown>)[HOT_RELOAD_FUNCTION_KEY];
     }
