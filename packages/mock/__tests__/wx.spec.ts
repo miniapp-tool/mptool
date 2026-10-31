@@ -458,6 +458,22 @@ describe("wx mock", () => {
       expect(logger).toHaveProperty("warn");
       expect(logger).toHaveProperty("group");
       expect(logger).toHaveProperty("groupEnd");
+      expect(logger).toHaveProperty("setFilterMsg");
+    });
+
+    it("should accept logs and filter messages without persisting them", () => {
+      const logger = wx.getRealtimeLogManager();
+
+      expect(() => {
+        logger.debug("debug");
+        logger.info("info");
+        logger.warn("warn");
+        logger.error("error");
+        logger.log("log");
+        logger.group("group");
+        logger.groupEnd();
+        logger.setFilterMsg("filter");
+      }).not.toThrow();
     });
   });
 
