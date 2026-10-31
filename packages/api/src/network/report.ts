@@ -48,10 +48,9 @@ export const reportNetworkStatus = (): void => {
         }
         default: {
           void showToast("网络连接出现问题，请稍后重试");
+          logger.error("Request fail with", networkType);
         }
       }
-
-      logger.error("Request fail with", networkType);
     },
     fail: () => {
       void showToast("网络连接出现问题，请稍后重试");
