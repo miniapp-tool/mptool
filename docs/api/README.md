@@ -29,18 +29,6 @@ icon: puzzle-piece
 
 保存联系人到通讯录。
 
-### getCurrentPage
-
-- 类型: `<T extends Record<string, any>>() => (T & WechatMiniprogram.Page.TrivialInstance) | null`
-
-获取当前页面实例。
-
-### getCurrentRoute
-
-- 类型: `() => string`
-
-获取当前页面路径。
-
 ## compareVersion
 
 ### compareVersion
@@ -59,6 +47,24 @@ icon: puzzle-piece
   - `-1`: versionA < versionB
 
 比较两个版本号的大小。
+
+## framework
+
+### getCurrentPage
+
+- 类型: `<T extends Record<string, any>>() => (T & WechatMiniprogram.Page.TrivialInstance) | null`
+
+- 说明: 返回页面栈栈顶的页面实例，页面栈为空时返回 `null`；泛型 `T` 用于声明页面实例上的自定义字段。
+
+获取当前页面实例。
+
+### getCurrentRoute
+
+- 类型: `() => string`
+
+- 说明: 页面栈为空时返回空字符串。
+
+获取当前页面路径（页面的 `route`，不含 query）。
 
 ## media
 
@@ -107,6 +113,35 @@ icon: puzzle-piece
 - 类型: `() => void`
 
 检测网络状态并显示提示。
+
+## permission
+
+### withScope
+
+- 类型: `(scope: keyof WechatMiniprogram.AuthSetting, run: () => Promise<void>, denyMessage: string) => Promise<void>`
+
+- 参数:
+  - `scope`: 要申请的权限（如 `"scope.userLocation"`、`"scope.writePhotosAlbum"`）
+  - `run`: 已授权（或用户刚同意授权）后执行的操作
+  - `denyMessage`: 用户拒绝授权时弹窗展示的提示文案
+
+- 返回值:
+  - `run` 执行完成时 resolve
+  - 用户拒绝授权、或申请流程本身失败时 reject 一个 `MpError`
+
+确保拿到指定权限后再执行操作：已授权时直接执行 `run`；未授权时先调用 `wx.authorize`，用户同意后执行 `run`。用户拒绝授权时会弹出 `denyMessage` 提示：确认后跳转设置页，确认或取消都会以 reject 一个 `MpError` 结束；`getSetting` 等流程本身的失败同样 reject。
+
+```ts
+import { withScope } from "@mptool/api";
+
+await withScope(
+  "scope.writePhotosAlbum",
+  async () => {
+    await wx.saveImageToPhotosAlbum({ filePath: imgPath });
+  },
+  "需要相册权限才能保存图片",
+);
+```
 
 ## ui
 

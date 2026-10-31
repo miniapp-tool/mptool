@@ -29,18 +29,6 @@ Writes content to the clipboard.
 
 Saves a contact to the address book.
 
-### getCurrentPage
-
-- Type: `<T extends Record<string, any>>() => (T & WechatMiniprogram.Page.TrivialInstance) | null`
-
-Gets the current page instance.
-
-### getCurrentRoute
-
-- Type: `() => string`
-
-Gets the current page path.
-
 ## compareVersion
 
 ### compareVersion
@@ -59,6 +47,24 @@ Gets the current page path.
   - `-1`: versionA < versionB
 
 Compares two version numbers.
+
+## framework
+
+### getCurrentPage
+
+- Type: `<T extends Record<string, any>>() => (T & WechatMiniprogram.Page.TrivialInstance) | null`
+
+- Notes: returns the top page instance of the page stack, or `null` when the stack is empty; the generic `T` declares the custom fields on the page instance.
+
+Gets the current page instance.
+
+### getCurrentRoute
+
+- Type: `() => string`
+
+- Notes: returns an empty string when the page stack is empty.
+
+Gets the current page path (the page `route`, without the query string).
 
 ## media
 
@@ -107,6 +113,35 @@ Downloads a file and returns the temporary file path.
 - Type: `() => void`
 
 Detects the network status and shows a prompt.
+
+## permission
+
+### withScope
+
+- Type: `(scope: keyof WechatMiniprogram.AuthSetting, run: () => Promise<void>, denyMessage: string) => Promise<void>`
+
+- Parameters:
+  - `scope`: the permission to request (such as `"scope.userLocation"` or `"scope.writePhotosAlbum"`)
+  - `run`: the operation to perform once the permission is granted (or just granted by the user)
+  - `denyMessage`: the prompt shown in a modal when the user denies the permission
+
+- Returns:
+  - resolves when `run` completes
+  - rejects with an `MpError` when the user denies the permission or the request flow itself fails
+
+Ensures the given permission is granted before running the operation: it runs `run` directly when the permission is already granted; otherwise it calls `wx.authorize` and runs `run` after the user agrees. When the user denies, it shows the `denyMessage` prompt: confirming opens the settings page, and both confirming and cancelling reject with an `MpError`; failures of the flow itself (such as `getSetting`) also reject.
+
+```ts
+import { withScope } from "@mptool/api";
+
+await withScope(
+  "scope.writePhotosAlbum",
+  async () => {
+    await wx.saveImageToPhotosAlbum({ filePath: imgPath });
+  },
+  "Album permission is required to save the image",
+);
+```
 
 ## ui
 
