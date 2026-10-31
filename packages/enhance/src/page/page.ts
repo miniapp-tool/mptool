@@ -217,6 +217,12 @@ export const $Page: PageConstructor = <
       shouldBeFirstPage = false;
       this.$state = { ...options.$state, firstOpen: isFirstPage };
 
+      // Every page instance needs its own `$refs`: the page definition is shared by all instances of
+      // the same page, so a single Map on it would leak child components between instances.
+      // 每个页面实例都需要独立的 `$refs`：页面定义被同一页面的所有实例共享，挂在定义上的 Map 会让
+      // 子组件引用在实例之间串台。
+      this.$refs = new Map();
+
       // 将已就绪的热更新方法挂到实例（未就绪时登记，拉取完成后补挂）
       // apply hot-reload methods to the instance (register when not ready, patch on resolve)
       if (hotReloadPattern) applyHotReload(name, this);
@@ -257,6 +263,10 @@ export const $Page: PageConstructor = <
     function handleOnUnload(this: PageInstance<Data, Custom>): void {
       appEmitter.emit(ON_PAGE_UNLOAD);
 
+      // 释放当前实例的子组件引用（每个实例独占自己的 Map）
+      // release this instance's child-component references (every instance owns its own Map)
+      this.$refs?.clear();
+
       // 注销 onAwake 监听器，避免页面卸载后残留
       const onAwakeHandler = onAwakeHandlers.get(this);
 
@@ -271,7 +281,7 @@ export const $Page: PageConstructor = <
   );
   /* oxlint-enable typescript/no-misused-promises */
 
-  mount(options);
+  mount(options, true);
 
   // extend page config
   if (injectPage) injectPage(name, options);

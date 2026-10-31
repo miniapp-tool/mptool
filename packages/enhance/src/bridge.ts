@@ -211,7 +211,16 @@ export const bind = function (
 export function mount<
   Data extends WechatMiniprogram.IAnyObject,
   Custom extends WechatMiniprogram.IAnyObject,
->(ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>): void;
+>(
+  ctx: PageOptions<Data, Custom> & Partial<ExtendedPageMethods<Data, Custom>>,
+  /**
+   * Whether `ctx` is a page definition. Page instances create their own `$refs` in `onLoad`, so the
+   * shared page definition must not own one.
+   *
+   * 是否为页面定义。页面实例会在 `onLoad` 中创建独立的 `$refs`，共享的页面定义上不应挂载。
+   */
+  isPage?: boolean,
+): void;
 
 /**
  * 挂载组件方法
@@ -242,14 +251,19 @@ export function mount<
 export function mount(
   ctx: Partial<ExtendedPageMethods<WechatMiniprogram.IAnyObject, WechatMiniprogram.IAnyObject>> &
     WechatMiniprogram.IAnyObject,
+  isPage = false,
 ): void {
   const config = getConfig();
 
   // oxlint-disable-next-line id-length
   ctx.$ = bind;
 
-  // 实例引用集合
-  ctx.$refs = new Map();
+  // Page instances create their own `$refs` in `onLoad`: a Map on the shared page definition would
+  // be shared by every instance of the same page. Components are mounted per instance in
+  // `created`, so their `$refs` is created here.
+  // 页面实例在 `onLoad` 中创建独立的 `$refs`：若在共享的页面定义上创建 Map，同一页面的所有实例会共享它。
+  // 组件在 `created` 中按实例挂载，因此可以在此创建 `$refs`。
+  if (!isPage) ctx.$refs = new Map();
 
   ctx.$on = userEmitter.on;
   ctx.$off = userEmitter.off;

@@ -20,6 +20,11 @@ interface PageStateInstance {
   $state?: PageState;
 }
 
+interface PageInstanceLike {
+  $refs?: Map<string, unknown>;
+  $state?: PageState;
+}
+
 interface CapturedPageOptions extends MyPageOptions {
   $state?: PageState;
 }
@@ -47,6 +52,15 @@ const loadPageState = (options: CapturedPageOptions | undefined): PageState => {
 
   // the wrapped `onLoad` always creates the instance state
   return instance.$state!;
+};
+
+// Run one page instance through the wrapped `onLoad` and return the instance
+const loadPageInstance = (options: CapturedPageOptions | undefined): PageInstanceLike => {
+  const instance: PageInstanceLike = {};
+
+  if (options?.onLoad) void Reflect.apply(options.onLoad, instance, [{}]);
+
+  return instance;
 };
 
 describe($Page, () => {
@@ -313,5 +327,34 @@ describe($Page, () => {
     } finally {
       errorSpy.mockRestore();
     }
+  });
+
+  it("should give every page instance its own $refs", () => {
+    $Config({ defaultPage: "/pages/$name" });
+
+    const getOptions = capturePageOptions();
+
+    $Page("index", {});
+
+    const options = getOptions()!;
+
+    // 页面定义（被所有实例共享）上不再挂载会被共享的 Map
+    expect(options).not.toHaveProperty("$refs");
+
+    const first = loadPageInstance(options);
+    const second = loadPageInstance(options);
+
+    expect(first.$refs).toBeInstanceOf(Map);
+    expect(second.$refs).toBeInstanceOf(Map);
+    expect(first.$refs).not.toBe(second.$refs);
+
+    first.$refs?.set("child", { name: "first" });
+    second.$refs?.set("child", { name: "second" });
+
+    // 卸载一个实例只清理自己的引用，不影响另一个仍在页面栈中的实例
+    void options.onUnload?.call(first);
+
+    expect(first.$refs?.size).toBe(0);
+    expect(second.$refs?.get("child")).toStrictEqual({ name: "second" });
   });
 });
