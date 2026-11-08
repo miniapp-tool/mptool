@@ -46,7 +46,7 @@
     "@mptool/parser": "workspace:*",
     "@mptool/shared": "workspace:*",
     "@mptool/skyline-enhance": "workspace:*",
-    "miniprogram-api-typings": "5.2.3"
+    "miniprogram-api-typings": "5.3.1"
   },
   "peerDependencies": {
     "miniprogram-api-typings": "^5.0.0"
