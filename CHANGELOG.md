@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/miniapp-tool/mptool/compare/v0.20.0...v0.20.1) (2026-11-12)
+
+### 🐛 Bug Fixes
+
+- adapt tests and mock to miniprogram-api-typings 5.3.1 ([beb4c33](https://github.com/miniapp-tool/mptool/commit/beb4c33b8100f19a8d99f83c7a7f5cb35602db59))
+- **enhance:** lazy-init page $refs and replace user lifecycles on hot reload ([#1681](https://github.com/miniapp-tool/mptool/issues/1681)) ([9323c7f](https://github.com/miniapp-tool/mptool/commit/9323c7f809e235c83e5249a970c1b49093349b42))
+- harden edge cases in shared, api, file and mock ([#1678](https://github.com/miniapp-tool/mptool/issues/1678)) ([bffbfb3](https://github.com/miniapp-tool/mptool/commit/bffbfb372084a89182c308a2b311d2539dee3c83))
+- **net:** handle URLSearchParams.has value, runtime header shapes, and retry edge cases ([#1679](https://github.com/miniapp-tool/mptool/issues/1679)) ([00322e3](https://github.com/miniapp-tool/mptool/commit/00322e3be54cdc2cad469601ef441006f91036c9))
+- **run:** resolve remaining interpreter, parser and createFunction edge cases ([#1680](https://github.com/miniapp-tool/mptool/issues/1680)) ([00c4564](https://github.com/miniapp-tool/mptool/commit/00c456425ac5293af56861ef634a8ef7412c5a8f))
+
+### Documentation
+
+- fix remaining documentation and demo issues ([#1677](https://github.com/miniapp-tool/mptool/issues/1677)) ([726a40e](https://github.com/miniapp-tool/mptool/commit/726a40efa7173ebd55f824d0f32d3f1f93013c98))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.3.1 ([#1687](https://github.com/miniapp-tool/mptool/issues/1687)) ([31aa423](https://github.com/miniapp-tool/mptool/commit/31aa42338f74c1d20098b8b052cab29b4a60ecd6))
+- **deps:** update dependency miniprogram-api-typings to v5.3.1 ([#1688](https://github.com/miniapp-tool/mptool/issues/1688)) ([4523716](https://github.com/miniapp-tool/mptool/commit/4523716e70654d8efa26338ad82cf11b77ea2dea))
+- **deps:** update dependency oxfmt to v0.77.0 ([#1689](https://github.com/miniapp-tool/mptool/issues/1689)) ([171e1f9](https://github.com/miniapp-tool/mptool/commit/171e1f9870143d49e41c193a40290c4f4e54930d))
+- **deps:** update dependency oxlint-tsgolint to v7.0.2006 ([#1683](https://github.com/miniapp-tool/mptool/issues/1683)) ([da69b9b](https://github.com/miniapp-tool/mptool/commit/da69b9bff3f15bbd8f88c146865b1554ce7e6a70))
+- **deps:** update dependency rimraf to v6.1.4 ([#1684](https://github.com/miniapp-tool/mptool/issues/1684)) ([a9de353](https://github.com/miniapp-tool/mptool/commit/a9de353c83522f7ae1f055cb23c6053eb43d43d5))
+- **deps:** update dependency set-cookie-parser to v3.2.2 ([#1682](https://github.com/miniapp-tool/mptool/issues/1682)) ([37a5cd4](https://github.com/miniapp-tool/mptool/commit/37a5cd4acb777c8ba86f6b8186841758de3d7ce6))
+- **deps:** update lerna-lite monorepo to v5.7.0 ([#1691](https://github.com/miniapp-tool/mptool/issues/1691)) ([7cf8cbc](https://github.com/miniapp-tool/mptool/commit/7cf8cbcf03762c67573e0c6e88879dec835a816c))
+- **deps:** update pnpm to v12.18.0 ([#1692](https://github.com/miniapp-tool/mptool/issues/1692)) ([7ca8f5e](https://github.com/miniapp-tool/mptool/commit/7ca8f5e82a92d354c6fece178acc674883b6c5ec))
+- **deps:** update vitest monorepo to v5.1.0 ([#1693](https://github.com/miniapp-tool/mptool/issues/1693)) ([6187ef6](https://github.com/miniapp-tool/mptool/commit/6187ef6b095df7c20a9a7b2d76affb675f309f2d))
+
 ## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
 
 ### ⚠ BREAKING CHANGES

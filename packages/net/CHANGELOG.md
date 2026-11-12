@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/miniapp-tool/mptool/compare/v0.20.0...v0.20.1) (2026-11-12)
+
+### 🐛 Bug Fixes
+
+- **net:** handle URLSearchParams.has value, runtime header shapes, and retry edge cases ([#1679](https://github.com/miniapp-tool/mptool/issues/1679)) ([00322e3](https://github.com/miniapp-tool/mptool/commit/00322e3be54cdc2cad469601ef441006f91036c9))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.3.1 ([#1687](https://github.com/miniapp-tool/mptool/issues/1687)) ([31aa423](https://github.com/miniapp-tool/mptool/commit/31aa42338f74c1d20098b8b052cab29b4a60ecd6))
+- **deps:** update dependency set-cookie-parser to v3.2.2 ([#1682](https://github.com/miniapp-tool/mptool/issues/1682)) ([37a5cd4](https://github.com/miniapp-tool/mptool/commit/37a5cd4acb777c8ba86f6b8186841758de3d7ce6))
+
 ## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
 
 ### ⚠ BREAKING CHANGES

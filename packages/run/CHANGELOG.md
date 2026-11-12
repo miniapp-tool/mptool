@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/miniapp-tool/mptool/compare/v0.20.0...v0.20.1) (2026-11-12)
+
+### 🐛 Bug Fixes
+
+- **run:** resolve remaining interpreter, parser and createFunction edge cases ([#1680](https://github.com/miniapp-tool/mptool/issues/1680)) ([00c4564](https://github.com/miniapp-tool/mptool/commit/00c456425ac5293af56861ef634a8ef7412c5a8f))
+
+### Miscellaneous Chores
+
+- **deps:** update dependency miniprogram-api-typings to v5.3.1 ([#1687](https://github.com/miniapp-tool/mptool/issues/1687)) ([31aa423](https://github.com/miniapp-tool/mptool/commit/31aa42338f74c1d20098b8b052cab29b4a60ecd6))
+
 ## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
 
 ### ⚠ BREAKING CHANGES

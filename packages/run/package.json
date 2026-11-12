@@ -1,6 +1,6 @@
 {
   "name": "@mptool/run",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "JS interpreter (custom eval) for Wechat miniapp",
   "keywords": [
     "eval",

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/miniapp-tool/mptool/compare/v0.20.0...v0.20.1) (2026-11-12)
+
+### 🐛 Bug Fixes
+
+- adapt tests and mock to miniprogram-api-typings 5.3.1 ([beb4c33](https://github.com/miniapp-tool/mptool/commit/beb4c33b8100f19a8d99f83c7a7f5cb35602db59))
+- harden edge cases in shared, api, file and mock ([#1678](https://github.com/miniapp-tool/mptool/issues/1678)) ([bffbfb3](https://github.com/miniapp-tool/mptool/commit/bffbfb372084a89182c308a2b311d2539dee3c83))
+
 ## [0.20.0](https://github.com/miniapp-tool/mptool/compare/v0.19.0...v0.20.0) (2026-10-31)
 
 ### ⚠ BREAKING CHANGES
