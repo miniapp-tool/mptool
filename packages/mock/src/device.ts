@@ -109,6 +109,13 @@ export const deviceApi = {
     return callCallback(option, { errMsg: "saveVideoToPhotosAlbum:ok" });
   },
 
+  saveMediaToPhotosAlbum(option: unknown): unknown {
+    if (uiDecisions.auth["scope.writePhotosAlbum"] === false)
+      return callFail(option, "saveMediaToPhotosAlbum:fail auth deny");
+
+    return callCallback(option, { errMsg: "saveMediaToPhotosAlbum:ok" });
+  },
+
   chooseMessageFile(option: unknown): unknown {
     return callCallback(option, { tempFiles: [], errMsg: "chooseMessageFile:ok" });
   },

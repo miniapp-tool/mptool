@@ -112,7 +112,7 @@ describe($Page, () => {
       onResize() {},
       onTabItemTap(item) {
         expectTypeOf(item).toEqualTypeOf<WechatMiniprogram.Page.ITabItemTapOption>();
-        expectTypeOf(item.index).toEqualTypeOf<string>();
+        expectTypeOf(item.index).toEqualTypeOf<number>();
         expectTypeOf(item.pagePath).toEqualTypeOf<string>();
         expectTypeOf(item.text).toEqualTypeOf<string>();
       },
@@ -241,8 +241,8 @@ describe($Page, () => {
 
     $Page("example", {
       onAddToFavorites(res) {
-        // webview 页面返回 webviewUrl
-        if (res.webviewUrl) console.log("WebviewUrl:", res.webviewUrl);
+        // webview 页面返回 webViewUrl
+        if (res.webViewUrl) console.log("WebViewUrl:", res.webViewUrl);
 
         return {
           title: "自定义标题",

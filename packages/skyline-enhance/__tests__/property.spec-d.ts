@@ -28,7 +28,8 @@ describe($Component, () => {
         },
       },
       options: {
-        addGlobalClass: true,
+        // `addGlobalClass: true` is deprecated upstream; this is the equivalent option.
+        styleIsolation: "apply-shared",
       },
     });
 

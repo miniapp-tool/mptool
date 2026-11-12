@@ -64,10 +64,10 @@ describe("api coverage guard", () => {
     expect(methodSet.has("request")).toBe(true);
   });
 
-  it("should keep the unsupported allowlist split at A4 97 + deferred 24", () => {
-    expect(A4_UNSUPPORTED_APIS).toHaveLength(97);
+  it("should keep the unsupported allowlist split at A4 102 + deferred 24", () => {
+    expect(A4_UNSUPPORTED_APIS).toHaveLength(102);
     expect(DEFERRED_APIS).toHaveLength(24);
-    expect(UNSUPPORTED_APIS).toHaveLength(121);
+    expect(UNSUPPORTED_APIS).toHaveLength(126);
     expect(new Set(UNSUPPORTED_APIS).size).toBe(UNSUPPORTED_APIS.length);
   });
 

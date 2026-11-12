@@ -101,6 +101,12 @@ describe("device mock", () => {
     });
   });
 
+  it("saveMediaToPhotosAlbum should resolve", async () => {
+    await expect(wx.saveMediaToPhotosAlbum({ filePath: "x.mp4" })).resolves.toStrictEqual({
+      errMsg: "saveMediaToPhotosAlbum:ok",
+    });
+  });
+
   it("chooseMessageFile should resolve", async () => {
     const res = (await wx.chooseMessageFile({})) as { tempFiles: unknown[] };
 

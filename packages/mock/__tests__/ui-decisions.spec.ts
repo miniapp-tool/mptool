@@ -167,11 +167,17 @@ describe("ui decisions", () => {
       await expect(wx.saveVideoToPhotosAlbum({ filePath: "x" })).rejects.toMatchObject({
         errMsg: "saveVideoToPhotosAlbum:fail auth deny",
       });
+      await expect(wx.saveMediaToPhotosAlbum({ filePath: "x" })).rejects.toMatchObject({
+        errMsg: "saveMediaToPhotosAlbum:fail auth deny",
+      });
     });
 
     it("should succeed by default", async () => {
       await expect(wx.saveImageToPhotosAlbum({ filePath: "x" })).resolves.toMatchObject({
         errMsg: "saveImageToPhotosAlbum:ok",
+      });
+      await expect(wx.saveMediaToPhotosAlbum({ filePath: "x" })).resolves.toMatchObject({
+        errMsg: "saveMediaToPhotosAlbum:ok",
       });
     });
   });

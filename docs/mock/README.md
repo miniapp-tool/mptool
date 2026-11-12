@@ -419,7 +419,7 @@ mockWx.authorize("deny"); // 所有未授权 scope 的 authorize 都失败
 - `wx.getSetting` / `wx.openSetting` 返回当前 `authSetting`（只包含配置过或授权过的 scope）。
 - `wx.authorize({scope})`：已授权 → 成功；scope 明确为 `false` 或 `authorize("deny")` → `fail "authorize:fail auth deny"` 并记录 `false`；否则成功并记录 `true`。
 - `withScope` 的已授权 / 首次授权 / 拒绝 / `getSetting` 失败四条分支都可以用上述配置或 `mockWx.failNext("getSetting", ...)` 覆盖。
-- `saveImageToPhotosAlbum` / `saveVideoToPhotosAlbum` 在 `scope.writePhotosAlbum === false` 时 fail `auth deny`。
+- `saveImageToPhotosAlbum` / `saveVideoToPhotosAlbum` / `saveMediaToPhotosAlbum` 在 `scope.writePhotosAlbum === false` 时 fail `auth deny`。
 
 ### 剪贴板
 
@@ -797,7 +797,7 @@ cache.get("key"); // "value"
 - 视频号 / 直播 / 广告、公众号 / 表情 / 贴纸、聊天工具；
 - 支付 / 卡券 / 门店 / 离线支付、Employee / 设备 VoIP、SOTER / 人脸 / VK / XR 等。
 
-完整名单见 `packages/mock/src/unsupported.ts` 的 `A4_UNSUPPORTED_APIS`（97 个）与 `DEFERRED_APIS`（24 个，渠道 / 聊天工具 / 日历等长尾）；两者合并为 `UNSUPPORTED_APIS`（121 个）。另有 `MOCK_ONLY_APIS`（15 个）列出 mock 暴露但 typings 没有（或已移除）的 API，例如 `getFileInfo`、`saveFile`、`getSavedFileList`、`showKeyboard`、`offSocket*`。
+完整名单见 `packages/mock/src/unsupported.ts` 的 `A4_UNSUPPORTED_APIS`（102 个）与 `DEFERRED_APIS`（24 个，渠道 / 聊天工具 / 日历等长尾）；两者合并为 `UNSUPPORTED_APIS`（126 个）。另有 `MOCK_ONLY_APIS`（15 个）列出 mock 暴露但 typings 没有（或已移除）的 API，例如 `getFileInfo`、`saveFile`、`getSavedFileList`、`showKeyboard`、`offSocket*`。
 
 ### 覆盖守护
 
