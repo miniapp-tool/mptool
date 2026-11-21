@@ -298,8 +298,7 @@ export const readJSON = <T = unknown>(
   path: string,
   encoding: FileEncoding = "utf-8",
 ): T | undefined => {
-  // oxlint-disable-next-line no-undefined
-  let data = undefined;
+  let data: T | undefined;
 
   const target = `${resolvePath(path)}.json`;
 

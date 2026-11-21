@@ -18,7 +18,7 @@ export const withScope = (
   new Promise((resolve, reject) => {
     // 执行目标操作，成功后 resolve
     const execute = (): void => {
-      void run().then(resolve, reject);
+      void run().then(resolve).catch(reject);
     };
 
     // donut 环境直接执行目标操作
