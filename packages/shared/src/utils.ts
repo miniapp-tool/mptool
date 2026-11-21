@@ -305,19 +305,17 @@ export const createQueue = <StopMessage>(
 
           if (task) {
             running += 1;
-            // 忽略单个任务的错误，队列不应被失败任务卡死
-            void task().then(
-              () => {
+            void task()
+              // 忽略单个任务的错误，队列不应被失败任务卡死
+              .catch(() => {
+                // A failing task must not stall the queue, so its rejection is intentionally ignored.
+                // 任务的拒绝被有意忽略，避免单个失败任务让队列停摆。
+              })
+              .then(() => {
                 running -= 1;
                 // oxlint-disable-next-line promise/no-callback-in-promise
                 next();
-              },
-              () => {
-                running -= 1;
-                // oxlint-disable-next-line promise/no-callback-in-promise
-                next();
-              },
-            );
+              });
           } else if (running === 0) {
             finish();
           }

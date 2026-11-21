@@ -891,7 +891,7 @@ export const createRequest = ({
       requests.add(abortable);
     }
 
-    void responsePromise.then(untrackOnSettle, untrackOnSettle);
+    void responsePromise.then(untrackOnSettle).catch(untrackOnSettle);
 
     return responsePromise;
   };

@@ -1182,6 +1182,58 @@ describe("request factory cancellation", () => {
     await expect(second).rejects.toMatchObject({ type: "abort" });
     expect(api.pendingCount()).toBe(0);
   });
+
+  it("should untrack a resolved request that settles without being aborted", async () => {
+    (wx as unknown as { request: unknown }).request = (option: {
+      success?: (result: {
+        data: unknown;
+        statusCode: number;
+        header: Record<string, string>;
+      }) => void;
+    }): unknown => {
+      option.success?.({ data: {}, statusCode: 200, header: {} });
+
+      return {
+        abort: (): void => void 0,
+        onHeadersReceived: (): void => void 0,
+        offHeadersReceived: (): void => void 0,
+      };
+    };
+
+    const api = createRequest({ server: "https://example.com" });
+
+    await expect(api.request("/ok", { cancelKey: "settled" })).resolves.toMatchObject({
+      status: 200,
+    });
+
+    // A settled request must drop its tracking entry, otherwise `abortAll()` keeps it forever.
+    await vi.waitFor(() => {
+      expect(api.pendingCount()).toBe(0);
+    });
+  });
+
+  it("should untrack a rejected request that settles without being aborted", async () => {
+    (wx as unknown as { request: unknown }).request = (option: {
+      fail?: (result: { errMsg: string }) => void;
+    }): unknown => {
+      option.fail?.({ errMsg: "" });
+
+      return {
+        abort: (): void => void 0,
+        onHeadersReceived: (): void => void 0,
+        offHeadersReceived: (): void => void 0,
+      };
+    };
+
+    const api = createRequest({ server: "https://example.com" });
+
+    await expect(api.request("/fail", { cancelKey: "settled" })).rejects.toThrow("request:fail");
+
+    // A rejected request must untrack as well.
+    await vi.waitFor(() => {
+      expect(api.pendingCount()).toBe(0);
+    });
+  });
 });
 
 describe("request response headers", () => {

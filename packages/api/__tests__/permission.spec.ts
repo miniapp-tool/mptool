@@ -77,6 +77,15 @@ describe(withScope, () => {
     expect(scopes).toStrictEqual(["scope.camera"]);
   });
 
+  it("should reject when the target action rejects", async () => {
+    mockGetSetting(true);
+    const error = new Error("boom");
+
+    await expect(withScope("scope.camera", () => Promise.reject(error), "测试权限")).rejects.toBe(
+      error,
+    );
+  });
+
   it("should reject when user denies authorization", async () => {
     let modalTitle = "";
     const mockShowModalApi = wx as unknown as {
