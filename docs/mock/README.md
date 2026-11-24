@@ -324,7 +324,7 @@ mockWx.compat({ storageResolveMissingKey: true });
 
 > 这些配置都会立即被对应的 mock 行为读取：`auth` / `authorize` / `user` 影响权限与 UI，`system` / `network` 影响系统信息与网络 API，`clipboard` / `login` 影响剪贴板与登录，`pages` / `file` / `dir` 直接预置页面栈与文件系统；`scope()` / `reset()` 可还原。
 
-## Storage 语义（真机对齐）
+## Storage 语义
 
 `@mptool/mock` 的 storage 按微信开发者工具实测行为工作（2026-10 实测，SDK 3.17.4 / libVersion 3.5.0 结论一致）：
 
@@ -906,7 +906,7 @@ mockWx.emit("bleConnectionStateChange", { deviceId: "d1", connected: true });
 
 ## 管理器对象
 
-`wx.createInnerAudioContext()`、`wx.createVideoContext()`、`wx.createCanvasContext()`、`wx.getRecorderManager()` 等常用管理器返回可调用的对象；A3 的 `createAnimation` / `createCameraContext` / `createMediaRecorder` / `createWorker` / socket / cache manager 等也已提供桩实现（能创建、方法齐全、事件可注册），见 [A3 管理器桩](#a3-管理器桩-能创建方法齐全事件可注册)。
+`wx.createInnerAudioContext()`、`wx.createVideoContext()`、`wx.createCanvasContext()`、`wx.getRecorderManager()` 等常用管理器返回可调用的对象；A3 的 `createAnimation` / `createCameraContext` / `createMediaRecorder` / `createWorker` / socket / cache manager 等也已提供桩实现（能创建、方法齐全、事件可注册）。
 
 ```ts
 const audio = wx.createInnerAudioContext();

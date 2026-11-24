@@ -39,8 +39,8 @@
     "miniprogram-api-typings": "5.3.1",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.15",
-    "oxfmt": "0.79.0",
-    "oxlint": "1.94.0",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
     "oxlint-tsgolint": "7.0.2008",
     "publint": "0.3.25",
     "rimraf": "6.1.4",
@@ -56,12 +56,12 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "12.21.0",
+      "version": "12.23.0",
       "onFail": "download"
     },
     "runtime": {
       "name": "node",
-      "version": "^22.23.4 || ^24.22.1 || ^26.13.0",
+      "version": "^22.23.4 || ^24.22.1 || ^26.13.1",
       "onFail": "error"
     }
   }
