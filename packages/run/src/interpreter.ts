@@ -2473,7 +2473,7 @@ export class Runtime {
 
       return {
         get: () => env.get(name),
-        set: (value) => {
+        set: (value): void => {
           this.writeIdentifier(name, value, env);
         },
       };
@@ -2490,7 +2490,7 @@ export class Runtime {
           // reads and accessors run with the instance as receiver
           // 读取与 accessor 以实例作为接收者运行
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
-          set: (value) => {
+          set: (value): void => {
             this.writeSuperProperty(superBase, key, value, thisRef.value);
           },
         };
@@ -2503,7 +2503,7 @@ export class Runtime {
 
       return {
         get: () => getProperty(object, key),
-        set: (value) => {
+        set: (value): void => {
           this.writeProperty(object, key, value);
         },
       };
@@ -5367,7 +5367,7 @@ export class Runtime {
 
       return {
         get: () => env.get(name),
-        set: (value) => {
+        set: (value): void => {
           this.writeIdentifier(name, value, env);
         },
       };
@@ -5382,7 +5382,7 @@ export class Runtime {
 
         return {
           get: () => Reflect.get(superBase, key, thisRef.value) as unknown,
-          set: (value) => {
+          set: (value): void => {
             this.writeSuperProperty(superBase, key, value, thisRef.value);
           },
         };
@@ -5395,7 +5395,7 @@ export class Runtime {
 
       return {
         get: () => getProperty(object, key),
-        set: (value) => {
+        set: (value): void => {
           this.writeProperty(object, key, value);
         },
       };

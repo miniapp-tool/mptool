@@ -79,7 +79,7 @@ describe("for-of IteratorClose", () => {
       [Symbol.iterator](): Iterator<number> {
         return {
           next: () => ({ done: false, value: 1 }),
-          return: () => {
+          return: (): never => {
             throw new Error("close failed");
           },
         };

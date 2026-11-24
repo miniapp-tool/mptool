@@ -44,7 +44,7 @@ const createAnimation = (): Record<string, (...args: unknown[]) => unknown> => {
 };
 
 const createCameraContext = (): Record<string, unknown> => ({
-  onCameraFrame: (callback: (frame: unknown) => void) => {
+  onCameraFrame: (callback: (frame: unknown) => void): void => {
     eventPair("cameraFrame", callback);
   },
   setFocusMode: noop,

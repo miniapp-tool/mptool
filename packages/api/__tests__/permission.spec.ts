@@ -32,7 +32,7 @@ describe(withScope, () => {
 
     return {
       calls,
-      run: () => {
+      run: (): Promise<void> => {
         calls.count += 1;
 
         return Promise.resolve();
@@ -172,7 +172,7 @@ describe("withScope with mockWx decisions", () => {
 
     return {
       calls,
-      run: () => {
+      run: (): Promise<void> => {
         calls.count += 1;
 
         return Promise.resolve();
