@@ -1,6 +1,5 @@
 ---
 title: "@mptool/skyline"
-icon: cubes
 ---
 
 Full bundle for the WeChat [Skyline rendering engine](https://developers.weixin.qq.com/miniprogram/dev/framework/runtime/skyline/introduction.html) (base library 3.0+): it combines `@mptool/net`, `@mptool/skyline-enhance`, `@mptool/file` and `@mptool/parser`, and additionally provides `installMptoolGlobals` / `mptoolGlobals`.

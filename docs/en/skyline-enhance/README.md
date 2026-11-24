@@ -1,6 +1,5 @@
 ---
 title: "@mptool/skyline-enhance"
-icon: toolbox
 ---
 
 A slim version of `@mptool/enhance` for WeChat's [Skyline renderer](https://developers.weixin.qq.com/miniprogram/dev/framework/runtime/skyline/introduction.html) (base library 3.0+).

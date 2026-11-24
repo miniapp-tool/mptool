@@ -1,6 +1,5 @@
 ---
 title: "@mptool/net"
-icon: network-wired
 ---
 
 Networking framework for mini-programs, about 26.2 kB.

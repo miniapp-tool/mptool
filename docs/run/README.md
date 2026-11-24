@@ -1,6 +1,5 @@
 ---
 title: "@mptool/run"
-icon: play
 ---
 
 小程序自定义 JS 解释器，可在微信小程序中执行动态下发的代码，替代被禁用的 `eval` 与 `new Function`。大小约 108.7 kB。

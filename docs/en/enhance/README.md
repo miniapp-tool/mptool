@@ -1,6 +1,5 @@
 ---
 title: "@mptool/enhance"
-icon: toolbox
 ---
 
 A mini-program enhancement framework, about 12.2 kB.

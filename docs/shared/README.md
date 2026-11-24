@@ -1,6 +1,5 @@
 ---
 title: "@mptool/shared"
-icon: share-nodes
 ---
 
 `@mptool` 各包共用的基础工具。多数场景下你不需要直接安装它（`@mptool/all` / `@mptool/skyline` 已经 re-export 了常用成员），需要单独使用时可以安装：

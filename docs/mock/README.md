@@ -1,6 +1,5 @@
 ---
 title: "@mptool/mock"
-icon: flask
 ---
 
 `wx` API 模拟，用于在 Node.js / vitest 等环境中直接运行小程序代码。它既实现 storage / 文件系统 / 路由 / 权限 / 网络 / 系统信息等状态语义，也提供 `mockWx` 控制面来注入失败、配置用户决策与预置状态。
@@ -89,7 +88,7 @@ const task = wx.request({
 task.abort();
 ```
 
-> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；`respond()` / `route()` 支持 `delay` 模拟慢响应（mock 不会按 `option.timeout` 自动超时；需要超时分支可用 `mockWx.failNext("request", { type: "timeout" })`）。
+> 网络失败、超时和自定义状态码可以用 [`mockWx`](#控制面-mockwx-强制失败与响应注入) 的 `fail()` / `respond()` / `route()` 构造；`respond()` / `route()` 支持 `delay` 模拟慢响应（mock 不会按 `option.timeout` 自动超时；需要超时分支可用 `mockWx.failNext("request", { type: "timeout" })`）。
 
 任务还提供 `onHeadersReceived` / `offHeadersReceived`（在 `success` 之前触发）以及 `onChunkReceived` / `offChunkReceived`（mock 不会产生数据分片，仅保证接口可用）。
 

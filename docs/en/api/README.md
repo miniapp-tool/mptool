@@ -1,6 +1,5 @@
 ---
 title: "@mptool/api"
-icon: puzzle-piece
 ---
 
 Common API wrappers for mini-programs.

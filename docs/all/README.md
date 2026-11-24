@@ -1,6 +1,5 @@
 ---
 title: "@mptool/all"
-icon: box
 ---
 
 全量包：把 `@mptool/api`、`@mptool/enhance`、`@mptool/file`、`@mptool/net`、`@mptool/parser` 与 `@mptool/shared` 的常用工具打成一个 ESM 文件，并额外提供 `installMptoolGlobals` / `mptoolGlobals`。

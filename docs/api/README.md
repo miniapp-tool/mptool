@@ -1,6 +1,5 @@
 ---
 title: "@mptool/api"
-icon: puzzle-piece
 ---
 
 小程序通用 API 封装。

@@ -1,6 +1,5 @@
 ---
 title: "@mptool/encoder"
-icon: code
 ---
 
 `TextEncoder` / `TextDecoder` implementations for mini-program environments that lack GBK / GB18030 support, plus the standard UTF-8 implementation.

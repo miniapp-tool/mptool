@@ -1,90 +1,60 @@
 ---
 home: true
 title: Home
-icon: home
 heroImage: /logo.svg
 actions:
-  - text: 💡 Quick start
-    link: /en/guide/
+  - text: Quick start
+    link: /en/guide.html
     type: primary
 
-highlights:
-  - header: "@mptool/enhance"
-    description: Communication framework
-    highlights:
-      - title: Enhanced app startup
-        icon: rocket
-        details: Extra lifecycles let you run any preloading work you want while the app starts or a page registers
+features:
+  - title: "@mptool/all"
+    details: Full bundle that packs the common utilities of api / enhance / file / net / parser / shared into a single ESM file
+    link: /en/all/
 
-      - title: Extra lifecycle extensions
-        icon: circle-plus
-        details: You can trigger preloading of other pages at any time, or notify the target page to prepare data during navigation
+  - title: "@mptool/skyline"
+    details: Full bundle for Skyline, combining net / skyline-enhance / file / parser
+    link: /en/skyline/
 
-      - title: Lightweight
-        icon: bolt
-        details: About 12.2 kB
+  - title: "@mptool/enhance"
+    details: Enhancement framework with App / Page / Component wrappers, extra lifecycles and unified events
+    link: /en/enhance/
 
-      - title: References
-        icon: route
-        details: Reference pointers between parent and child components, and between components and pages, allow direct access
+  - title: "@mptool/skyline-enhance"
+    details: Slim Skyline variant of enhance, keeping communication, references and hot reload
+    link: /en/skyline-enhance/
 
-      - title: Unified events
-        icon: flag
-        details: Fully connects components, pages and the app. You can communicate or trigger events from almost anywhere
+  - title: "@mptool/net"
+    details: Networking framework with a Fetch-style API, plus Headers, URLSearchParams and automatic cookies
+    link: /en/net/
 
-  - header: "@mptool/file"
-    description: File and storage framework
-    highlights:
-      - title: Automatic path handling
-        icon: wand-sparkles
-        details: Paths are handled automatically, creating parent folders or overwriting files.
+  - title: "@mptool/file"
+    details: File and storage framework with automatic path handling, expiration and download / unzip helpers
+    link: /en/file/
 
-      - title: Expiration support
-        icon: stopwatch
-        details: Set a lifetime for stored data and expired entries are cleaned up automatically.
+  - title: "@mptool/api"
+    details: General API wrappers covering clipboard, permission, page info, media and UI
+    link: /en/api/
 
-      - title: Complex logic encapsulated
-        icon: object-group
-        details: Wrappers for complex logic such as downloading files, unzipping archives and saving online files.
+  - title: "@mptool/parser"
+    details: HTML parser that turns HTML into rich-text nodes
+    link: /en/parser/
 
-  - header: "@mptool/net"
-    description: Networking framework
-    highlights:
-      - title: Fetch API
-        icon: wifi
-        details: Fetch-style API that also provides Headers and URLSearchParams
+  - title: "@mptool/run"
+    details: Custom JavaScript interpreter that executes dynamic code in mini-programs, replacing the disabled eval and new Function
+    link: /en/run/
 
-      - title: Cookie support
-        icon: cookie
-        details: Cookies are saved and attached fully automatically
+  - title: "@mptool/encoder"
+    details: TextEncoder and TextDecoder with UTF-8 / GBK / GB18030 support
+    link: /en/encoder/
 
-  - header: "@mptool/parser"
-    description: HTML parser
+  - title: "@mptool/shared"
+    details: Shared utilities such as Emitter, logger, query, lock and base64 helpers
+    link: /en/shared/
 
-  - header: "@mptool/api"
-    description: General API wrappers
-
-  - header: "@mptool/encoder"
-    description: Encoder with UTF-8 / GBK / GB18030 support
-
-  - header: "@mptool/run"
-    description: Custom JS interpreter
-    highlights:
-      - title: Dynamic execution
-        icon: play
-        details: Execute dynamically delivered code in WeChat mini-programs, replacing the disabled `eval` and `new Function`
-
-      - title: Syntax support
-        icon: code
-        details: All of ES5 plus common ES6 syntax, including `let/const`, arrow functions, template literals, destructuring, `class`, `async/await` and more
-
-      - title: Built-in delegation
-        icon: box
-        details: Built-in objects all reuse the host runtime, so every prototype and static method the host supports is available
-
-      - title: Lightweight
-        icon: bolt
-        details: About 108.7 kB in size
+  - title: "@mptool/mock"
+    details: wx API mock that runs mini-program code directly under Node.js / vitest
+    link: /en/mock/
 
 footer: Using the <a href="https://theme-hope.vuejs.press/zh/" target="_blank">VuePress Theme Hope</a> theme
 ---

@@ -1,6 +1,5 @@
 ---
 title: "@mptool/shared"
-icon: share-nodes
 ---
 
 Shared foundational utilities used by the `@mptool` packages. In most cases you do not need to install it directly (`@mptool/all` / `@mptool/skyline` already re-export the common members); install it when you want to use it on its own:

@@ -1,6 +1,8 @@
 ---
-title: MP Tool
-icon: lightbulb
+title: 指南
+order: 1
+redirectFrom:
+  - /guide/
 ---
 
 轻量的小程序增强框架。

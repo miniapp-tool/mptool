@@ -1,6 +1,5 @@
 ---
 title: "@mptool/file"
-icon: folder
 ---
 
 ## File API

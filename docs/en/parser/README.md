@@ -1,6 +1,5 @@
 ---
 title: "@mptool/parser"
-icon: network-wired
 ---
 
 HTML parser for mini-programs, about 69.6 kB.

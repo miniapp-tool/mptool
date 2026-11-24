@@ -1,6 +1,5 @@
 ---
 title: "@mptool/mock"
-icon: flask
 ---
 
 A `wx` API mock for running mini-program code directly under Node.js / vitest and similar environments. It implements stateful semantics for storage / file system / routing / permissions / network / system info, and also exposes the `mockWx` control plane to inject failures, configure user decisions and preset state.

@@ -1,6 +1,5 @@
 ---
 title: "@mptool/encoder"
-icon: code
 ---
 
 小程序环境缺少 GBK / GB18030 支持时的 `TextEncoder` / `TextDecoder` 实现，同时提供 UTF-8 的标准实现。

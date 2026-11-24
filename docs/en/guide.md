@@ -1,6 +1,8 @@
 ---
-title: MP Tool
-icon: lightbulb
+title: Guide
+order: 1
+redirectFrom:
+  - /en/guide/
 ---
 
 A lightweight enhancement framework for mini-programs.

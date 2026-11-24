@@ -1,6 +1,5 @@
 ---
 title: "@mptool/run"
-icon: play
 ---
 
 A custom JavaScript interpreter for mini-programs. It executes dynamically delivered code inside WeChat mini-programs, replacing the disabled `eval` and `new Function`. Size is about 108.7 kB.

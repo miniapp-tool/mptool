@@ -1,6 +1,5 @@
 ---
 title: "@mptool/skyline-enhance"
-icon: toolbox
 ---
 
 `@mptool/enhance` 的 slim 版本，面向微信 [Skyline 渲染引擎](https://developers.weixin.qq.com/miniprogram/dev/framework/runtime/skyline/introduction.html)（基础库 3.0+）。

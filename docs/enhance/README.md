@@ -1,6 +1,5 @@
 ---
 title: "@mptool/enhance"
-icon: toolbox
 ---
 
 小程序增强框架，大小约 12.2 kB。

@@ -1,6 +1,5 @@
 ---
 title: "@mptool/all"
-icon: box
 ---
 
 Full bundle: packs `@mptool/api`, `@mptool/enhance`, `@mptool/file`, `@mptool/net`, `@mptool/parser` and the common `@mptool/shared` utilities into a single ESM file, and additionally provides `installMptoolGlobals` / `mptoolGlobals`.

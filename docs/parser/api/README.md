@@ -1,6 +1,5 @@
 ---
 title: "@mptool/parser"
-icon: folder
 index: false
 ---
 

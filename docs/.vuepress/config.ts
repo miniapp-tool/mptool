@@ -35,7 +35,6 @@ const config: UserConfig = defineUserConfig({
         navbar: [
           {
             text: "全量包",
-            icon: "box",
             children: [
               { text: "@mptool/all", link: "/all/" },
               { text: "@mptool/skyline", link: "/skyline/" },
@@ -60,7 +59,6 @@ const config: UserConfig = defineUserConfig({
         navbar: [
           {
             text: "Bundles",
-            icon: "box",
             children: [
               { text: "@mptool/all", link: "/en/all/" },
               { text: "@mptool/skyline", link: "/en/skyline/" },
@@ -90,9 +88,6 @@ const config: UserConfig = defineUserConfig({
     },
 
     plugins: {
-      icon: {
-        assets: "fontawesome",
-      },
       meilisearch: {
         host: "https://meilisearch.mister-hope.com",
         apiKey: "d20925d3e008db806140a8ba74ba942506a66497ac817291033f54cc76df79cb",

@@ -1,6 +1,5 @@
 ---
 title: "@mptool/skyline"
-icon: cubes
 ---
 
 面向微信 [Skyline 渲染引擎](https://developers.weixin.qq.com/miniprogram/dev/framework/runtime/skyline/introduction.html)（基础库 3.0+）的全量包：汇总 `@mptool/net`、`@mptool/skyline-enhance`、`@mptool/file`、`@mptool/parser`，并额外提供 `installMptoolGlobals` / `mptoolGlobals`。
